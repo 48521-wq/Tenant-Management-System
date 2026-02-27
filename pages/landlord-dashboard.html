@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Landlord Dashboard — TMS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --gold:    #C9A96E;
+      --gold-l:  #E8C97A;
+      --dark:    #07090C;
+      --dark2:   #0C1018;
+      --card:    rgba(16,20,28,0.95);
+      --border:  rgba(201,169,110,0.15);
+      --text:    #EDE9E0;
+      --muted:   #566070;
+      --success: #4ECDC4;
+      --error:   #FF6B6B;
+      --warn:    #FFB347;
+    }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--dark); }
+    ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+
+    body { font-family: 'DM Sans', sans-serif; background: var(--dark); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
+
+    .bg {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 20%, rgba(201,169,110,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 90% 80%, rgba(78,205,196,0.03) 0%, transparent 60%),
+        linear-gradient(160deg, #07090C 0%, #0C1018 100%);
+    }
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0;
+      background-image: linear-gradient(rgba(201,169,110,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(201,169,110,0.025) 1px, transparent 1px);
+      background-size: 55px 55px;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0; width: 230px;
+      background: rgba(10,12,18,0.97); backdrop-filter: blur(24px);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; z-index: 50;
+    }
+    .sidebar-head { padding: 28px 22px 22px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .logo-box { width: 42px; height: 42px; background: linear-gradient(135deg, var(--gold), var(--gold-l)); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 6px 20px rgba(201,169,110,0.3); }
+    .logo-box svg { width: 22px; height: 22px; fill: #0A0C0F; }
+    .sidebar-head h2 { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; background: linear-gradient(135deg, var(--gold), var(--gold-l)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .sidebar-head p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .nav-section { padding: 18px 14px 8px; }
+    .nav-label { font-size: 10px; color: var(--muted); letter-spacing: 1.2px; text-transform: uppercase; font-weight: 600; padding: 0 8px 8px; }
+    .nav-item { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 10px; color: var(--muted); font-size: 13.5px; font-weight: 500; cursor: pointer; transition: all 0.2s; margin-bottom: 2px; text-decoration: none; border: none; background: none; width: 100%; font-family: 'DM Sans', sans-serif; }
+    .nav-item svg { width: 17px; height: 17px; stroke: currentColor; fill: none; flex-shrink: 0; }
+    .nav-item:hover { color: var(--text); background: rgba(201,169,110,0.07); }
+    .nav-item.active { color: var(--gold); background: rgba(201,169,110,0.1); font-weight: 600; }
+
+    .sidebar-foot { margin-top: auto; padding: 16px 22px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .user-row { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--gold-l)); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #0A0C0F; flex-shrink: 0; }
+    .user-name { font-size: 13px; font-weight: 600; }
+    .user-role { font-size: 11px; color: var(--muted); }
+    .logout-btn { margin-left: auto; background: none; border: none; cursor: pointer; padding: 5px; color: var(--muted); transition: color 0.2s; }
+    .logout-btn:hover { color: #FF6B6B; }
+    .logout-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; }
+
+    /* MAIN */
+    .main { margin-left: 230px; flex: 1; position: relative; z-index: 1; min-height: 100vh; overflow-y: auto; padding: 36px 40px; }
+    .page { display: none; animation: fadeUp 0.35s ease both; }
+    .page.active { display: block; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+    /* TOPBAR */
+    .topbar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 36px; }
+    .pg-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; }
+    .pg-sub { color: var(--muted); font-size: 13px; margin-top: 5px; }
+    .role-pill { display: flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 20px; background: rgba(201,169,110,0.09); border: 1px solid rgba(201,169,110,0.2); color: var(--gold); font-size: 12px; font-weight: 600; }
+
+    /* ACTION BUTTONS */
+    .action-row { display: flex; gap: 14px; margin-bottom: 32px; flex-wrap: wrap; }
+    .act-btn {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px; padding: 28px 32px;
+      background: var(--card); border-radius: 18px;
+      border: 1px solid var(--border);
+      cursor: pointer; transition: all 0.25s;
+      min-width: 140px; flex: 1;
+    }
+    .act-btn:hover { transform: translateY(-3px); }
+    .act-btn.add:hover   { border-color: rgba(78,205,196,0.4); box-shadow: 0 10px 30px rgba(78,205,196,0.1); }
+    .act-btn.edit:hover  { border-color: rgba(201,169,110,0.4); box-shadow: 0 10px 30px rgba(201,169,110,0.1); }
+    .act-btn.del:hover   { border-color: rgba(255,107,107,0.4); box-shadow: 0 10px 30px rgba(255,107,107,0.1); }
+    .act-btn.view3d:hover{ border-color: rgba(74,158,255,0.4); box-shadow: 0 10px 30px rgba(74,158,255,0.1); }
+
+    .act-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .act-icon.add   { background: rgba(78,205,196,0.1); }
+    .act-icon.edit  { background: rgba(201,169,110,0.1); }
+    .act-icon.del   { background: rgba(255,107,107,0.1); }
+    .act-icon.view3d{ background: rgba(74,158,255,0.1); }
+
+    .act-label { font-size: 14px; font-weight: 600; color: var(--text); }
+    .act-sub   { font-size: 11px; color: var(--muted); text-align: center; }
+
+    /* 3D CARD */
+    .house-card { background: var(--card); border: 1px solid rgba(201,169,110,0.22); border-radius: 20px; overflow: hidden; box-shadow: 0 8px 40px rgba(201,169,110,0.06); }
+    .house-card-top { display: flex; align-items: center; justify-content: space-between; padding: 20px 26px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.15); }
+    .house-card-title { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; }
+    .house-card-title svg { width: 18px; height: 18px; stroke: var(--gold); fill: none; }
+    .live-badge { padding: 3px 11px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(201,169,110,0.1); color: var(--gold); border: 1px solid rgba(201,169,110,0.2); display: flex; align-items: center; gap: 5px; }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    #canvas3d { width: 100%; height: 430px; display: block; cursor: grab; }
+    #canvas3d:active { cursor: grabbing; }
+    .controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 16px 26px; background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.05); }
+    .ctrl { padding: 7px 15px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.09); background: rgba(255,255,255,0.04); color: var(--muted); font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+    .ctrl:hover { background: rgba(201,169,110,0.1); color: var(--gold); border-color: rgba(201,169,110,0.3); }
+    .ctrl-hint { margin-left: auto; font-size: 11px; color: var(--muted); }
+
+    /* MODAL */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(10px); z-index: 200; display: none; align-items: center; justify-content: center; }
+    .overlay.open { display: flex; }
+    .modal { background: #0C1018; border: 1px solid var(--border); border-radius: 20px; padding: 34px; width: 100%; max-width: 460px; animation: fadeUp 0.3s ease both; }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 6px; }
+    .modal-sub { color: var(--muted); font-size: 13px; margin-bottom: 26px; }
+    .fgroup { margin-bottom: 16px; }
+    .flabel { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500; letter-spacing: 0.3px; }
+    .finput, .fselect {
+      width: 100%; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: 11px; padding: 12px 14px; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s;
+    }
+    .finput:focus, .fselect:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,169,110,0.08); }
+    .frow2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .modal-btns { display: flex; gap: 10px; margin-top: 24px; }
+    .mbtn { flex: 1; padding: 13px; border: none; border-radius: 11px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .mbtn.primary { background: linear-gradient(135deg, var(--gold), var(--gold-l)); color: #0A0C0F; box-shadow: 0 5px 16px rgba(201,169,110,0.3); }
+    .mbtn.primary:hover { box-shadow: 0 7px 22px rgba(201,169,110,0.4); transform: translateY(-1px); }
+    .mbtn.ghost { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.08); }
+    .mbtn.ghost:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+    /* DELETE CONFIRM */
+    .confirm-modal { background: #0C1018; border: 1px solid rgba(255,107,107,0.2); border-radius: 20px; padding: 34px; width: 100%; max-width: 380px; text-align: center; animation: fadeUp 0.3s ease both; }
+    .confirm-icon { width: 58px; height: 58px; background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
+    .confirm-icon svg { width: 26px; height: 26px; stroke: #FF6B6B; fill: none; }
+    .confirm-title { font-family: 'Playfair Display', serif; font-size: 21px; margin-bottom: 10px; }
+    .confirm-msg { color: var(--muted); font-size: 13px; line-height: 1.7; margin-bottom: 26px; }
+    .confirm-name { color: var(--text); font-weight: 600; }
+
+    /* PROPERTY LIST */
+    .prop-list { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; }
+    .prop-item { display: flex; align-items: center; gap: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; transition: border-color 0.2s; }
+    .prop-item:hover { border-color: rgba(201,169,110,0.3); }
+    .prop-item-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(201,169,110,0.1); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .prop-item-info { flex: 1; }
+    .prop-item-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+    .prop-item-addr { font-size: 12px; color: var(--muted); }
+    .prop-item-rent { font-size: 14px; font-weight: 700; color: var(--gold); margin-right: 16px; white-space: nowrap; }
+    .prop-actions { display: flex; gap: 8px; }
+    .pact { padding: 7px 13px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--muted); transition: all 0.2s; display: flex; align-items: center; gap: 5px; }
+    .pact svg { width: 13px; height: 13px; stroke: currentColor; fill: none; }
+    .pact.view3d:hover { background: rgba(74,158,255,0.1); color: #4A9EFF; border-color: rgba(74,158,255,0.3); }
+    .pact.edit:hover   { background: rgba(201,169,110,0.1); color: var(--gold); border-color: rgba(201,169,110,0.3); }
+    .pact.del:hover    { background: rgba(255,107,107,0.1); color: #FF6B6B; border-color: rgba(255,107,107,0.3); }
+
+    /* 3D MODAL */
+    .modal3d { background: #0C1018; border: 1px solid rgba(201,169,110,0.2); border-radius: 20px; width: 100%; max-width: 660px; overflow: hidden; animation: fadeUp 0.3s ease both; }
+    .modal3d-top { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .modal3d-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .modal3d-title svg { width: 17px; height: 17px; stroke: var(--gold); fill: none; }
+    #canvas-modal { width: 100%; height: 360px; display: block; cursor: grab; }
+    #canvas-modal:active { cursor: grabbing; }
+    .close-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--muted); font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+    .close-btn:hover { background: rgba(255,107,107,0.1); color: #FF6B6B; border-color: rgba(255,107,107,0.2); }
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 14px; }
+    .empty-state span { font-size: 36px; display: block; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="bg-grid"></div>
+
+<!-- ADD MODAL -->
+<div class="overlay" id="modal-add">
+  <div class="modal">
+    <div class="modal-title" id="modal-title-text">Add Property</div>
+    <div class="modal-sub" id="modal-sub-text">Enter the details of your property</div>
+    <input type="hidden" id="edit-id">
+    <div class="fgroup">
+      <label class="flabel">Property Name</label>
+      <input class="finput" id="f-name" placeholder="e.g. DHA House Block C">
+    </div>
+    <div class="fgroup">
+      <label class="flabel">Address</label>
+      <input class="finput" id="f-addr" placeholder="Street, Block, City">
+    </div>
+    <div class="frow2">
+      <div class="fgroup">
+        <label class="flabel">Monthly Rent (Rs.)</label>
+        <input class="finput" id="f-rent" type="number" placeholder="35000">
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Type</label>
+        <select class="fselect" id="f-type">
+          <option>House</option>
+          <option>Flat</option>
+          <option>Shop</option>
+          <option>Apartment</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="mbtn primary" onclick="saveProperty()">Save Property</button>
+      <button class="mbtn ghost" onclick="closeAll()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="overlay" id="modal-del">
+  <div class="confirm-modal">
+    <div class="confirm-icon">
+      <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+    </div>
+    <div class="confirm-title">Delete Property?</div>
+    <div class="confirm-msg">Are you sure you want to delete <span class="confirm-name" id="del-name"></span>? This cannot be undone.</div>
+    <div class="modal-btns" style="justify-content:center">
+      <button class="mbtn" style="background:rgba(255,107,107,0.12);color:#FF6B6B;border:1px solid rgba(255,107,107,0.2)" onclick="confirmDel()">Yes, Delete</button>
+      <button class="mbtn ghost" onclick="closeAll()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- 3D VIEW MODAL -->
+<div class="overlay" id="modal-3d">
+  <div class="modal3d">
+    <div class="modal3d-top">
+      <div class="modal3d-title">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        <span id="modal3d-name">Property 3D View</span>
+      </div>
+      <button class="close-btn" onclick="closeAll()">✕ Close</button>
+    </div>
+    <canvas id="canvas-modal"></canvas>
+    <div class="controls" style="padding:14px 20px;">
+      <button class="ctrl" onclick="resetCamera3D('modal')">↺ Reset</button>
+      <button class="ctrl" onclick="toggleWireframe('modal')">⬡ Wireframe</button>
+      <span class="ctrl-hint">🖱 Drag to rotate · Scroll to zoom</span>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-head">
+    <div class="logo-box">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </div>
+    <h2>TMS Portal</h2>
+    <p>Landlord Dashboard</p>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Menu</div>
+    <button class="nav-item active" onclick="showPage('properties', this)">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      My Properties
+    </button>
+  </div>
+  <div class="sidebar-foot">
+    <div class="user-row">
+      <div class="avatar">L</div>
+      <div>
+        <div class="user-name">Landlord</div>
+        <div class="user-role">🏢 Landlord</div>
+      </div>
+      <button class="logout-btn" onclick="window.location.href='../index.html'">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="page active" id="page-properties">
+    <div class="topbar">
+      <div>
+        <div class="pg-title">My Properties</div>
+        <div class="pg-sub">Add, edit, delete properties and view 3D models</div>
+      </div>
+      <div class="role-pill">🏢 Landlord Portal</div>
+    </div>
+
+    <!-- 4 Action Buttons -->
+    <div class="action-row">
+      <div class="act-btn add" onclick="openAdd()">
+        <div class="act-icon add">➕</div>
+        <div class="act-label">Add Property</div>
+        <div class="act-sub">List a new property</div>
+      </div>
+      <div class="act-btn edit" onclick="editFirst()">
+        <div class="act-icon edit">✏️</div>
+        <div class="act-label">Edit Property</div>
+        <div class="act-sub">Update existing details</div>
+      </div>
+      <div class="act-btn del" onclick="delFirst()">
+        <div class="act-icon del">🗑️</div>
+        <div class="act-label">Delete Property</div>
+        <div class="act-sub">Remove a property</div>
+      </div>
+      <div class="act-btn view3d" onclick="view3DFirst()">
+        <div class="act-icon view3d">🏠</div>
+        <div class="act-label">3D House View</div>
+        <div class="act-sub">Interactive 3D model</div>
+      </div>
+    </div>
+
+    <!-- Property List -->
+    <div class="prop-list" id="prop-list"></div>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="../js/house3d.js"></script>
+<script>
+  let properties = [];
+  let delId = null;
+  let modalInitDone = false;
+
+  function showPage(id, el) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    if (el) el.classList.add('active');
+  }
+
+  function renderList() {
+    const list = document.getElementById('prop-list');
+    if (properties.length === 0) {
+      list.innerHTML = `<div class="empty-state"><span>🏠</span>No properties yet. Click <strong>Add Property</strong> to get started.</div>`;
+      return;
+    }
+    list.innerHTML = properties.map(p => `
+      <div class="prop-item">
+        <div class="prop-item-icon">🏠</div>
+        <div class="prop-item-info">
+          <div class="prop-item-name">${p.name}</div>
+          <div class="prop-item-addr">${p.addr} · ${p.type}</div>
+        </div>
+        <div class="prop-item-rent">Rs. ${Number(p.rent).toLocaleString()}</div>
+        <div class="prop-actions">
+          <button class="pact view3d" onclick="openView3D(${p.id}, '${p.name}')">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg> 3D View
+          </button>
+          <button class="pact edit" onclick="openEdit(${p.id})">
+            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg> Edit
+          </button>
+          <button class="pact del" onclick="openDel(${p.id}, '${p.name}')">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg> Delete
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── ADD ──
+  function openAdd() {
+    document.getElementById('modal-title-text').textContent = 'Add Property';
+    document.getElementById('modal-sub-text').textContent = 'Enter the details of your property';
+    document.getElementById('edit-id').value = '';
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-addr').value = '';
+    document.getElementById('f-rent').value = '';
+    document.getElementById('f-type').value = 'House';
+    document.getElementById('modal-add').classList.add('open');
+  }
+
+  // ── EDIT ──
+  function openEdit(id) {
+    const p = properties.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('modal-title-text').textContent = 'Edit Property';
+    document.getElementById('modal-sub-text').textContent = 'Update the property details';
+    document.getElementById('edit-id').value = id;
+    document.getElementById('f-name').value = p.name;
+    document.getElementById('f-addr').value = p.addr;
+    document.getElementById('f-rent').value = p.rent;
+    document.getElementById('f-type').value = p.type;
+    document.getElementById('modal-add').classList.add('open');
+  }
+
+  function editFirst() {
+    if (properties.length === 0) { alert('No properties to edit. Please add a property first.'); return; }
+    openEdit(properties[0].id);
+  }
+
+  function saveProperty() {
+    const name  = document.getElementById('f-name').value.trim();
+    const addr  = document.getElementById('f-addr').value.trim();
+    const rent  = document.getElementById('f-rent').value;
+    const type  = document.getElementById('f-type').value;
+    const eid   = document.getElementById('edit-id').value;
+    if (!name || !addr || !rent) { alert('Please fill all fields.'); return; }
+
+    if (eid) {
+      const p = properties.find(x => x.id === parseInt(eid));
+      if (p) { p.name = name; p.addr = addr; p.rent = rent; p.type = type; }
+    } else {
+      const newId = properties.length ? Math.max(...properties.map(p => p.id)) + 1 : 1;
+      properties.push({ id: newId, name, addr, rent, type });
+    }
+    closeAll();
+    renderList();
+  }
+
+  // ── DELETE ──
+  function openDel(id, name) {
+    delId = id;
+    document.getElementById('del-name').textContent = name;
+    document.getElementById('modal-del').classList.add('open');
+  }
+
+  function delFirst() {
+    if (properties.length === 0) { alert('No properties to delete.'); return; }
+    openDel(properties[0].id, properties[0].name);
+  }
+
+  function confirmDel() {
+    properties = properties.filter(p => p.id !== delId);
+    closeAll();
+    renderList();
+  }
+
+  // ── 3D VIEW ──
+  function openView3D(id, name) {
+    document.getElementById('modal3d-name').textContent = name + ' — 3D View';
+    document.getElementById('modal-3d').classList.add('open');
+    setTimeout(() => {
+      if (!modalInitDone) {
+        initHouse3D('canvas-modal', 'modal');
+        modalInitDone = true;
+      }
+    }, 80);
+  }
+
+  function view3DFirst() {
+    if (properties.length === 0) {
+      // open 3d without a name
+      document.getElementById('modal3d-name').textContent = 'Property 3D View';
+      document.getElementById('modal-3d').classList.add('open');
+      setTimeout(() => {
+        if (!modalInitDone) { initHouse3D('canvas-modal', 'modal'); modalInitDone = true; }
+      }, 80);
+    } else {
+      openView3D(properties[0].id, properties[0].name);
+    }
+  }
+
+  // ── CLOSE ALL ──
+  function closeAll() {
+    document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open'));
+  }
+  document.querySelectorAll('.overlay').forEach(o => {
+    o.addEventListener('click', e => { if (e.target === o) closeAll(); });
+  });
+
+  renderList();
+</script>
+</body>
+</html>
