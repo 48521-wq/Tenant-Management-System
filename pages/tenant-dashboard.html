@@ -3,235 +3,599 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tenant Dashboard — TMS</title>
+  <title>Find Properties — TMS</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --blue:      #4A9EFF;
-      --blue-l:    #7BBFFF;
-      --dark:      #07090D;
-      --dark2:     #0C1018;
-      --card:      rgba(16,22,32,0.95);
-      --border:    rgba(74,158,255,0.15);
-      --text:      #E8EDF5;
-      --muted:     #566070;
+      --blue:    #4A9EFF;
+      --blue-l:  #7BBFFF;
+      --dark:    #07090D;
+      --dark2:   #0C1018;
+      --card:    rgba(16,22,32,0.96);
+      --border:  rgba(74,158,255,0.13);
+      --text:    #E8EDF5;
+      --muted:   #566070;
+      --success: #4ECDC4;
+      --gold:    #C9A96E;
+      --error:   #FF6B6B;
     }
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: var(--dark); }
     ::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 10px; }
 
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--dark); color: var(--text);
-      min-height: 100vh; display: flex; overflow: hidden;
-    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--dark); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
-    /* BG */
+    /* ── BG ── */
     .bg {
       position: fixed; inset: 0; z-index: 0;
       background:
-        radial-gradient(ellipse 80% 60% at 15% 20%, rgba(74,158,255,0.07) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 50% at 85% 80%, rgba(78,205,196,0.04) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 60% at 10% 15%, rgba(74,158,255,0.07) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 50% at 90% 80%, rgba(78,205,196,0.04) 0%, transparent 55%),
         linear-gradient(160deg, #07090D 0%, #0C1018 100%);
     }
     .bg-grid {
       position: fixed; inset: 0; z-index: 0;
-      background-image:
-        linear-gradient(rgba(74,158,255,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(74,158,255,0.025) 1px, transparent 1px);
+      background-image: linear-gradient(rgba(74,158,255,0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(74,158,255,0.022) 1px, transparent 1px);
       background-size: 55px 55px;
     }
 
-    /* SIDEBAR */
-    .sidebar {
-      position: fixed; left: 0; top: 0; bottom: 0; width: 230px;
-      background: rgba(10,14,22,0.97); backdrop-filter: blur(24px);
-      border-right: 1px solid var(--border);
-      display: flex; flex-direction: column;
-      z-index: 50; padding: 0;
-    }
-    .sidebar-head {
-      padding: 28px 22px 22px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    .logo-box {
-      width: 42px; height: 42px;
-      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-l) 100%);
-      border-radius: 12px; display: flex; align-items: center; justify-content: center;
-      margin-bottom: 12px;
-      box-shadow: 0 6px 20px rgba(74,158,255,0.3);
-    }
-    .logo-box svg { width: 22px; height: 22px; fill: #fff; }
-    .sidebar-head h2 {
-      font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700;
-      background: linear-gradient(135deg, var(--blue), var(--blue-l));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .sidebar-head p { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-    .nav-section { padding: 18px 14px 8px; }
-    .nav-label { font-size: 10px; color: var(--muted); letter-spacing: 1.2px; text-transform: uppercase; font-weight: 600; padding: 0 8px 8px; }
-    .nav-item {
-      display: flex; align-items: center; gap: 11px;
-      padding: 10px 12px; border-radius: 10px;
-      color: var(--muted); font-size: 13.5px; font-weight: 500;
-      cursor: pointer; transition: all 0.2s; margin-bottom: 2px;
-      text-decoration: none; border: none; background: none; width: 100%;
-    }
-    .nav-item svg { width: 17px; height: 17px; stroke: currentColor; fill: none; flex-shrink: 0; }
-    .nav-item:hover { color: var(--text); background: rgba(74,158,255,0.07); }
-    .nav-item.active { color: var(--blue); background: rgba(74,158,255,0.1); font-weight: 600; }
-
-    .sidebar-foot {
-      margin-top: auto;
-      padding: 16px 22px;
-      border-top: 1px solid rgba(255,255,255,0.05);
-    }
-    .user-row { display: flex; align-items: center; gap: 10px; }
-    .avatar { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg, var(--blue), var(--blue-l)); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; }
-    .user-name { font-size: 13px; font-weight: 600; }
-    .user-role { font-size: 11px; color: var(--muted); }
-    .logout-btn { margin-left: auto; background: none; border: none; cursor: pointer; padding: 5px; color: var(--muted); transition: color 0.2s; }
-    .logout-btn:hover { color: #FF6B6B; }
-    .logout-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; }
-
-    /* MAIN */
-    .main { margin-left: 230px; flex: 1; position: relative; z-index: 1; min-height: 100vh; overflow-y: auto; padding: 36px 40px; }
-    .page { display: none; animation: fadeUp 0.35s ease both; }
-    .page.active { display: block; }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-
-    /* TOPBAR */
-    .topbar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 36px; }
-    .pg-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; }
-    .pg-sub { color: var(--muted); font-size: 13px; margin-top: 5px; }
-    .role-pill { display: flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 20px; background: rgba(74,158,255,0.09); border: 1px solid rgba(74,158,255,0.2); color: var(--blue); font-size: 12px; font-weight: 600; }
-
-    /* 3D CARD */
-    .house-card {
-      background: var(--card);
-      border: 1px solid rgba(74,158,255,0.22);
-      border-radius: 20px; overflow: hidden;
-      box-shadow: 0 8px 40px rgba(74,158,255,0.08);
-    }
-    .house-card-top {
+    /* ── TOPNAV ── */
+    .topnav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(7,9,13,0.92); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 26px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      background: rgba(0,0,0,0.15);
+      padding: 0 36px; height: 62px;
     }
-    .house-card-title { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; }
-    .house-card-title svg { width: 18px; height: 18px; stroke: var(--blue); fill: none; }
-    .live-badge {
-      padding: 3px 11px; border-radius: 20px; font-size: 11px; font-weight: 600;
-      background: rgba(74,158,255,0.1); color: var(--blue); border: 1px solid rgba(74,158,255,0.2);
-      display: flex; align-items: center; gap: 5px;
+    .topnav-logo { display: flex; align-items: center; gap: 10px; }
+    .logo-icon { width: 34px; height: 34px; background: linear-gradient(135deg, var(--blue), var(--blue-l)); border-radius: 9px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(74,158,255,0.3); }
+    .logo-icon svg { width: 18px; height: 18px; fill: #fff; }
+    .logo-text { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; background: linear-gradient(135deg, var(--blue), var(--blue-l)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .topnav-right { display: flex; align-items: center; gap: 12px; }
+    .nav-pill { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: rgba(74,158,255,0.07); color: var(--blue); font-size: 12px; font-weight: 600; }
+    .logout-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 9px; background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.15); color: #FF6B6B; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+    .logout-btn:hover { background: rgba(255,107,107,0.15); }
+    .logout-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+
+    /* ── HERO SEARCH BAR ── */
+    .hero {
+      position: relative; z-index: 1;
+      padding: 40px 36px 0;
+      max-width: 1200px; margin: 0 auto;
     }
-    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); animation: pulse 2s infinite; }
+    .hero-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; margin-bottom: 6px; }
+    .hero-title span { background: linear-gradient(135deg, var(--blue), var(--blue-l)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+    /* ── FILTER BAR ── */
+    .filter-bar {
+      background: var(--card);
+      border: 1px solid rgba(74,158,255,0.18);
+      border-radius: 18px;
+      padding: 20px 24px;
+      display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      margin-bottom: 32px;
+    }
+    .filter-group { display: flex; flex-direction: column; gap: 7px; flex: 1; min-width: 140px; }
+    .filter-label { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; }
+    .filter-select, .filter-input {
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 10px 14px;
+      color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px;
+      outline: none; transition: border-color 0.2s; width: 100%;
+      appearance: none;
+    }
+    .filter-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px; }
+    .filter-select:focus, .filter-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(74,158,255,0.08); }
+    .filter-select option { background: #0C1018; }
+    .search-btn {
+      padding: 10px 28px; border-radius: 10px; border: none;
+      background: linear-gradient(135deg, var(--blue), var(--blue-l));
+      color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(74,158,255,0.3);
+      white-space: nowrap; height: 42px; align-self: flex-end;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .search-btn:hover { box-shadow: 0 6px 22px rgba(74,158,255,0.45); transform: translateY(-1px); }
+    .search-btn svg { width: 16px; height: 16px; stroke: #fff; fill: none; }
+    .reset-btn {
+      padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04); color: var(--muted);
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s; height: 42px; align-self: flex-end; white-space: nowrap;
+    }
+    .reset-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+    /* ── RESULTS HEADER ── */
+    .results-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 36px; max-width: 1200px; margin: 0 auto 20px;
+    }
+    .results-count { font-size: 14px; color: var(--muted); }
+    .results-count strong { color: var(--text); font-size: 16px; }
+    .view-toggle { display: flex; gap: 6px; }
+    .view-btn { padding: 7px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); cursor: pointer; color: var(--muted); transition: all 0.2s; }
+    .view-btn.active { background: rgba(74,158,255,0.1); border-color: rgba(74,158,255,0.25); color: var(--blue); }
+    .view-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; display: block; }
+
+    /* ── ACTIVE FILTERS ── */
+    .active-filters { padding: 0 36px; max-width: 1200px; margin: 0 auto 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .filter-tag { display: flex; align-items: center; gap: 6px; padding: 5px 12px; background: rgba(74,158,255,0.1); border: 1px solid rgba(74,158,255,0.2); border-radius: 20px; font-size: 12px; color: var(--blue); font-weight: 500; }
+    .filter-tag-x { cursor: pointer; font-size: 14px; line-height: 1; }
+    .filter-tag-x:hover { color: var(--error); }
+
+    /* ── PROPERTY GRID ── */
+    .props-wrap { padding: 0 36px 48px; max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+    .props-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .props-grid.list-view { grid-template-columns: 1fr; }
+
+    /* ── PROPERTY CARD ── */
+    .prop-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 18px; overflow: hidden;
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+      cursor: pointer;
+    }
+    .prop-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); border-color: rgba(74,158,255,0.3); }
+
+    /* Card image / mini 3D preview */
+    .prop-thumb {
+      position: relative; height: 180px;
+      background: linear-gradient(135deg, #0D1520 0%, #111827 100%);
+      overflow: hidden;
+    }
+    .prop-thumb canvas { width: 100% !important; height: 100% !important; display: block; }
+    .prop-thumb-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.55) 100%);
+      pointer-events: none;
+    }
+    .prop-thumb-badge {
+      position: absolute; top: 12px; left: 12px;
+      padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+      backdrop-filter: blur(8px);
+    }
+    .prop-thumb-badge.rent { background: rgba(74,158,255,0.85); color: #fff; }
+    .prop-thumb-badge.sale { background: rgba(201,169,110,0.85); color: #0A0C0F; }
+    .prop-thumb-3d {
+      position: absolute; bottom: 10px; right: 10px;
+      padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600;
+      background: rgba(0,0,0,0.65); color: var(--blue); border: 1px solid rgba(74,158,255,0.3);
+      backdrop-filter: blur(6px); display: flex; align-items: center; gap: 4px;
+    }
+    .prop-thumb-3d svg { width: 12px; height: 12px; stroke: currentColor; fill: none; }
+    .view3d-pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); animation: pulse 2s infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-    #canvas3d { width: 100%; height: 480px; display: block; cursor: grab; }
-    #canvas3d:active { cursor: grabbing; }
+    /* Card body */
+    .prop-body { padding: 18px 20px; }
+    .prop-price { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--blue); margin-bottom: 4px; }
+    .prop-price span { font-size: 13px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-weight: 400; }
+    .prop-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .prop-location { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 12px; margin-bottom: 14px; }
+    .prop-location svg { width: 13px; height: 13px; stroke: var(--blue); fill: none; flex-shrink: 0; }
 
-    .house-card-controls {
-      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-      padding: 16px 26px;
-      background: rgba(0,0,0,0.2);
-      border-top: 1px solid rgba(255,255,255,0.05);
+    .prop-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .prop-tag { padding: 4px 10px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+    .prop-tag span { font-size: 12px; }
+
+    .prop-divider { height: 1px; background: rgba(255,255,255,0.05); margin-bottom: 14px; }
+    .prop-footer { display: flex; align-items: center; justify-content: space-between; }
+    .prop-area-badge { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+    .prop-area-badge svg { width: 12px; height: 12px; stroke: var(--muted); fill: none; }
+    .view3d-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 9px;
+      background: rgba(74,158,255,0.1); border: 1px solid rgba(74,158,255,0.22);
+      color: var(--blue); font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
     }
-    .ctrl { padding: 7px 15px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.09); background: rgba(255,255,255,0.04); color: var(--muted); font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+    .view3d-btn:hover { background: rgba(74,158,255,0.18); box-shadow: 0 4px 14px rgba(74,158,255,0.2); }
+    .view3d-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+
+    /* List view adjustments */
+    .props-grid.list-view .prop-card { display: flex; }
+    .props-grid.list-view .prop-thumb { width: 240px; flex-shrink: 0; height: auto; }
+    .props-grid.list-view .prop-body { flex: 1; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state { text-align: center; padding: 80px 24px; color: var(--muted); }
+    .empty-state span { font-size: 52px; display: block; margin-bottom: 16px; }
+    .empty-state h3 { font-size: 18px; color: var(--text); margin-bottom: 8px; }
+    .empty-state p { font-size: 14px; }
+
+    /* ── 3D MODAL ── */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .overlay.open { display: flex; animation: fadein 0.25s ease; }
+    @keyframes fadein { from{opacity:0} to{opacity:1} }
+
+    .modal3d {
+      background: #0C1018; border: 1px solid rgba(74,158,255,0.25);
+      border-radius: 22px; width: 100%; max-width: 720px;
+      overflow: hidden; animation: slideup 0.3s ease;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+    }
+    @keyframes slideup { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+    .modal3d-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.05);
+      background: rgba(0,0,0,0.2);
+    }
+    .modal3d-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .modal3d-title svg { width: 18px; height: 18px; stroke: var(--blue); fill: none; }
+    .modal3d-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .modal3d-close {
+      padding: 7px 14px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04); color: var(--muted); font-size: 13px;
+      cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+    }
+    .modal3d-close:hover { background: rgba(255,107,107,0.1); color: #FF6B6B; border-color: rgba(255,107,107,0.2); }
+
+    #canvas-modal3d { width: 100%; height: 400px; display: block; cursor: grab; background: #080B10; }
+    #canvas-modal3d:active { cursor: grabbing; }
+
+    .modal3d-controls {
+      display: flex; align-items: center; gap: 8px; padding: 14px 24px;
+      background: rgba(0,0,0,0.25); border-top: 1px solid rgba(255,255,255,0.05); flex-wrap: wrap;
+    }
+    .ctrl { padding: 7px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.09); background: rgba(255,255,255,0.04); color: var(--muted); font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
     .ctrl:hover { background: rgba(74,158,255,0.1); color: var(--blue); border-color: rgba(74,158,255,0.3); }
     .ctrl-hint { margin-left: auto; font-size: 11px; color: var(--muted); }
+
+    .modal3d-info {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 0; border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .info-item { padding: 16px 20px; border-right: 1px solid rgba(255,255,255,0.05); }
+    .info-item:last-child { border-right: none; }
+    .info-item-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 5px; }
+    .info-item-val { font-size: 14px; font-weight: 600; }
+    .info-item-val.blue { color: var(--blue); }
+    .info-item-val.gold { color: var(--gold); }
+    .info-item-val.green { color: var(--success); }
   </style>
 </head>
 <body>
 <div class="bg"></div>
 <div class="bg-grid"></div>
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <div class="sidebar-head">
-    <div class="logo-box">
+<!-- 3D MODAL -->
+<div class="overlay" id="overlay-3d">
+  <div class="modal3d">
+    <div class="modal3d-header">
+      <div>
+        <div class="modal3d-title">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span id="m3d-name">Property 3D View</span>
+        </div>
+        <div class="modal3d-sub" id="m3d-location">—</div>
+      </div>
+      <button class="modal3d-close" onclick="close3D()">✕ Close</button>
+    </div>
+    <canvas id="canvas-modal3d"></canvas>
+    <div class="modal3d-controls">
+      <button class="ctrl" onclick="resetCamera3D('modal')">↺ Reset</button>
+      <button class="ctrl" onclick="toggleWireframe('modal')">⬡ Wireframe</button>
+      <button class="ctrl" onclick="rotateFront('modal')">⬆ Front</button>
+      <button class="ctrl" onclick="rotateSide('modal')">➡ Side</button>
+      <button class="ctrl" onclick="rotateTop('modal')">⬇ Top</button>
+      <button class="ctrl" onclick="toggleDayNight()">🌙 Day/Night</button>
+      <span class="ctrl-hint">🖱 Drag to rotate · Scroll to zoom</span>
+    </div>
+    <div class="modal3d-info">
+      <div class="info-item"><div class="info-item-label">Rent</div><div class="info-item-val blue" id="m3d-rent">—</div></div>
+      <div class="info-item"><div class="info-item-label">Type</div><div class="info-item-val" id="m3d-type">—</div></div>
+      <div class="info-item"><div class="info-item-label">Beds</div><div class="info-item-val" id="m3d-beds">—</div></div>
+      <div class="info-item"><div class="info-item-label">Status</div><div class="info-item-val green" id="m3d-status">Available</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="topnav-logo">
+    <div class="logo-icon">
       <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     </div>
-    <h2>TMS Portal</h2>
-    <p>Tenant Dashboard</p>
+    <span class="logo-text">TMS</span>
+    <span style="color:var(--muted);font-size:12px;margin-left:6px">Property Portal</span>
   </div>
-
-  <div class="nav-section">
-    <div class="nav-label">Menu</div>
-    <button class="nav-item active" onclick="showPage('house', this)">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      3D House View
+  <div class="topnav-right">
+    <span class="nav-pill">🏠 Tenant</span>
+    <button class="logout-btn" onclick="window.location.href='../index.html'">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
     </button>
   </div>
+</nav>
 
-  <div class="sidebar-foot">
-    <div class="user-row">
-      <div class="avatar">T</div>
-      <div>
-        <div class="user-name">Tenant</div>
-        <div class="user-role">🏠 Tenant</div>
-      </div>
-      <button class="logout-btn" onclick="window.location.href='../index.html'">
-        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      </button>
+<!-- HERO + FILTERS -->
+<div class="hero">
+  <div class="hero-title">Find Your <span>Perfect Home</span></div>
+  <div class="hero-sub">Browse properties by area, type, and budget — then explore in 3D</div>
+
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label class="filter-label">📍 Area / City</label>
+      <select class="filter-select" id="f-area">
+        <option value="">All Areas</option>
+        <option value="DHA Lahore">DHA Lahore</option>
+        <option value="Johar Town">Johar Town</option>
+        <option value="Gulberg">Gulberg</option>
+        <option value="Bahria Town">Bahria Town</option>
+        <option value="Model Town">Model Town</option>
+        <option value="Garden Town">Garden Town</option>
+        <option value="Cantt">Cantt</option>
+        <option value="Islamabad">Islamabad</option>
+        <option value="Karachi">Karachi</option>
+      </select>
     </div>
+    <div class="filter-group">
+      <label class="filter-label">🏠 Property Type</label>
+      <select class="filter-select" id="f-type">
+        <option value="">All Types</option>
+        <option value="House">House</option>
+        <option value="Flat">Flat</option>
+        <option value="Apartment">Apartment</option>
+        <option value="Shop">Shop</option>
+        <option value="Villa">Villa</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">🛏 Bedrooms</label>
+      <select class="filter-select" id="f-beds">
+        <option value="">Any</option>
+        <option value="1">1 Bed</option>
+        <option value="2">2 Beds</option>
+        <option value="3">3 Beds</option>
+        <option value="4">4+ Beds</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">💰 Min Rent (Rs.)</label>
+      <select class="filter-select" id="f-min">
+        <option value="">No Min</option>
+        <option value="10000">10,000</option>
+        <option value="20000">20,000</option>
+        <option value="30000">30,000</option>
+        <option value="50000">50,000</option>
+        <option value="80000">80,000</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">💰 Max Rent (Rs.)</label>
+      <select class="filter-select" id="f-max">
+        <option value="">No Max</option>
+        <option value="20000">20,000</option>
+        <option value="35000">35,000</option>
+        <option value="50000">50,000</option>
+        <option value="80000">80,000</option>
+        <option value="150000">1,50,000</option>
+      </select>
+    </div>
+    <button class="search-btn" onclick="applyFilters()">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Search
+    </button>
+    <button class="reset-btn" onclick="resetFilters()">↺ Reset</button>
   </div>
-</aside>
+</div>
 
-<!-- MAIN -->
-<main class="main">
-  <div class="page active" id="page-house">
-    <div class="topbar">
-      <div>
-        <div class="pg-title">3D House View</div>
-        <div class="pg-sub">Interactive 3D model of your property — drag to rotate</div>
-      </div>
-      <div class="role-pill">🏠 Tenant Portal</div>
-    </div>
-
-    <div class="house-card">
-      <div class="house-card-top">
-        <div class="house-card-title">
-          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          My Property — 3D View
-        </div>
-        <div class="live-badge"><div class="live-dot"></div>Interactive</div>
-      </div>
-
-      <canvas id="canvas3d"></canvas>
-
-      <div class="house-card-controls">
-        <button class="ctrl" onclick="resetCam()">↺ Reset</button>
-        <button class="ctrl" onclick="wireframe()">⬡ Wireframe</button>
-        <button class="ctrl" onclick="frontView()">⬆ Front</button>
-        <button class="ctrl" onclick="sideView()">➡ Side</button>
-        <button class="ctrl" onclick="topView()">⬇ Top</button>
-        <button class="ctrl" onclick="nightToggle()">🌙 Day / Night</button>
-        <span class="ctrl-hint">🖱 Drag to rotate · Scroll to zoom</span>
-      </div>
-    </div>
+<!-- RESULTS HEADER -->
+<div class="results-header">
+  <div class="results-count"><strong id="count-num">9</strong> properties found</div>
+  <div class="view-toggle">
+    <button class="view-btn active" id="btn-grid" onclick="setView('grid')" title="Grid View">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    </button>
+    <button class="view-btn" id="btn-list" onclick="setView('list')" title="List View">
+      <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    </button>
   </div>
-</main>
+</div>
+
+<!-- ACTIVE FILTER TAGS -->
+<div class="active-filters" id="active-filters"></div>
+
+<!-- PROPERTY GRID -->
+<div class="props-wrap">
+  <div class="props-grid" id="props-grid"></div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="../js/house3d.js"></script>
 <script>
-  function showPage(id, el) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.getElementById('page-' + id).classList.add('active');
-    if (el) el.classList.add('active');
+// ── Properties Data ──────────────────────────
+const PROPERTIES = [
+  { id:1, name:'DHA House — Block C',   area:'DHA Lahore',  type:'House',     beds:4, rent:55000, sqft:2400, status:'Available', address:'House 14, Block C, DHA Lahore' },
+  { id:2, name:'DHA Villa — Phase 5',   area:'DHA Lahore',  type:'Villa',     beds:5, rent:95000, sqft:3800, status:'Available', address:'Plot 22, Phase 5, DHA Lahore' },
+  { id:3, name:'Johar Town House',      area:'Johar Town',  type:'House',     beds:3, rent:35000, sqft:1800, status:'Available', address:'Street 5, Block J, Johar Town' },
+  { id:4, name:'Gulberg Flat — 3B',     area:'Gulberg',     type:'Flat',      beds:2, rent:28000, sqft:1100, status:'Available', address:'Flat 3B, Main Blvd, Gulberg III' },
+  { id:5, name:'Bahria Apartment',      area:'Bahria Town', type:'Apartment', beds:2, rent:32000, sqft:1050, status:'Available', address:'Block A, Bahria Town Lahore' },
+  { id:6, name:'Bahria House — Sec C',  area:'Bahria Town', type:'House',     beds:3, rent:48000, sqft:2000, status:'Available', address:'Sector C, Bahria Town' },
+  { id:7, name:'Model Town Corner',     area:'Model Town',  type:'House',     beds:4, rent:60000, sqft:2600, status:'Available', address:'Block L, Model Town, Lahore' },
+  { id:8, name:'Garden Town Flat',      area:'Garden Town', type:'Flat',      beds:1, rent:18000, sqft:650,  status:'Available', address:'Street 3, Garden Town Lahore' },
+  { id:9, name:'Cantt Apartment',       area:'Cantt',       type:'Apartment', beds:3, rent:42000, sqft:1400, status:'Available', address:'Sarwar Colony, Cantt, Lahore' },
+];
+
+let filtered = [...PROPERTIES];
+let viewMode = 'grid';
+let modal3dReady = false;
+let miniScenes   = {}; // track mini canvas renders
+
+// ── Filter Logic ──────────────────────────────
+function applyFilters() {
+  const area = document.getElementById('f-area').value;
+  const type = document.getElementById('f-type').value;
+  const beds = document.getElementById('f-beds').value;
+  const min  = parseInt(document.getElementById('f-min').value) || 0;
+  const max  = parseInt(document.getElementById('f-max').value) || Infinity;
+
+  filtered = PROPERTIES.filter(p => {
+    if (area && p.area !== area) return false;
+    if (type && p.type !== type) return false;
+    if (beds) {
+      if (beds === '4' && p.beds < 4) return false;
+      if (beds !== '4' && p.beds !== parseInt(beds)) return false;
+    }
+    if (p.rent < min || p.rent > max) return false;
+    return true;
+  });
+
+  renderGrid();
+  renderFilterTags();
+  document.getElementById('count-num').textContent = filtered.length;
+}
+
+function resetFilters() {
+  ['f-area','f-type','f-beds','f-min','f-max'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  filtered = [...PROPERTIES];
+  renderGrid();
+  renderFilterTags();
+  document.getElementById('count-num').textContent = filtered.length;
+}
+
+function renderFilterTags() {
+  const area = document.getElementById('f-area').value;
+  const type = document.getElementById('f-type').value;
+  const beds = document.getElementById('f-beds').value;
+  const min  = document.getElementById('f-min').value;
+  const max  = document.getElementById('f-max').value;
+
+  const tags = [];
+  if (area) tags.push({ label: '📍 ' + area,  clear: () => { document.getElementById('f-area').value=''; applyFilters(); } });
+  if (type) tags.push({ label: '🏠 ' + type,  clear: () => { document.getElementById('f-type').value=''; applyFilters(); } });
+  if (beds) tags.push({ label: '🛏 ' + beds + (beds==='4'?'+':'') + ' Bed', clear: () => { document.getElementById('f-beds').value=''; applyFilters(); } });
+  if (min)  tags.push({ label: 'Min Rs.' + parseInt(min).toLocaleString(), clear: () => { document.getElementById('f-min').value=''; applyFilters(); } });
+  if (max)  tags.push({ label: 'Max Rs.' + parseInt(max).toLocaleString(), clear: () => { document.getElementById('f-max').value=''; applyFilters(); } });
+
+  const wrap = document.getElementById('active-filters');
+  wrap.innerHTML = tags.map((t,i) => `
+    <div class="filter-tag">${t.label}<span class="filter-tag-x" onclick="clearTag(${i})">×</span></div>
+  `).join('');
+  window._tagClearFns = tags.map(t => t.clear);
+}
+
+function clearTag(i) { window._tagClearFns[i](); }
+
+// ── Render Grid ───────────────────────────────
+function renderGrid() {
+  const grid = document.getElementById('props-grid');
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        <span>🔍</span>
+        <h3>No Properties Found</h3>
+        <p>Try adjusting your filters to see more results.</p>
+      </div>`;
+    return;
   }
-  window.addEventListener('load', () => initHouse3D('canvas3d', 'tenant'));
-  function resetCam()    { resetCamera3D('tenant'); }
-  function wireframe()   { toggleWireframe('tenant'); }
-  function frontView()   { rotateFront('tenant'); }
-  function sideView()    { rotateSide('tenant'); }
-  function topView()     { rotateTop('tenant'); }
-  function nightToggle() { toggleDayNight(); }
+
+  grid.innerHTML = filtered.map(p => `
+    <div class="prop-card" onclick="open3D(${p.id})">
+      <div class="prop-thumb">
+        <canvas id="mini-${p.id}" style="width:100%;height:180px"></canvas>
+        <div class="prop-thumb-overlay"></div>
+        <div class="prop-thumb-badge rent">For Rent</div>
+        <div class="prop-thumb-3d">
+          <div class="view3d-pulse"></div>
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+          3D View
+        </div>
+      </div>
+      <div class="prop-body">
+        <div class="prop-price">Rs. ${p.rent.toLocaleString()}<span> / month</span></div>
+        <div class="prop-name">${p.name}</div>
+        <div class="prop-location">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          ${p.address}
+        </div>
+        <div class="prop-tags">
+          <div class="prop-tag"><span>🛏</span> ${p.beds} Bed${p.beds>1?'s':''}</div>
+          <div class="prop-tag"><span>🏠</span> ${p.type}</div>
+          <div class="prop-tag"><span>📐</span> ${p.sqft} sq ft</div>
+        </div>
+        <div class="prop-divider"></div>
+        <div class="prop-footer">
+          <div class="prop-area-badge">
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            ${p.area}
+          </div>
+          <button class="view3d-btn" onclick="event.stopPropagation(); open3D(${p.id})">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            View 3D
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Init mini 3D previews after DOM renders
+  setTimeout(() => {
+    filtered.forEach(p => {
+      const key = 'mini-' + p.id;
+      if (!miniScenes[key]) {
+        initHouse3D('mini-' + p.id, key);
+        miniScenes[key] = true;
+      }
+    });
+  }, 80);
+}
+
+// ── Grid / List Toggle ────────────────────────
+function setView(mode) {
+  viewMode = mode;
+  const grid = document.getElementById('props-grid');
+  grid.className = 'props-grid' + (mode === 'list' ? ' list-view' : '');
+  document.getElementById('btn-grid').classList.toggle('active', mode === 'grid');
+  document.getElementById('btn-list').classList.toggle('active', mode === 'list');
+}
+
+// ── 3D Modal ──────────────────────────────────
+function open3D(id) {
+  const p = PROPERTIES.find(x => x.id === id);
+  if (!p) return;
+
+  document.getElementById('m3d-name').textContent     = p.name;
+  document.getElementById('m3d-location').textContent = p.address;
+  document.getElementById('m3d-rent').textContent     = 'Rs. ' + p.rent.toLocaleString() + '/mo';
+  document.getElementById('m3d-type').textContent     = p.type;
+  document.getElementById('m3d-beds').textContent     = p.beds + ' Bedroom' + (p.beds>1?'s':'');
+  document.getElementById('m3d-status').textContent   = p.status;
+
+  document.getElementById('overlay-3d').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  if (!modal3dReady) {
+    setTimeout(() => { initHouse3D('canvas-modal3d', 'modal'); modal3dReady = true; }, 60);
+  } else {
+    resetCamera3D('modal');
+  }
+}
+
+function close3D() {
+  document.getElementById('overlay-3d').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('overlay-3d').addEventListener('click', function(e) {
+  if (e.target === this) close3D();
+});
+
+// Keyboard close
+document.addEventListener('keydown', e => { if (e.key === 'Escape') close3D(); });
+
+// ── Init ──────────────────────────────────────
+renderGrid();
+renderFilterTags();
 </script>
 </body>
 </html>
