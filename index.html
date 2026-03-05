@@ -1,11 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tenant Management System</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── THEME TOGGLE BUTTON ── */
+    .theme-btn {
+      position: fixed; top: 20px; right: 24px; z-index: 999;
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+      backdrop-filter: blur(12px);
+    }
+    .theme-btn:hover { transform: rotate(20deg) scale(1.1); box-shadow: 0 6px 22px rgba(0,0,0,0.35); border-color: var(--gold); }
+
+    /* ── LIGHT THEME OVERRIDES ── */
+    [data-theme="light"] {
+      --dark:   #F0F2F5;
+      --dark2:  #E4E8EE;
+      --card:   #FFFFFF;
+      --border: rgba(201,169,110,0.25);
+      --text:   #1A1E26;
+      --muted:  #7A8390;
+    }
+    [data-theme="light"] body { background: #F0F2F5; }
+    [data-theme="light"] .bg-scene {
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 30%, rgba(201,169,110,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 70%, rgba(74,158,255,0.06) 0%, transparent 60%),
+        linear-gradient(160deg, #F0F2F5 0%, #E8ECF2 100%);
+    }
+    [data-theme="light"] .grid-overlay {
+      background-image:
+        linear-gradient(rgba(100,110,130,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(100,110,130,0.07) 1px, transparent 1px);
+    }
+    [data-theme="light"] .panel {
+      background: rgba(255,255,255,0.88);
+      border-color: rgba(201,169,110,0.22);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.9);
+    }
+    [data-theme="light"] .form-input {
+      background: rgba(0,0,0,0.03);
+      border-color: rgba(0,0,0,0.1);
+      color: #1A1E26;
+    }
+    [data-theme="light"] .form-input:focus {
+      background: rgba(201,169,110,0.05);
+      border-color: var(--gold);
+    }
+    [data-theme="light"] .form-input::placeholder { color: #AAB0BA; }
+    [data-theme="light"] .tabs { background: rgba(0,0,0,0.05); }
+    [data-theme="light"] .tab.active { background: rgba(255,255,255,0.85); color: #1A1E26; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    [data-theme="light"] .tab { color: #7A8390; }
+    [data-theme="light"] .role-card-inline { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); }
+    [data-theme="light"] .error-msg { background: rgba(255,107,107,0.06); }
+    [data-theme="light"] .panel-footer { color: #AAB0BA; }
+    [data-theme="light"] .fp-icon { background: rgba(201,169,110,0.08); }
+    [data-theme="light"] .success-icon { background: rgba(78,205,196,0.08); }
+    [data-theme="light"] .strength-seg { background: rgba(0,0,0,0.08); }
+    [data-theme="light"] .orb1 { background: radial-gradient(circle, rgba(201,169,110,0.12) 0%, transparent 70%); }
+    [data-theme="light"] .orb2 { background: radial-gradient(circle, rgba(74,158,255,0.1) 0%, transparent 70%); }
+    [data-theme="light"] ::-webkit-scrollbar-track { background: #E4E8EE; }
+  </style>
 </head>
 <body>
 
@@ -14,43 +77,42 @@
   <div class="orb1"></div>
   <div class="orb2"></div>
 
+  <!-- Theme Toggle Button -->
+  <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+
   <div class="container">
     <div class="panel">
 
+      <!-- Logo -->
       <div class="logo">
         <div class="logo-icon">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-            <polyline points="9 22 9 12 15 12 15 22"/>
-          </svg>
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </div>
         <h1>Tenant Management System</h1>
         <p>Property Management Portal</p>
       </div>
 
-      <!-- 3 TABS -->
+      <!-- TABS: Sign In | Sign Up only -->
       <div class="tabs" id="main-tabs">
         <button class="tab active" id="tab-signin" onclick="switchTab('signin')">Sign In</button>
         <button class="tab" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
-        <button class="tab tab-admin" id="tab-admin" onclick="switchTab('admin')">⚙️ Admin</button>
       </div>
 
       <div id="error-box" class="error-msg"></div>
-      <div id="admin-error-box" class="error-msg"></div>
 
-      <!-- SIGN IN -->
+      <!-- ===== SIGN IN FORM ===== -->
       <div id="form-signin">
         <div class="form-group">
           <label class="form-label">Email Address</label>
           <div class="input-wrap">
-            <input type="email" class="form-input" id="signin-email" placeholder="your@email.com">
+            <input type="email" class="form-input" id="signin-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter') handleSignin()">
             <svg class="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           </div>
         </div>
         <div class="form-group">
           <label class="form-label">Password</label>
           <div class="input-wrap">
-            <input type="password" class="form-input" id="signin-password" placeholder="Enter your password">
+            <input type="password" class="form-input" id="signin-password" placeholder="Enter your password" onkeydown="if(event.key==='Enter') handleSignin()">
             <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
             <button class="eye-btn" onclick="togglePass('signin-password', this)">
               <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -64,7 +126,7 @@
         </div>
       </div>
 
-      <!-- SIGN UP -->
+      <!-- ===== SIGN UP FORM ===== -->
       <div id="form-signup" style="display:none;">
         <div class="form-group">
           <label class="form-label">Full Name</label>
@@ -90,10 +152,8 @@
             </button>
           </div>
           <div class="strength-bar">
-            <div class="strength-seg" id="s1"></div>
-            <div class="strength-seg" id="s2"></div>
-            <div class="strength-seg" id="s3"></div>
-            <div class="strength-seg" id="s4"></div>
+            <div class="strength-seg" id="s1"></div><div class="strength-seg" id="s2"></div>
+            <div class="strength-seg" id="s3"></div><div class="strength-seg" id="s4"></div>
           </div>
           <div class="strength-label" id="strength-label"></div>
         </div>
@@ -126,39 +186,7 @@
         </div>
       </div>
 
-      <!-- ADMIN SIGN IN -->
-      <div id="form-admin" style="display:none;">
-        <div class="admin-banner">
-          <div class="admin-banner-icon">⚙️</div>
-          <div>
-            <div class="admin-banner-title">Admin Access Only</div>
-            <div class="admin-banner-sub">Use your authorized admin credentials</div>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Admin Email</label>
-          <div class="input-wrap">
-            <input type="email" class="form-input admin-input" id="admin-email" placeholder="admin@gmail.com">
-            <svg class="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Admin Password</label>
-          <div class="input-wrap">
-            <input type="password" class="form-input admin-input" id="admin-password" placeholder="Enter admin password">
-            <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-            <button class="eye-btn" onclick="togglePass('admin-password', this)">
-              <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-        </div>
-        <button class="btn-primary btn-red" id="admin-btn" onclick="handleAdminLogin()">Access Admin Panel</button>
-        <div class="switch-text" style="margin-top:16px;">
-          Not an admin? <button class="switch-link" onclick="switchTab('signin')">Go to Sign In</button>
-        </div>
-      </div>
-
-      <!-- FORGOT PASSWORD -->
+      <!-- ===== FORGOT PASSWORD ===== -->
       <div id="screen-forgot" style="display:none;">
         <button class="back-btn" onclick="showAuth()">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
@@ -180,7 +208,7 @@
         <button class="btn-primary btn-gold" id="fp-btn" onclick="handleForgot()">Send Reset Link</button>
       </div>
 
-      <!-- SUCCESS -->
+      <!-- ===== SUCCESS ===== -->
       <div id="screen-success" style="display:none;">
         <div class="success-state">
           <div class="success-icon">
@@ -203,5 +231,22 @@
   </div>
 
   <script src="js/app.js"></script>
+  <script>
+    /* ── Theme Toggle ── */
+    (function(){
+      const saved = localStorage.getItem('tms-theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+      document.getElementById('theme-btn').textContent = saved === 'dark' ? '🌙' : '☀️';
+    })();
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('theme-btn').textContent = next === 'dark' ? '🌙' : '☀️';
+      localStorage.setItem('tms-theme', next);
+    }
+  </script>
 </body>
 </html>

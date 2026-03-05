@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -107,6 +107,61 @@
     .coming-icon { font-size: 48px; display: block; margin-bottom: 18px; }
     .coming-title { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 8px; }
     .coming-msg { color: var(--muted); font-size: 14px; }
+  
+    /* ── THEME TOGGLE ── */
+    .theme-btn {
+      position: fixed; top: 16px; right: 20px; z-index: 999;
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.07);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 18px; backdrop-filter: blur(10px);
+      transition: transform 0.3s, background 0.3s;
+      box-shadow: 0 3px 14px rgba(0,0,0,0.3);
+    }
+    .theme-btn:hover { transform: rotate(20deg) scale(1.1); background: rgba(255,255,255,0.12); }
+    /* Light mode */
+    [data-theme="light"] body { background: #F0F4F8 !important; }
+    [data-theme="light"] .bg, [data-theme="light"] .bg-wrap {
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 15%, rgba(74,158,255,0.07) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 50% at 90% 80%, rgba(78,205,196,0.05) 0%, transparent 55%),
+        linear-gradient(160deg, #EEF1F6 0%, #E4EAF2 100%) !important;
+    }
+    [data-theme="light"] .bg-grid {
+      background-image: linear-gradient(rgba(80,100,130,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(80,100,130,0.06) 1px, transparent 1px) !important;
+    }
+    [data-theme="light"] .sidebar {
+      background: rgba(240,244,248,0.97) !important;
+      border-right-color: rgba(0,0,0,0.1) !important;
+    }
+    [data-theme="light"] .topnav {
+      background: rgba(240,244,248,0.95) !important;
+      border-bottom-color: rgba(0,0,0,0.08) !important;
+    }
+    [data-theme="light"] .nav-item { color: #7A8390 !important; }
+    [data-theme="light"] .nav-item.active { background: rgba(74,158,255,0.1) !important; }
+    [data-theme="light"] .nav-item:hover { background: rgba(0,0,0,0.05) !important; color: #1A1E26 !important; }
+    [data-theme="light"] .sidebar-head h2, [data-theme="light"] .logo-text { color: inherit !important; }
+    [data-theme="light"] .user-name { color: #1A1E26 !important; }
+    [data-theme="light"] .card, [data-theme="light"] .house-card, [data-theme="light"] .filter-bar, [data-theme="light"] .prop-card, [data-theme="light"] .act-btn, [data-theme="light"] .modal, [data-theme="light"] .modal3d, [data-theme="light"] .confirm-modal {
+      background: rgba(255,255,255,0.92) !important;
+      border-color: rgba(0,0,0,0.1) !important;
+    }
+    [data-theme="light"] .filter-select, [data-theme="light"] .filter-input, [data-theme="light"] .finput, [data-theme="light"] .fselect, [data-theme="light"] .form-input-m, [data-theme="light"] .form-select-m, [data-theme="light"] .search-input {
+      background: rgba(0,0,0,0.04) !important;
+      border-color: rgba(0,0,0,0.1) !important;
+      color: #1A1E26 !important;
+    }
+    [data-theme="light"] .pg-title, [data-theme="light"] .page-title, [data-theme="light"] .modal-title, [data-theme="light"] .confirm-title, [data-theme="light"] .prop-name, [data-theme="light"] .prop-item-name, [data-theme="light"] .act-label, [data-theme="light"] .prop-card-name { color: #1A1E26 !important; }
+    [data-theme="light"] .house-card-top, [data-theme="light"] .modal3d-header, [data-theme="light"] .modal3d-controls, [data-theme="light"] .view3d-controls, [data-theme="light"] .controls { background: rgba(0,0,0,0.04) !important; border-color: rgba(0,0,0,0.07) !important; }
+    [data-theme="light"] .ctrl { background: rgba(0,0,0,0.05) !important; border-color: rgba(0,0,0,0.1) !important; color: #7A8390 !important; }
+    [data-theme="light"] .ctrl:hover { background: rgba(74,158,255,0.1) !important; }
+    [data-theme="light"] .data-table th, [data-theme="light"] .prop-table th, [data-theme="light"] .pay-table th { color: #9CA3AF !important; }
+    [data-theme="light"] .data-table td, [data-theme="light"] .prop-table td, [data-theme="light"] .pay-table td { color: #1A1E26 !important; border-color: rgba(0,0,0,0.05) !important; }
+    [data-theme="light"] .muted, [data-theme="light"] .pg-sub, [data-theme="light"] .page-sub, [data-theme="light"] .modal-sub, [data-theme="light"] .card-sub, [data-theme="light"] .prop-location, [data-theme="light"] .prop-area-badge { color: #7A8390 !important; }
+    [data-theme="light"] .theme-btn { border-color: rgba(0,0,0,0.12) !important; background: rgba(255,255,255,0.9) !important; box-shadow: 0 3px 14px rgba(0,0,0,0.12) !important; }
+
   </style>
 </head>
 <body>
@@ -262,5 +317,23 @@
     if (el) el.classList.add('active');
   }
 </script>
+
+  <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
+  <script>
+    (function(){
+      const saved = localStorage.getItem('tms-theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+      const btn = document.getElementById('theme-btn');
+      if (btn) btn.textContent = saved === 'dark' ? '🌙' : '☀️';
+    })();
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      const btn = document.getElementById('theme-btn');
+      if (btn) btn.textContent = next === 'dark' ? '🌙' : '☀️';
+      localStorage.setItem('tms-theme', next);
+    }
+  </script>
 </body>
 </html>
