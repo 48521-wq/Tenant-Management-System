@@ -1,213 +1,368 @@
-/* ============================================
-   Tenant Management System — Main JavaScript
-   File: js/app.js
-   ============================================ */
+// ═══════════════════════════════════════════════════════
+//  TMS — app.js
+//  Auth: Strict login, Google One Tap OAuth, Register only
+// ═══════════════════════════════════════════════════════
 
-// ─── State ───────────────────────────────────
-let currentRole = '';
-let currentTab  = 'signin';
-
-// ─── Admin Fixed Credentials ─────────────────
 const ADMIN_EMAIL    = 'adboy768@gmail.com';
 const ADMIN_PASSWORD = 'adnan123@';
 
-// ─── Tab Switching ────────────────────────────
+// Google OAuth Client ID — replace with your own from
+// console.cloud.google.com → APIs & Services → Credentials
+const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+
+// ── localStorage helpers ─────────────────────────────
+function getUsers() {
+  return JSON.parse(localStorage.getItem('tms_users') || '{}');
+}
+function saveUsers(users) {
+  localStorage.setItem('tms_users', JSON.stringify(users));
+}
+
+// ── UI helpers ───────────────────────────────────────
+function showError(msg) {
+  const box = document.getElementById('error-box');
+  box.textContent = msg;
+  box.style.display = 'block';
+  box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function clearError() {
+  const box = document.getElementById('error-box');
+  if (box) { box.textContent = ''; box.style.display = 'none'; }
+}
+function setLoading(btnId, loading, defaultText) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.textContent = loading ? 'Please wait…' : defaultText;
+}
+
+// ── Tab switching ────────────────────────────────────
 function switchTab(tab) {
-  currentTab = tab;
-
-  document.getElementById('tab-signin').classList.toggle('active', tab === 'signin');
-  document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
-  document.getElementById('tab-admin').classList.toggle('active',  tab === 'admin');
-
-  document.getElementById('form-signin').style.display = tab === 'signin' ? 'block' : 'none';
-  document.getElementById('form-signup').style.display = tab === 'signup' ? 'block' : 'none';
-  document.getElementById('form-admin').style.display  = tab === 'admin'  ? 'block' : 'none';
-
-  document.getElementById('screen-forgot').style.display  = 'none';
-  document.getElementById('screen-success').style.display = 'none';
-  document.getElementById('main-tabs').style.display      = 'flex';
-
-  clearErrors();
+  clearError();
+  const signin = document.getElementById('form-signin');
+  const signup = document.getElementById('form-signup');
+  const tsIn   = document.getElementById('tab-signin');
+  const tsUp   = document.getElementById('tab-signup');
+  const tabs   = document.getElementById('main-tabs');
+  if (tab === 'signin') {
+    signin.style.display = ''; signup.style.display = 'none';
+    tsIn.classList.add('active'); tsUp.classList.remove('active');
+    if (tabs) tabs.style.display = '';
+  } else {
+    signin.style.display = 'none'; signup.style.display = '';
+    tsIn.classList.remove('active'); tsUp.classList.add('active');
+    if (tabs) tabs.style.display = '';
+  }
+  document.getElementById('screen-forgot')?.style && (document.getElementById('screen-forgot').style.display = 'none');
 }
 
-// ─── Role Select (inside signup) ─────────────
+// ── Role selection ───────────────────────────────────
+let selectedRole = '';
 function selectRole(role) {
-  currentRole = role;
-  document.getElementById('role-tenant').classList.remove('selected');
-  document.getElementById('role-landlord').classList.remove('selected');
-  document.getElementById('role-' + role).classList.add('selected');
-  document.getElementById('role-error').classList.remove('show');
-
-  document.getElementById('signup-btn').className =
-    role === 'tenant' ? 'btn-primary btn-blue' : 'btn-primary btn-gold';
+  selectedRole = role;
+  document.getElementById('role-tenant')?.classList.remove('selected');
+  document.getElementById('role-landlord')?.classList.remove('selected');
+  document.getElementById('role-' + role)?.classList.add('selected');
+  const err = document.getElementById('role-error');
+  if (err) err.style.display = 'none';
 }
 
-// ─── Forgot Password ──────────────────────────
-function showForgot() {
-  ['form-signin','form-signup','form-admin'].forEach(id => {
-    document.getElementById(id).style.display = 'none';
+// ── Password strength ────────────────────────────────
+function checkStrength(val) {
+  const segs = ['s1','s2','s3','s4'];
+  const colors = ['#FF6B6B','#FFB347','#C9A96E','#4ECDC4'];
+  let score = 0;
+  if (val.length >= 8) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+  const labels = ['','Weak','Fair','Good','Strong'];
+  segs.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.style.background = i < score ? colors[score-1] : '';
   });
-  document.getElementById('main-tabs').style.display    = 'none';
-  document.getElementById('screen-forgot').style.display = 'block';
-  document.getElementById('fp-email').value = '';
-  hideError('fp-error');
+  const lbl = document.getElementById('strength-label');
+  if (lbl) { lbl.textContent = score > 0 ? labels[score] : ''; lbl.style.color = colors[score-1] || ''; }
 }
 
+// ── Toggle password visibility ───────────────────────
+function togglePass(id, btn) {
+  const inp = document.getElementById(id);
+  if (!inp) return;
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.style.opacity = inp.type === 'text' ? '1' : '0.5';
+}
+
+// ── Forgot password ──────────────────────────────────
+function showForgot() {
+  document.getElementById('form-signin').style.display  = 'none';
+  document.getElementById('form-signup').style.display  = 'none';
+  document.getElementById('main-tabs').style.display    = 'none';
+  document.getElementById('screen-forgot').style.display = '';
+  clearError();
+}
 function showAuth() {
   document.getElementById('screen-forgot').style.display  = 'none';
   document.getElementById('screen-success').style.display = 'none';
-  document.getElementById('main-tabs').style.display      = 'flex';
+  document.getElementById('main-tabs').style.display = '';
   switchTab('signin');
 }
-
-// ─── Errors ───────────────────────────────────
-function showError(id, msg) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.textContent = msg;
-  el.classList.add('show');
-}
-function hideError(id) {
-  const el = document.getElementById(id);
-  if (el) el.classList.remove('show');
-}
-function clearErrors() {
-  document.querySelectorAll('.error-msg').forEach(e => e.classList.remove('show'));
-  document.querySelectorAll('.role-error-msg').forEach(e => e.classList.remove('show'));
+function handleForgot() {
+  const email = document.getElementById('fp-email')?.value.trim();
+  const err   = document.getElementById('fp-error');
+  if (!email) { if (err) { err.textContent='Please enter your email.'; err.style.display='block'; } return; }
+  const users = getUsers();
+  if (!users[email] && email !== ADMIN_EMAIL) {
+    if (err) { err.textContent='No account found with this email.'; err.style.display='block'; } return;
+  }
+  document.getElementById('screen-forgot').style.display  = 'none';
+  document.getElementById('screen-success').style.display = '';
+  document.getElementById('success-email-display').textContent = email;
 }
 
-// ─── Validation ───────────────────────────────
-function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
-
-// ─── Sign In ──────────────────────────────────
+// ── STRICT SIGN IN ───────────────────────────────────
+// Only registered users + admin can login. No defaults.
 function handleSignin() {
-  const email = document.getElementById('signin-email').value.trim();
-  const pass  = document.getElementById('signin-password').value;
-  hideError('error-box');
+  clearError();
+  const email = document.getElementById('signin-email')?.value.trim().toLowerCase();
+  const pass  = document.getElementById('signin-password')?.value;
+  if (!email || !pass) { showError('Please enter email and password.'); return; }
 
-  if (!email)               return showError('error-box', 'Please enter your email address.');
-  if (!isValidEmail(email)) return showError('error-box', 'Please enter a valid email address.');
-  if (!pass)                return showError('error-box', 'Please enter your password.');
-  if (pass.length < 6)      return showError('error-box', 'Password must be at least 6 characters.');
-
-  const btn = document.getElementById('signin-btn');
-  btn.textContent = 'Signing in...';
-  btn.disabled = true;
+  setLoading('signin-btn', true, 'Sign In');
 
   setTimeout(() => {
-    btn.textContent = 'Sign In';
-    btn.disabled = false;
-    window.location.href = 'pages/tenant-dashboard.html';
-  }, 1400);
+    setLoading('signin-btn', false, 'Sign In');
+
+    // Admin check
+    if (email === ADMIN_EMAIL && pass === ADMIN_PASSWORD) {
+      window.location.href = 'pages/admin-dashboard.html'; return;
+    }
+
+    // Registered user check
+    const users = getUsers();
+    if (users[email]) {
+      const u = users[email];
+      if (u.password && u.password !== pass) {
+        showError('Incorrect password. Please try again.'); return;
+      }
+      const dest = u.role === 'landlord' ? 'pages/landlord-dashboard.html' : 'pages/tenant-dashboard.html';
+      window.location.href = dest; return;
+    }
+
+    // Not registered
+    showError('No account found with this email. Please sign up first.');
+  }, 600);
 }
 
-// ─── Sign Up ──────────────────────────────────
+// ── SIGN UP ──────────────────────────────────────────
 function handleSignup() {
-  const name    = document.getElementById('signup-name').value.trim();
-  const email   = document.getElementById('signup-email').value.trim();
-  const pass    = document.getElementById('signup-password').value;
-  const confirm = document.getElementById('signup-confirm').value;
-  hideError('error-box');
+  clearError();
+  const name  = document.getElementById('signup-name')?.value.trim();
+  const email = document.getElementById('signup-email')?.value.trim().toLowerCase();
+  const pass  = document.getElementById('signup-password')?.value;
+  const conf  = document.getElementById('signup-confirm')?.value;
 
-  if (!name)                return showError('error-box', 'Please enter your full name.');
-  if (!email)               return showError('error-box', 'Please enter your email address.');
-  if (!isValidEmail(email)) return showError('error-box', 'Please enter a valid email address.');
-  if (!pass)                return showError('error-box', 'Please enter a password.');
-  if (pass.length < 8)      return showError('error-box', 'Password must be at least 8 characters.');
-  if (pass !== confirm)     return showError('error-box', 'Passwords do not match.');
+  if (!name || !email || !pass || !conf) { showError('Please fill in all fields.'); return; }
+  if (pass !== conf)  { showError('Passwords do not match.'); return; }
+  if (pass.length < 6) { showError('Password must be at least 6 characters.'); return; }
+  if (!selectedRole) {
+    const err = document.getElementById('role-error');
+    if (err) err.style.display = 'block';
+    showError('Please select a role (Tenant or Landlord).'); return;
+  }
 
-  if (!currentRole) {
-    document.getElementById('role-error').classList.add('show');
-    document.getElementById('role-tenant').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const users = getUsers();
+  if (users[email] || email === ADMIN_EMAIL) {
+    showError('An account with this email already exists. Please sign in.'); return;
+  }
+
+  setLoading('signup-btn', true, 'Create Account');
+  setTimeout(() => {
+    setLoading('signup-btn', false, 'Create Account');
+    users[email] = { name, role: selectedRole, password: pass };
+    saveUsers(users);
+    const dest = selectedRole === 'landlord' ? 'pages/landlord-dashboard.html' : 'pages/tenant-dashboard.html';
+    window.location.href = dest;
+  }, 600);
+}
+
+// ═══════════════════════════════════════════════════════
+//  GOOGLE OAUTH — Real Google Sign-In via GSI library
+//  Uses Google Identity Services (accounts.google.com/gsi)
+//  Shows a Google popup with the user's actual Google accounts
+// ═══════════════════════════════════════════════════════
+
+let googleMode = ''; // 'signin' | 'signup'
+
+// Called when Google GSI library loads
+function initGoogleAuth() {
+  if (!window.google || GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE')) return;
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleCredential,
+    auto_select: false,
+    cancel_on_tap_outside: true,
+  });
+}
+
+// Called when Google returns a credential (JWT)
+function handleGoogleCredential(response) {
+  try {
+    // Decode JWT payload (base64)
+    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+    const email   = payload.email?.toLowerCase() || '';
+    const name    = payload.name  || email.split('@')[0];
+
+    if (!email) { showError('Could not retrieve email from Google.'); return; }
+
+    const users = getUsers();
+
+    if (googleMode === 'signin') {
+      // Admin via Google
+      if (email === ADMIN_EMAIL) { window.location.href = 'pages/admin-dashboard.html'; return; }
+      // Registered user
+      if (users[email]) {
+        const dest = users[email].role === 'landlord' ? 'pages/landlord-dashboard.html' : 'pages/tenant-dashboard.html';
+        window.location.href = dest; return;
+      }
+      showError('No account found for ' + email + '. Please sign up first.');
+
+    } else if (googleMode === 'signup') {
+      if (users[email] || email === ADMIN_EMAIL) {
+        showError('Account already exists for ' + email + '. Please sign in instead.'); return;
+      }
+      if (!selectedRole) {
+        const err = document.getElementById('role-error');
+        if (err) err.style.display = 'block';
+        showError('Please select a role first, then try Google sign-up again.'); return;
+      }
+      users[email] = { name, role: selectedRole, google: true };
+      saveUsers(users);
+      const dest = selectedRole === 'landlord' ? 'pages/landlord-dashboard.html' : 'pages/tenant-dashboard.html';
+      window.location.href = dest;
+    }
+  } catch(e) {
+    console.error('Google credential error:', e);
+    showError('Google sign-in failed. Please try email/password instead.');
+  }
+}
+
+// ── Trigger Google popup (Sign In) ───────────────────
+function handleGoogleSignin() {
+  clearError();
+  googleMode = 'signin';
+
+  // If real GSI is loaded, use it
+  if (window.google && !GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE')) {
+    google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        // Fallback: popup button flow
+        triggerGooglePopup();
+      }
+    });
     return;
   }
 
-  const btn = document.getElementById('signup-btn');
-  btn.textContent = 'Creating Account...';
-  btn.disabled = true;
-
-  setTimeout(() => {
-    btn.textContent = 'Create Account';
-    btn.disabled = false;
-    window.location.href = currentRole === 'landlord'
-      ? 'pages/landlord-dashboard.html'
-      : 'pages/tenant-dashboard.html';
-  }, 1400);
+  // Fallback: open Google email modal
+  openGoogleModal('signin');
 }
 
-// ─── Admin Login ──────────────────────────────
-function handleAdminLogin() {
-  const email = document.getElementById('admin-email').value.trim();
-  const pass  = document.getElementById('admin-password').value;
-  hideError('admin-error-box');
+// ── Trigger Google popup (Sign Up) ───────────────────
+function handleGoogleSignup() {
+  clearError();
+  googleMode = 'signup';
 
-  if (!email) return showError('admin-error-box', 'Please enter admin email.');
-  if (!pass)  return showError('admin-error-box', 'Please enter admin password.');
+  if (window.google && !GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE')) {
+    google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        triggerGooglePopup();
+      }
+    });
+    return;
+  }
 
-  const btn = document.getElementById('admin-btn');
-  btn.textContent = 'Verifying...';
-  btn.disabled = true;
+  openGoogleModal('signup');
+}
 
-  setTimeout(() => {
-    btn.textContent = 'Access Admin Panel';
-    btn.disabled = false;
-
-    if (email === ADMIN_EMAIL && pass === ADMIN_PASSWORD) {
-      window.location.href = 'pages/admin-dashboard.html';
-    } else {
-      document.getElementById('admin-password').value = '';
-      showError('admin-error-box', 'Invalid credentials. Please check your email and password.');
+// ── Google OAuth popup (when One Tap is blocked) ─────
+function triggerGooglePopup() {
+  if (!window.google || GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE')) return;
+  google.accounts.oauth2.initCodeClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: 'email profile',
+    callback: (response) => {
+      if (response.error) { showError('Google sign-in was cancelled.'); return; }
     }
-  }, 1200);
+  }).requestCode();
 }
 
-// ─── Forgot Password Send ─────────────────────
-function handleForgot() {
-  const email = document.getElementById('fp-email').value.trim();
-  hideError('fp-error');
-  if (!email)               return showError('fp-error', 'Please enter your email address.');
-  if (!isValidEmail(email)) return showError('fp-error', 'Please enter a valid email address.');
-
-  const btn = document.getElementById('fp-btn');
-  btn.textContent = 'Sending...';
-  btn.disabled = true;
-
-  setTimeout(() => {
-    btn.textContent = 'Send Reset Link';
-    btn.disabled = false;
-    document.getElementById('success-email-display').textContent = email;
-    document.getElementById('screen-forgot').style.display  = 'none';
-    document.getElementById('screen-success').style.display = 'block';
-  }, 1400);
+// ── Google email fallback modal ──────────────────────
+//  Shown when real OAuth isn't configured yet
+function openGoogleModal(mode) {
+  const isSignin = mode === 'signin';
+  document.getElementById('g-modal-title').textContent = isSignin ? 'Sign in with Google' : 'Sign up with Google';
+  document.getElementById('g-modal-sub').textContent   = isSignin
+    ? 'Enter the Gmail address linked to your account.'
+    : 'Enter the Gmail address you want to register with.';
+  document.getElementById('g-email-input').value = '';
+  document.getElementById('g-error').classList.remove('show');
+  document.getElementById('g-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('g-email-input').focus(), 120);
+}
+function closeGoogleModal() {
+  document.getElementById('g-overlay').classList.remove('open');
 }
 
-// ─── Password Strength ────────────────────────
-function checkStrength(pass) {
-  const segs  = ['s1','s2','s3','s4'].map(id => document.getElementById(id));
-  const label = document.getElementById('strength-label');
-  segs.forEach(s => { s.className = 'strength-seg'; });
-  if (!pass) { label.textContent = ''; return; }
+// ── Confirm Google modal (fallback) ─────────────────
+function confirmGoogle() {
+  const email = document.getElementById('g-email-input')?.value.trim().toLowerCase();
+  const errEl = document.getElementById('g-error');
+  const showGErr = (msg) => { errEl.textContent = msg; errEl.classList.add('show'); };
 
-  let score = 0;
-  if (pass.length >= 8)          score++;
-  if (/[A-Z]/.test(pass))        score++;
-  if (/[0-9]/.test(pass))        score++;
-  if (/[^A-Za-z0-9]/.test(pass)) score++;
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showGErr('Please enter a valid email address.'); return;
+  }
 
-  const cls = ['weak','weak','medium','strong'];
-  const lbl = ['','Weak','Medium','Strong','Very Strong'];
-  const col = ['','#FF6B6B','#FFA500','#4ECDC4','#4ECDC4'];
-  for (let i = 0; i < score; i++) segs[i].classList.add(cls[i < 2 ? 0 : i < 3 ? 1 : 2]);
-  label.textContent = lbl[score];
-  label.style.color = col[score];
+  const users = getUsers();
+
+  if (googleMode === 'signin') {
+    if (email === ADMIN_EMAIL) { closeGoogleModal(); window.location.href = 'pages/admin-dashboard.html'; return; }
+    if (users[email]) {
+      closeGoogleModal();
+      const dest = users[email].role === 'landlord' ? 'pages/landlord-dashboard.html' : 'pages/tenant-dashboard.html';
+      window.location.href = dest; return;
+    }
+    showGErr('No account found. Please sign up first.');
+
+  } else {
+    if (users[email] || email === ADMIN_EMAIL) {
+      showGErr('Account already exists. Please sign in instead.'); return;
+    }
+    if (!selectedRole) {
+      closeGoogleModal();
+      const err = document.getElementById('role-error');
+      if (err) err.style.display = 'block';
+      showError('Please select a role first, then use Google sign-up.'); return;
+    }
+    users[email] = { name: email.split('@')[0], role: selectedRole, google: true };
+    saveUsers(users);
+    closeGoogleModal();
+    const dest = selectedRole === 'landlord' ? 'pages/landlord-dashboard.html' : 'pages/tenant-dashboard.html';
+    window.location.href = dest;
+  }
 }
 
-// ─── Toggle Password Visibility ───────────────
-function togglePass(inputId, btn) {
-  const inp = document.getElementById(inputId);
-  const hidden = inp.type === 'password';
-  inp.type = hidden ? 'text' : 'password';
-  btn.innerHTML = hidden
-    ? `<svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
-    : `<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
-}
+// ── Keyboard shortcut ────────────────────────────────
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeGoogleModal();
+});
+
+// ── Load Google GSI script dynamically ──────────────
+(function loadGSI() {
+  if (GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE')) return; // skip until real ID is set
+  const s = document.createElement('script');
+  s.src = 'https://accounts.google.com/gsi/client';
+  s.async = true; s.defer = true;
+  s.onload = initGoogleAuth;
+  document.head.appendChild(s);
+})();
