@@ -6,37 +6,44 @@
   <title>Admin Dashboard — TMS</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --red:    #E53935;
-      --red-l:  #FF6B6B;
-      --dark:   #07090C;
-      --dark2:  #0C1018;
-      --card:   rgba(16,20,28,0.95);
-      --border: rgba(229,57,53,0.14);
-      --text:   #EDE9E0;
-      --muted:  #566070;
-    }
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: var(--dark); }
-    ::-webkit-scrollbar-thumb { background: var(--red); border-radius: 10px; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--red:#E53935;--red-l:#FF6B6B;--dark:#07090C;--card:rgba(16,20,28,0.96);--border:rgba(229,57,53,0.13);--text:#EDE9E0;--muted:#566070;--gold:#C9A96E;--blue:#4A9EFF;--green:#4ECDC4}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--dark)}::-webkit-scrollbar-thumb{background:var(--red);border-radius:10px}
+    body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+    .bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 10% 20%,rgba(229,57,53,0.06) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 90% 80%,rgba(74,158,255,0.03) 0%,transparent 60%),linear-gradient(160deg,#07090C 0%,#0C1018 100%)}
+    .bg-grid{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(229,57,53,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(229,57,53,0.02) 1px,transparent 1px);background-size:55px 55px}
 
-    body { font-family: 'DM Sans', sans-serif; background: var(--dark); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
+    /* TOPNAV */
+    .topnav{position:sticky;top:0;z-index:200;background:rgba(7,9,12,0.94);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;height:62px;gap:14px}
+    .topnav-logo{display:flex;align-items:center;gap:10px;margin-right:auto}
+    .logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--red),var(--red-l));border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(229,57,53,0.3);font-size:16px}
+    .logo-text{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;background:linear-gradient(135deg,var(--red),var(--red-l));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .logo-sep{color:var(--muted);font-size:12px;margin-left:2px}
+    .nav-pill{padding:5px 14px;border-radius:20px;border:1px solid rgba(229,57,53,0.22);background:rgba(229,57,53,0.08);color:var(--red-l);font-size:12px;font-weight:600;white-space:nowrap}
+    .theme-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;transition:transform 0.3s,background 0.2s;flex-shrink:0}
+    .theme-btn:hover{transform:rotate(20deg) scale(1.1);background:rgba(255,255,255,0.1)}
+    .logout-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:9px;background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.15);color:#FF6B6B;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;white-space:nowrap}
+    .logout-btn:hover{background:rgba(255,107,107,0.14)}
+    .logout-btn svg{width:14px;height:14px;stroke:currentColor;fill:none}
 
-    .bg {
-      position: fixed; inset: 0; z-index: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 10% 15%, rgba(229,57,53,0.07) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 50% at 90% 85%, rgba(201,169,110,0.04) 0%, transparent 60%),
-        linear-gradient(160deg, #07090C 0%, #0C1018 100%);
-    }
-    .bg-grid {
-      position: fixed; inset: 0; z-index: 0;
-      background-image: linear-gradient(rgba(229,57,53,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(229,57,53,0.025) 1px, transparent 1px);
-      background-size: 55px 55px;
-    }
+    /* BODY */
+    .body-wrap{display:flex;flex:1;position:relative;z-index:1}
 
     /* SIDEBAR */
+<<<<<<< HEAD
+    .sidebar{width:220px;flex-shrink:0;background:rgba(10,12,18,0.97);backdrop-filter:blur(24px);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto}
+    .sidebar-section{padding:20px 14px 8px}
+    .sidebar-label{font-size:10px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;padding:0 8px 10px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.18s;margin-bottom:2px;border:none;background:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left}
+    .nav-item svg{width:16px;height:16px;stroke:currentColor;fill:none;flex-shrink:0}
+    .nav-item:hover{color:var(--text);background:rgba(229,57,53,0.07)}
+    .nav-item.active{color:var(--red-l);background:rgba(229,57,53,0.1);font-weight:600}
+    .sidebar-foot{margin-top:auto;padding:14px 16px;border-top:1px solid rgba(255,255,255,0.05)}
+    .user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.05)}
+    .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red-l));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+    .user-name{font-size:12px;font-weight:600}
+    .user-role{font-size:10px;color:var(--muted)}
+=======
     .sidebar {
       position: fixed; left: 0; top: 0; bottom: 0; width: 230px;
       background: rgba(10,12,18,0.97); backdrop-filter: blur(24px);
@@ -78,41 +85,88 @@
     .topnav .logout-btn-nav:hover { background: rgba(255,107,107,0.15); }
     .topnav .logout-btn-nav svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
 
+<<<<<<< HEAD
+=======
+>>>>>>> 3414f9ea58c36df2694be57f05d7e6b493594df8
+>>>>>>> 7f516d727b9d64cb643da83c057683ddeda32772
 
     /* MAIN */
-    .main { margin-left: 230px; flex: 1; position: relative; z-index: 1; min-height: 100vh; overflow-y: auto; padding: 36px 40px; }
-    .page { display: none; animation: fadeUp 0.35s ease both; }
-    .page.active { display: block; }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+    .main{flex:1;min-width:0;overflow-y:auto}
+    .page{display:none;padding:32px 36px 48px;animation:fadeUp 0.3s ease both}
+    .page.active{display:block}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    .pg-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:16px}
+    .pg-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:700}
+    .pg-sub{color:var(--muted);font-size:13px;margin-top:4px}
+=======
+>>>>>>> 7f516d727b9d64cb643da83c057683ddeda32772
     .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; }
     .pg-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; }
     .pg-sub { color: var(--muted); font-size: 13px; margin-top: 5px; }
     .admin-pill { display: flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 20px; background: rgba(229,57,53,0.09); border: 1px solid rgba(229,57,53,0.22); color: var(--red-l); font-size: 12px; font-weight: 600; }
+>>>>>>> 3414f9ea58c36df2694be57f05d7e6b493594df8
 
-    /* Welcome Card */
-    .welcome-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 20px; padding: 40px;
-      text-align: center;
-      max-width: 520px; margin: 0 auto;
-      box-shadow: 0 8px 40px rgba(229,57,53,0.06);
-    }
-    .welcome-icon { font-size: 56px; margin-bottom: 20px; display: block; }
-    .welcome-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; margin-bottom: 10px; }
-    .welcome-msg { color: var(--muted); font-size: 14px; line-height: 1.8; margin-bottom: 28px; }
-    .welcome-cred {
-      background: rgba(229,57,53,0.06); border: 1px solid rgba(229,57,53,0.15);
-      border-radius: 12px; padding: 16px 20px; margin-bottom: 0;
-      text-align: left;
-    }
-    .cred-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; margin-bottom: 10px; }
-    .cred-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .cred-row:last-child { margin-bottom: 0; }
-    .cred-key { font-size: 12px; color: var(--muted); }
-    .cred-val { font-size: 12px; font-family: monospace; color: var(--red-l); font-weight: 600; }
+    /* STATS */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 20px;display:flex;align-items:center;gap:14px}
+    .stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .stat-icon.red{background:rgba(229,57,53,0.12)}
+    .stat-icon.blue{background:rgba(74,158,255,0.1)}
+    .stat-icon.green{background:rgba(78,205,196,0.1)}
+    .stat-icon.gold{background:rgba(201,169,110,0.1)}
+    .stat-val{font-size:22px;font-weight:700;font-family:'Playfair Display',serif;line-height:1}
+    .stat-val.red{color:var(--red-l)}.stat-val.blue{color:var(--blue)}.stat-val.green{color:var(--green)}.stat-val.gold{color:var(--gold)}
+    .stat-label{font-size:11px;color:var(--muted);margin-top:3px;font-weight:500;text-transform:uppercase;letter-spacing:0.4px}
 
+<<<<<<< HEAD
+    /* TABLE */
+    .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    .section-title{font-size:15px;font-weight:700}
+    .table-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+    table{width:100%;border-collapse:collapse}
+    thead tr{background:rgba(0,0,0,0.2)}
+    th{padding:12px 18px;text-align:left;font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+    td{padding:14px 18px;font-size:13px;border-top:1px solid rgba(255,255,255,0.04)}
+    tr:hover td{background:rgba(255,255,255,0.02)}
+    .badge{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+    .badge.green{background:rgba(78,205,196,0.1);color:var(--green);border:1px solid rgba(78,205,196,0.2)}
+    .badge.red{background:rgba(229,57,53,0.1);color:var(--red-l);border:1px solid rgba(229,57,53,0.2)}
+    .badge.gold{background:rgba(201,169,110,0.1);color:var(--gold);border:1px solid rgba(201,169,110,0.2)}
+    .badge.blue{background:rgba(74,158,255,0.1);color:var(--blue);border:1px solid rgba(74,158,255,0.2)}
+
+    /* COMING SOON */
+    .coming-soon{text-align:center;padding:70px 24px;color:var(--muted)}
+    .coming-soon .cs-icon{font-size:52px;margin-bottom:16px;opacity:0.4}
+    .coming-soon h3{font-size:18px;color:var(--text);margin-bottom:6px}
+    .coming-soon p{font-size:13px}
+
+    /* ACTIVITY */
+    .activity-list{display:flex;flex-direction:column;gap:10px}
+    .activity-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px}
+    .act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .act-dot.red{background:var(--red-l)}.act-dot.green{background:var(--green)}.act-dot.blue{background:var(--blue)}.act-dot.gold{background:var(--gold)}
+    .act-text{flex:1;font-size:13px}
+    .act-time{font-size:11px;color:var(--muted)}
+
+    /* LIGHT */
+    [data-theme="light"] body{background:#F0F4F8!important;color:#1A1E26!important}
+    [data-theme="light"] .bg{background:radial-gradient(ellipse 80% 60% at 10% 20%,rgba(229,57,53,0.06) 0%,transparent 60%),linear-gradient(160deg,#EEF1F6 0%,#E4EAF2 100%)!important}
+    [data-theme="light"] .bg-grid{background-image:linear-gradient(rgba(80,100,130,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(80,100,130,0.05) 1px,transparent 1px)!important}
+    [data-theme="light"] .topnav{background:rgba(240,244,248,0.97)!important;border-bottom-color:rgba(0,0,0,0.08)!important}
+    [data-theme="light"] .sidebar{background:rgba(232,236,244,0.98)!important;border-right-color:rgba(0,0,0,0.08)!important}
+    [data-theme="light"] .stat-card,.table-wrap,[data-theme="light"] .activity-item{background:rgba(255,255,255,0.92)!important;border-color:rgba(0,0,0,0.08)!important}
+    [data-theme="light"] .table-wrap{background:rgba(255,255,255,0.92)!important;border-color:rgba(0,0,0,0.08)!important}
+    [data-theme="light"] .activity-item{background:rgba(255,255,255,0.92)!important;border-color:rgba(0,0,0,0.08)!important}
+    [data-theme="light"] thead tr{background:rgba(0,0,0,0.04)!important}
+    [data-theme="light"] td{border-top-color:rgba(0,0,0,0.05)!important;color:#1A1E26!important}
+    [data-theme="light"] .pg-title,.section-title,[data-theme="light"] .stat-val{color:#1A1E26!important}
+    [data-theme="light"] .user-card{background:rgba(0,0,0,0.04)!important;border-color:rgba(0,0,0,0.07)!important}
+    [data-theme="light"] .theme-btn{background:rgba(255,255,255,0.8)!important;border-color:rgba(0,0,0,0.12)!important}
+=======
     /* Nav Pages */
     .coming-card {
       background: var(--card); border: 1px solid var(--border);
@@ -177,20 +231,55 @@
     [data-theme="light"] .muted, [data-theme="light"] .pg-sub, [data-theme="light"] .page-sub, [data-theme="light"] .modal-sub, [data-theme="light"] .card-sub, [data-theme="light"] .prop-location, [data-theme="light"] .prop-area-badge { color: #7A8390 !important; }
     [data-theme="light"] .theme-btn { border-color: rgba(0,0,0,0.12) !important; background: rgba(255,255,255,0.9) !important; box-shadow: 0 3px 14px rgba(0,0,0,0.12) !important; }
 
+<<<<<<< HEAD
+=======
+>>>>>>> 3414f9ea58c36df2694be57f05d7e6b493594df8
+>>>>>>> 7f516d727b9d64cb643da83c057683ddeda32772
   </style>
 </head>
 <body>
-<div class="bg"></div>
-<div class="bg-grid"></div>
+<div class="bg"></div><div class="bg-grid"></div>
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <div class="sidebar-head">
-    <div class="logo-box">⚙️</div>
-    <h2>Admin Panel</h2>
-    <p>Tenant Management System</p>
+<nav class="topnav">
+  <div class="topnav-logo">
+    <div class="logo-icon">⚙️</div>
+    <span class="logo-text">TMS</span>
+    <span class="logo-sep">/ Admin</span>
   </div>
+  <span class="nav-pill">⚙️ Super Admin</span>
+  <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
+  <button class="logout-btn" onclick="window.location.href='../index.html'">
+    <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout
+  </button>
+</nav>
 
+<<<<<<< HEAD
+<div class="body-wrap">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Main</div>
+      <button class="nav-item active" onclick="switchPage('dashboard',this)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
+      </button>
+      <button class="nav-item" onclick="switchPage('users',this)">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Users
+      </button>
+      <button class="nav-item" onclick="switchPage('properties',this)">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Properties
+      </button>
+      <button class="nav-item" onclick="switchPage('payments',this)">
+        <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payments
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">System</div>
+      <button class="nav-item" onclick="switchPage('reports',this)">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Reports
+      </button>
+      <button class="nav-item" onclick="switchPage('settings',this)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings
+      </button>
+=======
   <div class="nav-section">
     <div class="nav-label">Control Panel</div>
     <button class="nav-item active" onclick="showPage('dashboard', this)">
@@ -261,90 +350,139 @@
         <div class="pg-sub">Welcome to the Tenant Management System control panel</div>
       </div>
       <div class="admin-pill">⚙️ Super Admin</div>
+>>>>>>> 3414f9ea58c36df2694be57f05d7e6b493594df8
     </div>
-
-    <div class="welcome-card">
-      <span class="welcome-icon">⚙️</span>
-      <div class="welcome-title">Admin Panel Ready</div>
-      <div class="welcome-msg">
-        You are logged in as <strong>Super Admin</strong>.<br>
-        Use the sidebar to navigate between sections.<br>
-        Data will be added when backend is connected.
-      </div>
-      <div class="welcome-cred">
-        <div class="cred-label">Your Admin Credentials</div>
-        <div class="cred-row">
-          <span class="cred-key">Email</span>
-          <span class="cred-val">adboy768@gmail.com</span>
-        </div>
-        <div class="cred-row">
-          <span class="cred-key">Password</span>
-          <span class="cred-val">adnan123@</span>
-        </div>
+    <div class="sidebar-foot">
+      <div class="user-card">
+        <div class="avatar">A</div>
+        <div><div class="user-name">Super Admin</div><div class="user-role">⚙️ Administrator</div></div>
       </div>
     </div>
-  </div>
+  </aside>
 
-  <!-- USERS -->
-  <div class="page" id="page-users">
-    <div class="topbar"><div><div class="pg-title">Users</div><div class="pg-sub">Manage all system users</div></div><div class="admin-pill">⚙️ Admin</div></div>
-    <div class="coming-card">
-      <span class="coming-icon">👥</span>
-      <div class="coming-title">Users Management</div>
-      <div class="coming-msg">User data will appear here once the backend is connected.</div>
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="pg-head">
+        <div><div class="pg-title">Dashboard</div><div class="pg-sub">System overview & recent activity</div></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-icon blue">👥</div><div><div class="stat-val blue">0</div><div class="stat-label">Total Users</div></div></div>
+        <div class="stat-card"><div class="stat-icon gold">🏠</div><div><div class="stat-val gold">0</div><div class="stat-label">Properties</div></div></div>
+        <div class="stat-card"><div class="stat-icon green">💰</div><div><div class="stat-val green">Rs. 0</div><div class="stat-label">Total Revenue</div></div></div>
+        <div class="stat-card"><div class="stat-icon red">⚠️</div><div><div class="stat-val red">0</div><div class="stat-label">Complaints</div></div></div>
+      </div>
+      <div class="section-head"><div class="section-title">Recent Activity</div></div>
+      <div class="activity-list">
+        <div class="activity-item"><div class="act-dot green"></div><div class="act-text">System initialized successfully</div><div class="act-time">Just now</div></div>
+        <div class="activity-item"><div class="act-dot blue"></div><div class="act-text">Admin logged in</div><div class="act-time">Just now</div></div>
+      </div>
     </div>
-  </div>
 
-  <!-- PROPERTIES -->
-  <div class="page" id="page-properties">
-    <div class="topbar"><div><div class="pg-title">Properties</div><div class="pg-sub">All system properties</div></div><div class="admin-pill">⚙️ Admin</div></div>
-    <div class="coming-card">
-      <span class="coming-icon">🏠</span>
-      <div class="coming-title">Properties Overview</div>
-      <div class="coming-msg">Property listings will appear here once the backend is connected.</div>
+    <!-- USERS -->
+    <div class="page" id="page-users">
+      <div class="pg-head"><div><div class="pg-title">Users</div><div class="pg-sub">All registered tenants and landlords</div></div></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th></tr></thead>
+          <tbody id="users-tbody">
+            <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No users registered yet</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
 
-  <!-- PAYMENTS -->
-  <div class="page" id="page-payments">
-    <div class="topbar"><div><div class="pg-title">Payments</div><div class="pg-sub">All rent transactions</div></div><div class="admin-pill">⚙️ Admin</div></div>
-    <div class="coming-card">
-      <span class="coming-icon">💰</span>
-      <div class="coming-title">Payment Records</div>
-      <div class="coming-msg">Payment history will appear here once the backend is connected.</div>
+    <!-- PROPERTIES -->
+    <div class="page" id="page-properties">
+      <div class="pg-head"><div><div class="pg-title">Properties</div><div class="pg-sub">All listed properties across the system</div></div></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Property</th><th>Owner</th><th>Type</th><th>Rent</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No properties listed yet</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
 
-  <!-- REPORTS -->
-  <div class="page" id="page-reports">
-    <div class="topbar"><div><div class="pg-title">Reports</div><div class="pg-sub">System analytics</div></div><div class="admin-pill">⚙️ Admin</div></div>
-    <div class="coming-card">
-      <span class="coming-icon">📊</span>
-      <div class="coming-title">Reports & Analytics</div>
-      <div class="coming-msg">Reports will appear here once the backend is connected.</div>
+    <!-- PAYMENTS -->
+    <div class="page" id="page-payments">
+      <div class="pg-head"><div><div class="pg-title">Payments</div><div class="pg-sub">All rent transactions</div></div></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Tenant</th><th>Property</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No payment records yet</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
 
-  <!-- SETTINGS -->
-  <div class="page" id="page-settings">
-    <div class="topbar"><div><div class="pg-title">Settings</div><div class="pg-sub">System configuration</div></div><div class="admin-pill">⚙️ Admin</div></div>
-    <div class="coming-card">
-      <span class="coming-icon">⚙️</span>
-      <div class="coming-title">System Settings</div>
-      <div class="coming-msg">Settings will be available once the backend is connected.</div>
+    <!-- REPORTS -->
+    <div class="page" id="page-reports">
+      <div class="pg-head"><div><div class="pg-title">Reports</div><div class="pg-sub">System analytics & insights</div></div></div>
+      <div class="coming-soon"><div class="cs-icon">📊</div><h3>Reports Coming Soon</h3><p>Analytics and reporting features will be available in the next update.</p></div>
     </div>
-  </div>
 
-</main>
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="pg-head"><div><div class="pg-title">Settings</div><div class="pg-sub">System configuration</div></div></div>
+      <div class="coming-soon"><div class="cs-icon">⚙️</div><h3>Settings Coming Soon</h3><p>System configuration options will be available in the next update.</p></div>
+    </div>
+
+  </main>
+</div>
 
 <script>
-  function showPage(id, el) {
+  function switchPage(id, el) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById('page-' + id).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     if (el) el.classList.add('active');
+
+    // Load users from localStorage on users tab
+    if (id === 'users') loadUsers();
+  }
+
+  function loadUsers() {
+    const users = JSON.parse(localStorage.getItem('tms_users') || '{}');
+    const tbody = document.getElementById('users-tbody');
+    const entries = Object.entries(users);
+    if (entries.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">No users registered yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = entries.map(([email, u], i) => `
+      <tr>
+        <td style="color:var(--muted)">${i+1}</td>
+        <td style="font-weight:600">${u.name || '—'}</td>
+        <td>${email}</td>
+        <td><span class="badge ${u.role==='landlord'?'gold':'blue'}">${u.role==='landlord'?'🏢 Landlord':'🏠 Tenant'}</span></td>
+        <td><span class="badge green">Active</span></td>
+        <td style="color:var(--muted)">2026</td>
+      </tr>`).join('');
   }
 </script>
+<<<<<<< HEAD
+=======
+<script>
+  (function(){
+    const saved = localStorage.getItem('tms-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    const btn = document.getElementById('theme-btn');
+    if (btn) btn.textContent = saved === 'dark' ? '🌙' : '☀️';
+  })();
+  function toggleTheme() {
+    const html = document.documentElement;
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    const btn = document.getElementById('theme-btn');
+    if (btn) btn.textContent = next === 'dark' ? '🌙' : '☀️';
+    localStorage.setItem('tms-theme', next);
+  }
+</script>
+>>>>>>> 7f516d727b9d64cb643da83c057683ddeda32772
 
   <script>
     (function(){
