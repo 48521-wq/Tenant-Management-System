@@ -246,6 +246,73 @@
     .ctrl { padding: 7px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.09); background: rgba(255,255,255,0.04); color: var(--muted); font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
     .ctrl:hover { background: rgba(74,158,255,0.1); color: var(--blue); border-color: rgba(74,158,255,0.3); }
     .ctrl-hint { margin-left: auto; font-size: 11px; color: var(--muted); }
+
+    .modal3d-info {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 0; border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .info-item { padding: 16px 20px; border-right: 1px solid rgba(255,255,255,0.05); }
+    .info-item:last-child { border-right: none; }
+    .info-item-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 5px; }
+    .info-item-val { font-size: 14px; font-weight: 600; }
+    .info-item-val.blue { color: var(--blue); }
+    .info-item-val.gold { color: var(--gold); }
+    .info-item-val.green { color: var(--success); }
+  
+    /* ── THEME TOGGLE ── */
+    .theme-btn {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.06);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 17px; backdrop-filter: blur(10px);
+      transition: transform 0.3s, background 0.3s;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.25);
+      flex-shrink: 0;
+    }
+    .theme-btn:hover { transform: rotate(20deg) scale(1.1); background: rgba(255,255,255,0.12); }
+    /* Light mode */
+    [data-theme="light"] body { background: #F0F4F8 !important; }
+    [data-theme="light"] .bg, [data-theme="light"] .bg-wrap {
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 15%, rgba(74,158,255,0.07) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 50% at 90% 80%, rgba(78,205,196,0.05) 0%, transparent 55%),
+        linear-gradient(160deg, #EEF1F6 0%, #E4EAF2 100%) !important;
+    }
+    [data-theme="light"] .bg-grid {
+      background-image: linear-gradient(rgba(80,100,130,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(80,100,130,0.06) 1px, transparent 1px) !important;
+    }
+    [data-theme="light"] .sidebar {
+      background: rgba(240,244,248,0.97) !important;
+      border-right-color: rgba(0,0,0,0.1) !important;
+    }
+    [data-theme="light"] .topnav {
+      background: rgba(240,244,248,0.95) !important;
+      border-bottom-color: rgba(0,0,0,0.08) !important;
+    }
+    [data-theme="light"] .nav-item { color: #7A8390 !important; }
+    [data-theme="light"] .nav-item.active { background: rgba(74,158,255,0.1) !important; }
+    [data-theme="light"] .nav-item:hover { background: rgba(0,0,0,0.05) !important; color: #1A1E26 !important; }
+    [data-theme="light"] .sidebar-head h2, [data-theme="light"] .logo-text { color: inherit !important; }
+    [data-theme="light"] .user-name { color: #1A1E26 !important; }
+    [data-theme="light"] .card, [data-theme="light"] .house-card, [data-theme="light"] .filter-bar, [data-theme="light"] .prop-card, [data-theme="light"] .act-btn, [data-theme="light"] .modal, [data-theme="light"] .modal3d, [data-theme="light"] .confirm-modal {
+      background: rgba(255,255,255,0.92) !important;
+      border-color: rgba(0,0,0,0.1) !important;
+    }
+    [data-theme="light"] .filter-select, [data-theme="light"] .filter-input, [data-theme="light"] .finput, [data-theme="light"] .fselect, [data-theme="light"] .form-input-m, [data-theme="light"] .form-select-m, [data-theme="light"] .search-input {
+      background: rgba(0,0,0,0.04) !important;
+      border-color: rgba(0,0,0,0.1) !important;
+      color: #1A1E26 !important;
+    }
+    [data-theme="light"] .pg-title, [data-theme="light"] .page-title, [data-theme="light"] .modal-title, [data-theme="light"] .confirm-title, [data-theme="light"] .prop-name, [data-theme="light"] .prop-item-name, [data-theme="light"] .act-label, [data-theme="light"] .prop-card-name { color: #1A1E26 !important; }
+    [data-theme="light"] .house-card-top, [data-theme="light"] .modal3d-header, [data-theme="light"] .modal3d-controls, [data-theme="light"] .view3d-controls, [data-theme="light"] .controls { background: rgba(0,0,0,0.04) !important; border-color: rgba(0,0,0,0.07) !important; }
+    [data-theme="light"] .ctrl { background: rgba(0,0,0,0.05) !important; border-color: rgba(0,0,0,0.1) !important; color: #7A8390 !important; }
+    [data-theme="light"] .ctrl:hover { background: rgba(74,158,255,0.1) !important; }
+    [data-theme="light"] .data-table th, [data-theme="light"] .prop-table th, [data-theme="light"] .pay-table th { color: #9CA3AF !important; }
+    [data-theme="light"] .data-table td, [data-theme="light"] .prop-table td, [data-theme="light"] .pay-table td { color: #1A1E26 !important; border-color: rgba(0,0,0,0.05) !important; }
+    [data-theme="light"] .muted, [data-theme="light"] .pg-sub, [data-theme="light"] .page-sub, [data-theme="light"] .modal-sub, [data-theme="light"] .card-sub, [data-theme="light"] .prop-location, [data-theme="light"] .prop-area-badge { color: #7A8390 !important; }
+    [data-theme="light"] .theme-btn { border-color: rgba(0,0,0,0.12) !important; background: rgba(255,255,255,0.9) !important; box-shadow: 0 3px 14px rgba(0,0,0,0.12) !important; }
+
   </style>
 </head>
 <body>
@@ -295,6 +362,7 @@
   </div>
   <div class="topnav-right">
     <span class="nav-pill">🏠 Tenant</span>
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
     <button class="logout-btn" onclick="window.location.href='../index.html'">
       <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Logout
@@ -398,19 +466,209 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="../js/house3d.js"></script>
 <script>
-  function showPage(id, el) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.getElementById('page-' + id).classList.add('active');
-    if (el) el.classList.add('active');
+// ── Properties Data ──────────────────────────
+const PROPERTIES = [
+  { id:1, name:'DHA House — Block C',   area:'DHA Lahore',  type:'House',     beds:4, rent:55000, sqft:2400, status:'Available', address:'House 14, Block C, DHA Lahore' },
+  { id:2, name:'DHA Villa — Phase 5',   area:'DHA Lahore',  type:'Villa',     beds:5, rent:95000, sqft:3800, status:'Available', address:'Plot 22, Phase 5, DHA Lahore' },
+  { id:3, name:'Johar Town House',      area:'Johar Town',  type:'House',     beds:3, rent:35000, sqft:1800, status:'Available', address:'Street 5, Block J, Johar Town' },
+  { id:4, name:'Gulberg Flat — 3B',     area:'Gulberg',     type:'Flat',      beds:2, rent:28000, sqft:1100, status:'Available', address:'Flat 3B, Main Blvd, Gulberg III' },
+  { id:5, name:'Bahria Apartment',      area:'Bahria Town', type:'Apartment', beds:2, rent:32000, sqft:1050, status:'Available', address:'Block A, Bahria Town Lahore' },
+  { id:6, name:'Bahria House — Sec C',  area:'Bahria Town', type:'House',     beds:3, rent:48000, sqft:2000, status:'Available', address:'Sector C, Bahria Town' },
+  { id:7, name:'Model Town Corner',     area:'Model Town',  type:'House',     beds:4, rent:60000, sqft:2600, status:'Available', address:'Block L, Model Town, Lahore' },
+  { id:8, name:'Garden Town Flat',      area:'Garden Town', type:'Flat',      beds:1, rent:18000, sqft:650,  status:'Available', address:'Street 3, Garden Town Lahore' },
+  { id:9, name:'Cantt Apartment',       area:'Cantt',       type:'Apartment', beds:3, rent:42000, sqft:1400, status:'Available', address:'Sarwar Colony, Cantt, Lahore' },
+];
+
+let filtered = [...PROPERTIES];
+let viewMode = 'grid';
+let modal3dReady = false;
+let miniScenes   = {}; // track mini canvas renders
+
+// ── Filter Logic ──────────────────────────────
+function applyFilters() {
+  const area = document.getElementById('f-area').value;
+  const type = document.getElementById('f-type').value;
+  const beds = document.getElementById('f-beds').value;
+  const min  = parseInt(document.getElementById('f-min').value) || 0;
+  const max  = parseInt(document.getElementById('f-max').value) || Infinity;
+
+  filtered = PROPERTIES.filter(p => {
+    if (area && p.area !== area) return false;
+    if (type && p.type !== type) return false;
+    if (beds) {
+      if (beds === '4' && p.beds < 4) return false;
+      if (beds !== '4' && p.beds !== parseInt(beds)) return false;
+    }
+    if (p.rent < min || p.rent > max) return false;
+    return true;
+  });
+
+  renderGrid();
+  renderFilterTags();
+  document.getElementById('count-num').textContent = filtered.length;
+}
+
+function resetFilters() {
+  ['f-area','f-type','f-beds','f-min','f-max'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  filtered = [...PROPERTIES];
+  renderGrid();
+  renderFilterTags();
+  document.getElementById('count-num').textContent = filtered.length;
+}
+
+function renderFilterTags() {
+  const area = document.getElementById('f-area').value;
+  const type = document.getElementById('f-type').value;
+  const beds = document.getElementById('f-beds').value;
+  const min  = document.getElementById('f-min').value;
+  const max  = document.getElementById('f-max').value;
+
+  const tags = [];
+  if (area) tags.push({ label: '📍 ' + area,  clear: () => { document.getElementById('f-area').value=''; applyFilters(); } });
+  if (type) tags.push({ label: '🏠 ' + type,  clear: () => { document.getElementById('f-type').value=''; applyFilters(); } });
+  if (beds) tags.push({ label: '🛏 ' + beds + (beds==='4'?'+':'') + ' Bed', clear: () => { document.getElementById('f-beds').value=''; applyFilters(); } });
+  if (min)  tags.push({ label: 'Min Rs.' + parseInt(min).toLocaleString(), clear: () => { document.getElementById('f-min').value=''; applyFilters(); } });
+  if (max)  tags.push({ label: 'Max Rs.' + parseInt(max).toLocaleString(), clear: () => { document.getElementById('f-max').value=''; applyFilters(); } });
+
+  const wrap = document.getElementById('active-filters');
+  wrap.innerHTML = tags.map((t,i) => `
+    <div class="filter-tag">${t.label}<span class="filter-tag-x" onclick="clearTag(${i})">×</span></div>
+  `).join('');
+  window._tagClearFns = tags.map(t => t.clear);
+}
+
+function clearTag(i) { window._tagClearFns[i](); }
+
+// ── Render Grid ───────────────────────────────
+function renderGrid() {
+  const grid = document.getElementById('props-grid');
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        <span>🔍</span>
+        <h3>No Properties Found</h3>
+        <p>Try adjusting your filters to see more results.</p>
+      </div>`;
+    return;
   }
-  window.addEventListener('load', () => initHouse3D('canvas3d', 'tenant'));
-  function resetCam()    { resetCamera3D('tenant'); }
-  function wireframe()   { toggleWireframe('tenant'); }
-  function frontView()   { rotateFront('tenant'); }
-  function sideView()    { rotateSide('tenant'); }
-  function topView()     { rotateTop('tenant'); }
-  function nightToggle() { toggleDayNight(); }
+
+  grid.innerHTML = filtered.map(p => `
+    <div class="prop-card" onclick="open3D(${p.id})">
+      <div class="prop-thumb">
+        <canvas id="mini-${p.id}" style="width:100%;height:180px"></canvas>
+        <div class="prop-thumb-overlay"></div>
+        <div class="prop-thumb-badge rent">For Rent</div>
+        <div class="prop-thumb-3d">
+          <div class="view3d-pulse"></div>
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+          3D View
+        </div>
+      </div>
+      <div class="prop-body">
+        <div class="prop-price">Rs. ${p.rent.toLocaleString()}<span> / month</span></div>
+        <div class="prop-name">${p.name}</div>
+        <div class="prop-location">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          ${p.address}
+        </div>
+        <div class="prop-tags">
+          <div class="prop-tag"><span>🛏</span> ${p.beds} Bed${p.beds>1?'s':''}</div>
+          <div class="prop-tag"><span>🏠</span> ${p.type}</div>
+          <div class="prop-tag"><span>📐</span> ${p.sqft} sq ft</div>
+        </div>
+        <div class="prop-divider"></div>
+        <div class="prop-footer">
+          <div class="prop-area-badge">
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            ${p.area}
+          </div>
+          <button class="view3d-btn" onclick="event.stopPropagation(); open3D(${p.id})">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            View 3D
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Init mini 3D previews after DOM renders
+  setTimeout(() => {
+    filtered.forEach(p => {
+      const key = 'mini-' + p.id;
+      if (!miniScenes[key]) {
+        initHouse3D('mini-' + p.id, key);
+        miniScenes[key] = true;
+      }
+    });
+  }, 80);
+}
+
+// ── Grid / List Toggle ────────────────────────
+function setView(mode) {
+  viewMode = mode;
+  const grid = document.getElementById('props-grid');
+  grid.className = 'props-grid' + (mode === 'list' ? ' list-view' : '');
+  document.getElementById('btn-grid').classList.toggle('active', mode === 'grid');
+  document.getElementById('btn-list').classList.toggle('active', mode === 'list');
+}
+
+// ── 3D Modal ──────────────────────────────────
+function open3D(id) {
+  const p = PROPERTIES.find(x => x.id === id);
+  if (!p) return;
+
+  document.getElementById('m3d-name').textContent     = p.name;
+  document.getElementById('m3d-location').textContent = p.address;
+  document.getElementById('m3d-rent').textContent     = 'Rs. ' + p.rent.toLocaleString() + '/mo';
+  document.getElementById('m3d-type').textContent     = p.type;
+  document.getElementById('m3d-beds').textContent     = p.beds + ' Bedroom' + (p.beds>1?'s':'');
+  document.getElementById('m3d-status').textContent   = p.status;
+
+  document.getElementById('overlay-3d').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  if (!modal3dReady) {
+    setTimeout(() => { initHouse3D('canvas-modal3d', 'modal'); modal3dReady = true; }, 60);
+  } else {
+    resetCamera3D('modal');
+  }
+}
+
+function close3D() {
+  document.getElementById('overlay-3d').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('overlay-3d').addEventListener('click', function(e) {
+  if (e.target === this) close3D();
+});
+
+// Keyboard close
+document.addEventListener('keydown', e => { if (e.key === 'Escape') close3D(); });
+
+// ── Init ──────────────────────────────────────
+renderGrid();
+renderFilterTags();
 </script>
+
+  <script>
+    (function(){
+      const saved = localStorage.getItem('tms-theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+      const btn = document.getElementById('theme-btn');
+      if (btn) btn.textContent = saved === 'dark' ? '🌙' : '☀️';
+    })();
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      const btn = document.getElementById('theme-btn');
+      if (btn) btn.textContent = next === 'dark' ? '🌙' : '☀️';
+      localStorage.setItem('tms-theme', next);
+    }
+  </script>
 </body>
 </html>

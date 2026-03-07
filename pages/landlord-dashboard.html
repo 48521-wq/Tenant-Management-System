@@ -75,7 +75,7 @@
     @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
 
     /* TOPBAR */
-    .topbar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 36px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 36px; }
     .pg-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; }
     .pg-sub { color: var(--muted); font-size: 13px; margin-top: 5px; }
     .role-pill { display: flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 20px; background: rgba(201,169,110,0.09); border: 1px solid rgba(201,169,110,0.2); color: var(--gold); font-size: 12px; font-weight: 600; }
@@ -180,14 +180,14 @@
   
     /* ── THEME TOGGLE ── */
     .theme-btn {
-      position: fixed; top: 16px; right: 20px; z-index: 999;
-      width: 40px; height: 40px; border-radius: 50%;
+      width: 38px; height: 38px; border-radius: 50%;
       border: 1.5px solid rgba(255,255,255,0.1);
-      background: rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.06);
       cursor: pointer; display: flex; align-items: center; justify-content: center;
-      font-size: 18px; backdrop-filter: blur(10px);
+      font-size: 17px; backdrop-filter: blur(10px);
       transition: transform 0.3s, background 0.3s;
-      box-shadow: 0 3px 14px rgba(0,0,0,0.3);
+      box-shadow: 0 3px 12px rgba(0,0,0,0.25);
+      flex-shrink: 0;
     }
     .theme-btn:hover { transform: rotate(20deg) scale(1.1); background: rgba(255,255,255,0.12); }
     /* Light mode */
@@ -346,6 +346,7 @@
         <div class="pg-title">My Properties</div>
         <div class="pg-sub">Add, edit, delete properties and view 3D models</div>
       </div>
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
       <div class="role-pill">🏢 Landlord Portal</div>
     </div>
 
@@ -525,7 +526,6 @@
   renderList();
 </script>
 
-  <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
   <script>
     (function(){
       const saved = localStorage.getItem('tms-theme') || 'dark';

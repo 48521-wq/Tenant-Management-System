@@ -31,17 +31,18 @@ function selectRole(role) {
 }
 
 /* ── Sign In ──
-   Logic:
-   - Admin credentials  → admin dashboard
-   - Anything else valid → tenant dashboard
+   Priority:
+   1. Admin credentials (exact match) → admin dashboard
+   2. Email exists in registered users → correct role dashboard
+   3. Anything else → tenant dashboard (default)
 */
 function handleSignin() {
-  const email = document.getElementById('signin-email').value.trim();
+  const email = document.getElementById('signin-email').value.trim().toLowerCase();
   const pass  = document.getElementById('signin-password').value;
   hideError('error-box');
 
-  if (!email)  return showError('error-box', 'Please enter your email address.');
-  if (!pass)   return showError('error-box', 'Please enter your password.');
+  if (!email) return showError('error-box', 'Please enter your email address.');
+  if (!pass)  return showError('error-box', 'Please enter your password.');
 
   const btn = document.getElementById('signin-btn');
   btn.textContent = 'Signing in...';
@@ -51,20 +52,34 @@ function handleSignin() {
     btn.textContent = 'Sign In';
     btn.disabled = false;
 
-    /* Admin check — exact match */
+    // 1. Admin check
     if (email === ADMIN_EMAIL && pass === ADMIN_PASSWORD) {
       window.location.href = 'pages/admin-dashboard.html';
-    } else {
-      /* Any other credentials → tenant dashboard */
-      window.location.href = 'pages/tenant-dashboard.html';
+      return;
     }
+
+    // 2. Check registered users (saved in localStorage during signup)
+    const users = JSON.parse(localStorage.getItem('tms_users') || '{}');
+    if (users[email]) {
+      const role = users[email].role;
+      if (role === 'landlord') {
+        window.location.href = 'pages/landlord-dashboard.html';
+      } else {
+        window.location.href = 'pages/tenant-dashboard.html';
+      }
+      return;
+    }
+
+    // 3. Default → tenant dashboard
+    window.location.href = 'pages/tenant-dashboard.html';
+
   }, 1200);
 }
 
-/* ── Sign Up ── */
+/* ── Sign Up ── saves user role to localStorage ── */
 function handleSignup() {
   const name    = document.getElementById('signup-name').value.trim();
-  const email   = document.getElementById('signup-email').value.trim();
+  const email   = document.getElementById('signup-email').value.trim().toLowerCase();
   const pass    = document.getElementById('signup-password').value;
   const confirm = document.getElementById('signup-confirm').value;
   hideError('error-box');
@@ -88,9 +103,18 @@ function handleSignup() {
   setTimeout(() => {
     btn.textContent = 'Create Account';
     btn.disabled = false;
-    window.location.href = currentRole === 'landlord'
-      ? 'pages/landlord-dashboard.html'
-      : 'pages/tenant-dashboard.html';
+
+    // Save user role to localStorage
+    const users = JSON.parse(localStorage.getItem('tms_users') || '{}');
+    users[email] = { name, role: currentRole };
+    localStorage.setItem('tms_users', JSON.stringify(users));
+
+    // Redirect based on role
+    if (currentRole === 'landlord') {
+      window.location.href = 'pages/landlord-dashboard.html';
+    } else {
+      window.location.href = 'pages/tenant-dashboard.html';
+    }
   }, 1200);
 }
 
@@ -151,7 +175,7 @@ function checkStrength(pass) {
   const cls = ['weak','weak','medium','strong'];
   const lbl = ['','Weak','Medium','Strong','Very Strong'];
   const col = ['','#FF6B6B','#FFA500','#4ECDC4','#4ECDC4'];
-  for (let i = 0; i < score; i++) segs[i].classList.add(cls[Math.min(i,2)]);
+  for (let i = 0; i < score; i++) segs[i].classList.add(cls[Math.min(i, 2)]);
   label.textContent = lbl[score]; label.style.color = col[score];
 }
 
