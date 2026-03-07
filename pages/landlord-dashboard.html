@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,316 +12,311 @@
       --gold-l:  #E8C97A;
       --dark:    #07090C;
       --dark2:   #0C1018;
-      --card:    rgba(16,20,28,0.95);
-      --border:  rgba(201,169,110,0.15);
+      --card:    rgba(16,20,28,0.96);
+      --border:  rgba(201,169,110,0.13);
       --text:    #EDE9E0;
       --muted:   #566070;
       --success: #4ECDC4;
       --error:   #FF6B6B;
-      --warn:    #FFB347;
+      --blue:    #4A9EFF;
     }
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: var(--dark); }
     ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
 
-    body { font-family: 'DM Sans', sans-serif; background: var(--dark); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--dark); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
-    .bg {
-      position: fixed; inset: 0; z-index: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 10% 20%, rgba(201,169,110,0.07) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 50% at 90% 80%, rgba(78,205,196,0.03) 0%, transparent 60%),
-        linear-gradient(160deg, #07090C 0%, #0C1018 100%);
-    }
-    .bg-grid {
-      position: fixed; inset: 0; z-index: 0;
-      background-image: linear-gradient(rgba(201,169,110,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(201,169,110,0.025) 1px, transparent 1px);
-      background-size: 55px 55px;
-    }
+    .bg { position: fixed; inset: 0; z-index: 0; background: radial-gradient(ellipse 80% 60% at 10% 20%, rgba(201,169,110,0.06) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 90% 80%, rgba(78,205,196,0.03) 0%, transparent 60%), linear-gradient(160deg, #07090C 0%, #0C1018 100%); }
+    .bg-grid { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(201,169,110,0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(201,169,110,0.022) 1px, transparent 1px); background-size: 55px 55px; }
 
-    /* SIDEBAR */
-    .sidebar {
-      position: fixed; left: 0; top: 0; bottom: 0; width: 230px;
-      background: rgba(10,12,18,0.97); backdrop-filter: blur(24px);
-      border-right: 1px solid var(--border);
-      display: flex; flex-direction: column; z-index: 50;
-    }
-    .sidebar-head { padding: 28px 22px 22px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .logo-box { width: 42px; height: 42px; background: linear-gradient(135deg, var(--gold), var(--gold-l)); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 6px 20px rgba(201,169,110,0.3); }
-    .logo-box svg { width: 22px; height: 22px; fill: #0A0C0F; }
-    .sidebar-head h2 { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; background: linear-gradient(135deg, var(--gold), var(--gold-l)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .sidebar-head p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    /* ── TOPNAV ── */
+    .topnav { position: sticky; top: 0; z-index: 200; background: rgba(7,9,12,0.94); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 32px; height: 62px; gap: 14px; }
+    .topnav-logo { display: flex; align-items: center; gap: 10px; margin-right: auto; }
+    .logo-icon { width: 34px; height: 34px; background: linear-gradient(135deg, var(--gold), var(--gold-l)); border-radius: 9px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(201,169,110,0.3); flex-shrink: 0; }
+    .logo-icon svg { width: 17px; height: 17px; fill: #0A0C0F; }
+    .logo-text { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; background: linear-gradient(135deg, var(--gold), var(--gold-l)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .logo-sep { color: var(--muted); font-size: 12px; margin-left: 2px; }
+    .nav-pill { padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); background: rgba(201,169,110,0.08); color: var(--gold); font-size: 12px; font-weight: 600; white-space: nowrap; }
+    .theme-btn { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 17px; transition: transform 0.3s, background 0.2s; flex-shrink: 0; }
+    .theme-btn:hover { transform: rotate(20deg) scale(1.1); background: rgba(255,255,255,0.1); }
+    .logout-btn { display: flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 9px; background: rgba(255,107,107,0.07); border: 1px solid rgba(255,107,107,0.15); color: #FF6B6B; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; white-space: nowrap; }
+    .logout-btn:hover { background: rgba(255,107,107,0.14); }
+    .logout-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
 
-    .nav-section { padding: 18px 14px 8px; }
-    .nav-label { font-size: 10px; color: var(--muted); letter-spacing: 1.2px; text-transform: uppercase; font-weight: 600; padding: 0 8px 8px; }
-    .nav-item { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 10px; color: var(--muted); font-size: 13.5px; font-weight: 500; cursor: pointer; transition: all 0.2s; margin-bottom: 2px; text-decoration: none; border: none; background: none; width: 100%; font-family: 'DM Sans', sans-serif; }
-    .nav-item svg { width: 17px; height: 17px; stroke: currentColor; fill: none; flex-shrink: 0; }
+    /* ── BODY LAYOUT ── */
+    .body-wrap { display: flex; flex: 1; position: relative; z-index: 1; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { width: 220px; flex-shrink: 0; background: rgba(10,12,18,0.97); backdrop-filter: blur(24px); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 62px; height: calc(100vh - 62px); overflow-y: auto; }
+    .sidebar-section { padding: 20px 14px 8px; }
+    .sidebar-label { font-size: 10px; color: var(--muted); letter-spacing: 1.2px; text-transform: uppercase; font-weight: 600; padding: 0 8px 10px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: var(--muted); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.18s; margin-bottom: 2px; border: none; background: none; width: 100%; font-family: 'DM Sans', sans-serif; text-align: left; }
+    .nav-item svg { width: 16px; height: 16px; stroke: currentColor; fill: none; flex-shrink: 0; }
     .nav-item:hover { color: var(--text); background: rgba(201,169,110,0.07); }
     .nav-item.active { color: var(--gold); background: rgba(201,169,110,0.1); font-weight: 600; }
+    .sidebar-foot { margin-top: auto; padding: 14px 16px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .user-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--gold-l)); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #0A0C0F; flex-shrink: 0; }
+    .user-name { font-size: 12px; font-weight: 600; }
+    .user-role { font-size: 10px; color: var(--muted); }
 
-    .sidebar-foot { margin-top: auto; padding: 16px 22px; border-top: 1px solid rgba(255,255,255,0.05); }
-    .user-row { display: flex; align-items: center; gap: 10px; }
-    .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--gold-l)); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #0A0C0F; flex-shrink: 0; }
-    .user-name { font-size: 13px; font-weight: 600; }
-    .user-role { font-size: 11px; color: var(--muted); }
-    .logout-btn { margin-left: auto; background: none; border: none; cursor: pointer; padding: 5px; color: var(--muted); transition: color 0.2s; }
-    .logout-btn:hover { color: #FF6B6B; }
-    .logout-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; }
-
-    /* MAIN */
-    .main { margin-left: 230px; flex: 1; position: relative; z-index: 1; min-height: 100vh; overflow-y: auto; padding: 36px 40px; }
-    .page { display: none; animation: fadeUp 0.35s ease both; }
+    /* ── MAIN ── */
+    .main { flex: 1; min-width: 0; overflow-y: auto; }
+    .page { display: none; padding: 32px 36px 48px; animation: fadeUp 0.3s ease both; }
     .page.active { display: block; }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
 
-    /* TOPBAR */
-    .topbar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 36px; }
-    .pg-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; }
-    .pg-sub { color: var(--muted); font-size: 13px; margin-top: 5px; }
-    .role-pill { display: flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 20px; background: rgba(201,169,110,0.09); border: 1px solid rgba(201,169,110,0.2); color: var(--gold); font-size: 12px; font-weight: 600; }
+    .pg-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; gap: 16px; }
+    .pg-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; }
+    .pg-sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
 
-    /* ACTION BUTTONS */
-    .action-row { display: flex; gap: 14px; margin-bottom: 32px; flex-wrap: wrap; }
-    .act-btn {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 10px; padding: 28px 32px;
-      background: var(--card); border-radius: 18px;
-      border: 1px solid var(--border);
-      cursor: pointer; transition: all 0.25s;
-      min-width: 140px; flex: 1;
-    }
-    .act-btn:hover { transform: translateY(-3px); }
-    .act-btn.add:hover   { border-color: rgba(78,205,196,0.4); box-shadow: 0 10px 30px rgba(78,205,196,0.1); }
-    .act-btn.edit:hover  { border-color: rgba(201,169,110,0.4); box-shadow: 0 10px 30px rgba(201,169,110,0.1); }
-    .act-btn.del:hover   { border-color: rgba(255,107,107,0.4); box-shadow: 0 10px 30px rgba(255,107,107,0.1); }
-    .act-btn.view3d:hover{ border-color: rgba(74,158,255,0.4); box-shadow: 0 10px 30px rgba(74,158,255,0.1); }
+    .add-btn { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 11px; border: none; background: linear-gradient(135deg, var(--gold), var(--gold-l)); color: #0A0C0F; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(201,169,110,0.3); transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
+    .add-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(201,169,110,0.4); }
+    .add-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
 
-    .act-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
-    .act-icon.add   { background: rgba(78,205,196,0.1); }
-    .act-icon.edit  { background: rgba(201,169,110,0.1); }
-    .act-icon.del   { background: rgba(255,107,107,0.1); }
-    .act-icon.view3d{ background: rgba(74,158,255,0.1); }
+    /* Stats */
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px 22px; display: flex; align-items: center; gap: 14px; }
+    .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .stat-icon.gold { background: rgba(201,169,110,0.12); }
+    .stat-icon.blue { background: rgba(74,158,255,0.1); }
+    .stat-icon.green { background: rgba(78,205,196,0.1); }
+    .stat-val { font-size: 22px; font-weight: 700; font-family: 'Playfair Display', serif; line-height: 1; }
+    .stat-val.gold { color: var(--gold); }
+    .stat-val.blue { color: var(--blue); }
+    .stat-val.green { color: var(--success); }
+    .stat-label { font-size: 11px; color: var(--muted); margin-top: 3px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; }
 
-    .act-label { font-size: 14px; font-weight: 600; color: var(--text); }
-    .act-sub   { font-size: 11px; color: var(--muted); text-align: center; }
+    /* Section head */
+    .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .section-title { font-size: 15px; font-weight: 700; }
+    .section-count { font-size: 12px; color: var(--muted); background: rgba(255,255,255,0.05); padding: 3px 10px; border-radius: 20px; }
 
-    /* 3D CARD */
-    .house-card { background: var(--card); border: 1px solid rgba(201,169,110,0.22); border-radius: 20px; overflow: hidden; box-shadow: 0 8px 40px rgba(201,169,110,0.06); }
-    .house-card-top { display: flex; align-items: center; justify-content: space-between; padding: 20px 26px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.15); }
-    .house-card-title { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; }
-    .house-card-title svg { width: 18px; height: 18px; stroke: var(--gold); fill: none; }
-    .live-badge { padding: 3px 11px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(201,169,110,0.1); color: var(--gold); border: 1px solid rgba(201,169,110,0.2); display: flex; align-items: center; gap: 5px; }
-    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-    #canvas3d { width: 100%; height: 430px; display: block; cursor: grab; }
-    #canvas3d:active { cursor: grabbing; }
-    .controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 16px 26px; background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.05); }
-    .ctrl { padding: 7px 15px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.09); background: rgba(255,255,255,0.04); color: var(--muted); font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+    /* Property cards */
+    .prop-list { display: flex; flex-direction: column; gap: 10px; }
+    .prop-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 14px; transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s; }
+    .prop-card:hover { border-color: rgba(201,169,110,0.3); transform: translateX(3px); box-shadow: 0 6px 24px rgba(0,0,0,0.22); }
+    .prop-card-icon { width: 44px; height: 44px; border-radius: 11px; background: rgba(201,169,110,0.1); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .prop-card-info { flex: 1; min-width: 0; }
+    .prop-card-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .prop-card-addr { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+    .prop-card-addr svg { width: 11px; height: 11px; stroke: var(--muted); fill: none; flex-shrink: 0; }
+    .prop-card-type { font-size: 11px; padding: 3px 9px; border-radius: 8px; background: rgba(201,169,110,0.08); color: var(--gold); border: 1px solid rgba(201,169,110,0.15); font-weight: 600; flex-shrink: 0; white-space: nowrap; }
+    .prop-card-rent { font-size: 15px; font-weight: 700; color: var(--gold); white-space: nowrap; flex-shrink: 0; }
+    .prop-card-rent span { font-size: 11px; color: var(--muted); font-weight: 400; }
+    .prop-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .pact { display: flex; align-items: center; gap: 5px; padding: 6px 11px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: var(--muted); font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.18s; white-space: nowrap; }
+    .pact svg { width: 12px; height: 12px; stroke: currentColor; fill: none; }
+    .pact.view3d:hover { background: rgba(74,158,255,0.1); color: var(--blue); border-color: rgba(74,158,255,0.25); }
+    .pact.edit:hover   { background: rgba(201,169,110,0.1); color: var(--gold); border-color: rgba(201,169,110,0.25); }
+    .pact.del:hover    { background: rgba(255,107,107,0.1); color: var(--error); border-color: rgba(255,107,107,0.25); }
+
+    /* Empty */
+    .empty { text-align: center; padding: 60px 24px; }
+    .empty-icon { font-size: 50px; margin-bottom: 14px; opacity: 0.4; }
+    .empty h3 { font-size: 16px; margin-bottom: 6px; }
+    .empty p { font-size: 13px; color: var(--muted); }
+    .empty-add { margin-top: 20px; display: inline-flex; align-items: center; gap: 7px; padding: 10px 22px; border-radius: 11px; background: linear-gradient(135deg, var(--gold), var(--gold-l)); color: #0A0C0F; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; border: none; box-shadow: 0 4px 16px rgba(201,169,110,0.25); transition: all 0.2s; }
+    .empty-add:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(201,169,110,0.35); }
+
+    /* Overlay/Modals */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.78); backdrop-filter: blur(12px); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .overlay.open { display: flex; animation: oFade 0.2s ease; }
+    @keyframes oFade { from{opacity:0} to{opacity:1} }
+
+    .modal { background: #0C1018; border: 1px solid var(--border); border-radius: 20px; padding: 32px; width: 100%; max-width: 460px; animation: fadeUp 0.28s ease both; box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 21px; font-weight: 700; margin-bottom: 4px; }
+    .modal-sub { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+    .fgroup { margin-bottom: 15px; }
+    .flabel { display: block; font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+    .finput, .fselect { width: 100%; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.08); border-radius: 11px; padding: 11px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: all 0.2s; }
+    .finput::placeholder { color: #374151; }
+    .finput:focus, .fselect:focus { border-color: var(--gold); background: rgba(201,169,110,0.04); box-shadow: 0 0 0 3px rgba(201,169,110,0.07); }
+    .fselect { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px; }
+    .fselect option { background: #0C1018; }
+    .modal-btns { display: flex; gap: 10px; margin-top: 24px; }
+    .mbtn-primary { flex: 1; padding: 12px; border: none; border-radius: 11px; background: linear-gradient(135deg, var(--gold), var(--gold-l)); color: #0A0C0F; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .mbtn-primary:hover { box-shadow: 0 5px 16px rgba(201,169,110,0.35); transform: translateY(-1px); }
+    .mbtn-cancel { padding: 12px 18px; border: 1px solid rgba(255,255,255,0.1); border-radius: 11px; background: rgba(255,255,255,0.04); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+    .mbtn-cancel:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+    .mbtn-del { flex: 1; padding: 12px; border: none; border-radius: 11px; background: linear-gradient(135deg, #E53935, #FF6B6B); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .mbtn-del:hover { box-shadow: 0 5px 16px rgba(229,57,53,0.35); transform: translateY(-1px); }
+
+    .del-icon { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.2); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+    .del-icon svg { width: 22px; height: 22px; stroke: var(--error); fill: none; }
+    .del-warning { color: var(--muted); font-size: 13px; margin-top: 6px; line-height: 1.6; }
+    .del-warning strong { color: var(--text); }
+
+    .modal3d { background: #0C1018; border: 1px solid rgba(201,169,110,0.2); border-radius: 20px; width: 100%; max-width: 700px; overflow: hidden; animation: fadeUp 0.28s ease both; box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
+    .modal3d-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); }
+    .modal3d-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .modal3d-title svg { width: 17px; height: 17px; stroke: var(--gold); fill: none; }
+    .modal3d-close { padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--muted); font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+    .modal3d-close:hover { background: rgba(255,107,107,0.1); color: var(--error); }
+    #canvas-modal { width: 100%; height: 380px; display: block; cursor: grab; background: #080B10; }
+    #canvas-modal:active { cursor: grabbing; }
+    .view3d-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 14px 24px; background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.05); }
+    .ctrl { padding: 6px 13px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: var(--muted); font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
     .ctrl:hover { background: rgba(201,169,110,0.1); color: var(--gold); border-color: rgba(201,169,110,0.3); }
     .ctrl-hint { margin-left: auto; font-size: 11px; color: var(--muted); }
 
-    /* MODAL */
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(10px); z-index: 200; display: none; align-items: center; justify-content: center; }
-    .overlay.open { display: flex; }
-    .modal { background: #0C1018; border: 1px solid var(--border); border-radius: 20px; padding: 34px; width: 100%; max-width: 460px; animation: fadeUp 0.3s ease both; }
-    .modal-title { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 6px; }
-    .modal-sub { color: var(--muted); font-size: 13px; margin-bottom: 26px; }
-    .fgroup { margin-bottom: 16px; }
-    .flabel { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500; letter-spacing: 0.3px; }
-    .finput, .fselect {
-      width: 100%; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.08);
-      border-radius: 11px; padding: 12px 14px; color: var(--text);
-      font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s;
-    }
-    .finput:focus, .fselect:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,169,110,0.08); }
-    .frow2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .modal-btns { display: flex; gap: 10px; margin-top: 24px; }
-    .mbtn { flex: 1; padding: 13px; border: none; border-radius: 11px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-    .mbtn.primary { background: linear-gradient(135deg, var(--gold), var(--gold-l)); color: #0A0C0F; box-shadow: 0 5px 16px rgba(201,169,110,0.3); }
-    .mbtn.primary:hover { box-shadow: 0 7px 22px rgba(201,169,110,0.4); transform: translateY(-1px); }
-    .mbtn.ghost { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.08); }
-    .mbtn.ghost:hover { background: rgba(255,255,255,0.08); color: var(--text); }
-
-    /* DELETE CONFIRM */
-    .confirm-modal { background: #0C1018; border: 1px solid rgba(255,107,107,0.2); border-radius: 20px; padding: 34px; width: 100%; max-width: 380px; text-align: center; animation: fadeUp 0.3s ease both; }
-    .confirm-icon { width: 58px; height: 58px; background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
-    .confirm-icon svg { width: 26px; height: 26px; stroke: #FF6B6B; fill: none; }
-    .confirm-title { font-family: 'Playfair Display', serif; font-size: 21px; margin-bottom: 10px; }
-    .confirm-msg { color: var(--muted); font-size: 13px; line-height: 1.7; margin-bottom: 26px; }
-    .confirm-name { color: var(--text); font-weight: 600; }
-
-    /* PROPERTY LIST */
-    .prop-list { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; }
-    .prop-item { display: flex; align-items: center; gap: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; transition: border-color 0.2s; }
-    .prop-item:hover { border-color: rgba(201,169,110,0.3); }
-    .prop-item-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(201,169,110,0.1); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-    .prop-item-info { flex: 1; }
-    .prop-item-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
-    .prop-item-addr { font-size: 12px; color: var(--muted); }
-    .prop-item-rent { font-size: 14px; font-weight: 700; color: var(--gold); margin-right: 16px; white-space: nowrap; }
-    .prop-actions { display: flex; gap: 8px; }
-    .pact { padding: 7px 13px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--muted); transition: all 0.2s; display: flex; align-items: center; gap: 5px; }
-    .pact svg { width: 13px; height: 13px; stroke: currentColor; fill: none; }
-    .pact.view3d:hover { background: rgba(74,158,255,0.1); color: #4A9EFF; border-color: rgba(74,158,255,0.3); }
-    .pact.edit:hover   { background: rgba(201,169,110,0.1); color: var(--gold); border-color: rgba(201,169,110,0.3); }
-    .pact.del:hover    { background: rgba(255,107,107,0.1); color: #FF6B6B; border-color: rgba(255,107,107,0.3); }
-
-    /* 3D MODAL */
-    .modal3d { background: #0C1018; border: 1px solid rgba(201,169,110,0.2); border-radius: 20px; width: 100%; max-width: 660px; overflow: hidden; animation: fadeUp 0.3s ease both; }
-    .modal3d-top { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .modal3d-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-    .modal3d-title svg { width: 17px; height: 17px; stroke: var(--gold); fill: none; }
-    #canvas-modal { width: 100%; height: 360px; display: block; cursor: grab; }
-    #canvas-modal:active { cursor: grabbing; }
-    .close-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--muted); font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
-    .close-btn:hover { background: rgba(255,107,107,0.1); color: #FF6B6B; border-color: rgba(255,107,107,0.2); }
-    .empty-state { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 14px; }
-    .empty-state span { font-size: 36px; display: block; margin-bottom: 12px; }
+    /* ── LIGHT THEME ── */
+    [data-theme="light"] body { background: #F0F4F8 !important; color: #1A1E26 !important; }
+    [data-theme="light"] .bg { background: radial-gradient(ellipse 80% 60% at 10% 20%, rgba(201,169,110,0.08) 0%, transparent 60%), linear-gradient(160deg, #EEF1F6 0%, #E4EAF2 100%) !important; }
+    [data-theme="light"] .bg-grid { background-image: linear-gradient(rgba(80,100,130,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(80,100,130,0.05) 1px, transparent 1px) !important; }
+    [data-theme="light"] .topnav { background: rgba(240,244,248,0.97) !important; border-bottom-color: rgba(0,0,0,0.08) !important; }
+    [data-theme="light"] .sidebar { background: rgba(232,236,244,0.98) !important; border-right-color: rgba(0,0,0,0.08) !important; }
+    [data-theme="light"] .nav-item:hover { background: rgba(201,169,110,0.1) !important; }
+    [data-theme="light"] .nav-item.active { background: rgba(201,169,110,0.12) !important; }
+    [data-theme="light"] .user-card { background: rgba(0,0,0,0.04) !important; border-color: rgba(0,0,0,0.07) !important; }
+    [data-theme="light"] .stat-card, [data-theme="light"] .prop-card { background: rgba(255,255,255,0.92) !important; border-color: rgba(0,0,0,0.08) !important; }
+    [data-theme="light"] .prop-card:hover { border-color: rgba(201,169,110,0.35) !important; }
+    [data-theme="light"] .modal, [data-theme="light"] .modal3d { background: #fff !important; border-color: rgba(0,0,0,0.1) !important; }
+    [data-theme="light"] .finput, [data-theme="light"] .fselect { background: rgba(0,0,0,0.04) !important; border-color: rgba(0,0,0,0.1) !important; color: #1A1E26 !important; }
+    [data-theme="light"] .finput:focus, [data-theme="light"] .fselect:focus { background: rgba(201,169,110,0.05) !important; }
+    [data-theme="light"] .modal3d-header, [data-theme="light"] .view3d-controls { background: rgba(0,0,0,0.03) !important; border-color: rgba(0,0,0,0.07) !important; }
+    [data-theme="light"] .ctrl { background: rgba(0,0,0,0.04) !important; border-color: rgba(0,0,0,0.08) !important; }
+    [data-theme="light"] .mbtn-cancel { background: rgba(0,0,0,0.04) !important; border-color: rgba(0,0,0,0.1) !important; }
+    [data-theme="light"] .pg-title, [data-theme="light"] .prop-card-name, [data-theme="light"] .section-title, [data-theme="light"] .modal-title { color: #1A1E26 !important; }
+    [data-theme="light"] .theme-btn { background: rgba(255,255,255,0.8) !important; border-color: rgba(0,0,0,0.12) !important; }
+    [data-theme="light"] .logo-sep { color: #9CA3AF; }
   </style>
 </head>
 <body>
 <div class="bg"></div>
 <div class="bg-grid"></div>
 
-<!-- ADD MODAL -->
+<!-- TOPNAV -->
+<nav class="topnav">
+  <div class="topnav-logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </div>
+    <span class="logo-text">TMS</span>
+    <span class="logo-sep">/ Landlord</span>
+  </div>
+  <span class="nav-pill">🏢 Landlord</span>
+  <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
+  <button class="logout-btn" onclick="window.location.href='../index.html'">
+    <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Logout
+  </button>
+</nav>
+
+<div class="body-wrap">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Menu</div>
+      <button class="nav-item active" onclick="switchPage('properties', this)">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        My Properties
+      </button>
+    </div>
+    <div class="sidebar-foot">
+      <div class="user-card">
+        <div class="avatar">L</div>
+        <div>
+          <div class="user-name">Landlord</div>
+          <div class="user-role">🏢 Landlord</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="page active" id="page-properties">
+      <div class="pg-head">
+        <div>
+          <div class="pg-title">My Properties</div>
+          <div class="pg-sub">Manage your listed properties</div>
+        </div>
+        <button class="add-btn" onclick="openAdd()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Property
+        </button>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon gold">🏠</div>
+          <div><div class="stat-val gold" id="stat-total">0</div><div class="stat-label">Total Properties</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">✅</div>
+          <div><div class="stat-val green" id="stat-active">0</div><div class="stat-label">Active Listings</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">💰</div>
+          <div><div class="stat-val blue" id="stat-rent">Rs. 0</div><div class="stat-label">Total Rent / mo</div></div>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <div class="section-title">Property Listings</div>
+        <div class="section-count" id="prop-count">0 properties</div>
+      </div>
+      <div class="prop-list" id="prop-list"></div>
+    </div>
+  </main>
+</div>
+
+<!-- ADD / EDIT MODAL -->
 <div class="overlay" id="modal-add">
   <div class="modal">
     <div class="modal-title" id="modal-title-text">Add Property</div>
-    <div class="modal-sub" id="modal-sub-text">Enter the details of your property</div>
+    <div class="modal-sub" id="modal-sub-text">Fill in the property details below</div>
     <input type="hidden" id="edit-id">
+    <div class="fgroup"><label class="flabel">Property Name</label><input class="finput" id="f-name" placeholder="e.g. DHA House Block C"></div>
+    <div class="fgroup"><label class="flabel">Address</label><input class="finput" id="f-addr" placeholder="Street, Area, City"></div>
+    <div class="fgroup"><label class="flabel">Monthly Rent (Rs.)</label><input class="finput" id="f-rent" type="number" placeholder="e.g. 45000"></div>
     <div class="fgroup">
-      <label class="flabel">Property Name</label>
-      <input class="finput" id="f-name" placeholder="e.g. DHA House Block C">
-    </div>
-    <div class="fgroup">
-      <label class="flabel">Address</label>
-      <input class="finput" id="f-addr" placeholder="Street, Block, City">
-    </div>
-    <div class="frow2">
-      <div class="fgroup">
-        <label class="flabel">Monthly Rent (Rs.)</label>
-        <input class="finput" id="f-rent" type="number" placeholder="35000">
-      </div>
-      <div class="fgroup">
-        <label class="flabel">Type</label>
-        <select class="fselect" id="f-type">
-          <option>House</option>
-          <option>Flat</option>
-          <option>Shop</option>
-          <option>Apartment</option>
-        </select>
-      </div>
+      <label class="flabel">Property Type</label>
+      <select class="fselect" id="f-type">
+        <option value="House">House</option><option value="Flat">Flat</option>
+        <option value="Apartment">Apartment</option><option value="Shop">Shop</option><option value="Villa">Villa</option>
+      </select>
     </div>
     <div class="modal-btns">
-      <button class="mbtn primary" onclick="saveProperty()">Save Property</button>
-      <button class="mbtn ghost" onclick="closeAll()">Cancel</button>
+      <button class="mbtn-primary" onclick="saveProperty()">Save Property</button>
+      <button class="mbtn-cancel" onclick="closeAll()">Cancel</button>
     </div>
   </div>
 </div>
 
-<!-- DELETE CONFIRM MODAL -->
+<!-- DELETE MODAL -->
 <div class="overlay" id="modal-del">
-  <div class="confirm-modal">
-    <div class="confirm-icon">
-      <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-    </div>
-    <div class="confirm-title">Delete Property?</div>
-    <div class="confirm-msg">Are you sure you want to delete <span class="confirm-name" id="del-name"></span>? This cannot be undone.</div>
-    <div class="modal-btns" style="justify-content:center">
-      <button class="mbtn" style="background:rgba(255,107,107,0.12);color:#FF6B6B;border:1px solid rgba(255,107,107,0.2)" onclick="confirmDel()">Yes, Delete</button>
-      <button class="mbtn ghost" onclick="closeAll()">Cancel</button>
+  <div class="modal" style="max-width:400px;">
+    <div class="del-icon"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></div>
+    <div class="modal-title">Delete Property?</div>
+    <div class="del-warning">You are about to permanently delete <strong id="del-name">"Property"</strong>. This cannot be undone.</div>
+    <div class="modal-btns">
+      <button class="mbtn-del" onclick="confirmDel()">Yes, Delete</button>
+      <button class="mbtn-cancel" onclick="closeAll()">Cancel</button>
     </div>
   </div>
 </div>
 
-<!-- 3D VIEW MODAL -->
+<!-- 3D MODAL -->
 <div class="overlay" id="modal-3d">
   <div class="modal3d">
-    <div class="modal3d-top">
-      <div class="modal3d-title">
-        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-        <span id="modal3d-name">Property 3D View</span>
-      </div>
-      <button class="close-btn" onclick="closeAll()">✕ Close</button>
+    <div class="modal3d-header">
+      <div class="modal3d-title"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span id="modal3d-name">3D View</span></div>
+      <button class="modal3d-close" onclick="closeAll()">✕ Close</button>
     </div>
     <canvas id="canvas-modal"></canvas>
-    <div class="controls" style="padding:14px 20px;">
+    <div class="view3d-controls">
       <button class="ctrl" onclick="resetCamera3D('modal')">↺ Reset</button>
       <button class="ctrl" onclick="toggleWireframe('modal')">⬡ Wireframe</button>
-      <span class="ctrl-hint">🖱 Drag to rotate · Scroll to zoom</span>
+      <button class="ctrl" onclick="rotateFront('modal')">⬆ Front</button>
+      <button class="ctrl" onclick="rotateSide('modal')">➡ Side</button>
+      <button class="ctrl" onclick="rotateTop('modal')">⬇ Top</button>
+      <button class="ctrl" onclick="toggleDayNight()">🌙 Night</button>
+      <span class="ctrl-hint">🖱 Drag · Scroll zoom</span>
     </div>
   </div>
 </div>
-
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <div class="sidebar-head">
-    <div class="logo-box">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    </div>
-    <h2>TMS Portal</h2>
-    <p>Landlord Dashboard</p>
-  </div>
-  <div class="nav-section">
-    <div class="nav-label">Menu</div>
-    <button class="nav-item active" onclick="showPage('properties', this)">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      My Properties
-    </button>
-  </div>
-  <div class="sidebar-foot">
-    <div class="user-row">
-      <div class="avatar">L</div>
-      <div>
-        <div class="user-name">Landlord</div>
-        <div class="user-role">🏢 Landlord</div>
-      </div>
-      <button class="logout-btn" onclick="window.location.href='../index.html'">
-        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      </button>
-    </div>
-  </div>
-</aside>
-
-<!-- MAIN -->
-<main class="main">
-  <div class="page active" id="page-properties">
-    <div class="topbar">
-      <div>
-        <div class="pg-title">My Properties</div>
-        <div class="pg-sub">Add, edit, delete properties and view 3D models</div>
-      </div>
-      <div class="role-pill">🏢 Landlord Portal</div>
-    </div>
-
-    <!-- 4 Action Buttons -->
-    <div class="action-row">
-      <div class="act-btn add" onclick="openAdd()">
-        <div class="act-icon add">➕</div>
-        <div class="act-label">Add Property</div>
-        <div class="act-sub">List a new property</div>
-      </div>
-      <div class="act-btn edit" onclick="editFirst()">
-        <div class="act-icon edit">✏️</div>
-        <div class="act-label">Edit Property</div>
-        <div class="act-sub">Update existing details</div>
-      </div>
-      <div class="act-btn del" onclick="delFirst()">
-        <div class="act-icon del">🗑️</div>
-        <div class="act-label">Delete Property</div>
-        <div class="act-sub">Remove a property</div>
-      </div>
-      <div class="act-btn view3d" onclick="view3DFirst()">
-        <div class="act-icon view3d">🏠</div>
-        <div class="act-label">3D House View</div>
-        <div class="act-sub">Interactive 3D model</div>
-      </div>
-    </div>
-
-    <!-- Property List -->
-    <div class="prop-list" id="prop-list"></div>
-  </div>
-</main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="../js/house3d.js"></script>
@@ -330,144 +325,117 @@
   let delId = null;
   let modalInitDone = false;
 
-  function showPage(id, el) {
+  function switchPage(id, el) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById('page-' + id).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     if (el) el.classList.add('active');
   }
 
   function renderList() {
+    const total = properties.length;
+    const totalRent = properties.reduce((s, p) => s + Number(p.rent), 0);
+    document.getElementById('stat-total').textContent  = total;
+    document.getElementById('stat-active').textContent = total;
+    document.getElementById('stat-rent').textContent   = total ? 'Rs. ' + totalRent.toLocaleString() : 'Rs. 0';
+    document.getElementById('prop-count').textContent  = total + ' propert' + (total === 1 ? 'y' : 'ies');
+
     const list = document.getElementById('prop-list');
-    if (properties.length === 0) {
-      list.innerHTML = `<div class="empty-state"><span>🏠</span>No properties yet. Click <strong>Add Property</strong> to get started.</div>`;
+    if (total === 0) {
+      list.innerHTML = `<div class="empty"><div class="empty-icon">🏠</div><h3>No properties yet</h3><p>Add your first property to get started</p><button class="empty-add" onclick="openAdd()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Property</button></div>`;
       return;
     }
+    const emoji = { House:'🏠', Flat:'🏢', Apartment:'🏙️', Shop:'🏪', Villa:'🏡' };
     list.innerHTML = properties.map(p => `
-      <div class="prop-item">
-        <div class="prop-item-icon">🏠</div>
-        <div class="prop-item-info">
-          <div class="prop-item-name">${p.name}</div>
-          <div class="prop-item-addr">${p.addr} · ${p.type}</div>
+      <div class="prop-card">
+        <div class="prop-card-icon">${emoji[p.type]||'🏠'}</div>
+        <div class="prop-card-info">
+          <div class="prop-card-name">${p.name}</div>
+          <div class="prop-card-addr"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${p.addr}</div>
         </div>
-        <div class="prop-item-rent">Rs. ${Number(p.rent).toLocaleString()}</div>
-        <div class="prop-actions">
-          <button class="pact view3d" onclick="openView3D(${p.id}, '${p.name}')">
-            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg> 3D View
-          </button>
-          <button class="pact edit" onclick="openEdit(${p.id})">
-            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg> Edit
-          </button>
-          <button class="pact del" onclick="openDel(${p.id}, '${p.name}')">
-            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg> Delete
-          </button>
+        <div class="prop-card-type">${p.type}</div>
+        <div class="prop-card-rent">Rs. ${Number(p.rent).toLocaleString()}<span>/mo</span></div>
+        <div class="prop-card-actions">
+          <button class="pact view3d" onclick="openView3D(${p.id},'${p.name.replace(/'/g,"\\'")}')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>3D</button>
+          <button class="pact edit" onclick="openEdit(${p.id})"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg>Edit</button>
+          <button class="pact del" onclick="openDel(${p.id},'${p.name.replace(/'/g,"\\'")}')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>Delete</button>
         </div>
-      </div>
-    `).join('');
+      </div>`).join('');
   }
 
-  // ── ADD ──
   function openAdd() {
     document.getElementById('modal-title-text').textContent = 'Add Property';
-    document.getElementById('modal-sub-text').textContent = 'Enter the details of your property';
+    document.getElementById('modal-sub-text').textContent   = 'Fill in the property details below';
     document.getElementById('edit-id').value = '';
-    document.getElementById('f-name').value = '';
-    document.getElementById('f-addr').value = '';
-    document.getElementById('f-rent').value = '';
+    ['f-name','f-addr','f-rent'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('f-type').value = 'House';
     document.getElementById('modal-add').classList.add('open');
+    setTimeout(() => document.getElementById('f-name').focus(), 120);
   }
 
-  // ── EDIT ──
   function openEdit(id) {
-    const p = properties.find(x => x.id === id);
-    if (!p) return;
+    const p = properties.find(x => x.id === id); if (!p) return;
     document.getElementById('modal-title-text').textContent = 'Edit Property';
-    document.getElementById('modal-sub-text').textContent = 'Update the property details';
-    document.getElementById('edit-id').value = id;
-    document.getElementById('f-name').value = p.name;
-    document.getElementById('f-addr').value = p.addr;
-    document.getElementById('f-rent').value = p.rent;
-    document.getElementById('f-type').value = p.type;
+    document.getElementById('modal-sub-text').textContent   = 'Update the property details';
+    document.getElementById('edit-id').value  = id;
+    document.getElementById('f-name').value   = p.name;
+    document.getElementById('f-addr').value   = p.addr;
+    document.getElementById('f-rent').value   = p.rent;
+    document.getElementById('f-type').value   = p.type;
     document.getElementById('modal-add').classList.add('open');
-  }
-
-  function editFirst() {
-    if (properties.length === 0) { alert('No properties to edit. Please add a property first.'); return; }
-    openEdit(properties[0].id);
   }
 
   function saveProperty() {
-    const name  = document.getElementById('f-name').value.trim();
-    const addr  = document.getElementById('f-addr').value.trim();
-    const rent  = document.getElementById('f-rent').value;
-    const type  = document.getElementById('f-type').value;
-    const eid   = document.getElementById('edit-id').value;
+    const name = document.getElementById('f-name').value.trim();
+    const addr = document.getElementById('f-addr').value.trim();
+    const rent = document.getElementById('f-rent').value;
+    const type = document.getElementById('f-type').value;
+    const eid  = document.getElementById('edit-id').value;
     if (!name || !addr || !rent) { alert('Please fill all fields.'); return; }
-
     if (eid) {
       const p = properties.find(x => x.id === parseInt(eid));
-      if (p) { p.name = name; p.addr = addr; p.rent = rent; p.type = type; }
+      if (p) { p.name=name; p.addr=addr; p.rent=rent; p.type=type; }
     } else {
-      const newId = properties.length ? Math.max(...properties.map(p => p.id)) + 1 : 1;
+      const newId = properties.length ? Math.max(...properties.map(p=>p.id))+1 : 1;
       properties.push({ id: newId, name, addr, rent, type });
     }
-    closeAll();
-    renderList();
+    closeAll(); renderList();
   }
 
-  // ── DELETE ──
   function openDel(id, name) {
     delId = id;
-    document.getElementById('del-name').textContent = name;
+    document.getElementById('del-name').textContent = '"' + name + '"';
     document.getElementById('modal-del').classList.add('open');
   }
+  function confirmDel() { properties = properties.filter(p => p.id !== delId); closeAll(); renderList(); }
 
-  function delFirst() {
-    if (properties.length === 0) { alert('No properties to delete.'); return; }
-    openDel(properties[0].id, properties[0].name);
-  }
-
-  function confirmDel() {
-    properties = properties.filter(p => p.id !== delId);
-    closeAll();
-    renderList();
-  }
-
-  // ── 3D VIEW ──
   function openView3D(id, name) {
     document.getElementById('modal3d-name').textContent = name + ' — 3D View';
     document.getElementById('modal-3d').classList.add('open');
-    setTimeout(() => {
-      if (!modalInitDone) {
-        initHouse3D('canvas-modal', 'modal');
-        modalInitDone = true;
-      }
-    }, 80);
+    setTimeout(() => { if (!modalInitDone) { initHouse3D('canvas-modal','modal'); modalInitDone = true; } }, 80);
   }
 
-  function view3DFirst() {
-    if (properties.length === 0) {
-      // open 3d without a name
-      document.getElementById('modal3d-name').textContent = 'Property 3D View';
-      document.getElementById('modal-3d').classList.add('open');
-      setTimeout(() => {
-        if (!modalInitDone) { initHouse3D('canvas-modal', 'modal'); modalInitDone = true; }
-      }, 80);
-    } else {
-      openView3D(properties[0].id, properties[0].name);
-    }
-  }
-
-  // ── CLOSE ALL ──
-  function closeAll() {
-    document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open'));
-  }
-  document.querySelectorAll('.overlay').forEach(o => {
-    o.addEventListener('click', e => { if (e.target === o) closeAll(); });
-  });
+  function closeAll() { document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open')); }
+  document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) closeAll(); }));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
 
   renderList();
+</script>
+<script>
+  (function(){
+    const saved = localStorage.getItem('tms-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    const btn = document.getElementById('theme-btn');
+    if (btn) btn.textContent = saved === 'dark' ? '🌙' : '☀️';
+  })();
+  function toggleTheme() {
+    const html = document.documentElement;
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    const btn = document.getElementById('theme-btn');
+    if (btn) btn.textContent = next === 'dark' ? '🌙' : '☀️';
+    localStorage.setItem('tms-theme', next);
+  }
 </script>
 </body>
 </html>
