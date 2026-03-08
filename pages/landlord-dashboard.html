@@ -1,186 +1,308 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Landlord Dashboard — TMS</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --gold:    #C9A96E;
-      --gold-l:  #E8C97A;
-      --dark:    #07090C;
-      --dark2:   #0C1018;
-      --card:    rgba(16,20,28,0.96);
-      --border:  rgba(201,169,110,0.13);
-      --text:    #EDE9E0;
-      --muted:   #566070;
-      --success: #4ECDC4;
-      --error:   #FF6B6B;
-      --blue:    #4A9EFF;
-    }
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: var(--dark); }
-    ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Landlord Dashboard — TMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A96E;--gold-l:#E8C97A;--gold-d:#A07840;
+  --dark:#07090C;--card:rgba(14,18,26,0.97);--border:rgba(201,169,110,0.13);--border2:rgba(255,255,255,0.06);
+  --text:#EDE9E0;--muted:#566070;--text2:#9AA0AC;
+  --green:#4ECDC4;--blue:#4A9EFF;--red:#FF6B6B;--warn:#FFB347;
+}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(201,169,110,0.25);border-radius:4px}
+body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 70% 55% at 5% 12%,rgba(201,169,110,0.05) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 92% 85%,rgba(78,205,196,0.025) 0%,transparent 55%),linear-gradient(168deg,#07090C 0%,#0B0F16 100%)}
+.bg-grid{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(201,169,110,0.016) 1px,transparent 1px),linear-gradient(90deg,rgba(201,169,110,0.016) 1px,transparent 1px);background-size:60px 60px}
 
-    body { font-family: 'DM Sans', sans-serif; background: var(--dark); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+/* ── TOPNAV ── */
+.topnav{position:sticky;top:0;z-index:200;background:rgba(7,9,12,0.93);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;height:60px;gap:12px}
+.tn-brand{display:flex;align-items:center;gap:10px;margin-right:auto;flex-shrink:0}
+.tn-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--gold-l));display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(201,169,110,0.3)}
+.tn-icon svg{width:16px;height:16px;fill:#0A0C0F}
+.tn-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;background:linear-gradient(135deg,var(--gold),var(--gold-l));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tn-sep{color:var(--muted);font-size:11px;margin-left:2px}
+.tn-pill{padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:rgba(201,169,110,0.07);color:var(--gold);font-size:11px;font-weight:600;white-space:nowrap}
+.tn-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border2);background:rgba(255,255,255,0.04);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all 0.2s;flex-shrink:0;position:relative}
+.tn-btn:hover{background:rgba(255,255,255,0.09);border-color:rgba(201,169,110,0.22)}
+.tn-badge{position:absolute;top:-3px;right:-3px;width:16px;height:16px;border-radius:50%;background:var(--red);font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;border:2px solid var(--dark)}
+.tn-logout{display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:9px;background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.14);color:var(--red);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;white-space:nowrap}
+.tn-logout:hover{background:rgba(255,107,107,0.13)}
+.tn-logout svg{width:13px;height:13px;stroke:currentColor;fill:none}
 
-    .bg { position: fixed; inset: 0; z-index: 0; background: radial-gradient(ellipse 80% 60% at 10% 20%, rgba(201,169,110,0.06) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 90% 80%, rgba(78,205,196,0.03) 0%, transparent 60%), linear-gradient(160deg, #07090C 0%, #0C1018 100%); }
-    .bg-grid { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(201,169,110,0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(201,169,110,0.022) 1px, transparent 1px); background-size: 55px 55px; }
+/* ── LAYOUT ── */
+.layout{display:flex;flex:1;position:relative;z-index:1}
 
-    /* ── TOPNAV ── */
-    .topnav { position: sticky; top: 0; z-index: 200; background: rgba(7,9,12,0.94); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 32px; height: 62px; gap: 14px; }
-    .topnav-logo { display: flex; align-items: center; gap: 10px; margin-right: auto; }
-    .logo-icon { width: 34px; height: 34px; background: linear-gradient(135deg, var(--gold), var(--gold-l)); border-radius: 9px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(201,169,110,0.3); flex-shrink: 0; }
-    .logo-icon svg { width: 17px; height: 17px; fill: #0A0C0F; }
-    .logo-text { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; background: linear-gradient(135deg, var(--gold), var(--gold-l)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .logo-sep { color: var(--muted); font-size: 12px; margin-left: 2px; }
-    .nav-pill { padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); background: rgba(201,169,110,0.08); color: var(--gold); font-size: 12px; font-weight: 600; white-space: nowrap; }
-    .theme-btn { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 17px; transition: transform 0.3s, background 0.2s; flex-shrink: 0; }
-    .theme-btn:hover { transform: rotate(20deg) scale(1.1); background: rgba(255,255,255,0.1); }
-    .logout-btn { display: flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 9px; background: rgba(255,107,107,0.07); border: 1px solid rgba(255,107,107,0.15); color: #FF6B6B; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; white-space: nowrap; }
-    .logout-btn:hover { background: rgba(255,107,107,0.14); }
-    .logout-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+/* ── SIDEBAR ── */
+.sidebar{width:216px;flex-shrink:0;background:rgba(9,11,16,0.98);backdrop-filter:blur(24px);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto}
+.sb-sec{padding:14px 12px 4px}
+.sb-lbl{font-size:9.5px;color:var(--muted);letter-spacing:1.4px;text-transform:uppercase;font-weight:600;padding:0 8px 7px;display:block}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;color:var(--muted);font-size:12.5px;font-weight:500;cursor:pointer;transition:all 0.16s;margin-bottom:1px;border:none;background:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left;position:relative}
+.nav-item svg{width:14px;height:14px;stroke:currentColor;fill:none;flex-shrink:0;opacity:0.7}
+.nav-item:hover{color:var(--text);background:rgba(201,169,110,0.07)}
+.nav-item.active{color:var(--gold);background:rgba(201,169,110,0.1);font-weight:600}
+.nav-item.active svg{opacity:1}
+.nb{margin-left:auto;min-width:17px;height:17px;border-radius:9px;background:var(--red);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0}
+.sb-foot{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,0.05)}
+.sb-user{display:flex;align-items:center;gap:9px;padding:9px 11px;background:rgba(255,255,255,0.03);border-radius:11px;border:1px solid rgba(255,255,255,0.05)}
+.sb-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-l));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#0A0C0F;flex-shrink:0}
+.sb-uname{font-size:11.5px;font-weight:600}.sb-urole{font-size:10px;color:var(--muted)}
 
-    /* ── BODY LAYOUT ── */
-    .body-wrap { display: flex; flex: 1; position: relative; z-index: 1; }
+/* ── MAIN ── */
+.main{flex:1;min-width:0;overflow-y:auto}
+.page{display:none;padding:26px 32px 52px;animation:pgIn 0.27s ease both}
+.page.active{display:block}
+@keyframes pgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.pg-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:14px;flex-wrap:wrap}
+.pg-title{font-family:'Playfair Display',serif;font-size:23px;font-weight:700;line-height:1.2}
+.pg-sub{color:var(--text2);font-size:12.5px;margin-top:3px}
 
-    /* ── SIDEBAR ── */
-    .sidebar { width: 220px; flex-shrink: 0; background: rgba(10,12,18,0.97); backdrop-filter: blur(24px); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 62px; height: calc(100vh - 62px); overflow-y: auto; }
-    .sidebar-section { padding: 20px 14px 8px; }
-    .sidebar-label { font-size: 10px; color: var(--muted); letter-spacing: 1.2px; text-transform: uppercase; font-weight: 600; padding: 0 8px 10px; }
-    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: var(--muted); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.18s; margin-bottom: 2px; border: none; background: none; width: 100%; font-family: 'DM Sans', sans-serif; text-align: left; }
-    .nav-item svg { width: 16px; height: 16px; stroke: currentColor; fill: none; flex-shrink: 0; }
-    .nav-item:hover { color: var(--text); background: rgba(201,169,110,0.07); }
-    .nav-item.active { color: var(--gold); background: rgba(201,169,110,0.1); font-weight: 600; }
-    .sidebar-foot { margin-top: auto; padding: 14px 16px; border-top: 1px solid rgba(255,255,255,0.05); }
-    .user-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
-    .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--gold-l)); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #0A0C0F; flex-shrink: 0; }
-    .user-name { font-size: 12px; font-weight: 600; }
-    .user-role { font-size: 10px; color: var(--muted); }
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;transition:all 0.2s;border:none;flex-shrink:0;white-space:nowrap}
+.btn svg{width:13px;height:13px;stroke:currentColor;fill:none}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-l));color:#0A0C0F;box-shadow:0 3px 12px rgba(201,169,110,0.24)}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(201,169,110,0.34)}
+.btn-ghost{background:rgba(255,255,255,0.04);color:var(--text2);border:1px solid var(--border2)}
+.btn-ghost:hover{background:rgba(255,255,255,0.09);color:var(--text)}
+.btn-green{background:linear-gradient(135deg,var(--green),#35B5AC);color:#051210;box-shadow:0 3px 12px rgba(78,205,196,0.2)}
+.btn-green:hover{transform:translateY(-1px)}
+.btn-red{background:rgba(255,107,107,0.09);color:var(--red);border:1px solid rgba(255,107,107,0.17)}
+.btn-red:hover{background:rgba(255,107,107,0.16)}
+.btn-sm{padding:5px 11px;font-size:11.5px;border-radius:7px;gap:4px}
+.btn-sm svg{width:11px;height:11px}
 
-    /* ── MAIN ── */
-    .main { flex: 1; min-width: 0; overflow-y: auto; }
-    .page { display: none; padding: 32px 36px 48px; animation: fadeUp 0.3s ease both; }
-    .page.active { display: block; }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:600}
+.b-green{background:rgba(78,205,196,0.1);color:var(--green);border:1px solid rgba(78,205,196,0.18)}
+.b-gold{background:rgba(201,169,110,0.1);color:var(--gold);border:1px solid rgba(201,169,110,0.18)}
+.b-blue{background:rgba(74,158,255,0.1);color:var(--blue);border:1px solid rgba(74,158,255,0.18)}
+.b-red{background:rgba(255,107,107,0.1);color:var(--red);border:1px solid rgba(255,107,107,0.18)}
+.b-warn{background:rgba(255,179,71,0.1);color:var(--warn);border:1px solid rgba(255,179,71,0.18)}
 
-    .pg-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; gap: 16px; }
-    .pg-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; }
-    .pg-sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
+.card-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.ci{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ci-gold{background:rgba(201,169,110,0.12)}.ci-blue{background:rgba(74,158,255,0.1)}
+.ci-green{background:rgba(78,205,196,0.1)}.ci-red{background:rgba(255,107,107,0.1)}.ci-warn{background:rgba(255,179,71,0.1)}
+.card-title{font-size:13.5px;font-weight:700}.card-sub{font-size:11px;color:var(--muted);margin-top:1px}
 
-    .add-btn { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 11px; border: none; background: linear-gradient(135deg, var(--gold), var(--gold-l)); color: #0A0C0F; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(201,169,110,0.3); transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
-    .add-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(201,169,110,0.4); }
-    .add-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:13px;transition:all 0.2s}
+.stat-card:hover{border-color:rgba(201,169,110,0.24);transform:translateY(-2px)}
+.stat-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.stat-val{font-size:21px;font-weight:700;font-family:'Playfair Display',serif;line-height:1}
+.stat-lbl{font-size:9.5px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:0.4px;font-weight:600}
+.stat-delta{font-size:10px;color:var(--green);margin-top:1px}
 
-    /* Stats */
-    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
-    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px 22px; display: flex; align-items: center; gap: 14px; }
-    .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-    .stat-icon.gold { background: rgba(201,169,110,0.12); }
-    .stat-icon.blue { background: rgba(74,158,255,0.1); }
-    .stat-icon.green { background: rgba(78,205,196,0.1); }
-    .stat-val { font-size: 22px; font-weight: 700; font-family: 'Playfair Display', serif; line-height: 1; }
-    .stat-val.gold { color: var(--gold); }
-    .stat-val.blue { color: var(--blue); }
-    .stat-val.green { color: var(--success); }
-    .stat-label { font-size: 11px; color: var(--muted); margin-top: 3px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; }
+/* ── GRIDS ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 
-    /* Section head */
-    .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-    .section-title { font-size: 15px; font-weight: 700; }
-    .section-count { font-size: 12px; color: var(--muted); background: rgba(255,255,255,0.05); padding: 3px 10px; border-radius: 20px; }
+/* ── FORM ELEMENTS ── */
+.field{display:flex;flex-direction:column;gap:5px}
+.flbl{font-size:10.5px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.4px}
+.finput,.fsel,.fta{background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.07);border-radius:10px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:all 0.2s;width:100%}
+.fta{resize:none;min-height:82px}
+.finput::placeholder,.fta::placeholder{color:#374050}
+.finput:focus,.fsel:focus,.fta:focus{border-color:var(--gold);background:rgba(201,169,110,0.04);box-shadow:0 0 0 3px rgba(201,169,110,0.07)}
+.fsel{appearance:none;padding-right:30px;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.fsel option{background:#0C1018}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.full{grid-column:1/-1}
 
-    /* Property cards */
-    .prop-list { display: flex; flex-direction: column; gap: 10px; }
-    .prop-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 14px; transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s; }
-    .prop-card:hover { border-color: rgba(201,169,110,0.3); transform: translateX(3px); box-shadow: 0 6px 24px rgba(0,0,0,0.22); }
-    .prop-card-icon { width: 44px; height: 44px; border-radius: 11px; background: rgba(201,169,110,0.1); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-    .prop-card-info { flex: 1; min-width: 0; }
-    .prop-card-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .prop-card-addr { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
-    .prop-card-addr svg { width: 11px; height: 11px; stroke: var(--muted); fill: none; flex-shrink: 0; }
-    .prop-card-type { font-size: 11px; padding: 3px 9px; border-radius: 8px; background: rgba(201,169,110,0.08); color: var(--gold); border: 1px solid rgba(201,169,110,0.15); font-weight: 600; flex-shrink: 0; white-space: nowrap; }
-    .prop-card-rent { font-size: 15px; font-weight: 700; color: var(--gold); white-space: nowrap; flex-shrink: 0; }
-    .prop-card-rent span { font-size: 11px; color: var(--muted); font-weight: 400; }
-    .prop-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
-    .pact { display: flex; align-items: center; gap: 5px; padding: 6px 11px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: var(--muted); font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.18s; white-space: nowrap; }
-    .pact svg { width: 12px; height: 12px; stroke: currentColor; fill: none; }
-    .pact.view3d:hover { background: rgba(74,158,255,0.1); color: var(--blue); border-color: rgba(74,158,255,0.25); }
-    .pact.edit:hover   { background: rgba(201,169,110,0.1); color: var(--gold); border-color: rgba(201,169,110,0.25); }
-    .pact.del:hover    { background: rgba(255,107,107,0.1); color: var(--error); border-color: rgba(255,107,107,0.25); }
+/* ── BANNERS ── */
+.ok-banner{display:none;align-items:center;gap:8px;padding:9px 13px;background:rgba(78,205,196,0.08);border:1px solid rgba(78,205,196,0.18);border-radius:9px;font-size:12.5px;color:var(--green)}
+.ok-banner.show{display:flex}
+.err-banner{display:none;align-items:center;gap:8px;padding:9px 13px;background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.16);border-radius:9px;font-size:12.5px;color:var(--red)}
+.err-banner.show{display:flex}
 
-    /* Empty */
-    .empty { text-align: center; padding: 60px 24px; }
-    .empty-icon { font-size: 50px; margin-bottom: 14px; opacity: 0.4; }
-    .empty h3 { font-size: 16px; margin-bottom: 6px; }
-    .empty p { font-size: 13px; color: var(--muted); }
-    .empty-add { margin-top: 20px; display: inline-flex; align-items: center; gap: 7px; padding: 10px 22px; border-radius: 11px; background: linear-gradient(135deg, var(--gold), var(--gold-l)); color: #0A0C0F; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; border: none; box-shadow: 0 4px 16px rgba(201,169,110,0.25); transition: all 0.2s; }
-    .empty-add:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(201,169,110,0.35); }
+/* ── TABLE ── */
+.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead tr{background:rgba(0,0,0,0.22)}
+th{padding:10px 15px;text-align:left;font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap}
+td{padding:12px 15px;font-size:12.5px;border-top:1px solid rgba(255,255,255,0.04);vertical-align:middle}
+tbody tr:hover td{background:rgba(255,255,255,0.015)}
 
-    /* Overlay/Modals */
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.78); backdrop-filter: blur(12px); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
-    .overlay.open { display: flex; animation: oFade 0.2s ease; }
-    @keyframes oFade { from{opacity:0} to{opacity:1} }
+/* ── LIST ROWS ── */
+.lrow{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.055);border-radius:12px;padding:12px 15px;display:flex;align-items:center;gap:13px;transition:all 0.18s;margin-bottom:8px}
+.lrow:last-child{margin-bottom:0}
+.lrow:hover{border-color:rgba(201,169,110,0.2);background:rgba(201,169,110,0.025)}
+.lav{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.la-blue{background:linear-gradient(135deg,var(--blue),#7BBFFF)}
+.la-gold{background:linear-gradient(135deg,var(--gold),var(--gold-l));color:#0A0C0F}
+.la-green{background:linear-gradient(135deg,var(--green),#35B5AC);color:#05100F}
+.la-red{background:linear-gradient(135deg,var(--red),#FF9A8B)}
+.la-warn{background:linear-gradient(135deg,var(--warn),#FFCC60);color:#0A0600}
+.lbody{flex:1;min-width:0}
+.ltitle{font-size:13px;font-weight:600;margin-bottom:2px}
+.lsub{font-size:11px;color:var(--muted);line-height:1.4}
+.lright{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+.ltime{font-size:10.5px;color:var(--muted)}
 
-    .modal { background: #0C1018; border: 1px solid var(--border); border-radius: 20px; padding: 32px; width: 100%; max-width: 460px; animation: fadeUp 0.28s ease both; box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
-    .modal-title { font-family: 'Playfair Display', serif; font-size: 21px; font-weight: 700; margin-bottom: 4px; }
-    .modal-sub { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
-    .fgroup { margin-bottom: 15px; }
-    .flabel { display: block; font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
-    .finput, .fselect { width: 100%; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.08); border-radius: 11px; padding: 11px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: all 0.2s; }
-    .finput::placeholder { color: #374151; }
-    .finput:focus, .fselect:focus { border-color: var(--gold); background: rgba(201,169,110,0.04); box-shadow: 0 0 0 3px rgba(201,169,110,0.07); }
-    .fselect { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px; }
-    .fselect option { background: #0C1018; }
-    .modal-btns { display: flex; gap: 10px; margin-top: 24px; }
-    .mbtn-primary { flex: 1; padding: 12px; border: none; border-radius: 11px; background: linear-gradient(135deg, var(--gold), var(--gold-l)); color: #0A0C0F; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-    .mbtn-primary:hover { box-shadow: 0 5px 16px rgba(201,169,110,0.35); transform: translateY(-1px); }
-    .mbtn-cancel { padding: 12px 18px; border: 1px solid rgba(255,255,255,0.1); border-radius: 11px; background: rgba(255,255,255,0.04); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; transition: all 0.2s; }
-    .mbtn-cancel:hover { background: rgba(255,255,255,0.08); color: var(--text); }
-    .mbtn-del { flex: 1; padding: 12px; border: none; border-radius: 11px; background: linear-gradient(135deg, #E53935, #FF6B6B); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-    .mbtn-del:hover { box-shadow: 0 5px 16px rgba(229,57,53,0.35); transform: translateY(-1px); }
+/* ── PROPERTY CARDS ── */
+.prop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.pcard{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all 0.22s}
+.pcard:hover{border-color:rgba(201,169,110,0.28);transform:translateY(-3px);box-shadow:0 12px 30px rgba(0,0,0,0.4)}
+.pcard-thumb{height:140px;position:relative;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0B0F1A,#0E1420);overflow:hidden}
+.pcard-emo{font-size:48px;opacity:0.28}
+.pcard-ov{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 35%,rgba(0,0,0,0.52) 100%)}
+.pcard-status{position:absolute;top:9px;left:9px;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:700;backdrop-filter:blur(6px)}
+.ps-avail{background:rgba(78,205,196,0.85);color:#041210}
+.ps-rented{background:rgba(255,179,71,0.85);color:#0A0600}
+.pcard-3d{position:absolute;bottom:8px;right:8px;padding:3px 10px;border-radius:7px;border:1px solid rgba(201,169,110,0.3);background:rgba(0,0,0,0.65);color:var(--gold);font-size:10px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;backdrop-filter:blur(6px);display:flex;align-items:center;gap:4px;transition:all 0.18s}
+.pcard-3d:hover{background:rgba(201,169,110,0.2)}
+.pdot{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:dp 2s infinite}
+@keyframes dp{0%,100%{opacity:1}50%{opacity:0.3}}
+.pcard-body{padding:13px 15px}
+.pcard-price{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--gold);margin-bottom:2px}
+.pcard-price span{font-size:10px;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:400}
+.pcard-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.pcard-addr{font-size:11px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:3px}
+.pcard-addr svg{width:10px;height:10px;stroke:var(--gold);fill:none;flex-shrink:0}
+.ptags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.ptag{padding:2px 7px;border-radius:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);font-size:10px;color:var(--muted)}
+.pbtns{display:flex;gap:6px}
+.pb{flex:1;padding:6px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.18s;border:1px solid transparent;display:flex;align-items:center;justify-content:center;gap:4px}
+.pb svg{width:10px;height:10px;stroke:currentColor;fill:none}
+.pb-edit{background:rgba(201,169,110,0.08);color:var(--gold);border-color:rgba(201,169,110,0.18)}.pb-edit:hover{background:rgba(201,169,110,0.16)}
+.pb-toggle{background:rgba(255,255,255,0.05);color:var(--text2);border-color:var(--border2)}.pb-toggle:hover{background:rgba(78,205,196,0.1);color:var(--green)}
+.pb-del{background:rgba(255,107,107,0.07);color:var(--red);border-color:rgba(255,107,107,0.14)}.pb-del:hover{background:rgba(255,107,107,0.15)}
 
-    .del-icon { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.2); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
-    .del-icon svg { width: 22px; height: 22px; stroke: var(--error); fill: none; }
-    .del-warning { color: var(--muted); font-size: 13px; margin-top: 6px; line-height: 1.6; }
-    .del-warning strong { color: var(--text); }
+/* ── UPLOAD ZONES ── */
+.upzone{border:2px dashed rgba(201,169,110,0.2);border-radius:11px;padding:20px;text-align:center;cursor:pointer;transition:all 0.2s;background:rgba(201,169,110,0.02)}
+.upzone:hover,.upzone.drag{border-color:rgba(201,169,110,0.5);background:rgba(201,169,110,0.055)}
+.upzone input{display:none}
+.uz-ico{font-size:28px;margin-bottom:6px;opacity:0.4}
+.uz-lbl{font-size:12.5px;color:var(--text2)}
+.uz-lbl strong{color:var(--gold)}
+.img-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.img-pw{position:relative;display:inline-block}
+.img-thumb{width:64px;height:64px;border-radius:8px;object-fit:cover;border:1px solid var(--border);display:block}
+.img-rm{position:absolute;top:-5px;right:-5px;width:17px;height:17px;border-radius:50%;background:var(--red);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--dark)}
 
-    .modal3d { background: #0C1018; border: 1px solid rgba(201,169,110,0.2); border-radius: 20px; width: 100%; max-width: 700px; overflow: hidden; animation: fadeUp 0.28s ease both; box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
-    .modal3d-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); }
-    .modal3d-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-    .modal3d-title svg { width: 17px; height: 17px; stroke: var(--gold); fill: none; }
-    .modal3d-close { padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--muted); font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
-    .modal3d-close:hover { background: rgba(255,107,107,0.1); color: var(--error); }
-    #canvas-modal { width: 100%; height: 380px; display: block; cursor: grab; background: #080B10; }
-    #canvas-modal:active { cursor: grabbing; }
-    .view3d-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 14px 24px; background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.05); }
-    .ctrl { padding: 6px 13px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: var(--muted); font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
-    .ctrl:hover { background: rgba(201,169,110,0.1); color: var(--gold); border-color: rgba(201,169,110,0.3); }
-    .ctrl-hint { margin-left: auto; font-size: 11px; color: var(--muted); }
+/* ── AGREEMENT ── */
+.agr-box{background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.06);border-radius:11px;padding:16px;font-size:12.5px;line-height:1.85;color:#B0B8C8;max-height:230px;overflow-y:auto;margin-bottom:12px}
+.agr-box p{margin-bottom:8px}
+.party-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px}
+.pbox{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:9px;padding:11px 13px}
+.plbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-bottom:3px}
+.pval{font-size:13px;font-weight:600}
 
-    /* ── LIGHT THEME ── */
-    [data-theme="light"] body { background: #F0F4F8 !important; color: #1A1E26 !important; }
-    [data-theme="light"] .bg { background: radial-gradient(ellipse 80% 60% at 10% 20%, rgba(201,169,110,0.08) 0%, transparent 60%), linear-gradient(160deg, #EEF1F6 0%, #E4EAF2 100%) !important; }
-    [data-theme="light"] .bg-grid { background-image: linear-gradient(rgba(80,100,130,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(80,100,130,0.05) 1px, transparent 1px) !important; }
-    [data-theme="light"] .topnav { background: rgba(240,244,248,0.97) !important; border-bottom-color: rgba(0,0,0,0.08) !important; }
-    [data-theme="light"] .sidebar { background: rgba(232,236,244,0.98) !important; border-right-color: rgba(0,0,0,0.08) !important; }
-    [data-theme="light"] .nav-item:hover { background: rgba(201,169,110,0.1) !important; }
-    [data-theme="light"] .nav-item.active { background: rgba(201,169,110,0.12) !important; }
-    [data-theme="light"] .user-card { background: rgba(0,0,0,0.04) !important; border-color: rgba(0,0,0,0.07) !important; }
-    [data-theme="light"] .stat-card, [data-theme="light"] .prop-card { background: rgba(255,255,255,0.92) !important; border-color: rgba(0,0,0,0.08) !important; }
-    [data-theme="light"] .prop-card:hover { border-color: rgba(201,169,110,0.35) !important; }
-    [data-theme="light"] .modal, [data-theme="light"] .modal3d { background: #fff !important; border-color: rgba(0,0,0,0.1) !important; }
-    [data-theme="light"] .finput, [data-theme="light"] .fselect { background: rgba(0,0,0,0.04) !important; border-color: rgba(0,0,0,0.1) !important; color: #1A1E26 !important; }
-    [data-theme="light"] .finput:focus, [data-theme="light"] .fselect:focus { background: rgba(201,169,110,0.05) !important; }
-    [data-theme="light"] .modal3d-header, [data-theme="light"] .view3d-controls { background: rgba(0,0,0,0.03) !important; border-color: rgba(0,0,0,0.07) !important; }
-    [data-theme="light"] .ctrl { background: rgba(0,0,0,0.04) !important; border-color: rgba(0,0,0,0.08) !important; }
-    [data-theme="light"] .mbtn-cancel { background: rgba(0,0,0,0.04) !important; border-color: rgba(0,0,0,0.1) !important; }
-    [data-theme="light"] .pg-title, [data-theme="light"] .prop-card-name, [data-theme="light"] .section-title, [data-theme="light"] .modal-title { color: #1A1E26 !important; }
-    [data-theme="light"] .theme-btn { background: rgba(255,255,255,0.8) !important; border-color: rgba(0,0,0,0.12) !important; }
-    [data-theme="light"] .logo-sep { color: #9CA3AF; }
-  </style>
+/* ── NOTIFICATIONS ── */
+.notif-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 16px;display:flex;align-items:flex-start;gap:11px;margin-bottom:9px}
+.notif-item:last-child{margin-bottom:0}
+.notif-item.unread{border-color:rgba(201,169,110,0.22);background:rgba(201,169,110,0.03)}
+.n-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.nd-gold{background:var(--gold)}.nd-green{background:var(--green)}.nd-blue{background:var(--blue)}.nd-red{background:var(--red)}
+.n-body{flex:1}.n-title{font-size:13px;font-weight:600;margin-bottom:2px}
+.n-msg{font-size:11.5px;color:var(--text2);line-height:1.5}
+.n-time{font-size:10.5px;color:var(--muted);white-space:nowrap;flex-shrink:0}
+
+/* ── EMPTY STATES ── */
+.empty{text-align:center;padding:42px 20px}
+.empty-ico{font-size:42px;opacity:0.26;margin-bottom:10px}
+.empty h3{font-size:14.5px;margin-bottom:4px}.empty p{font-size:12px;color:var(--muted)}
+
+/* ── SECTION HEAD ── */
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;flex-wrap:wrap}
+.sec-title{font-size:14.5px;font-weight:700}
+.sec-count{font-size:11px;color:var(--muted);background:rgba(255,255,255,0.05);padding:2px 10px;border-radius:20px;border:1px solid var(--border2)}
+
+/* ── FURNITURE ── */
+.furn-canvas-wrap{border-radius:12px;overflow:hidden;background:#07090C;margin-bottom:12px}
+canvas.cfurn{width:100%!important;height:300px!important;display:block;cursor:grab}
+canvas.cfurn:active{cursor:grabbing}
+.furn-btns{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.ftog{padding:5px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:var(--muted);font-size:11.5px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+.ftog:hover,.ftog.on{background:rgba(201,169,110,0.1);color:var(--gold);border-color:rgba(201,169,110,0.22)}
+
+/* ── OVERLAYS ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);backdrop-filter:blur(14px);z-index:400;display:none;align-items:center;justify-content:center;padding:16px}
+.overlay.open{display:flex;animation:ovIn 0.18s ease}
+@keyframes ovIn{from{opacity:0}to{opacity:1}}
+.modal{background:#0B0F18;border:1px solid var(--border);border-radius:18px;padding:26px;width:100%;max-width:500px;animation:pgIn 0.24s ease both;box-shadow:0 20px 55px rgba(0,0,0,0.5);max-height:90vh;overflow-y:auto}
+.modal-lg{max-width:700px}
+.modal-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;margin-bottom:3px}
+.modal-sub{color:var(--text2);font-size:12.5px;margin-bottom:20px}
+.modal-btns{display:flex;gap:9px;margin-top:20px}
+.mbtn{flex:1;padding:10px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--gold-l));color:#0A0C0F;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s}
+.mbtn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(201,169,110,0.28)}
+.mbtn-red{background:linear-gradient(135deg,#C62828,var(--red));color:#fff}
+.mbtn-green{background:linear-gradient(135deg,var(--green),#35B5AC);color:#041210}
+.mbtn-cancel{padding:10px 16px;border:1px solid var(--border2);border-radius:10px;background:rgba(255,255,255,0.04);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s}
+.mbtn-cancel:hover{background:rgba(255,255,255,0.08);color:var(--text)}
+.del-ico{width:46px;height:46px;border-radius:50%;background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.18);display:flex;align-items:center;justify-content:center;margin-bottom:13px}
+.del-ico svg{width:20px;height:20px;stroke:var(--red);fill:none}
+
+/* ── 3D MODAL ── */
+.m3d{background:#080B12;border:1px solid rgba(201,169,110,0.18);border-radius:18px;width:100%;max-width:700px;overflow:hidden;animation:pgIn 0.24s ease both;box-shadow:0 22px 55px rgba(0,0,0,0.6)}
+.m3d-head{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(0,0,0,0.18)}
+.m3d-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.m3d-title svg{width:15px;height:15px;stroke:var(--gold);fill:none}
+.m3d-close{padding:5px 12px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:var(--text2);font-size:11.5px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+.m3d-close:hover{background:rgba(255,107,107,0.1);color:var(--red)}
+canvas.c3main{width:100%!important;height:370px!important;display:block;cursor:grab;background:#070A0F}
+canvas.c3main:active{cursor:grabbing}
+.m3d-ctrls{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:11px 22px;background:rgba(0,0,0,0.18);border-top:1px solid rgba(255,255,255,0.05)}
+.c3btn{padding:5px 11px;border-radius:7px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:var(--muted);font-size:11.5px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+.c3btn:hover{background:rgba(201,169,110,0.1);color:var(--gold);border-color:rgba(201,169,110,0.22)}
+.c3hint{margin-left:auto;font-size:10.5px;color:var(--muted)}
+.m3d-info{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(255,255,255,0.05)}
+.mi{padding:11px 15px;border-right:1px solid rgba(255,255,255,0.05)}
+.mi:last-child{border-right:none}
+.mi-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;font-weight:600}
+.mi-val{font-size:13.5px;font-weight:700}
+
+/* ── TENANT DETAIL ── */
+.td-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.td-cell{padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:9px}
+.td-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;font-weight:600}
+.td-val{font-size:13px;font-weight:600}
+
+/* ── PROFILE ── */
+.prof-header{display:flex;align-items:center;gap:18px;padding:22px;background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:16px}
+.prof-av{width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-l));display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#0A0C0F;flex-shrink:0}
+.prof-av-name{font-size:17px;font-weight:700}.prof-av-email{font-size:12px;color:var(--muted);margin-top:2px}
+.prof-av-meta{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+
+/* ── STEP PROGRESS (Agreement) ── */
+.steps{display:flex;align-items:center;gap:0;margin-bottom:22px}
+.step{display:flex;align-items:center;gap:8px}
+.step-num{width:28px;height:28px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--muted);flex-shrink:0;transition:all 0.3s}
+.step.done .step-num{background:var(--green);border-color:var(--green);color:#041210}
+.step.active .step-num{background:linear-gradient(135deg,var(--gold),var(--gold-l));border-color:var(--gold);color:#0A0C0F}
+.step-lbl{font-size:11.5px;color:var(--muted);font-weight:500;white-space:nowrap}
+.step.active .step-lbl{color:var(--gold);font-weight:600}
+.step.done .step-lbl{color:var(--green)}
+.step-line{flex:1;height:2px;background:rgba(255,255,255,0.07);margin:0 10px;min-width:24px}
+.step.done + .step > .step-line{background:var(--green)}
+
+/* ── LIGHT THEME ── */
+[data-theme="light"] body{background:#F0F4F8!important;color:#1A1E26!important}
+[data-theme="light"] .bg{background:radial-gradient(ellipse 70% 55% at 5% 12%,rgba(201,169,110,0.06) 0%,transparent 55%),linear-gradient(168deg,#EEF1F6 0%,#E4EAF2 100%)!important}
+[data-theme="light"] .bg-grid{background-image:linear-gradient(rgba(80,100,130,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(80,100,130,0.04) 1px,transparent 1px)!important}
+[data-theme="light"] .topnav{background:rgba(240,244,248,0.96)!important;border-bottom-color:rgba(0,0,0,0.07)!important}
+[data-theme="light"] .sidebar{background:rgba(232,236,244,0.98)!important;border-right-color:rgba(0,0,0,0.07)!important}
+[data-theme="light"] .card,.stat-card,.pcard,.tbl-wrap,.notif-item,.modal,.lrow,.m3d,.prof-header,.td-cell,.pbox{background:rgba(255,255,255,0.93)!important;border-color:rgba(0,0,0,0.08)!important}
+[data-theme="light"] .sb-user{background:rgba(0,0,0,0.04)!important;border-color:rgba(0,0,0,0.07)!important}
+[data-theme="light"] .finput,.fsel,.fta{background:rgba(0,0,0,0.04)!important;border-color:rgba(0,0,0,0.1)!important;color:#1A1E26!important}
+[data-theme="light"] .fsel option{background:#fff}
+[data-theme="light"] thead tr{background:rgba(0,0,0,0.04)!important}
+[data-theme="light"] td{border-top-color:rgba(0,0,0,0.05)!important;color:#1A1E26!important}
+[data-theme="light"] .agr-box{background:rgba(0,0,0,0.04)!important;color:#566070!important}
+[data-theme="light"] .upzone{background:rgba(201,169,110,0.03)!important;border-color:rgba(201,169,110,0.22)!important}
+[data-theme="light"] .m3d-head,.m3d-ctrls,.m3d-info,.furn-canvas-wrap{background:rgba(0,0,0,0.04)!important;border-color:rgba(0,0,0,0.07)!important}
+[data-theme="light"] .pg-title,.card-title,.sec-title,.pcard-name,.n-title,.ltitle,.td-val,.prof-av-name{color:#1A1E26!important}
+[data-theme="light"] .tn-btn,.btn-ghost,.mbtn-cancel,.ftog,.c3btn,.m3d-close{background:rgba(255,255,255,0.8)!important;border-color:rgba(0,0,0,0.1)!important}
+[data-theme="light"] .step-num{border-color:rgba(0,0,0,0.15)!important}
+[data-theme="light"] .step-line{background:rgba(0,0,0,0.1)!important}
+[data-theme="light"] .finput::placeholder,.fta::placeholder{color:#AAB0BA!important}
+</style>
 </head>
 <body>
 <div class="bg"></div>
@@ -188,254 +310,912 @@
 
 <!-- TOPNAV -->
 <nav class="topnav">
-  <div class="topnav-logo">
-    <div class="logo-icon">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    </div>
-    <span class="logo-text">TMS</span>
-    <span class="logo-sep">/ Landlord</span>
+  <div class="tn-brand">
+    <div class="tn-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+    <span class="tn-name">TMS</span><span class="tn-sep">/ Landlord</span>
   </div>
-  <span class="nav-pill">🏢 Landlord</span>
-  <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
-  <button class="logout-btn" onclick="window.location.href='../index.html'">
-    <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-    Logout
+  <span class="tn-pill">🏢 Landlord</span>
+  <button class="tn-btn" onclick="gp('notifications',null)" title="Notifications">🔔<span class="tn-badge" id="tn-nb">4</span></button>
+  <button class="tn-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
+  <button class="tn-logout" onclick="location.href='../index.html'">
+    <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout
   </button>
 </nav>
 
-<div class="body-wrap">
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-section">
-      <div class="sidebar-label">Menu</div>
-      <button class="nav-item active" onclick="switchPage('properties', this)">
-        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        My Properties
-      </button>
+<div class="layout">
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-sec">
+    <span class="sb-lbl">Overview</span>
+    <button class="nav-item active" onclick="gp('dashboard',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</button>
+    <button class="nav-item" onclick="gp('profile',this)"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>My Profile</button>
+  </div>
+  <div class="sb-sec">
+    <span class="sb-lbl">Properties</span>
+    <button class="nav-item" onclick="gp('properties',this)"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>My Properties</button>
+    <button class="nav-item" onclick="gp('add-prop',this)"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Property</button>
+    <button class="nav-item" onclick="gp('furniture',this)"><svg viewBox="0 0 24 24"><path d="M20 9V6a2 2 0 00-2-2H6a2 2 0 00-2 2v3"/><path d="M2 11v5a2 2 0 002 2h16a2 2 0 002-2v-5a2 2 0 00-4 0v2H6v-2a2 2 0 00-4 0z"/></svg>Furniture Layout</button>
+  </div>
+  <div class="sb-sec">
+    <span class="sb-lbl">Tenants</span>
+    <button class="nav-item" onclick="gp('tenants',this)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Tenant Details</button>
+    <button class="nav-item" onclick="gp('requests',this)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Requests<span class="nb" id="req-nb">2</span></button>
+    <button class="nav-item" onclick="gp('agreement',this)"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Lease Agreement</button>
+  </div>
+  <div class="sb-sec">
+    <span class="sb-lbl">Finance & Support</span>
+    <button class="nav-item" onclick="gp('payments',this)"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payments</button>
+    <button class="nav-item" onclick="gp('maintenance',this)"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Maintenance<span class="nb">1</span></button>
+    <button class="nav-item" onclick="gp('complaints',this)"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Complaints<span class="nb">1</span></button>
+    <button class="nav-item" onclick="gp('notifications',this)"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>Notifications<span class="nb" id="notif-nb2">4</span></button>
+  </div>
+  <div class="sb-foot">
+    <div class="sb-user">
+      <div class="sb-av" id="sb-av">L</div>
+      <div><div class="sb-uname" id="sb-name">Landlord</div><div class="sb-urole">🏢 Property Owner</div></div>
     </div>
-    <div class="sidebar-foot">
-      <div class="user-card">
-        <div class="avatar">L</div>
-        <div>
-          <div class="user-name">Landlord</div>
-          <div class="user-role">🏢 Landlord</div>
+  </div>
+</aside>
+
+<main class="main">
+
+<!-- ━━━━━━ DASHBOARD ━━━━━━ -->
+<div class="page active" id="page-dashboard">
+  <div class="pg-head"><div><div class="pg-title">Dashboard</div><div class="pg-sub">Your property portfolio overview</div></div><button class="btn btn-gold" onclick="gp('add-prop',null)"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Property</button></div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-icon ci-gold">🏠</div><div><div class="stat-val" style="color:var(--gold)" id="st-total">3</div><div class="stat-lbl">Total Properties</div><div class="stat-delta">↑ Active Portfolio</div></div></div>
+    <div class="stat-card"><div class="stat-icon ci-green">✅</div><div><div class="stat-val" style="color:var(--green)" id="st-avail">1</div><div class="stat-lbl">Available</div><div class="stat-delta" style="color:var(--green)">Ready to Rent</div></div></div>
+    <div class="stat-card"><div class="stat-icon ci-warn">🔑</div><div><div class="stat-val" style="color:var(--warn)" id="st-rented">2</div><div class="stat-lbl">Rented Out</div><div class="stat-delta" style="color:var(--warn)">Occupied</div></div></div>
+    <div class="stat-card"><div class="stat-icon ci-blue">💰</div><div><div class="stat-val" style="color:var(--blue);font-size:16px" id="st-rev">Rs. 1,27,000</div><div class="stat-lbl">Monthly Revenue</div><div class="stat-delta">Active Leases</div></div></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><div class="ci ci-gold">📋</div><div><div class="card-title">Recent Activity</div><div class="card-sub">Latest updates</div></div></div>
+      <div class="lrow"><div class="lav la-blue">A</div><div class="lbody"><div class="ltitle">Ali Hassan paid January rent</div><div class="lsub">Gulberg Flat · Rs. 28,000</div></div><div class="lright"><div class="ltime">2h ago</div><span class="badge b-green">Paid</span></div></div>
+      <div class="lrow"><div class="lav la-warn">!!</div><div class="lbody"><div class="ltitle">New maintenance request</div><div class="lsub">DHA House · AC Not Working · High</div></div><div class="lright"><div class="ltime">5h ago</div><span class="badge b-warn">Urgent</span></div></div>
+      <div class="lrow"><div class="lav la-green">✓</div><div class="lbody"><div class="ltitle">Lease signed by Sara Khan</div><div class="lsub">Bahria Apartment · 12-month term</div></div><div class="lright"><div class="ltime">1d ago</div><span class="badge b-green">Signed</span></div></div>
+      <div class="lrow"><div class="lav la-red">⚠</div><div class="lbody"><div class="ltitle">Complaint received</div><div class="lsub">DHA House · Noise issue</div></div><div class="lright"><div class="ltime">2d ago</div><span class="badge b-red">Open</span></div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="ci ci-blue">📊</div><div><div class="card-title">Revenue Breakdown</div><div class="card-sub">Current month</div></div></div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(201,169,110,0.05);border:1px solid rgba(201,169,110,0.1);border-radius:9px">
+          <div><div style="font-size:12.5px;font-weight:600">DHA House — Block C</div><div style="font-size:11px;color:var(--muted)">Rented · Ahmed Khan</div></div>
+          <div style="font-size:14px;font-weight:700;color:var(--gold)">Rs. 55,000</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(78,205,196,0.05);border:1px solid rgba(78,205,196,0.1);border-radius:9px">
+          <div><div style="font-size:12.5px;font-weight:600">Gulberg Flat — 3B</div><div style="font-size:11px;color:var(--muted)">Rented · Ali Hassan</div></div>
+          <div style="font-size:14px;font-weight:700;color:var(--green)">Rs. 28,000</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:9px">
+          <div><div style="font-size:12.5px;font-weight:600">Johar Town House</div><div style="font-size:11px;color:var(--muted)">Available · No tenant</div></div>
+          <div style="font-size:14px;font-weight:700;color:var(--muted)">—</div>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:12px;color:var(--muted);font-weight:600">Total This Month</div>
+          <div style="font-size:18px;font-weight:700;font-family:'Playfair Display',serif;color:var(--gold)">Rs. 83,000</div>
         </div>
       </div>
     </div>
-  </aside>
-
-  <!-- MAIN -->
-  <main class="main">
-    <div class="page active" id="page-properties">
-      <div class="pg-head">
-        <div>
-          <div class="pg-title">My Properties</div>
-          <div class="pg-sub">Manage your listed properties</div>
-        </div>
-        <button class="add-btn" onclick="openAdd()">
-          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add Property
-        </button>
-      </div>
-
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-icon gold">🏠</div>
-          <div><div class="stat-val gold" id="stat-total">0</div><div class="stat-label">Total Properties</div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon green">✅</div>
-          <div><div class="stat-val green" id="stat-active">0</div><div class="stat-label">Active Listings</div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon blue">💰</div>
-          <div><div class="stat-val blue" id="stat-rent">Rs. 0</div><div class="stat-label">Total Rent / mo</div></div>
-        </div>
-      </div>
-
-      <div class="section-head">
-        <div class="section-title">Property Listings</div>
-        <div class="section-count" id="prop-count">0 properties</div>
-      </div>
-      <div class="prop-list" id="prop-list"></div>
-    </div>
-  </main>
+  </div>
 </div>
 
-<!-- ADD / EDIT MODAL -->
-<div class="overlay" id="modal-add">
-  <div class="modal">
-    <div class="modal-title" id="modal-title-text">Add Property</div>
-    <div class="modal-sub" id="modal-sub-text">Fill in the property details below</div>
-    <input type="hidden" id="edit-id">
-    <div class="fgroup"><label class="flabel">Property Name</label><input class="finput" id="f-name" placeholder="e.g. DHA House Block C"></div>
-    <div class="fgroup"><label class="flabel">Address</label><input class="finput" id="f-addr" placeholder="Street, Area, City"></div>
-    <div class="fgroup"><label class="flabel">Monthly Rent (Rs.)</label><input class="finput" id="f-rent" type="number" placeholder="e.g. 45000"></div>
-    <div class="fgroup">
-      <label class="flabel">Property Type</label>
-      <select class="fselect" id="f-type">
-        <option value="House">House</option><option value="Flat">Flat</option>
-        <option value="Apartment">Apartment</option><option value="Shop">Shop</option><option value="Villa">Villa</option>
+<!-- ━━━━━━ MY PROFILE ━━━━━━ -->
+<div class="page" id="page-profile">
+  <div class="pg-head"><div><div class="pg-title">My Profile</div><div class="pg-sub">Manage your personal and business information</div></div></div>
+  <div class="prof-header">
+    <div class="prof-av" id="prof-av">M</div>
+    <div>
+      <div class="prof-av-name" id="prof-name">Muhammad Ahmad</div>
+      <div class="prof-av-email" id="prof-email">mahmad@email.com</div>
+      <div class="prof-av-meta"><span class="badge b-gold">🏢 Property Owner</span><span class="badge b-green">Verified</span></div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-head"><div class="ci ci-gold">👤</div><div><div class="card-title">Personal Information</div></div></div>
+    <div class="frow" style="gap:12px">
+      <div class="field"><label class="flbl">First Name</label><input class="finput" id="p-fn" value="Muhammad" placeholder="First Name"></div>
+      <div class="field"><label class="flbl">Last Name</label><input class="finput" id="p-ln" value="Ahmad" placeholder="Last Name"></div>
+      <div class="field full"><label class="flbl">Email Address</label><input class="finput" id="p-em" value="mahmad@email.com" placeholder="your@email.com"></div>
+      <div class="field"><label class="flbl">Phone</label><input class="finput" id="p-ph" value="+92 300 1234567" placeholder="+92 300 0000000"></div>
+      <div class="field"><label class="flbl">CNIC</label><input class="finput" id="p-cn" value="35201-1234567-1" placeholder="00000-0000000-0"></div>
+      <div class="field"><label class="flbl">City</label><input class="finput" id="p-ct" value="Lahore" placeholder="City"></div>
+      <div class="field"><label class="flbl">Address</label><input class="finput" id="p-ad" value="DHA Phase 5, Lahore" placeholder="Your address"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:16px">
+      <button class="btn btn-gold" onclick="saveProfile()">Save Changes</button>
+      <div class="ok-banner" id="prof-ok" style="margin-top:0">✅ Profile updated!</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><div class="ci ci-blue">🔒</div><div><div class="card-title">Change Password</div></div></div>
+    <div class="frow" style="gap:12px">
+      <div class="field"><label class="flbl">Current Password</label><input class="finput" type="password" id="p-cp" placeholder="Current password"></div>
+      <div class="field"><label class="flbl">New Password</label><input class="finput" type="password" id="p-np" placeholder="New password"></div>
+      <div class="field"><label class="flbl">Confirm New Password</label><input class="finput" type="password" id="p-conf" placeholder="Confirm password"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:16px">
+      <button class="btn btn-ghost" onclick="changePass()">Update Password</button>
+      <div class="ok-banner" id="pass-ok" style="margin-top:0">✅ Password updated!</div>
+      <div class="err-banner" id="pass-err" style="margin-top:0"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━ PROPERTIES ━━━━━━ -->
+<div class="page" id="page-properties">
+  <div class="pg-head">
+    <div><div class="pg-title">My Properties</div><div class="pg-sub" id="prop-count-lbl">3 properties in your portfolio</div></div>
+    <button class="btn btn-gold" onclick="gp('add-prop',null)"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add New Property</button>
+  </div>
+  <div class="prop-grid" id="prop-grid"></div>
+</div>
+
+<!-- ━━━━━━ ADD PROPERTY ━━━━━━ -->
+<div class="page" id="page-add-prop">
+  <div class="pg-head"><div><div class="pg-title" id="addprop-title">Add New Property</div><div class="pg-sub" id="addprop-sub">Fill in details to list your property</div></div></div>
+  <div class="g2">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="card-head"><div class="ci ci-gold">🏠</div><div><div class="card-title">Basic Information</div></div></div>
+        <div style="display:flex;flex-direction:column;gap:11px">
+          <div class="field"><label class="flbl">Property Name</label><input class="finput" id="ap-name" placeholder="e.g. DHA Phase 5 House"></div>
+          <div class="frow">
+            <div class="field"><label class="flbl">Type</label>
+              <select class="fsel" id="ap-type"><option>House</option><option>Flat</option><option>Apartment</option><option>Villa</option><option>Shop</option><option>Office</option></select>
+            </div>
+            <div class="field"><label class="flbl">Bedrooms</label>
+              <select class="fsel" id="ap-beds"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6+</option></select>
+            </div>
+          </div>
+          <div class="frow">
+            <div class="field"><label class="flbl">Bathrooms</label>
+              <select class="fsel" id="ap-bath"><option>1</option><option selected>2</option><option>3</option><option>4</option></select>
+            </div>
+            <div class="field"><label class="flbl">Area (sqft)</label><input class="finput" id="ap-sqft" placeholder="e.g. 1800" type="number"></div>
+          </div>
+          <div class="field"><label class="flbl">Monthly Rent (Rs.)</label><input class="finput" id="ap-rent" placeholder="e.g. 55000" type="number"></div>
+          <div class="field"><label class="flbl">Security Deposit (Rs.)</label><input class="finput" id="ap-dep" placeholder="e.g. 110000" type="number"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="ci ci-blue">📍</div><div><div class="card-title">Location</div></div></div>
+        <div style="display:flex;flex-direction:column;gap:11px">
+          <div class="field"><label class="flbl">Full Address</label><input class="finput" id="ap-addr" placeholder="House number, street, block..."></div>
+          <div class="frow">
+            <div class="field"><label class="flbl">Area / Society</label>
+              <select class="fsel" id="ap-area"><option>DHA Lahore</option><option>Johar Town</option><option>Gulberg</option><option>Bahria Town</option><option>Model Town</option><option>Garden Town</option><option>Cantt</option><option>Other</option></select>
+            </div>
+            <div class="field"><label class="flbl">City</label><input class="finput" id="ap-city" value="Lahore" placeholder="City"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="card-head"><div class="ci ci-green">🖼️</div><div><div class="card-title">Property Images</div><div class="card-sub">Upload up to 8 photos</div></div></div>
+        <div class="upzone" id="img-zone" onclick="document.getElementById('img-inp').click()" ondragover="dzOver(event,'img-zone')" ondragleave="dzLeave('img-zone')" ondrop="dzDrop(event,'img-zone','img-inp')">
+          <input type="file" id="img-inp" accept="image/*" multiple onchange="handleImgs(this)">
+          <div class="uz-ico">📷</div>
+          <div class="uz-lbl"><strong>Click or drag</strong> photos here</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">JPG, PNG · Max 5MB each</div>
+        </div>
+        <div class="img-row" id="img-row"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="ci ci-warn">🏗️</div><div><div class="card-title">3D Model (Optional)</div><div class="card-sub">Upload .glb / .obj / .fbx file</div></div></div>
+        <div class="upzone" id="mdl-zone" onclick="document.getElementById('mdl-inp').click()" ondragover="dzOver(event,'mdl-zone')" ondragleave="dzLeave('mdl-zone')" ondrop="dzDrop(event,'mdl-zone','mdl-inp')">
+          <input type="file" id="mdl-inp" accept=".glb,.obj,.fbx,.gltf" onchange="handleModel(this)">
+          <div class="uz-ico">🏠</div>
+          <div class="uz-lbl" id="mdl-lbl"><strong>Click or drag</strong> 3D model here</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">.glb · .obj · .fbx · .gltf</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="ci ci-red">📝</div><div><div class="card-title">Description & Features</div></div></div>
+        <div style="display:flex;flex-direction:column;gap:11px">
+          <div class="field"><label class="flbl">Description</label><textarea class="fta" id="ap-desc" placeholder="Describe your property..."></textarea></div>
+          <div class="field">
+            <label class="flbl">Features (select all that apply)</label>
+            <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:5px" id="feat-wrap">
+              <label class="feat-chk"><input type="checkbox" value="Parking"> 🚗 Parking</label>
+              <label class="feat-chk"><input type="checkbox" value="Garden"> 🌿 Garden</label>
+              <label class="feat-chk"><input type="checkbox" value="Generator"> ⚡ Generator</label>
+              <label class="feat-chk"><input type="checkbox" value="Furnished"> 🛋️ Furnished</label>
+              <label class="feat-chk"><input type="checkbox" value="Gym"> 💪 Gym</label>
+              <label class="feat-chk"><input type="checkbox" value="Lift"> 🔼 Lift</label>
+              <label class="feat-chk"><input type="checkbox" value="Security"> 🔒 Security</label>
+              <label class="feat-chk"><input type="checkbox" value="AC"> ❄️ AC</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ok-banner" id="ap-ok">✅ Property saved successfully!</div>
+      <div class="err-banner" id="ap-err"></div>
+      <div style="display:flex;gap:9px">
+        <button class="btn btn-gold" style="flex:1" onclick="saveProperty()">💾 Save Property</button>
+        <button class="btn btn-ghost" onclick="resetAddForm()">✕ Clear</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━ FURNITURE LAYOUT ━━━━━━ -->
+<div class="page" id="page-furniture">
+  <div class="pg-head"><div><div class="pg-title">Furniture Layout</div><div class="pg-sub">Design and manage your property's furniture placement</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <select class="fsel" id="furn-prop-sel" style="width:200px" onchange="furnPropChange()">
+        <option value="0">DHA House — Block C</option>
+        <option value="1">Gulberg Flat — 3B</option>
+        <option value="2">Johar Town House</option>
       </select>
     </div>
-    <div class="modal-btns">
-      <button class="mbtn-primary" onclick="saveProperty()">Save Property</button>
-      <button class="mbtn-cancel" onclick="closeAll()">Cancel</button>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><div class="ci ci-gold">🛋️</div><div><div class="card-title">3D Furniture View</div><div class="card-sub">Drag to orbit · Scroll to zoom</div></div></div>
+      <div class="furn-canvas-wrap"><canvas class="cfurn" id="c-furn"></canvas></div>
+      <div class="furn-btns" id="furn-btns">
+        <button class="ftog on" onclick="tFurn(this,'sofa')">🛋️ Sofa</button>
+        <button class="ftog on" onclick="tFurn(this,'bed')">🛏️ Bed</button>
+        <button class="ftog on" onclick="tFurn(this,'dining')">🪑 Dining</button>
+        <button class="ftog on" onclick="tFurn(this,'wardrobe')">🚪 Wardrobe</button>
+        <button class="ftog on" onclick="tFurn(this,'tv')">📺 TV Unit</button>
+        <button class="ftog on" onclick="tFurn(this,'desk')">🖥️ Desk</button>
+        <button class="ftog" onclick="tFurn(this,'plant')">🪴 Plants</button>
+        <button class="ftog" onclick="tFurn(this,'lamp')">💡 Lamps</button>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="card-head"><div class="ci ci-blue">📐</div><div><div class="card-title">Room Configuration</div><div class="card-sub">Set up room dimensions</div></div></div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="frow"><div class="field"><label class="flbl">Room Width (ft)</label><input class="finput" id="room-w" value="22" type="number"></div><div class="field"><label class="flbl">Room Length (ft)</label><input class="finput" id="room-l" value="18" type="number"></div></div>
+          <div class="field"><label class="flbl">Room Type</label><select class="fsel" id="room-type"><option>Living Room</option><option>Bedroom</option><option>Master Bedroom</option><option>Guest Room</option><option>Studio</option></select></div>
+          <div class="field"><label class="flbl">Style</label><select class="fsel" id="room-style"><option>Modern</option><option>Classic</option><option>Minimalist</option><option>Luxury</option></select></div>
+          <button class="btn btn-gold" onclick="saveFurnLayout()">💾 Save Layout</button>
+          <div class="ok-banner" id="furn-ok">✅ Furniture layout saved!</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="ci ci-green">📋</div><div><div class="card-title">Furniture Inventory</div><div class="card-sub">Items in this property</div></div></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="lrow" style="padding:9px 12px"><div style="font-size:18px">🛋️</div><div class="lbody"><div class="ltitle">3-Seat Sofa</div><div class="lsub">Living Room · Included</div></div><span class="badge b-green">Included</span></div>
+          <div class="lrow" style="padding:9px 12px"><div style="font-size:18px">🛏️</div><div class="lbody"><div class="ltitle">King Bed + Mattress</div><div class="lsub">Master Bedroom · Included</div></div><span class="badge b-green">Included</span></div>
+          <div class="lrow" style="padding:9px 12px"><div style="font-size:18px">🚪</div><div class="lbody"><div class="ltitle">3-Door Wardrobe</div><div class="lsub">Master Bedroom · Included</div></div><span class="badge b-green">Included</span></div>
+          <div class="lrow" style="padding:9px 12px"><div style="font-size:18px">📺</div><div class="lbody"><div class="ltitle">55" Smart TV + Stand</div><div class="lsub">Living Room · Included</div></div><span class="badge b-green">Included</span></div>
+          <button class="btn btn-ghost btn-sm" onclick="alert('Add furniture item feature — connect to backend!')" style="width:100%;justify-content:center;margin-top:4px"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Item</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- DELETE MODAL -->
-<div class="overlay" id="modal-del">
-  <div class="modal" style="max-width:400px;">
-    <div class="del-icon"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></div>
-    <div class="modal-title">Delete Property?</div>
-    <div class="del-warning">You are about to permanently delete <strong id="del-name">"Property"</strong>. This cannot be undone.</div>
-    <div class="modal-btns">
-      <button class="mbtn-del" onclick="confirmDel()">Yes, Delete</button>
-      <button class="mbtn-cancel" onclick="closeAll()">Cancel</button>
+<!-- ━━━━━━ TENANT DETAILS ━━━━━━ -->
+<div class="page" id="page-tenants">
+  <div class="pg-head"><div><div class="pg-title">Tenant Details</div><div class="pg-sub">Current and past tenants information</div></div></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Tenant</th><th>Property</th><th>Lease</th><th>Rent</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody id="tenant-tbl">
+        <tr>
+          <td><div style="font-weight:600">Ahmed Khan</div><div style="font-size:11px;color:var(--muted)">ahmed@email.com · +92 301 1234567</div></td>
+          <td>DHA House — Block C</td>
+          <td><div style="font-size:12px">Jan 2026 – Dec 2026</div><div style="font-size:11px;color:var(--muted)">12 months</div></td>
+          <td style="font-weight:600;color:var(--gold)">Rs. 55,000</td>
+          <td><span class="badge b-warn">Rented</span></td>
+          <td><button class="btn btn-sm btn-ghost" onclick="openTenantModal(0)">View Details</button></td>
+        </tr>
+        <tr>
+          <td><div style="font-weight:600">Ali Hassan</div><div style="font-size:11px;color:var(--muted)">ali@email.com · +92 302 9876543</div></td>
+          <td>Gulberg Flat — 3B</td>
+          <td><div style="font-size:12px">Dec 2025 – Nov 2026</div><div style="font-size:11px;color:var(--muted)">12 months</div></td>
+          <td style="font-weight:600;color:var(--gold)">Rs. 28,000</td>
+          <td><span class="badge b-warn">Rented</span></td>
+          <td><button class="btn btn-sm btn-ghost" onclick="openTenantModal(1)">View Details</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ━━━━━━ REQUESTS ━━━━━━ -->
+<div class="page" id="page-requests">
+  <div class="pg-head"><div><div class="pg-title">Tenant Requests</div><div class="pg-sub">Rental inquiries from prospective tenants</div></div></div>
+  <div style="display:flex;flex-direction:column;gap:10px" id="req-list">
+    <div class="lrow"><div class="lav la-blue">FA</div><div class="lbody"><div class="ltitle">Farhan Ahmed — Johar Town House</div><div class="lsub">Interested in renting · 3 beds · Rs. 35,000 budget · Move-in: Feb 2026</div></div><div class="lright"><div class="ltime">Today</div><div style="display:flex;gap:6px;margin-top:4px"><button class="btn btn-sm btn-green" onclick="approveReq(this)">✓ Approve</button><button class="btn btn-sm btn-red" onclick="rejectReq(this)">✕ Decline</button></div></div></div>
+    <div class="lrow"><div class="lav la-gold">NB</div><div class="lbody"><div class="ltitle">Nadia Baig — Johar Town House</div><div class="lsub">Interested in renting · Family of 4 · Rs. 38,000 budget · Move-in: Mar 2026</div></div><div class="lright"><div class="ltime">Yesterday</div><div style="display:flex;gap:6px;margin-top:4px"><button class="btn btn-sm btn-green" onclick="approveReq(this)">✓ Approve</button><button class="btn btn-sm btn-red" onclick="rejectReq(this)">✕ Decline</button></div></div></div>
+  </div>
+</div>
+
+<!-- ━━━━━━ LEASE AGREEMENT ━━━━━━ -->
+<div class="page" id="page-agreement">
+  <div class="pg-head"><div><div class="pg-title">Lease Agreement</div><div class="pg-sub">Create, view and digitally sign rental agreements</div></div></div>
+  <!-- STEP TABS -->
+  <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+    <button class="btn btn-gold" id="agr-tab-create" onclick="switchAgrTab('create')">✏️ Create Agreement</button>
+    <button class="btn btn-ghost" id="agr-tab-view" onclick="switchAgrTab('view')">📄 View Agreements</button>
+  </div>
+
+  <!-- CREATE -->
+  <div id="agr-create">
+    <div class="g2">
+      <div class="card" style="display:flex;flex-direction:column;gap:11px">
+        <div class="card-head"><div class="ci ci-gold">📝</div><div><div class="card-title">Agreement Details</div></div></div>
+        <div class="field"><label class="flbl">Select Property</label><select class="fsel" id="agr-prop"><option>DHA House — Block C · Rs. 55,000/mo</option><option>Gulberg Flat — 3B · Rs. 28,000/mo</option><option>Johar Town House · Rs. 35,000/mo</option></select></div>
+        <div class="field"><label class="flbl">Tenant Full Name</label><input class="finput" id="agr-tname" placeholder="Tenant name"></div>
+        <div class="field"><label class="flbl">Tenant CNIC</label><input class="finput" id="agr-tcnic" placeholder="00000-0000000-0"></div>
+        <div class="field"><label class="flbl">Tenant Contact</label><input class="finput" id="agr-tphone" placeholder="+92 300 0000000"></div>
+        <div class="frow">
+          <div class="field"><label class="flbl">Lease Start</label><input class="finput" id="agr-start" type="date"></div>
+          <div class="field"><label class="flbl">Duration</label><select class="fsel" id="agr-dur"><option>6 months</option><option selected>12 months</option><option>24 months</option></select></div>
+        </div>
+        <div class="field"><label class="flbl">Monthly Rent (Rs.)</label><input class="finput" id="agr-rent" type="number" placeholder="55000"></div>
+        <div class="field"><label class="flbl">Security Deposit (Rs.)</label><input class="finput" id="agr-dep" type="number" placeholder="110000"></div>
+        <div class="field"><label class="flbl">Special Clauses (optional)</label><textarea class="fta" id="agr-clauses" placeholder="Any additional terms..."></textarea></div>
+        <button class="btn btn-gold" onclick="generateAgreement()">Generate Agreement →</button>
+      </div>
+      <div id="agr-preview-wrap" style="display:none">
+        <div class="card">
+          <div class="card-head"><div class="ci ci-green">📋</div><div><div class="card-title">Agreement Preview</div><div class="card-sub" id="agr-ref-lbl">Ref: Generating...</div></div></div>
+          <div class="party-grid">
+            <div class="pbox"><div class="plbl">Landlord</div><div class="pval">Muhammad Ahmad</div><div style="font-size:11px;color:var(--muted)">DHA Phase 5, Lahore</div></div>
+            <div class="pbox"><div class="plbl">Tenant</div><div class="pval" id="agr-tn">—</div><div style="font-size:11px;color:var(--muted)" id="agr-tc">—</div></div>
+          </div>
+          <div class="agr-box" id="agr-text">Agreement preview will appear here after filling the form.</div>
+          <div style="display:flex;gap:9px;flex-wrap:wrap">
+            <button class="btn btn-gold" id="agr-sign-btn" onclick="landlordSign()">✍️ Sign as Landlord</button>
+            <div class="ok-banner" id="agr-signed">✅ Signed by Landlord — <span id="agr-sign-date"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW LIST -->
+  <div id="agr-view" style="display:none">
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Ref</th><th>Tenant</th><th>Property</th><th>Period</th><th>Rent</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight:600;color:var(--gold)">TMS-2026-001</td><td>Ahmed Khan</td><td>DHA House — Block C</td><td>Jan–Dec 2026</td><td style="color:var(--gold)">Rs. 55,000</td><td><span class="badge b-green">Signed</span></td></tr>
+          <tr><td style="font-weight:600;color:var(--gold)">TMS-2025-009</td><td>Ali Hassan</td><td>Gulberg Flat — 3B</td><td>Dec 25–Nov 26</td><td style="color:var(--gold)">Rs. 28,000</td><td><span class="badge b-green">Signed</span></td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
 
-<!-- 3D MODAL -->
-<div class="overlay" id="modal-3d">
-  <div class="modal3d">
-    <div class="modal3d-header">
-      <div class="modal3d-title"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span id="modal3d-name">3D View</span></div>
-      <button class="modal3d-close" onclick="closeAll()">✕ Close</button>
+<!-- ━━━━━━ PAYMENTS ━━━━━━ -->
+<div class="page" id="page-payments">
+  <div class="pg-head"><div><div class="pg-title">Payment Records</div><div class="pg-sub">All rent payment transactions</div></div>
+    <select class="fsel" style="width:180px" onchange="filterPayments(this.value)">
+      <option value="all">All Properties</option>
+      <option value="dha">DHA House</option>
+      <option value="gulberg">Gulberg Flat</option>
+    </select>
+  </div>
+  <div class="g2" style="margin-bottom:18px">
+    <div class="card" style="display:flex;align-items:center;gap:14px"><div class="stat-icon ci-green" style="font-size:22px">💰</div><div><div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px">Total Collected (2026)</div><div style="font-size:22px;font-weight:700;font-family:'Playfair Display',serif;color:var(--green)">Rs. 3,32,000</div></div></div>
+    <div class="card" style="display:flex;align-items:center;gap:14px"><div class="stat-icon ci-warn" style="font-size:22px">⏳</div><div><div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px">Next Due (Feb 5)</div><div style="font-size:22px;font-weight:700;font-family:'Playfair Display',serif;color:var(--warn)">Rs. 83,000</div></div></div>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Tenant</th><th>Property</th><th>Month</th><th>Amount</th><th>Method</th><th>Date</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--muted)">1</td><td>Ahmed Khan</td><td>DHA House</td><td>Jan 2026</td><td style="font-weight:600;color:var(--green)">Rs. 55,000</td><td>Bank Transfer</td><td>Jan 3, 2026</td><td><span class="badge b-green">Received</span></td></tr>
+        <tr><td style="color:var(--muted)">2</td><td>Ali Hassan</td><td>Gulberg Flat</td><td>Jan 2026</td><td style="font-weight:600;color:var(--green)">Rs. 28,000</td><td>Cash</td><td>Jan 4, 2026</td><td><span class="badge b-green">Received</span></td></tr>
+        <tr><td style="color:var(--muted)">3</td><td>Ahmed Khan</td><td>DHA House</td><td>Dec 2025</td><td style="font-weight:600;color:var(--green)">Rs. 55,000</td><td>Bank Transfer</td><td>Dec 3, 2025</td><td><span class="badge b-green">Received</span></td></tr>
+        <tr><td style="color:var(--muted)">4</td><td>Ali Hassan</td><td>Gulberg Flat</td><td>Dec 2025</td><td style="font-weight:600;color:var(--green)">Rs. 28,000</td><td>Cash</td><td>Dec 5, 2025</td><td><span class="badge b-green">Received</span></td></tr>
+        <tr><td style="color:var(--muted)">5</td><td>Ahmed Khan</td><td>DHA House</td><td>Feb 2026</td><td style="font-weight:600;color:var(--blue)">Rs. 55,000</td><td>—</td><td>—</td><td><span class="badge b-blue">Upcoming</span></td></tr>
+        <tr><td style="color:var(--muted)">6</td><td>Ali Hassan</td><td>Gulberg Flat</td><td>Feb 2026</td><td style="font-weight:600;color:var(--blue)">Rs. 28,000</td><td>—</td><td>—</td><td><span class="badge b-blue">Upcoming</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ━━━━━━ MAINTENANCE ━━━━━━ -->
+<div class="page" id="page-maintenance">
+  <div class="pg-head"><div><div class="pg-title">Maintenance Requests</div><div class="pg-sub">Review and manage repair requests from tenants</div></div></div>
+  <div style="display:flex;flex-direction:column;gap:10px" id="maint-list">
+    <div class="lrow"><div class="lav la-warn" style="font-size:20px">🔧</div><div class="lbody"><div class="ltitle">AC Not Working — DHA House</div><div class="lsub">Submitted by Ahmed Khan · AC/Heating · High Priority · Jan 15, 2026</div></div><div class="lright"><div class="ltime">5h ago</div><div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap"><select class="fsel" style="font-size:11px;padding:4px 8px;border-radius:7px;width:auto" onchange="updateMaint(this)"><option>Pending</option><option selected>In Progress</option><option>Resolved</option></select></div></div></div>
+    <div class="lrow"><div class="lav la-green" style="font-size:20px">🔧</div><div class="lbody"><div class="ltitle">Leaking Tap — Gulberg Flat</div><div class="lsub">Submitted by Ali Hassan · Plumbing · Medium · Dec 20, 2025</div></div><div class="lright"><div class="ltime">Resolved</div><span class="badge b-green">Resolved</span></div></div>
+  </div>
+</div>
+
+<!-- ━━━━━━ COMPLAINTS ━━━━━━ -->
+<div class="page" id="page-complaints">
+  <div class="pg-head"><div><div class="pg-title">Tenant Complaints</div><div class="pg-sub">Complaints submitted by your tenants</div></div></div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div class="lrow"><div class="lav la-red" style="font-size:20px">⚠️</div><div class="lbody"><div class="ltitle">Noise After Hours — DHA House</div><div class="lsub">Ahmed Khan · Noise/Disturbance · Jan 10, 2026<br><em style="color:var(--text2);font-style:normal">"Neighbors are making noise after 11pm, causing disturbance."</em></div></div><div class="lright"><div class="ltime">Jan 10</div><div style="margin-top:5px;display:flex;gap:6px"><button class="btn btn-sm btn-gold" onclick="resolveComp(this)">✓ Resolve</button><button class="btn btn-sm btn-ghost" onclick="reviewComp(this)">Under Review</button></div></div></div>
+  </div>
+</div>
+
+<!-- ━━━━━━ NOTIFICATIONS ━━━━━━ -->
+<div class="page" id="page-notifications">
+  <div class="pg-head">
+    <div><div class="pg-title">Notifications</div><div class="pg-sub">Recent alerts and updates</div></div>
+    <button class="btn btn-ghost" onclick="markAllRead()">Mark all read</button>
+  </div>
+  <div id="notif-list">
+    <div class="notif-item unread"><div class="n-dot nd-green"></div><div class="n-body"><div class="n-title">Rent Received — Ahmed Khan</div><div class="n-msg">Rs. 55,000 payment received for DHA House, January 2026 via bank transfer.</div></div><div class="n-time">2h ago</div></div>
+    <div class="notif-item unread"><div class="n-dot nd-red"></div><div class="n-body"><div class="n-title">New Maintenance Request</div><div class="n-msg">Ahmed Khan reported AC not working at DHA House. Priority: High.</div></div><div class="n-time">5h ago</div></div>
+    <div class="notif-item unread"><div class="n-dot nd-gold"></div><div class="n-body"><div class="n-title">New Rental Request</div><div class="n-msg">Farhan Ahmed is interested in Johar Town House. Budget: Rs. 35,000.</div></div><div class="n-time">Today</div></div>
+    <div class="notif-item unread"><div class="n-dot nd-blue"></div><div class="n-body"><div class="n-title">New Complaint Received</div><div class="n-msg">Ahmed Khan submitted a noise complaint for DHA House.</div></div><div class="n-time">2d ago</div></div>
+    <div class="notif-item"><div class="n-dot nd-green"></div><div class="n-body"><div class="n-title">Lease Agreement Signed</div><div class="n-msg">Sara Khan signed the lease agreement for Bahria Apartment 12-month term.</div></div><div class="n-time">Jan 3</div></div>
+    <div class="notif-item"><div class="n-dot nd-gold"></div><div class="n-body"><div class="n-title">Payment Due Reminder</div><div class="n-msg">February rent (Rs. 83,000 total) is due on Feb 5, 2026 from both tenants.</div></div><div class="n-time">Jan 1</div></div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- ═══ TENANT DETAIL MODAL ═══ -->
+<div class="overlay" id="ov-tenant" onclick="if(event.target===this)closeMod('ov-tenant')">
+  <div class="modal">
+    <div class="modal-title" id="td-title">Tenant Details</div>
+    <div class="modal-sub" id="td-sub">Full profile information</div>
+    <div class="td-grid">
+      <div class="td-cell"><div class="td-lbl">Full Name</div><div class="td-val" id="td-name">—</div></div>
+      <div class="td-cell"><div class="td-lbl">CNIC</div><div class="td-val" id="td-cnic">—</div></div>
+      <div class="td-cell"><div class="td-lbl">Email</div><div class="td-val" id="td-email">—</div></div>
+      <div class="td-cell"><div class="td-lbl">Phone</div><div class="td-val" id="td-phone">—</div></div>
+      <div class="td-cell"><div class="td-lbl">Property</div><div class="td-val" id="td-prop">—</div></div>
+      <div class="td-cell"><div class="td-lbl">Lease Start</div><div class="td-val" id="td-lease">—</div></div>
+      <div class="td-cell"><div class="td-lbl">Monthly Rent</div><div class="td-val" id="td-rent" style="color:var(--gold)">—</div></div>
+      <div class="td-cell"><div class="td-lbl">Deposit Paid</div><div class="td-val" id="td-dep">—</div></div>
     </div>
-    <canvas id="canvas-modal"></canvas>
-    <div class="view3d-controls">
-      <button class="ctrl" onclick="resetCamera3D('modal')">↺ Reset</button>
-      <button class="ctrl" onclick="toggleWireframe('modal')">⬡ Wireframe</button>
-      <button class="ctrl" onclick="rotateFront('modal')">⬆ Front</button>
-      <button class="ctrl" onclick="rotateSide('modal')">➡ Side</button>
-      <button class="ctrl" onclick="rotateTop('modal')">⬇ Top</button>
-      <button class="ctrl" onclick="toggleDayNight()">🌙 Night</button>
-      <span class="ctrl-hint">🖱 Drag · Scroll zoom</span>
+    <div class="modal-btns">
+      <button class="mbtn-cancel" onclick="closeMod('ov-tenant')">Close</button>
+      <button class="mbtn" onclick="gp('agreement',null);closeMod('ov-tenant')">Create Agreement</button>
     </div>
   </div>
 </div>
+
+<!-- ═══ DELETE CONFIRM MODAL ═══ -->
+<div class="overlay" id="ov-del" onclick="if(event.target===this)closeMod('ov-del')">
+  <div class="modal" style="text-align:center;max-width:400px">
+    <div class="del-ico" style="margin:0 auto 13px"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div>
+    <div class="modal-title">Delete Property</div>
+    <div class="modal-sub" id="del-msg">Are you sure you want to remove this property? This action cannot be undone.</div>
+    <div class="modal-btns"><button class="mbtn mbtn-red" onclick="confirmDelete()">Yes, Delete</button><button class="mbtn-cancel" onclick="closeMod('ov-del')">Cancel</button></div>
+  </div>
+</div>
+
+<!-- ═══ 3D VIEW MODAL ═══ -->
+<div class="overlay" id="ov-3d" onclick="if(event.target===this)close3D()">
+  <div class="m3d">
+    <div class="m3d-head">
+      <div class="m3d-title"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span id="m3d-pname">3D Property View</span></div>
+      <button class="m3d-close" onclick="close3D()">✕ Close</button>
+    </div>
+    <canvas class="c3main" id="c3main"></canvas>
+    <div class="m3d-ctrls">
+      <button class="c3btn" onclick="resetCam()">↺ Reset</button>
+      <button class="c3btn" onclick="toggleWire()">⬡ Wire</button>
+      <button class="c3btn" onclick="camFront()">⬆ Front</button>
+      <button class="c3btn" onclick="camSide()">➡ Side</button>
+      <button class="c3btn" onclick="camTop()">⬇ Top</button>
+      <button class="c3btn" onclick="toggleNight()">🌙 Night</button>
+      <span class="c3hint">🖱 Drag · Scroll zoom</span>
+    </div>
+    <div class="m3d-info">
+      <div class="mi"><div class="mi-lbl">Rent</div><div class="mi-val" style="color:var(--gold)" id="m-rent">—</div></div>
+      <div class="mi"><div class="mi-lbl">Status</div><div class="mi-val" id="m-status">—</div></div>
+      <div class="mi"><div class="mi-lbl">Beds</div><div class="mi-val" id="m-beds">—</div></div>
+      <div class="mi"><div class="mi-lbl">Area</div><div class="mi-val" style="color:var(--green)" id="m-area">—</div></div>
+    </div>
+  </div>
+</div>
+
+<style>
+.feat-chk{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);cursor:pointer;font-size:12px;color:var(--text2);transition:all 0.2s}
+.feat-chk:hover{background:rgba(201,169,110,0.08);border-color:rgba(201,169,110,0.2);color:var(--gold)}
+.feat-chk input{display:none}
+.feat-chk input:checked ~ *{color:var(--gold)}
+.feat-chk:has(input:checked){background:rgba(201,169,110,0.1);border-color:rgba(201,169,110,0.22);color:var(--gold)}
+</style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="../js/house3d.js"></script>
 <script>
-  let properties = [];
-  let delId = null;
-  let modalInitDone = false;
+// ── DATA STORE ──────────────────────────────────────
+let properties = [
+  {id:1,name:'DHA House — Block C',type:'House',beds:4,bath:2,sqft:2400,rent:55000,dep:110000,area:'DHA Lahore',addr:'House 14, Block C, DHA Lahore',status:'rented',tenant:'Ahmed Khan',desc:'Spacious corner house in prime DHA location.'},
+  {id:2,name:'Gulberg Flat — 3B',type:'Flat',beds:2,bath:1,sqft:1100,rent:28000,dep:56000,area:'Gulberg',addr:'Flat 3B, Main Boulevard, Gulberg III',status:'rented',tenant:'Ali Hassan',desc:'Modern flat on 2nd floor with parking.'},
+  {id:3,name:'Johar Town House',type:'House',beds:3,bath:2,sqft:1800,rent:35000,dep:70000,area:'Johar Town',addr:'Street 5, Block J, Johar Town',status:'available',tenant:null,desc:'Well-maintained house in a peaceful street.'},
+];
+const tenantData = [
+  {name:'Ahmed Khan',cnic:'35202-1234567-1',email:'ahmed@email.com',phone:'+92 301 1234567',prop:'DHA House — Block C',lease:'Jan 1, 2026',rent:'Rs. 55,000/mo',dep:'Rs. 1,10,000'},
+  {name:'Ali Hassan',cnic:'35201-9876543-2',email:'ali@email.com',phone:'+92 302 9876543',prop:'Gulberg Flat — 3B',lease:'Dec 1, 2025',rent:'Rs. 28,000/mo',dep:'Rs. 56,000'},
+];
+let editingPropId = null, deleteTarget = null;
+let m3dReady=false, furnReady=false, furnObjs={}, nightMode=false, wireMode=false;
+let m3dScene, m3dRenderer, m3dCam, m3dRy=0.4, m3dRx=0.6, m3dZm=14;
 
-  function switchPage(id, el) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-' + id).classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    if (el) el.classList.add('active');
+// ── PAGE NAVIGATION ──────────────────────────────────
+function gp(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  if (id === 'properties') renderProps();
+  if (id === 'furniture' && !furnReady) setTimeout(initFurnCanvas, 80);
+}
+
+// ── PROFILE ──────────────────────────────────────────
+function saveProfile() {
+  const fn = document.getElementById('p-fn').value.trim();
+  const ln = document.getElementById('p-ln').value.trim();
+  const name = (fn + ' ' + ln).trim() || 'Landlord';
+  document.getElementById('prof-name').textContent = name;
+  document.getElementById('prof-email').textContent = document.getElementById('p-em').value;
+  document.getElementById('prof-av').textContent = name[0].toUpperCase();
+  document.getElementById('sb-av').textContent = name[0].toUpperCase();
+  document.getElementById('sb-name').textContent = fn || 'Landlord';
+  flash('prof-ok');
+}
+function changePass() {
+  const cp = document.getElementById('p-cp').value;
+  const np = document.getElementById('p-np').value;
+  const cf = document.getElementById('p-conf').value;
+  const e = document.getElementById('pass-err');
+  e.textContent = ''; e.classList.remove('show');
+  if (!cp || !np || !cf) { e.textContent = 'Please fill all password fields.'; e.classList.add('show'); return; }
+  if (np !== cf) { e.textContent = 'New passwords do not match.'; e.classList.add('show'); return; }
+  if (np.length < 6) { e.textContent = 'Password must be at least 6 characters.'; e.classList.add('show'); return; }
+  document.getElementById('p-cp').value = document.getElementById('p-np').value = document.getElementById('p-conf').value = '';
+  flash('pass-ok');
+}
+
+// ── PROPERTY RENDER ───────────────────────────────────
+const emo = {House:'🏠', Flat:'🏢', Apartment:'🏙️', Villa:'🏡', Shop:'🏪', Office:'🏬'};
+function renderProps() {
+  const g = document.getElementById('prop-grid');
+  document.getElementById('prop-count-lbl').textContent = properties.length + ' properties in your portfolio';
+  updateStats();
+  if (!properties.length) {
+    g.innerHTML = '<div class="empty"><div class="empty-ico">🏠</div><h3>No Properties Yet</h3><p>Add your first property to get started.</p></div>';
+    return;
   }
-
-  function renderList() {
-    const total = properties.length;
-    const totalRent = properties.reduce((s, p) => s + Number(p.rent), 0);
-    document.getElementById('stat-total').textContent  = total;
-    document.getElementById('stat-active').textContent = total;
-    document.getElementById('stat-rent').textContent   = total ? 'Rs. ' + totalRent.toLocaleString() : 'Rs. 0';
-    document.getElementById('prop-count').textContent  = total + ' propert' + (total === 1 ? 'y' : 'ies');
-
-    const list = document.getElementById('prop-list');
-    if (total === 0) {
-      list.innerHTML = `<div class="empty"><div class="empty-icon">🏠</div><h3>No properties yet</h3><p>Add your first property to get started</p><button class="empty-add" onclick="openAdd()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Property</button></div>`;
-      return;
-    }
-    const emoji = { House:'🏠', Flat:'🏢', Apartment:'🏙️', Shop:'🏪', Villa:'🏡' };
-    list.innerHTML = properties.map(p => `
-      <div class="prop-card">
-        <div class="prop-card-icon">${emoji[p.type]||'🏠'}</div>
-        <div class="prop-card-info">
-          <div class="prop-card-name">${p.name}</div>
-          <div class="prop-card-addr"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${p.addr}</div>
+  g.innerHTML = properties.map(p => `
+    <div class="pcard">
+      <div class="pcard-thumb">
+        <div class="pcard-emo">${emo[p.type]||'🏠'}</div>
+        <div class="pcard-ov"></div>
+        <span class="pcard-status ${p.status==='available'?'ps-avail':'ps-rented'}">${p.status==='available'?'Available':'Rented'}</span>
+        <button class="pcard-3d" onclick="event.stopPropagation();open3D(${p.id})"><span class="pdot"></span>3D View</button>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-price">Rs. ${p.rent.toLocaleString()}<span> / month</span></div>
+        <div class="pcard-name">${p.name}</div>
+        <div class="pcard-addr"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${p.addr}</div>
+        <div class="ptags"><span class="ptag">🛏 ${p.beds} Bed</span><span class="ptag">🏠 ${p.type}</span><span class="ptag">📐 ${p.sqft} sqft</span>${p.tenant?`<span class="ptag" style="color:var(--warn)">👤 ${p.tenant}</span>`:''}</div>
+        <div class="pbtns">
+          <button class="pb pb-edit" onclick="editProp(${p.id})"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg>Edit</button>
+          <button class="pb pb-toggle" onclick="toggleStatus(${p.id})" title="Toggle availability">⇄ ${p.status==='available'?'Mark Rented':'Mark Available'}</button>
+          <button class="pb pb-del" onclick="openDelete(${p.id})"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>Del</button>
         </div>
-        <div class="prop-card-type">${p.type}</div>
-        <div class="prop-card-rent">Rs. ${Number(p.rent).toLocaleString()}<span>/mo</span></div>
-        <div class="prop-card-actions">
-          <button class="pact view3d" onclick="openView3D(${p.id},'${p.name.replace(/'/g,"\\'")}')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>3D</button>
-          <button class="pact edit" onclick="openEdit(${p.id})"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg>Edit</button>
-          <button class="pact del" onclick="openDel(${p.id},'${p.name.replace(/'/g,"\\'")}')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>Delete</button>
-        </div>
-      </div>`).join('');
-  }
+      </div>
+    </div>`).join('');
+}
 
-  function openAdd() {
-    document.getElementById('modal-title-text').textContent = 'Add Property';
-    document.getElementById('modal-sub-text').textContent   = 'Fill in the property details below';
-    document.getElementById('edit-id').value = '';
-    ['f-name','f-addr','f-rent'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('f-type').value = 'House';
-    document.getElementById('modal-add').classList.add('open');
-    setTimeout(() => document.getElementById('f-name').focus(), 120);
-  }
+function updateStats() {
+  const avail = properties.filter(p => p.status === 'available').length;
+  const rented = properties.filter(p => p.status === 'rented').length;
+  const rev = properties.filter(p => p.status === 'rented').reduce((s, p) => s + p.rent, 0);
+  document.getElementById('st-total').textContent = properties.length;
+  document.getElementById('st-avail').textContent = avail;
+  document.getElementById('st-rented').textContent = rented;
+  document.getElementById('st-rev').textContent = 'Rs. ' + rev.toLocaleString();
+}
 
-  function openEdit(id) {
-    const p = properties.find(x => x.id === id); if (!p) return;
-    document.getElementById('modal-title-text').textContent = 'Edit Property';
-    document.getElementById('modal-sub-text').textContent   = 'Update the property details';
-    document.getElementById('edit-id').value  = id;
-    document.getElementById('f-name').value   = p.name;
-    document.getElementById('f-addr').value   = p.addr;
-    document.getElementById('f-rent').value   = p.rent;
-    document.getElementById('f-type').value   = p.type;
-    document.getElementById('modal-add').classList.add('open');
-  }
+function toggleStatus(id) {
+  const p = properties.find(x => x.id === id);
+  if (!p) return;
+  p.status = p.status === 'available' ? 'rented' : 'available';
+  if (p.status === 'available') p.tenant = null;
+  renderProps();
+}
 
-  function saveProperty() {
-    const name = document.getElementById('f-name').value.trim();
-    const addr = document.getElementById('f-addr').value.trim();
-    const rent = document.getElementById('f-rent').value;
-    const type = document.getElementById('f-type').value;
-    const eid  = document.getElementById('edit-id').value;
-    if (!name || !addr || !rent) { alert('Please fill all fields.'); return; }
-    if (eid) {
-      const p = properties.find(x => x.id === parseInt(eid));
-      if (p) { p.name=name; p.addr=addr; p.rent=rent; p.type=type; }
-    } else {
-      const newId = properties.length ? Math.max(...properties.map(p=>p.id))+1 : 1;
-      properties.push({ id: newId, name, addr, rent, type });
+function editProp(id) {
+  const p = properties.find(x => x.id === id);
+  if (!p) return;
+  editingPropId = id;
+  document.getElementById('addprop-title').textContent = 'Edit Property';
+  document.getElementById('addprop-sub').textContent = 'Update details for ' + p.name;
+  document.getElementById('ap-name').value = p.name;
+  document.getElementById('ap-rent').value = p.rent;
+  document.getElementById('ap-dep').value = p.dep;
+  document.getElementById('ap-sqft').value = p.sqft;
+  document.getElementById('ap-addr').value = p.addr;
+  document.getElementById('ap-desc').value = p.desc || '';
+  gp('add-prop', null);
+}
+
+function saveProperty() {
+  const name = document.getElementById('ap-name').value.trim();
+  const rent = parseInt(document.getElementById('ap-rent').value) || 0;
+  if (!name || !rent) { const e = document.getElementById('ap-err'); e.textContent = 'Please fill in property name and rent.'; e.classList.add('show'); setTimeout(() => e.classList.remove('show'), 3000); return; }
+  const dep = parseInt(document.getElementById('ap-dep').value) || rent * 2;
+  const sqft = parseInt(document.getElementById('ap-sqft').value) || 1000;
+  const addr = document.getElementById('ap-addr').value.trim() || 'Address not set';
+  const type = document.getElementById('ap-type').value;
+  const beds = parseInt(document.getElementById('ap-beds').value) || 3;
+  const bath = parseInt(document.getElementById('ap-bath').value) || 2;
+  const area = document.getElementById('ap-area').value;
+  const desc = document.getElementById('ap-desc').value.trim();
+  if (editingPropId) {
+    const p = properties.find(x => x.id === editingPropId);
+    Object.assign(p, {name, rent, dep, sqft, addr, type, beds, bath, area, desc});
+  } else {
+    const id = Date.now();
+    properties.push({id, name, type, beds, bath, sqft, rent, dep, area, addr, status:'available', tenant:null, desc});
+  }
+  flash('ap-ok');
+  editingPropId = null;
+  document.getElementById('addprop-title').textContent = 'Add New Property';
+  document.getElementById('addprop-sub').textContent = 'Fill in details to list your property';
+  resetAddForm();
+  updateStats();
+}
+function resetAddForm() {
+  ['ap-name','ap-rent','ap-dep','ap-sqft','ap-addr','ap-desc'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('img-row').innerHTML = '';
+  document.getElementById('mdl-lbl').innerHTML = '<strong>Click or drag</strong> 3D model here';
+  document.querySelectorAll('.feat-chk input').forEach(c => c.checked = false);
+  editingPropId = null;
+}
+
+// ── DELETE ────────────────────────────────────────────
+function openDelete(id) { deleteTarget = id; document.getElementById('ov-del').classList.add('open'); }
+function confirmDelete() {
+  properties = properties.filter(p => p.id !== deleteTarget);
+  deleteTarget = null; closeMod('ov-del');
+  renderProps();
+}
+function closeMod(id) { document.getElementById(id).classList.remove('open'); }
+
+// ── IMAGE UPLOAD ──────────────────────────────────────
+function handleImgs(inp) {
+  const row = document.getElementById('img-row');
+  [...inp.files].slice(0, 8).forEach(f => {
+    const r = new FileReader();
+    r.onload = e => {
+      const wrap = document.createElement('div'); wrap.className = 'img-pw';
+      wrap.innerHTML = `<img src="${e.target.result}" class="img-thumb"><div class="img-rm" onclick="this.parentElement.remove()">✕</div>`;
+      row.appendChild(wrap);
+    };
+    r.readAsDataURL(f);
+  });
+}
+function handleModel(inp) {
+  if (inp.files[0]) document.getElementById('mdl-lbl').innerHTML = `<strong style="color:var(--green)">✅ ${inp.files[0].name}</strong> uploaded`;
+}
+
+// ── DRAG & DROP ───────────────────────────────────────
+function dzOver(e, id) { e.preventDefault(); document.getElementById(id).classList.add('drag'); }
+function dzLeave(id) { document.getElementById(id).classList.remove('drag'); }
+function dzDrop(e, zoneId, inpId) {
+  e.preventDefault(); document.getElementById(zoneId).classList.remove('drag');
+  const inp = document.getElementById(inpId);
+  const dt = new DataTransfer();
+  [...e.dataTransfer.files].forEach(f => dt.items.add(f));
+  inp.files = dt.files;
+  inp.id === 'img-inp' ? handleImgs(inp) : handleModel(inp);
+}
+
+// ── AGREEMENT ────────────────────────────────────────
+function switchAgrTab(t) {
+  document.getElementById('agr-create').style.display = t==='create' ? '' : 'none';
+  document.getElementById('agr-view').style.display = t==='view' ? '' : 'none';
+  document.getElementById('agr-tab-create').className = 'btn ' + (t==='create' ? 'btn-gold' : 'btn-ghost');
+  document.getElementById('agr-tab-view').className = 'btn ' + (t==='view' ? 'btn-gold' : 'btn-ghost');
+}
+function generateAgreement() {
+  const tn = document.getElementById('agr-tname').value.trim();
+  const tc = document.getElementById('agr-tcnic').value.trim();
+  const tp = document.getElementById('agr-tphone').value.trim();
+  const prop = document.getElementById('agr-prop').value;
+  const start = document.getElementById('agr-start').value;
+  const dur = document.getElementById('agr-dur').value;
+  const rent = document.getElementById('agr-rent').value;
+  const dep = document.getElementById('agr-dep').value;
+  if (!tn || !rent) { alert('Please fill in at least Tenant Name and Monthly Rent.'); return; }
+  const ref = 'TMS-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random()*900)+100);
+  document.getElementById('agr-ref-lbl').textContent = 'Ref: ' + ref;
+  document.getElementById('agr-tn').textContent = tn;
+  document.getElementById('agr-tc').textContent = tc || 'CNIC not provided';
+  const startDate = start ? new Date(start).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}) : 'As agreed';
+  document.getElementById('agr-text').innerHTML = `
+    <p><strong>Property:</strong> ${prop.split('·')[0].trim()}</p>
+    <p><strong>Lease Term:</strong> ${dur} from ${startDate}</p>
+    <p><strong>Monthly Rent:</strong> Rs. ${parseInt(rent||0).toLocaleString()}, payable on or before the 5th of each month.</p>
+    <p><strong>Security Deposit:</strong> Rs. ${parseInt(dep||0).toLocaleString()}, refundable upon vacating in good condition within 30 days.</p>
+    <p><strong>Utilities:</strong> All utility bills (electricity, gas, water) shall be the Tenant's responsibility.</p>
+    <p><strong>Maintenance:</strong> Minor repairs under Rs. 5,000 are the Tenant's responsibility. Major structural repairs are the Landlord's responsibility.</p>
+    <p><strong>Termination:</strong> Either party may terminate with 30 days written notice. Early exit by Tenant forfeits security deposit.</p>
+    <p><strong>Subletting:</strong> Not permitted without prior written consent of the Landlord.</p>
+    <p><strong>Disputes:</strong> To be resolved through negotiation first; if unresolved, through courts of Lahore jurisdiction.</p>
+    ${document.getElementById('agr-clauses').value ? '<p><strong>Special Clauses:</strong> ' + document.getElementById('agr-clauses').value + '</p>' : ''}
+  `;
+  document.getElementById('agr-preview-wrap').style.display = '';
+  document.getElementById('agr-sign-btn').style.display = '';
+  document.getElementById('agr-signed').classList.remove('show');
+}
+function landlordSign() {
+  const now = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('agr-sign-btn').style.display = 'none';
+  document.getElementById('agr-sign-date').textContent = now;
+  document.getElementById('agr-signed').classList.add('show');
+}
+
+// ── TENANT MODAL ──────────────────────────────────────
+function openTenantModal(i) {
+  const t = tenantData[i];
+  document.getElementById('td-title').textContent = t.name;
+  document.getElementById('td-sub').textContent = t.prop;
+  document.getElementById('td-name').textContent = t.name;
+  document.getElementById('td-cnic').textContent = t.cnic;
+  document.getElementById('td-email').textContent = t.email;
+  document.getElementById('td-phone').textContent = t.phone;
+  document.getElementById('td-prop').textContent = t.prop;
+  document.getElementById('td-lease').textContent = t.lease;
+  document.getElementById('td-rent').textContent = t.rent;
+  document.getElementById('td-dep').textContent = t.dep;
+  document.getElementById('ov-tenant').classList.add('open');
+}
+
+// ── REQUESTS / MAINTENANCE ────────────────────────────
+function approveReq(btn) {
+  const row = btn.closest('.lrow');
+  row.querySelector('.lav').style.background = 'linear-gradient(135deg,var(--green),#35B5AC)';
+  row.querySelector('.lav').textContent = '✓';
+  row.querySelector('.lright').innerHTML = '<div class="ltime">Approved</div><span class="badge b-green">Approved</span>';
+  let nb = parseInt(document.getElementById('req-nb').textContent) - 1;
+  document.getElementById('req-nb').textContent = Math.max(0, nb);
+}
+function rejectReq(btn) {
+  btn.closest('.lrow').style.opacity = '0.4';
+  btn.closest('.lrow').querySelector('.lright').innerHTML = '<span class="badge b-red">Declined</span>';
+}
+function updateMaint(sel) {
+  const b = sel.parentElement;
+  if (sel.value === 'Resolved') {
+    const row = sel.closest('.lrow');
+    sel.remove();
+    const r = row.querySelector('.lright');
+    r.innerHTML = '<div class="ltime">Resolved</div><span class="badge b-green">Resolved</span>';
+    row.querySelector('.lav').style.background = 'linear-gradient(135deg,var(--green),#35B5AC)';
+  }
+}
+function resolveComp(btn) {
+  const row = btn.closest('.lrow');
+  row.querySelector('.lright').innerHTML = '<div class="ltime">Resolved</div><span class="badge b-green">Resolved</span>';
+}
+function reviewComp(btn) { btn.className = 'btn btn-sm btn-gold'; btn.textContent = 'Under Review'; }
+function markAllRead() {
+  document.querySelectorAll('.notif-item.unread').forEach(n => n.classList.remove('unread'));
+  document.getElementById('tn-nb').style.display = 'none';
+  document.getElementById('notif-nb2').style.display = 'none';
+}
+
+// ── FURNITURE ─────────────────────────────────────────
+function initFurnCanvas() {
+  furnReady = true;
+  const cv = document.getElementById('c-furn');
+  const W = cv.clientWidth || 600, H = 300;
+  const renderer = new THREE.WebGLRenderer({canvas:cv, antialias:true});
+  renderer.setSize(W, H); renderer.setClearColor(0x07090C); renderer.shadowMap.enabled = true;
+  const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(45, W/H, 0.1, 100);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+  const sun = new THREE.DirectionalLight(0xFFF5E0, 0.9); sun.position.set(8, 12, 6); sun.castShadow = true; scene.add(sun);
+  scene.add(Object.assign(new THREE.DirectionalLight(0xC9A96E, 0.18), {position: new THREE.Vector3(-5, 4, -5)}));
+  // Floor
+  const fl = new THREE.Mesh(new THREE.PlaneGeometry(14, 12), new THREE.MeshLambertMaterial({color:0x1A120A}));
+  fl.rotation.x = -Math.PI/2; fl.receiveShadow = true; scene.add(fl);
+  // Walls
+  [[0,1.5,-6,14,3,0.12,0x16120C],[0,1.5,6,14,3,0.12,0x16120C],[-7,1.5,0,0.12,3,12,0x18140E],[7,1.5,0,0.12,3,12,0x18140E]].forEach(([x,y,z,w,h,d,c]) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshLambertMaterial({color:c})); m.position.set(x,y,z); scene.add(m);
+  });
+  function b(w,h,d,c,x,y,z,k) { const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshLambertMaterial({color:c})); m.position.set(x,y,z); m.castShadow=true; scene.add(m); if(k)furnObjs[k]=[m]; return m; }
+  // Sofa
+  furnObjs.sofa = [b(2.6,0.4,0.9,0x3B5C8A,-2.5,0.2,2.5), b(2.6,0.55,0.2,0x2E4E7A,-2.5,0.45,2.85), b(0.15,0.5,0.9,0x2E4E7A,-3.7,0.35,2.5), b(0.15,0.5,0.9,0x2E4E7A,-1.3,0.35,2.5)];
+  // Bed
+  furnObjs.bed = [b(2.0,0.3,2.6,0x7A5C48,2.8,0.15,0), b(2.0,0.5,0.25,0x6A4C38,2.8,0.38,-1.1), b(0.18,0.6,0.18,0x5A3C28,1.85,0.35,-1.8), b(0.18,0.6,0.18,0x5A3C28,3.75,0.35,-1.8)];
+  // Dining
+  furnObjs.dining = [b(1.4,0.08,0.8,0x6B5A3E,-2,0.72,-2.5), b(0.06,0.72,0.06,0x5A4A2E,-2.6,0.36,-2.85), b(0.06,0.72,0.06,0x5A4A2E,-1.4,0.36,-2.85), b(0.06,0.72,0.06,0x5A4A2E,-2.6,0.36,-2.15), b(0.06,0.72,0.06,0x5A4A2E,-1.4,0.36,-2.15)];
+  // Wardrobe
+  furnObjs.wardrobe = [b(0.7,2.0,1.6,0x5A3E28,5.0,1.0,0)];
+  // TV
+  furnObjs.tv = [b(2.2,0.4,0.5,0x1A1A22,-5.5,0.2,-0.5), b(2.0,1.0,0.1,0x0A0A12,-5.5,0.85,-0.7)];
+  // Desk
+  furnObjs.desk = [b(1.4,0.08,0.7,0x7A6050,3.2,0.75,-2.8), b(0.05,0.75,0.05,0x6A5040,2.55,0.37,-2.45), b(0.05,0.75,0.05,0x6A5040,3.85,0.37,-2.45), b(0.05,0.75,0.05,0x6A5040,2.55,0.37,-3.15), b(0.05,0.75,0.05,0x6A5040,3.85,0.37,-3.15)];
+  // Plant
+  furnObjs.plant = [b(0.25,0.5,0.25,0x4A7030,5.0,0.25,-4.5), b(0.5,0.6,0.5,0x3A5A20,5.0,0.6,-4.5)];
+  // Lamp
+  furnObjs.lamp = [b(0.06,1.2,0.06,0x8A7A6A,-3.5,0.6,-1.0), b(0.35,0.2,0.35,0xC9A96E,-3.5,1.22,-1.0)];
+  // Hide plant/lamp initially
+  furnObjs.plant.forEach(m=>m.visible=false); furnObjs.lamp.forEach(m=>m.visible=false);
+  let ry=0.5,rx=0.65,zm=16,drag=false,px=0,py=0;
+  function uc(){cam.position.set(Math.sin(ry)*Math.cos(rx)*zm,Math.sin(rx)*zm+0.5,Math.cos(ry)*Math.cos(rx)*zm);cam.lookAt(0,0.8,0);}
+  uc();
+  cv.addEventListener('mousedown',e=>{drag=true;px=e.clientX;py=e.clientY;});
+  window.addEventListener('mouseup',()=>drag=false);
+  window.addEventListener('mousemove',e=>{if(!drag)return;ry+=(e.clientX-px)*0.007;rx=Math.max(0.1,Math.min(1.3,rx+(e.clientY-py)*0.007));px=e.clientX;py=e.clientY;uc();});
+  cv.addEventListener('wheel',e=>{zm=Math.max(6,Math.min(24,zm+e.deltaY*0.02));uc();e.preventDefault();},{passive:false});
+  cv.addEventListener('touchstart',e=>{if(e.touches.length===1){drag=true;px=e.touches[0].clientX;py=e.touches[0].clientY;}},{passive:true});
+  window.addEventListener('touchend',()=>drag=false);
+  window.addEventListener('touchmove',e=>{if(!drag||e.touches.length!==1)return;ry+=(e.touches[0].clientX-px)*0.007;rx=Math.max(0.1,Math.min(1.3,rx+(e.touches[0].clientY-py)*0.007));px=e.touches[0].clientX;py=e.touches[0].clientY;uc();},{passive:true});
+  (function anim(){requestAnimationFrame(anim);renderer.render(scene,cam);})();
+}
+function tFurn(btn, k) {
+  btn.classList.toggle('on');
+  const show = btn.classList.contains('on');
+  if (furnObjs[k]) furnObjs[k].forEach(m => m.visible = show);
+}
+function saveFurnLayout() { flash('furn-ok'); }
+function furnPropChange() { /* In production: load furniture data for selected property */ }
+
+// ── 3D PROPERTY VIEW ──────────────────────────────────
+function open3D(id) {
+  const p = properties.find(x => x.id === id); if (!p) return;
+  document.getElementById('m3d-pname').textContent = p.name;
+  document.getElementById('m-rent').textContent = 'Rs. ' + p.rent.toLocaleString() + '/mo';
+  document.getElementById('m-status').textContent = p.status === 'available' ? '✅ Available' : '🔑 Rented';
+  document.getElementById('m-beds').textContent = p.beds + ' Beds';
+  document.getElementById('m-area').textContent = p.area;
+  document.getElementById('ov-3d').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (!m3dReady) { setTimeout(() => { initHouse3D('c3main','main'); m3dReady = true; }, 60); }
+  else resetCam();
+}
+function close3D() { document.getElementById('ov-3d').classList.remove('open'); document.body.style.overflow = ''; }
+
+// 3D control stubs — real calls go to house3d.js via initHouse3D
+function resetCam() { if(window.resetCamera3D) resetCamera3D('main'); }
+function toggleWire() { if(window.toggleWireframe) toggleWireframe('main'); }
+function camFront() { if(window.rotateFront) rotateFront('main'); }
+function camSide() { if(window.rotateSide) rotateSide('main'); }
+function camTop() { if(window.rotateTop) rotateTop('main'); }
+function toggleNight() { nightMode=!nightMode; if(window.setDayNight) setDayNight('main',nightMode); }
+
+// ── HELPERS ───────────────────────────────────────────
+function flash(id) {
+  const el = document.getElementById(id); if(!el) return;
+  el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2800);
+}
+function filterPayments(val) { /* filter payment table rows in production */ }
+
+// ── INIT ──────────────────────────────────────────────
+document.addEventListener('keydown', e => { if(e.key==='Escape'){closeMod('ov-tenant');closeMod('ov-del');close3D();} });
+document.addEventListener('DOMContentLoaded', () => {
+  // Load landlord info from localStorage if available
+  const users = JSON.parse(localStorage.getItem('tms_users') || '{}');
+  const entries = Object.entries(users).filter(([,u]) => u.role === 'landlord');
+  if (entries.length) {
+    const [email, u] = entries[entries.length-1];
+    if (u.name) {
+      document.getElementById('p-fn').value = u.name.split(' ')[0] || '';
+      document.getElementById('p-ln').value = u.name.split(' ').slice(1).join(' ') || '';
+      document.getElementById('prof-name').textContent = u.name;
+      document.getElementById('prof-av').textContent = u.name[0].toUpperCase();
+      document.getElementById('sb-av').textContent = u.name[0].toUpperCase();
+      document.getElementById('sb-name').textContent = u.name.split(' ')[0];
     }
-    closeAll(); renderList();
+    document.getElementById('p-em').value = email;
+    document.getElementById('prof-email').textContent = email;
   }
-
-  function openDel(id, name) {
-    delId = id;
-    document.getElementById('del-name').textContent = '"' + name + '"';
-    document.getElementById('modal-del').classList.add('open');
-  }
-  function confirmDel() { properties = properties.filter(p => p.id !== delId); closeAll(); renderList(); }
-
-  function openView3D(id, name) {
-    document.getElementById('modal3d-name').textContent = name + ' — 3D View';
-    document.getElementById('modal-3d').classList.add('open');
-    setTimeout(() => { if (!modalInitDone) { initHouse3D('canvas-modal','modal'); modalInitDone = true; } }, 80);
-  }
-
-  function closeAll() { document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open')); }
-  document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) closeAll(); }));
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
-
-  renderList();
+  renderProps();
+  updateStats();
+  // Set default date for agreement
+  document.getElementById('agr-start').value = new Date().toISOString().slice(0,10);
+});
 </script>
+
 <script>
-  (function(){
-    const saved = localStorage.getItem('tms-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', saved);
-    const btn = document.getElementById('theme-btn');
-    if (btn) btn.textContent = saved === 'dark' ? '🌙' : '☀️';
-  })();
-  function toggleTheme() {
-    const html = document.documentElement;
-    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', next);
-    const btn = document.getElementById('theme-btn');
-    if (btn) btn.textContent = next === 'dark' ? '🌙' : '☀️';
-    localStorage.setItem('tms-theme', next);
-  }
+(function(){const s=localStorage.getItem('tms-theme')||'dark';document.documentElement.setAttribute('data-theme',s);const b=document.getElementById('theme-btn');if(b)b.textContent=s==='dark'?'🌙':'☀️';})();
+function toggleTheme(){const h=document.documentElement,n=h.getAttribute('data-theme')==='dark'?'light':'dark';h.setAttribute('data-theme',n);const b=document.getElementById('theme-btn');if(b)b.textContent=n==='dark'?'🌙':'☀️';localStorage.setItem('tms-theme',n);}
 </script>
 </body>
 </html>
