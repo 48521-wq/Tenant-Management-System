@@ -1,26 +1,50 @@
 // ═══════════════════════════════════════════════════════
-//  TMS — app.js
-//  Auth: Strict login, Google One Tap OAuth, Register only
+//  TMS — app.js  v2.0
+//  Auth: MongoDB Atlas Backend + Real Google OAuth
+//  Backend API: http://localhost:5000/api
 // ═══════════════════════════════════════════════════════
 
-const ADMIN_EMAIL    = 'adboy768@gmail.com';
-const ADMIN_PASSWORD = 'adnan123@';
+// ── CONFIG ────────────────────────────────────────────
+// ⚠️  Replace with your actual Google Client ID
+//     Get from: console.cloud.google.com → APIs & Services → Credentials
+const GOOGLE_CLIENT_ID = '1092570435598-nicfmpo6mpqo6a1h36eg614082k8994l.apps.googleusercontent.com';
 
-// Google OAuth Client ID — replace with your own from
-// console.cloud.google.com → APIs & Services → Credentials
-const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+// ⚠️  Backend URL — change if deployed elsewhere
+const API_BASE = 'http://localhost:5000/api';
 
-// ── localStorage helpers ─────────────────────────────
-function getUsers() {
-  return JSON.parse(localStorage.getItem('tms_users') || '{}');
+// ── Token helpers (localStorage for session) ─────────
+const getToken  = ()    => localStorage.getItem('tms_token');
+const setToken  = (t)   => localStorage.setItem('tms_token', t);
+const setUser   = (u)   => localStorage.setItem('tms_user', JSON.stringify(u));
+const getUser   = ()    => JSON.parse(localStorage.getItem('tms_user') || 'null');
+const clearAuth = ()    => { localStorage.removeItem('tms_token'); localStorage.removeItem('tms_user'); };
+
+// ── API call helper ───────────────────────────────────
+async function apiCall(endpoint, method = 'GET', body = null) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+  };
+  const token = getToken();
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+  if (body)  opts.body = JSON.stringify(body);
+
+  const res  = await fetch(API_BASE + endpoint, opts);
+  const data = await res.json();
+  return { ok: res.ok, status: res.status, data };
 }
-function saveUsers(users) {
-  localStorage.setItem('tms_users', JSON.stringify(users));
+
+// ── Redirect based on role ────────────────────────────
+function redirectByRole(role) {
+  if (role === 'admin')         window.location.replace('pages/admin-dashboard.html');
+  else if (role === 'landlord') window.location.replace('pages/landlord-dashboard.html');
+  else                          window.location.replace('pages/tenant-dashboard.html');
 }
 
-// ── UI helpers ───────────────────────────────────────
+// ── UI helpers ────────────────────────────────────────
 function showError(msg) {
   const box = document.getElementById('error-box');
+  if (!box) return;
   box.textContent = msg;
   box.style.display = 'block';
   box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -32,11 +56,11 @@ function clearError() {
 function setLoading(btnId, loading, defaultText) {
   const btn = document.getElementById(btnId);
   if (!btn) return;
-  btn.disabled = loading;
+  btn.disabled  = loading;
   btn.textContent = loading ? 'Please wait…' : defaultText;
 }
 
-// ── Tab switching ────────────────────────────────────
+// ── Tab switching ─────────────────────────────────────
 function switchTab(tab) {
   clearError();
   const signin = document.getElementById('form-signin');
@@ -56,7 +80,7 @@ function switchTab(tab) {
   document.getElementById('screen-forgot')?.style && (document.getElementById('screen-forgot').style.display = 'none');
 }
 
-// ── Role selection ───────────────────────────────────
+// ── Role selection ────────────────────────────────────
 let selectedRole = '';
 function selectRole(role) {
   selectedRole = role;
@@ -67,14 +91,14 @@ function selectRole(role) {
   if (err) err.style.display = 'none';
 }
 
-// ── Password strength ────────────────────────────────
+// ── Password strength ─────────────────────────────────
 function checkStrength(val) {
-  const segs = ['s1','s2','s3','s4'];
+  const segs   = ['s1','s2','s3','s4'];
   const colors = ['#FF6B6B','#FFB347','#C9A96E','#4ECDC4'];
   let score = 0;
-  if (val.length >= 8) score++;
-  if (/[A-Z]/.test(val)) score++;
-  if (/[0-9]/.test(val)) score++;
+  if (val.length >= 8)          score++;
+  if (/[A-Z]/.test(val))        score++;
+  if (/[0-9]/.test(val))        score++;
   if (/[^A-Za-z0-9]/.test(val)) score++;
   const labels = ['','Weak','Fair','Good','Strong'];
   segs.forEach((id, i) => {
@@ -85,7 +109,6 @@ function checkStrength(val) {
   if (lbl) { lbl.textContent = score > 0 ? labels[score] : ''; lbl.style.color = colors[score-1] || ''; }
 }
 
-// ── Toggle password visibility ───────────────────────
 function togglePass(id, btn) {
   const inp = document.getElementById(id);
   if (!inp) return;
@@ -93,69 +116,62 @@ function togglePass(id, btn) {
   btn.style.opacity = inp.type === 'text' ? '1' : '0.5';
 }
 
-// ── Forgot password ──────────────────────────────────
+// ── Forgot password ───────────────────────────────────
 function showForgot() {
-  document.getElementById('form-signin').style.display  = 'none';
-  document.getElementById('form-signup').style.display  = 'none';
-  document.getElementById('main-tabs').style.display    = 'none';
+  document.getElementById('form-signin').style.display   = 'none';
+  document.getElementById('form-signup').style.display   = 'none';
+  document.getElementById('main-tabs').style.display     = 'none';
   document.getElementById('screen-forgot').style.display = '';
   clearError();
 }
 function showAuth() {
   document.getElementById('screen-forgot').style.display  = 'none';
   document.getElementById('screen-success').style.display = 'none';
-  document.getElementById('main-tabs').style.display = '';
+  document.getElementById('main-tabs').style.display      = '';
   switchTab('signin');
 }
 function handleForgot() {
   const email = document.getElementById('fp-email')?.value.trim();
   const err   = document.getElementById('fp-error');
   if (!email) { if (err) { err.textContent='Please enter your email.'; err.style.display='block'; } return; }
-  const users = getUsers();
-  if (!users[email] && email !== ADMIN_EMAIL) {
-    if (err) { err.textContent='No account found with this email.'; err.style.display='block'; } return;
-  }
   document.getElementById('screen-forgot').style.display  = 'none';
   document.getElementById('screen-success').style.display = '';
   document.getElementById('success-email-display').textContent = email;
 }
 
-// ── STRICT SIGN IN ───────────────────────────────────
-// Only registered users + admin can login. No defaults.
-function handleSignin() {
+// ══════════════════════════════════════════════════════
+//  SIGN IN — calls /api/auth/login
+// ══════════════════════════════════════════════════════
+async function handleSignin() {
   clearError();
   const email = document.getElementById('signin-email')?.value.trim().toLowerCase();
   const pass  = document.getElementById('signin-password')?.value;
-  if (!email || !pass) { showError('Please enter email and password.'); return; }
 
+  if (!email || !pass) { showError('Please enter email and password.'); return; }
   setLoading('signin-btn', true, 'Sign In');
 
-  setTimeout(() => {
+  try {
+    const { ok, data } = await apiCall('/auth/login', 'POST', { email, password: pass });
+
+    if (ok && data.success) {
+      setToken(data.token);
+      setUser(data.user);
+      redirectByRole(data.user.role);
+    } else {
+      showError(data.message || 'Login failed. Please try again.');
+    }
+  } catch (err) {
+    showError('Cannot connect to server. Make sure the backend is running on port 5000.');
+    console.error('Login fetch error:', err);
+  } finally {
     setLoading('signin-btn', false, 'Sign In');
-
-    // Admin check
-    if (email === ADMIN_EMAIL && pass === ADMIN_PASSWORD) {
-      window.location.href = 'pages/admin-dashboard.html'; return;
-    }
-
-    // Registered user check
-    const users = getUsers();
-    if (users[email]) {
-      const u = users[email];
-      if (u.password && u.password !== pass) {
-        showError('Incorrect password. Please try again.'); return;
-      }
-      const dest = u.role === 'landlord' ? 'pages/landlord-dashboard.html' : 'pages/tenant-dashboard.html';
-      window.location.href = dest; return;
-    }
-
-    // Not registered
-    showError('No account found with this email. Please sign up first.');
-  }, 600);
+  }
 }
 
-// ── SIGN UP ──────────────────────────────────────────
-function handleSignup() {
+// ══════════════════════════════════════════════════════
+//  SIGN UP — calls /api/auth/register
+// ══════════════════════════════════════════════════════
+async function handleSignup() {
   clearError();
   const name  = document.getElementById('signup-name')?.value.trim();
   const email = document.getElementById('signup-email')?.value.trim().toLowerCase();
@@ -163,7 +179,7 @@ function handleSignup() {
   const conf  = document.getElementById('signup-confirm')?.value;
 
   if (!name || !email || !pass || !conf) { showError('Please fill in all fields.'); return; }
-  if (pass !== conf)  { showError('Passwords do not match.'); return; }
+  if (pass !== conf)   { showError('Passwords do not match.'); return; }
   if (pass.length < 6) { showError('Password must be at least 6 characters.'); return; }
   if (!selectedRole) {
     const err = document.getElementById('role-error');
@@ -171,133 +187,125 @@ function handleSignup() {
     showError('Please select a role (Tenant or Landlord).'); return;
   }
 
-  const users = getUsers();
-  if (users[email] || email === ADMIN_EMAIL) {
-    showError('An account with this email already exists. Please sign in.'); return;
-  }
-
   setLoading('signup-btn', true, 'Create Account');
-  setTimeout(() => {
+
+  try {
+    const { ok, data } = await apiCall('/auth/register', 'POST', { name, email, password: pass, role: selectedRole });
+
+    if (ok && data.success) {
+      setToken(data.token);
+      setUser(data.user);
+      redirectByRole(data.user.role);
+    } else {
+      showError(data.message || 'Registration failed. Please try again.');
+    }
+  } catch (err) {
+    showError('Cannot connect to server. Make sure the backend is running on port 5000.');
+    console.error('Signup fetch error:', err);
+  } finally {
     setLoading('signup-btn', false, 'Create Account');
-    users[email] = { name, role: selectedRole, password: pass };
-    saveUsers(users);
-    const dest = selectedRole === 'landlord' ? 'pages/landlord-dashboard.html' : 'pages/tenant-dashboard.html';
-    window.location.href = dest;
-  }, 600);
+  }
 }
 
-// ═══════════════════════════════════════════════════════
-//  GOOGLE OAUTH — Real Google Sign-In via GSI library
-//  Uses Google Identity Services (accounts.google.com/gsi)
-//  Shows a Google popup with the user's actual Google accounts
-// ═══════════════════════════════════════════════════════
-
+// ══════════════════════════════════════════════════════
+//  GOOGLE OAUTH — Real Google Sign-In
+//  Sends Google credential token to /api/auth/google
+// ══════════════════════════════════════════════════════
 let googleMode = ''; // 'signin' | 'signup'
 
-// Called when Google GSI library loads
 function initGoogleAuth() {
   if (!window.google || GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE')) return;
   google.accounts.id.initialize({
     client_id: GOOGLE_CLIENT_ID,
-    callback: handleGoogleCredential,
+    callback:  handleGoogleCredential,
     auto_select: false,
     cancel_on_tap_outside: true,
+    ux_mode: 'popup',
   });
+  console.log('✅ Google Auth initialized');
 }
 
-// Called when Google returns a credential (JWT)
-function handleGoogleCredential(response) {
+// Called when Google returns credential JWT
+async function handleGoogleCredential(response) {
   try {
-    // Decode JWT payload (base64)
-    const payload = JSON.parse(atob(response.credential.split('.')[1]));
-    const email   = payload.email?.toLowerCase() || '';
-    const name    = payload.name  || email.split('@')[0];
+    clearError();
 
-    if (!email) { showError('Could not retrieve email from Google.'); return; }
+    // Send to our backend for verification + user creation/lookup
+    const { ok, data } = await apiCall('/auth/google', 'POST', {
+      credential: response.credential,
+      role:       selectedRole || undefined,
+      mode:       googleMode
+    });
 
-    const users = getUsers();
-
-    if (googleMode === 'signin') {
-      // Admin via Google
-      if (email === ADMIN_EMAIL) { window.location.href = 'pages/admin-dashboard.html'; return; }
-      // Registered user
-      if (users[email]) {
-        const dest = users[email].role === 'landlord' ? 'pages/landlord-dashboard.html' : 'pages/tenant-dashboard.html';
-        window.location.href = dest; return;
-      }
-      showError('No account found for ' + email + '. Please sign up first.');
-
-    } else if (googleMode === 'signup') {
-      if (users[email] || email === ADMIN_EMAIL) {
-        showError('Account already exists for ' + email + '. Please sign in instead.'); return;
-      }
-      if (!selectedRole) {
-        const err = document.getElementById('role-error');
-        if (err) err.style.display = 'block';
-        showError('Please select a role first, then try Google sign-up again.'); return;
-      }
-      users[email] = { name, role: selectedRole, google: true };
-      saveUsers(users);
-      const dest = selectedRole === 'landlord' ? 'pages/landlord-dashboard.html' : 'pages/tenant-dashboard.html';
-      window.location.href = dest;
+    if (ok && data.success) {
+      setToken(data.token);
+      setUser(data.user);
+      closeGoogleModal();
+      redirectByRole(data.user.role);
+    } else {
+      showError(data.message || 'Google sign-in failed.');
+      closeGoogleModal();
     }
-  } catch(e) {
-    console.error('Google credential error:', e);
-    showError('Google sign-in failed. Please try email/password instead.');
+  } catch (err) {
+    showError('Cannot connect to server. Make sure the backend is running.');
+    console.error('Google credential error:', err);
   }
 }
 
-// ── Trigger Google popup (Sign In) ───────────────────
 function handleGoogleSignin() {
   clearError();
   googleMode = 'signin';
-
-  // If real GSI is loaded, use it
   if (window.google && !GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE')) {
-    google.accounts.id.prompt((notification) => {
-      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-        // Fallback: popup button flow
-        triggerGooglePopup();
-      }
-    });
+    triggerGooglePopup();
     return;
   }
-
-  // Fallback: open Google email modal
   openGoogleModal('signin');
 }
 
-// ── Trigger Google popup (Sign Up) ───────────────────
 function handleGoogleSignup() {
   clearError();
   googleMode = 'signup';
-
-  if (window.google && !GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE')) {
-    google.accounts.id.prompt((notification) => {
-      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-        triggerGooglePopup();
-      }
-    });
+  if (!selectedRole) {
+    const err = document.getElementById('role-error');
+    if (err) err.style.display = 'block';
+    showError('Please select Tenant or Landlord first, then use Google sign-up.');
     return;
   }
-
+  if (window.google && !GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE')) {
+    triggerGooglePopup();
+    return;
+  }
   openGoogleModal('signup');
 }
 
-// ── Google OAuth popup (when One Tap is blocked) ─────
 function triggerGooglePopup() {
   if (!window.google || GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE')) return;
-  google.accounts.oauth2.initCodeClient({
-    client_id: GOOGLE_CLIENT_ID,
-    scope: 'email profile',
-    callback: (response) => {
-      if (response.error) { showError('Google sign-in was cancelled.'); return; }
+  // Use a hidden container for Google button click trigger
+  let container = document.getElementById('g-btn-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'g-btn-container';
+    container.style.cssText = 'position:fixed;top:-999px;left:-999px;z-index:-1';
+    document.body.appendChild(container);
+  }
+  container.innerHTML = '';
+  google.accounts.id.renderButton(container, {
+    theme: 'outline', size: 'large', type: 'standard'
+  });
+  // Click the rendered button
+  setTimeout(() => {
+    const btn = container.querySelector('[role=button]') || container.firstElementChild;
+    if (btn) btn.click();
+    else {
+      // Fallback to One Tap
+      google.accounts.id.prompt((n) => {
+        if (n.isNotDisplayed() || n.isSkippedMoment()) openGoogleModal(googleMode);
+      });
     }
-  }).requestCode();
+  }, 100);
 }
 
-// ── Google email fallback modal ──────────────────────
-//  Shown when real OAuth isn't configured yet
+// ── Fallback Google modal (when OAuth not configured) ─
 function openGoogleModal(mode) {
   const isSignin = mode === 'signin';
   document.getElementById('g-modal-title').textContent = isSignin ? 'Sign in with Google' : 'Sign up with Google';
@@ -310,59 +318,78 @@ function openGoogleModal(mode) {
   setTimeout(() => document.getElementById('g-email-input').focus(), 120);
 }
 function closeGoogleModal() {
-  document.getElementById('g-overlay').classList.remove('open');
+  document.getElementById('g-overlay')?.classList.remove('open');
 }
 
-// ── Confirm Google modal (fallback) ─────────────────
-function confirmGoogle() {
+// Fallback modal confirm — simulates Google, goes to backend
+async function confirmGoogle() {
   const email = document.getElementById('g-email-input')?.value.trim().toLowerCase();
   const errEl = document.getElementById('g-error');
-  const showGErr = (msg) => { errEl.textContent = msg; errEl.classList.add('show'); };
+  const showGErr = (msg) => { if(errEl){ errEl.textContent = msg; errEl.classList.add('show'); } };
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     showGErr('Please enter a valid email address.'); return;
   }
 
-  const users = getUsers();
-
-  if (googleMode === 'signin') {
-    if (email === ADMIN_EMAIL) { closeGoogleModal(); window.location.href = 'pages/admin-dashboard.html'; return; }
-    if (users[email]) {
-      closeGoogleModal();
-      const dest = users[email].role === 'landlord' ? 'pages/landlord-dashboard.html' : 'pages/tenant-dashboard.html';
-      window.location.href = dest; return;
+  // When real Google Client ID not set: simulate a credential call
+  // Send email directly (backend will handle admin check + user lookup)
+  // NOTE: This fallback uses a simplified flow for development only.
+  //       With real Google OAuth, the credential JWT is verified server-side.
+  try {
+    // For fallback: we simulate sign in/up with just email (no password)
+    if (googleMode === 'signin') {
+      const { ok, data } = await apiCall('/auth/login-google-fallback', 'POST', { email });
+      if (ok && data.success) {
+        setToken(data.token); setUser(data.user);
+        closeGoogleModal(); redirectByRole(data.user.role);
+      } else {
+        showGErr(data.message || 'No account found. Please sign up first.');
+      }
+    } else {
+      if (!selectedRole) {
+        closeGoogleModal();
+        const err = document.getElementById('role-error');
+        if (err) err.style.display = 'block';
+        showError('Please select a role first, then use Google sign-up.'); return;
+      }
+      const { ok, data } = await apiCall('/auth/register', 'POST', {
+        name: email.split('@')[0],
+        email,
+        password: 'google_' + Math.random().toString(36).slice(2),
+        role: selectedRole
+      });
+      if (ok && data.success) {
+        setToken(data.token); setUser(data.user);
+        closeGoogleModal(); redirectByRole(data.user.role);
+      } else {
+        showGErr(data.message || 'Registration failed.');
+      }
     }
-    showGErr('No account found. Please sign up first.');
-
-  } else {
-    if (users[email] || email === ADMIN_EMAIL) {
-      showGErr('Account already exists. Please sign in instead.'); return;
-    }
-    if (!selectedRole) {
-      closeGoogleModal();
-      const err = document.getElementById('role-error');
-      if (err) err.style.display = 'block';
-      showError('Please select a role first, then use Google sign-up.'); return;
-    }
-    users[email] = { name: email.split('@')[0], role: selectedRole, google: true };
-    saveUsers(users);
-    closeGoogleModal();
-    const dest = selectedRole === 'landlord' ? 'pages/landlord-dashboard.html' : 'pages/tenant-dashboard.html';
-    window.location.href = dest;
+  } catch(err) {
+    showGErr('Cannot connect to server.');
   }
 }
 
-// ── Keyboard shortcut ────────────────────────────────
+// ── Keyboard ──────────────────────────────────────────
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeGoogleModal();
+  if (e.key === 'Enter') {
+    const active = document.getElementById('form-signin')?.style.display !== 'none';
+    if (active) handleSignin();
+  }
 });
 
-// ── Load Google GSI script dynamically ──────────────
+// ── Load Google GSI script ────────────────────────────
 (function loadGSI() {
-  if (GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE')) return; // skip until real ID is set
+  if (GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE')) {
+    console.log('ℹ️  Google OAuth not configured. Using fallback modal.');
+    return;
+  }
   const s = document.createElement('script');
-  s.src = 'https://accounts.google.com/gsi/client';
+  s.src   = 'https://accounts.google.com/gsi/client';
   s.async = true; s.defer = true;
   s.onload = initGoogleAuth;
   document.head.appendChild(s);
 })();
+
+// ── No auto-login — user must always sign in manually after logout ──

@@ -1,0 +1,66 @@
+═══════════════════════════════════════════════
+  TMS — How to Run (Complete Guide)
+═══════════════════════════════════════════════
+
+✅ MongoDB Atlas: CONNECTED
+   URI: cluster0.yn3p7yr.mongodb.net
+   DB:  tms_database
+
+✅ Google OAuth: CONFIGURED  
+   Client ID: 1092570435598-nicfmpo6...
+
+✅ Admin Login:
+   Email:    adboy768@gmail.com
+   Password: adnan123@
+
+═══════════════════════════════════════════════
+  STEP 1 — Install Node.js (agar nahi hai)
+═══════════════════════════════════════════════
+Download: https://nodejs.org  (LTS version)
+Install kar lo — Next > Next > Finish
+
+═══════════════════════════════════════════════
+  STEP 2 — Backend Start karo
+═══════════════════════════════════════════════
+Windows users:
+  → START_BACKEND.bat par double-click karo
+
+Mac/Linux users:
+  → Terminal mein: ./START_BACKEND.sh
+
+Ya manually:
+  1. Terminal/CMD kholein
+  2. is folder mein jao (TMS_Final)
+  3. Run karo:
+       cd backend
+       npm install
+       npm start
+
+Yeh aana chahiye:
+  🚀 TMS Backend running on http://localhost:5000
+  ✅ MongoDB Atlas Connected
+
+═══════════════════════════════════════════════
+  STEP 3 — Frontend kholein
+═══════════════════════════════════════════════
+Option A (Recommended):
+  VS Code mein folder kholein
+  index.html par right-click → "Open with Live Server"
+  → http://127.0.0.1:5500 par khule ga
+
+Option B:
+  index.html par directly double-click karo
+  (Google OAuth kaam nahi kare ga is mein)
+
+═══════════════════════════════════════════════
+  KAAM KAISE KARTA HAI
+═══════════════════════════════════════════════
+Sign Up → Data MongoDB Atlas mein save hota hai
+Sign In → MongoDB se fetch ho kar verify hota hai
+Google  → Real Google account se login hota hai
+Admin   → adboy768@gmail.com / adnan123@
+
+Atlas par data check karo:
+https://cloud.mongodb.com
+→ tms_database → users collection
+═══════════════════════════════════════════════
