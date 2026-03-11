@@ -305,6 +305,69 @@ canvas.c3main:active{cursor:grabbing}
 </style>
 </head>
 <body>
+<script>
+// ── Dashboard Auth Guard ─────────────────────────────
+// This runs on every dashboard page to verify the user is logged in
+(function dashboardAuthGuard() {
+  const token = localStorage.getItem('tms_token');
+  const user  = JSON.parse(localStorage.getItem('tms_user') || 'null');
+  if (!token || !user) {
+    localStorage.clear();
+    window.location.replace('../index.html');
+    return;
+  }
+  const path = window.location.pathname;
+  if (path.includes('admin-dashboard') && user.role !== 'admin') {
+    localStorage.clear(); window.location.replace('../index.html'); return;
+  }
+  if (path.includes('landlord-dashboard') && user.role !== 'landlord') {
+    localStorage.clear(); window.location.replace('../index.html'); return;
+  }
+  if (path.includes('tenant-dashboard') && user.role !== 'tenant') {
+    localStorage.clear(); window.location.replace('../index.html'); return;
+  }
+})();
+
+function tmsLogout() {
+  localStorage.clear();
+  sessionStorage.clear();
+  window.location.replace('../index.html');
+}
+
+// Populate user info
+document.addEventListener('DOMContentLoaded', function(){
+  const user = JSON.parse(localStorage.getItem('tms_user') || '{}');
+  const name = user.name || 'Landlord';
+  const email = user.email || '';
+  const initials = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() || 'L';
+  const sbAv = document.getElementById('sb-av'); if(sbAv) sbAv.textContent = initials;
+  const sbName = document.getElementById('sb-name'); if(sbName) sbName.textContent = name;
+  const profAv = document.getElementById('prof-av'); if(profAv) profAv.textContent = initials;
+  const profName = document.getElementById('prof-name'); if(profName) profName.textContent = name;
+  const profEmail = document.getElementById('prof-email'); if(profEmail) profEmail.textContent = email;
+  const fn = document.getElementById('p-fn'); if(fn) fn.value = name.split(' ')[0] || '';
+  const em = document.getElementById('p-em'); if(em) em.value = email;
+});
+
+function getTMSUser() {
+  return JSON.parse(localStorage.getItem('tms_user') || 'null');
+}
+
+async function tmsApiCall(endpoint, method = 'GET', body = null) {
+  const token = localStorage.getItem('tms_token');
+  const opts = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res  = await fetch('http://localhost:5000/api' + endpoint, opts);
+  return res.json();
+}
+</script>
+
 <div class="bg"></div>
 <div class="bg-grid"></div>
 
@@ -317,7 +380,7 @@ canvas.c3main:active{cursor:grabbing}
   <span class="tn-pill">🏢 Landlord</span>
   <button class="tn-btn" onclick="gp('notifications',null)" title="Notifications">🔔<span class="tn-badge" id="tn-nb">4</span></button>
   <button class="tn-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
-  <button class="tn-logout" onclick="location.href='../index.html'">
+  <button class="tn-logout" onclick="tmsLogout()">
     <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout
   </button>
 </nav>
@@ -363,18 +426,17 @@ canvas.c3main:active{cursor:grabbing}
 <div class="page active" id="page-dashboard">
   <div class="pg-head"><div><div class="pg-title">Dashboard</div><div class="pg-sub">Your property portfolio overview</div></div><button class="btn btn-gold" onclick="gp('add-prop',null)"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Property</button></div>
   <div class="stats-row">
-    <div class="stat-card"><div class="stat-icon ci-gold">🏠</div><div><div class="stat-val" style="color:var(--gold)" id="st-total">3</div><div class="stat-lbl">Total Properties</div><div class="stat-delta">↑ Active Portfolio</div></div></div>
-    <div class="stat-card"><div class="stat-icon ci-green">✅</div><div><div class="stat-val" style="color:var(--green)" id="st-avail">1</div><div class="stat-lbl">Available</div><div class="stat-delta" style="color:var(--green)">Ready to Rent</div></div></div>
-    <div class="stat-card"><div class="stat-icon ci-warn">🔑</div><div><div class="stat-val" style="color:var(--warn)" id="st-rented">2</div><div class="stat-lbl">Rented Out</div><div class="stat-delta" style="color:var(--warn)">Occupied</div></div></div>
-    <div class="stat-card"><div class="stat-icon ci-blue">💰</div><div><div class="stat-val" style="color:var(--blue);font-size:16px" id="st-rev">Rs. 1,27,000</div><div class="stat-lbl">Monthly Revenue</div><div class="stat-delta">Active Leases</div></div></div>
+    <div class="stat-card"><div class="stat-icon ci-gold">🏠</div><div><div class="stat-val" style="color:var(--gold)" id="st-total">0</div><div class="stat-lbl">Total Properties</div><div class="stat-delta">↑ Active Portfolio</div></div></div>
+    <div class="stat-card"><div class="stat-icon ci-green">✅</div><div><div class="stat-val" style="color:var(--green)" id="st-avail">0</div><div class="stat-lbl">Available</div><div class="stat-delta" style="color:var(--green)">Ready to Rent</div></div></div>
+    <div class="stat-card"><div class="stat-icon ci-warn">🔑</div><div><div class="stat-val" style="color:var(--warn)" id="st-rented">0</div><div class="stat-lbl">Rented Out</div><div class="stat-delta" style="color:var(--warn)">Occupied</div></div></div>
+    <div class="stat-card"><div class="stat-icon ci-blue">💰</div><div><div class="stat-val" style="color:var(--blue);font-size:16px" id="st-rev">Rs. 0</div><div class="stat-lbl">Monthly Revenue</div><div class="stat-delta">Active Leases</div></div></div>
   </div>
   <div class="g2">
     <div class="card">
       <div class="card-head"><div class="ci ci-gold">📋</div><div><div class="card-title">Recent Activity</div><div class="card-sub">Latest updates</div></div></div>
-      <div class="lrow"><div class="lav la-blue">A</div><div class="lbody"><div class="ltitle">Ali Hassan paid January rent</div><div class="lsub">Gulberg Flat · Rs. 28,000</div></div><div class="lright"><div class="ltime">2h ago</div><span class="badge b-green">Paid</span></div></div>
-      <div class="lrow"><div class="lav la-warn">!!</div><div class="lbody"><div class="ltitle">New maintenance request</div><div class="lsub">DHA House · AC Not Working · High</div></div><div class="lright"><div class="ltime">5h ago</div><span class="badge b-warn">Urgent</span></div></div>
-      <div class="lrow"><div class="lav la-green">✓</div><div class="lbody"><div class="ltitle">Lease signed by Sara Khan</div><div class="lsub">Bahria Apartment · 12-month term</div></div><div class="lright"><div class="ltime">1d ago</div><span class="badge b-green">Signed</span></div></div>
-      <div class="lrow"><div class="lav la-red">⚠</div><div class="lbody"><div class="ltitle">Complaint received</div><div class="lsub">DHA House · Noise issue</div></div><div class="lright"><div class="ltime">2d ago</div><span class="badge b-red">Open</span></div></div>
+      <div id="landlord-activity-list">
+        <div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">No activity yet. Add tenants or properties to see updates.</div>
+      </div>
     </div>
     <div class="card">
       <div class="card-head"><div class="ci ci-blue">📊</div><div><div class="card-title">Revenue Breakdown</div><div class="card-sub">Current month</div></div></div>
@@ -1217,5 +1279,51 @@ document.addEventListener('DOMContentLoaded', () => {
 (function(){const s=localStorage.getItem('tms-theme')||'dark';document.documentElement.setAttribute('data-theme',s);const b=document.getElementById('theme-btn');if(b)b.textContent=s==='dark'?'🌙':'☀️';})();
 function toggleTheme(){const h=document.documentElement,n=h.getAttribute('data-theme')==='dark'?'light':'dark';h.setAttribute('data-theme',n);const b=document.getElementById('theme-btn');if(b)b.textContent=n==='dark'?'🌙':'☀️';localStorage.setItem('tms-theme',n);}
 </script>
+
+<script>
+// Landlord dashboard - load real data on page load
+document.addEventListener('DOMContentLoaded', () => {
+  // Update stats from TMS data
+  const props = TMS.getProperties();
+  const myEmail = localStorage.getItem('tms_current_user') || '';
+  
+  // Get properties for current landlord (or show all if admin viewing)
+  const allProps = props; // Show all for now
+  const availCount = allProps.filter(p => p.status === 'available').length;
+  const rentedCount = allProps.filter(p => p.status === 'rented').length;
+  const totalRev = allProps.filter(p => p.status === 'rented').reduce((s, p) => s + (Number(p.rent) || 0), 0);
+  
+  const stTotal = document.getElementById('st-total');
+  const stAvail = document.getElementById('st-avail');
+  const stRented = document.getElementById('st-rented');
+  const stRev = document.getElementById('st-rev');
+  
+  if (stTotal) stTotal.textContent = allProps.length;
+  if (stAvail) stAvail.textContent = availCount;
+  if (stRented) stRented.textContent = rentedCount;
+  if (stRev) stRev.textContent = 'Rs. ' + totalRev.toLocaleString();
+  
+  // Render activity from logs
+  const actList = document.getElementById('landlord-activity-list');
+  if (actList) {
+    const logs = TMS.getLogs().slice(0, 5);
+    if (logs.length) {
+      const dotColor = { success: 'la-green', warn: 'la-warn', error: 'la-red', info: 'la-blue' };
+      actList.innerHTML = logs.map(l => `
+        <div class="lrow">
+          <div class="lav ${dotColor[l.type] || 'la-blue'}">${(l.user||'S')[0].toUpperCase()}</div>
+          <div class="lbody"><div class="ltitle">${l.msg}</div><div class="lsub">${l.time}</div></div>
+          <div class="lright"><div class="ltime">recent</div></div>
+        </div>`).join('');
+    }
+  }
+  
+  // Re-render properties grid using existing render function if available
+  if (typeof renderProps === 'function') renderProps();
+  else if (typeof loadProperties === 'function') loadProperties();
+});
+</script>
+
+<script src="../js/tms-data.js"></script>
 </body>
 </html>
