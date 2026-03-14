@@ -261,13 +261,19 @@ function renderProps(list) {
     grid.innerHTML = '<div class="loading">🔍 No properties match your search.</div>';
     return;
   }
+  // Store in map to avoid JSON-in-HTML attribute issues
+  window._tenantPropMap = {};
+  list.forEach(p => { window._tenantPropMap[p._id] = p; });
+
   const emojis = {House:'🏠',Flat:'🏢',Apartment:'🏙️',Villa:'🏡',Room:'🛏️'};
-  grid.innerHTML = list.map(p => `
+  grid.innerHTML = list.map(p => {
+    const pid = p._id;
+    return `
     <div class="pcard">
       <div class="pcard-thumb">
         <span style="font-size:56px">${emojis[p.type]||'🏠'}</span>
         <span style="position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:rgba(78,205,196,0.88);color:#041210">For Rent</span>
-        <span onclick="open3D('${p._id}','${(p.title||'').replace(/'/g,"\\'")}','${JSON.stringify(p.model3d||{}).replace(/'/g,"\\'")}','${p.type||'House'}')" style="position:absolute;bottom:10px;right:10px;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--blue);border:1px solid rgba(74,158,255,0.3);cursor:pointer;backdrop-filter:blur(4px)">⬡ 3D View</span>
+        <span onclick="tenantView3D('${pid}')" style="position:absolute;bottom:10px;right:10px;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--blue);border:1px solid rgba(74,158,255,0.3);cursor:pointer;backdrop-filter:blur(4px)">⬡ 3D View</span>
       </div>
       <div class="pcard-body">
         <div class="pcard-price">Rs. ${Number(p.rent||0).toLocaleString()} <span>/mo</span></div>
@@ -278,10 +284,11 @@ function renderProps(list) {
           <span class="ptag">🚿 ${p.baths||'?'} Baths</span>
           <span class="ptag">${p.type||'House'}</span>
         </div>
-        <button class="pcard-btn" onclick="open3D('${p._id}','${(p.title||'').replace(/'/g,"\\'")}','${JSON.stringify(p.model3d||{}).replace(/'/g,"\\'")}','${p.type||'House'}')">View 3D Model →</button>
+        <button class="pcard-btn" onclick="tenantView3D('${pid}')">View 3D Model →</button>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 function applyFilters() {
   const area = document.getElementById('fa')?.value;
@@ -533,14 +540,19 @@ async function saveProfile() {
 // ═══════════════════════════════════════════════════════
 //  3D MODAL
 // ═══════════════════════════════════════════════════════
-function open3D(id, name, model3dJson, type) {
+function open3D(id, name, model3dOrJson, type) {
   document.getElementById('ov3d').classList.add('open');
   document.getElementById('m3dn').textContent = name || '3D View';
   document.body.style.overflow = 'hidden';
   const config = {};
-  try { Object.assign(config, JSON.parse(model3dJson||'{}')); } catch {}
-  config.type = type || 'House';
+  if (model3dOrJson && typeof model3dOrJson === 'object') Object.assign(config, model3dOrJson);
+  else { try { Object.assign(config, JSON.parse(model3dOrJson||'{}')); } catch {} }
+  if (!config.houseType) config.houseType = type?.toLowerCase() || 'standard';
   setTimeout(() => { if(typeof initHouse3D==='function') initHouse3D('c3main', config); }, 100);
+}
+function tenantView3D(propId) {
+  const p = (window._tenantPropMap||{})[propId]; if(!p) return;
+  open3D(propId, p.title, p.model3d, p.type);
 }
 function c3d() {
   document.getElementById('ov3d')?.classList.remove('open');
@@ -781,17 +793,24 @@ function c3d() {
 </main>
 </div>
 
-<!-- 3D MODAL -->
 <div class="ov" id="ov3d">
   <div class="ov-box">
     <div class="ov-head">
       <span class="ov-title" id="m3dn">3D View</span>
-      <button class="close-btn" onclick="c3d()">✕</button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button style="padding:4px 10px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="h3d_front('c3main')">Front</button>
+        <button style="padding:4px 10px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="h3d_top('c3main')">Top</button>
+        <button style="padding:4px 10px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="h3d_night('c3main')">🌙</button>
+        <button style="padding:4px 10px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="h3d_reset('c3main')">↺</button>
+        <button class="close-btn" onclick="c3d()">✕</button>
+      </div>
     </div>
-    <canvas id="c3main" style="width:100%;height:460px;background:#0A0F1A"></canvas>
+    <canvas id="c3main" style="width:100%;height:460px;display:block;background:#080B12"></canvas>
+    <div style="padding:8px 16px;font-size:11px;color:var(--muted);text-align:center;border-top:1px solid var(--border)">Drag to rotate · Scroll to zoom</div>
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="../js/house3d.js"></script>
 </body>
 </html>

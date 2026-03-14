@@ -3,19 +3,35 @@ const Property = require('../models/Property');
 const { protect, adminOnly } = require('../middleware/auth');
 const router = express.Router();
 
+// GET landlord's OWN properties (uses JWT — no ID needed in URL)
+router.get('/my', protect, async (req, res) => {
+  try {
+    const props = await Property.find({ landlordId: req.user._id }).sort({ createdAt: -1 });
+    res.json({ success: true, count: props.length, properties: props });
+  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
+});
+
 // GET all properties (public / admin)
 router.get('/', async (req, res) => {
   try {
     const filter = {};
-    if (req.query.status)     filter.status     = req.query.status;
-    if (req.query.landlordId) filter.landlordId = req.query.landlordId;
-    if (req.query.area)       filter.area       = req.query.area;
-    if (req.query.type)       filter.type       = req.query.type;
-    if (req.query.beds)       filter.beds       = { $gte: Number(req.query.beds) };
-    if (req.query.maxRent)    filter.rent       = { $lte: Number(req.query.maxRent) };
+    if (req.query.status)     filter.status = req.query.status;
+    if (req.query.area)       filter.area   = req.query.area;
+    if (req.query.type)       filter.type   = req.query.type;
+    if (req.query.beds)       filter.beds   = { $gte: Number(req.query.beds) };
+    if (req.query.maxRent)    filter.rent   = { $lte: Number(req.query.maxRent) };
+    if (req.query.landlordId) {
+      // MongoDB stores landlordId as ObjectId — use string comparison via regex or cast
+      const mongoose = require('mongoose');
+      try {
+        filter.landlordId = new mongoose.Types.ObjectId(req.query.landlordId);
+      } catch {
+        filter.landlordId = req.query.landlordId; // fallback if not valid ObjectId
+      }
+    }
     const props = await Property.find(filter).sort({ createdAt: -1 });
     res.json({ success: true, count: props.length, properties: props });
-  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
+  } catch (e) { console.error(e); res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
 // GET single property
@@ -67,9 +83,11 @@ router.put('/:id/model3d', protect, async (req, res) => {
 // PUT save furniture layout
 router.put('/:id/furniture', protect, async (req, res) => {
   try {
-    const prop = await Property.findByIdAndUpdate(
-      req.params.id, { furnitureLayout: req.body }, { new: true }
-    );
+    const prop = await Property.findById(req.params.id);
+    if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
+    prop.furnitureLayout = req.body;
+    prop.markModified('furnitureLayout');
+    await prop.save();
     res.json({ success: true, property: prop });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
