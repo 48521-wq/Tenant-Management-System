@@ -153,8 +153,17 @@ const tok = () => localStorage.getItem('tms_token');
 async function lFetch(url, method='GET', body=null) {
   const opts = { method, headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+tok() } };
   if (body) opts.body = JSON.stringify(body);
-  const r = await fetch(API + url, opts);
-  return r.json();
+  // 8 second timeout so loading never hangs forever
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+  try {
+    const r = await fetch(API + url, { ...opts, signal: controller.signal });
+    clearTimeout(timer);
+    return r.json();
+  } catch(e) {
+    clearTimeout(timer);
+    throw e;
+  }
 }
 function tmsLogout() { localStorage.clear(); sessionStorage.clear(); window.location.replace('../index.html'); }
 
@@ -210,13 +219,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ══════════════════════════════════════
 let myProps = [];
 async function loadMyProperties() {
-  const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
+  const grid  = document.getElementById('prop-grid');
+  const grid2 = document.getElementById('prop-grid-2');
+  const loading = '<div class="loading"><span class="spinner"></span>Loading…</div>';
+  if (grid)  grid.innerHTML  = loading;
+  if (grid2) grid2.innerHTML = loading;
   try {
-    const data = await lFetch('/properties?landlordId=' + (user.id||user._id));
-    myProps = data.properties || [];
+    const me = await lFetch('/auth/me');
+    const myId = (me.user?._id || me.user?.id || '').toString();
+    if (!myId) throw new Error('No user ID');
+    const data = await lFetch('/properties');
+    const all = data.properties || [];
+    myProps = all.filter(p => (p.landlordId || '').toString() === myId);
     renderMyProperties();
     updateStats();
-  } catch { console.log('Props error'); }
+  } catch(e) {
+    console.error('loadMyProperties error:', e);
+    const errHtml = '<div class="loading" style="grid-column:1/-1"><div style="font-size:36px;margin-bottom:10px">⚠️</div><div style="font-weight:600;color:var(--text);margin-bottom:6px">Server se connect nahi ho saka</div><div style="font-size:12px;color:var(--muted)">Backend chal raha hai? Port 5000 check karen</div><button onclick="loadMyProperties()" style="margin-top:14px;padding:8px 20px;border-radius:9px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;font-family:DM Sans,sans-serif;font-size:13px">🔄 Retry</button></div>';
+    if (grid)  grid.innerHTML  = errHtml;
+    if (grid2) grid2.innerHTML = errHtml;
+  }
 }
 function updateStats() {
   const total  = myProps.length;
@@ -228,20 +250,30 @@ function updateStats() {
   set('st-rev','Rs. '+rev.toLocaleString());
 }
 function renderMyProperties() {
-  const grid = document.getElementById('prop-grid');
-  if (!grid) return;
+  const grid  = document.getElementById('prop-grid');
+  const grid2 = document.getElementById('prop-grid-2');
+
   if (!myProps.length) {
-    grid.innerHTML = '<div class="loading" style="grid-column:1/-1"><div style="font-size:48px;margin-bottom:12px">🏠</div><div style="font-size:15px;font-weight:600;margin-bottom:6px;color:var(--text)">No Properties Yet</div><div>Click "Add Property" to list your first property.</div></div>';
+    const empty = '<div class="loading" style="grid-column:1/-1"><div style="font-size:48px;margin-bottom:12px">🏠</div><div style="font-size:15px;font-weight:600;margin-bottom:6px;color:var(--text)">No Properties Yet</div><div>Click "Add Property" to list your first property.</div></div>';
+    if (grid)  grid.innerHTML  = empty;
+    if (grid2) grid2.innerHTML = empty;
     return;
   }
+
+  // Store props in a JS map to avoid JSON-in-HTML attribute encoding issues
+  window._propMap = {};
+  myProps.forEach(p => { window._propMap[p._id] = p; });
+
   const emojis={House:'🏠',Flat:'🏢',Apartment:'🏙️',Villa:'🏡',Room:'🛏️'};
   const statusColors={available:'rgba(78,205,196,0.9)',rented:'rgba(255,179,71,0.9)',suspended:'rgba(255,107,107,0.9)'};
-  grid.innerHTML = myProps.map(p => `
+  const html = myProps.map(p => {
+    const id = p._id;
+    return `
     <div class="pcard">
       <div class="pcard-thumb">
         <span style="font-size:54px">${emojis[p.type]||'🏠'}</span>
         <span style="position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:${statusColors[p.status]||statusColors.available};color:#fff">${p.status||'available'}</span>
-        <span onclick="open3D('${p._id}','${(p.title||'').replace(/'/g,"\\'")}','${p.type||'House'}')" style="position:absolute;bottom:10px;right:10px;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--gold);border:1px solid rgba(201,169,110,0.3);cursor:pointer">⬡ 3D</span>
+        <span onclick="quickView3D('${id}')" style="position:absolute;bottom:10px;right:10px;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--gold);border:1px solid rgba(201,169,110,0.3);cursor:pointer">⬡ 3D</span>
       </div>
       <div class="pcard-body">
         <div class="pcard-title">${p.title||'Untitled'}</div>
@@ -250,29 +282,151 @@ function renderMyProperties() {
           <span>🛏 ${p.beds||'?'}</span><span>🚿 ${p.baths||'?'}</span><span>${p.type||'House'}</span>
         </div>
         <div class="pcard-price">Rs. ${Number(p.rent||0).toLocaleString()} <span>/mo</span></div>
-        <div class="pcard-actions">
-          <button class="btn btn-gold btn-sm" style="flex:1" onclick="open3D('${p._id}','${(p.title||'').replace(/'/g,"\\'")}','${p.type||'House'}')">🏠 3D View</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteProp('${p._id}')">🗑</button>
+        <div class="pcard-actions" style="flex-wrap:wrap;gap:6px">
+          <button class="btn btn-gold btn-sm" style="flex:1" onclick="edit3DByPropId('${id}')">🏗️ Edit 3D</button>
+          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="furnViewByPropId('${id}')">🛋️ Interior</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteProp('${id}')">🗑</button>
         </div>
       </div>
     </div>
-  `).join('');
+  `}).join('');
+
+  if (grid)  grid.innerHTML  = html;
+  if (grid2) grid2.innerHTML = html;
 }
+// Current 3D model config being built
+let current3DConfig = {
+  houseType: 'standard', wallColor: '#C9A96E', roofColor: '#7A4F2A',
+  floorColor: '#D2B48C', floors: 1, hasGarden: false, hasPool: false, hasGarage: false
+};
+let editingPropId = null; // which property's 3D we're editing
+
 async function submitAddProp() {
   const g = id => document.getElementById(id)?.value?.trim()||'';
   const title=g('ap-title'),type=g('ap-type'),area=g('ap-area'),addr=g('ap-addr'),rent=g('ap-rent'),beds=g('ap-beds'),baths=g('ap-baths'),sqft=g('ap-sqft'),desc=g('ap-desc');
   if (!title||!area||!addr||!rent) { showMsg('ap-msg','⚠️ Title, area, address and rent are required.','err'); return; }
   const btn=document.getElementById('ap-btn'); if(btn){btn.disabled=true;btn.textContent='Saving…';}
   try {
-    const data = await lFetch('/properties','POST',{title,type,area,address:addr,rent:Number(rent),beds:Number(beds)||2,baths:Number(baths)||1,sqft:Number(sqft)||1000,description:desc});
+    const data = await lFetch('/properties','POST',{
+      title,type,area,address:addr,rent:Number(rent),
+      beds:Number(beds)||2,baths:Number(baths)||1,sqft:Number(sqft)||1000,description:desc,
+      model3d: current3DConfig
+    });
     if (data.success) {
       showMsg('ap-msg','✅ Property listed successfully!','ok');
       ['ap-title','ap-addr','ap-desc'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+      current3DConfig = {houseType:'standard',wallColor:'#C9A96E',roofColor:'#7A4F2A',floorColor:'#D2B48C',floors:1,hasGarden:false,hasPool:false,hasGarage:false};
       await loadMyProperties();
     } else showMsg('ap-msg','⚠️ '+(data.message||'Error'),'err');
   } catch { showMsg('ap-msg','⚠️ Cannot connect to server.','err'); }
   finally { if(btn){btn.disabled=false;btn.textContent='🏠 Add Property';} }
 }
+
+// ══════════════════════════════════════
+// 3D MODEL BUILDER (for landlord editing)
+// ══════════════════════════════════════
+function open3DBuilder(propId, propTitle, model3dOrJson) {
+  editingPropId = propId;
+  if (model3dOrJson && typeof model3dOrJson === 'object') {
+    current3DConfig = { ...model3dOrJson };
+  } else {
+    try { current3DConfig = model3dOrJson ? JSON.parse(model3dOrJson) : { ...current3DConfig }; } catch { }
+  }
+  document.getElementById('b3d-title').textContent = propTitle || 'Configure 3D Model';
+  // Fill controls from config
+  const setVal = (id, v) => { const e=document.getElementById(id); if(e) { if(e.type==='checkbox') e.checked=!!v; else e.value=v||''; }};
+  setVal('b3d-type',   current3DConfig.houseType||'standard');
+  setVal('b3d-wall',   current3DConfig.wallColor||'#C9A96E');
+  setVal('b3d-roof',   current3DConfig.roofColor||'#7A4F2A');
+  setVal('b3d-floor',  current3DConfig.floorColor||'#D2B48C');
+  setVal('b3d-floors', current3DConfig.floors||1);
+  setVal('b3d-garden', current3DConfig.hasGarden);
+  setVal('b3d-pool',   current3DConfig.hasPool);
+  setVal('b3d-garage', current3DConfig.hasGarage);
+  document.getElementById('ov3d-builder').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(previewBuilderModel, 120);
+}
+function close3DBuilder() {
+  document.getElementById('ov3d-builder')?.classList.remove('open');
+  document.body.style.overflow = '';
+}
+function previewBuilderModel() {
+  const g = id => document.getElementById(id);
+  current3DConfig = {
+    houseType:  g('b3d-type')?.value   || 'standard',
+    wallColor:  g('b3d-wall')?.value   || '#C9A96E',
+    roofColor:  g('b3d-roof')?.value   || '#7A4F2A',
+    floorColor: g('b3d-floor')?.value  || '#D2B48C',
+    floors:     parseInt(g('b3d-floors')?.value)||1,
+    hasGarden:  g('b3d-garden')?.checked || false,
+    hasPool:    g('b3d-pool')?.checked   || false,
+    hasGarage:  g('b3d-garage')?.checked || false,
+  };
+  initHouse3D('c3d-builder', current3DConfig);
+}
+async function save3DModel() {
+  previewBuilderModel();
+  const btn = document.getElementById('b3d-save-btn');
+  if(btn){btn.disabled=true;btn.textContent='Saving…';}
+  try {
+    if (editingPropId) {
+      await lFetch('/properties/'+editingPropId+'/model3d','PUT', current3DConfig);
+      showMsg('b3d-msg','✅ 3D Model saved!','ok');
+    } else {
+      // If no prop ID yet (inline in add-property form), just keep in current3DConfig
+      showMsg('b3d-msg','✅ 3D config applied! Will save with property.','ok');
+    }
+    setTimeout(close3DBuilder, 1800);
+    await loadMyProperties();
+  } catch { showMsg('b3d-msg','⚠️ Error saving.','err'); }
+  finally { if(btn){btn.disabled=false;btn.textContent='💾 Save 3D Model';} }
+}
+
+// ══════════════════════════════════════
+// FURNITURE VIEWER
+// ══════════════════════════════════════
+function openFurnitureViewer(propId, propTitle, model3dOrJson) {
+  let cfg = {};
+  if (model3dOrJson && typeof model3dOrJson === 'object') cfg = model3dOrJson;
+  else { try { cfg = model3dOrJson ? JSON.parse(model3dOrJson) : {}; } catch {} }
+
+  window._furnPropId = propId;
+  document.getElementById('ov-furn-title').textContent = (propTitle||'Property') + ' — Furniture Placement';
+  document.getElementById('ov-furn').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  setTimeout(() => {
+    const sc = initFurniturePlacement('c3d-furn', cfg.furnitureLayout || {}, null);
+    window._furnScene = sc;
+  }, 150);
+}
+function closeFurnViewer() {
+  document.getElementById('ov-furn')?.classList.remove('open');
+  document.body.style.overflow = '';
+}
+async function saveFurnitureLayout() {
+  const sc = window._furnScene;
+  if (!sc) return;
+  const layout = sc.getLayout();
+  const btn = document.getElementById('furn-save-btn');
+  if (btn) { btn.disabled=true; btn.textContent='Saving…'; }
+  try {
+    if (window._furnPropId) {
+      await lFetch('/properties/'+window._furnPropId+'/furniture','PUT', layout);
+    }
+    const toast = document.getElementById('furn-saved-toast');
+    if (toast) { toast.style.display='block'; setTimeout(()=>toast.style.display='none',2000); }
+    await loadMyProperties();
+  } catch(e) { alert('Error saving layout'); }
+  finally { if(btn){btn.disabled=false;btn.textContent='💾 Save Layout';} }
+}
+function furnAddItem(type, color) {
+  const sc = window._furnScene;
+  if (sc) sc.addFurniture(type, parseInt(color.replace('#',''),16));
+}
+function furnRotate(deg) { const sc=window._furnScene; if(sc) sc.rotateSelected(deg); }
+function furnDelete()    { const sc=window._furnScene; if(sc) sc.deleteSelected(); }
 async function deleteProp(id) {
   if (!confirm('Delete this property permanently?')) return;
   await lFetch('/properties/'+id,'DELETE');
@@ -381,18 +535,36 @@ async function saveProfile() {
   finally{if(btn){btn.disabled=false;btn.textContent='💾 Save Changes';}}
 }
 
+// Safe wrappers using propMap (avoids JSON-in-HTML attribute issues)
+function quickView3D(propId) {
+  const p = (window._propMap||{})[propId]; if(!p) return;
+  open3D(propId, p.title, p.model3d, p.type);
+}
+function edit3DByPropId(propId) {
+  const p = (window._propMap||{})[propId]; if(!p) return;
+  open3DBuilder(propId, p.title, p.model3d);
+}
+function furnViewByPropId(propId) {
+  const p = (window._propMap||{})[propId]; if(!p) return;
+  openFurnitureViewer(propId, p.title, p.model3d);
+}
+
 // ══════════════════════════════════════
-// 3D MODAL
+// SIMPLE 3D VIEW (read-only, for prop cards)
 // ══════════════════════════════════════
 let curr3DId = null;
-function open3D(propId, name, type) {
-  curr3DId=propId;
+function open3D(propId, name, model3dOrJson, type) {
+  curr3DId = propId;
+  let cfg = {};
+  if (model3dOrJson && typeof model3dOrJson === 'object') cfg = model3dOrJson;
+  else { try { cfg = JSON.parse(model3dOrJson||'{}'); } catch {} }
+  cfg.houseType = cfg.houseType || type?.toLowerCase() || 'standard';
   document.getElementById('ov3d').classList.add('open');
-  document.getElementById('m3dn').textContent=name||'3D View';
+  document.getElementById('m3dn').textContent = name || '3D View';
   document.body.style.overflow='hidden';
-  setTimeout(()=>{if(typeof initHouse3D==='function') initHouse3D('c3main',{houseType:type?.toLowerCase()||'standard'});},100);
+  setTimeout(()=>{ initHouse3D('c3main', cfg); }, 100);
 }
-function c3d(){document.getElementById('ov3d')?.classList.remove('open');document.body.style.overflow='';}
+function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); document.body.style.overflow=''; }
 </script>
 
 <div class="bg"></div>
@@ -484,10 +656,6 @@ function c3d(){document.getElementById('ov3d')?.classList.remove('open');documen
       </button>
     </div>
     <div class="props-grid" id="prop-grid-2"><div class="loading"><span class="spinner"></span>Loading…</div></div>
-    <script>
-    // Sync both grids
-    const _orig = renderMyProperties;
-    </script>
   </div>
 
   <!-- ADD PROPERTY -->
@@ -510,6 +678,14 @@ function c3d(){document.getElementById('ov3d')?.classList.remove('open');documen
         <div class="fg"><label>Bathrooms</label><input id="ap-baths" type="number" placeholder="1" value="1"></div>
         <div class="fg"><label>Size (sqft)</label><input id="ap-sqft" type="number" placeholder="1000" value="1000"></div>
         <div class="fg full"><label>Description</label><textarea id="ap-desc" placeholder="Describe amenities, nearby places, condition..."></textarea></div>
+      </div>
+      <!-- 3D Model Preview for New Property -->
+      <div style="margin-top:18px;padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <span style="font-size:13px;font-weight:700;color:var(--text)">🏗️ 3D Model Configuration</span>
+          <button class="btn btn-ghost btn-sm" onclick="open3DBuilder(null,'New Property',null)">Configure 3D →</button>
+        </div>
+        <div style="font-size:12px;color:var(--muted)">Configure house type, colors, floors, garden, pool, garage for your property's 3D model.</div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;margin-top:16px">
         <button class="submit-btn" id="ap-btn" onclick="submitAddProp()">🏠 Add Property</button>
@@ -589,17 +765,184 @@ function c3d(){document.getElementById('ov3d')?.classList.remove('open');documen
 </main>
 </div>
 
-<!-- 3D MODAL -->
+<!-- 3D VIEW MODAL (read-only quick view) -->
 <div class="ov" id="ov3d">
   <div class="ov-box">
     <div class="ov-head">
       <span class="ov-title" id="m3dn">3D View</span>
-      <button class="close-btn" onclick="c3d()">✕</button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn btn-ghost btn-sm" onclick="h3d_front('c3main')">Front</button>
+        <button class="btn btn-ghost btn-sm" onclick="h3d_top('c3main')">Top</button>
+        <button class="btn btn-ghost btn-sm" onclick="h3d_night('c3main')">🌙</button>
+        <button class="btn btn-ghost btn-sm" onclick="h3d_reset('c3main')">↺</button>
+        <button class="close-btn" onclick="c3d()">✕</button>
+      </div>
     </div>
-    <canvas id="c3main" style="width:100%;height:460px;background:#0A0F1A"></canvas>
+    <canvas id="c3main" style="width:100%;height:460px;display:block"></canvas>
+    <div style="padding:10px 16px;font-size:11px;color:var(--muted);text-align:center;border-top:1px solid var(--border)">Drag to rotate · Scroll to zoom</div>
   </div>
 </div>
 
+<!-- 3D MODEL BUILDER MODAL (landlord edits) -->
+<div class="ov" id="ov3d-builder">
+  <div class="ov-box" style="width:min(860px,97vw);max-height:94vh;overflow-y:auto">
+    <div class="ov-head" style="position:sticky;top:0;background:var(--card);z-index:2">
+      <span class="ov-title" id="b3d-title">Configure 3D Model</span>
+      <button class="close-btn" onclick="close3DBuilder()">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:0;min-height:460px">
+      <!-- Controls panel -->
+      <div style="padding:20px;border-right:1px solid var(--border);overflow-y:auto">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">House Configuration</div>
+
+        <div class="fg" style="margin-bottom:13px">
+          <label>House Type</label>
+          <select id="b3d-type" onchange="previewBuilderModel()" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;-webkit-appearance:none;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 10px center;background-color:var(--input-bg);padding-right:28px">
+            <option value="standard">Standard House</option>
+            <option value="villa">Villa</option>
+            <option value="apartment">Apartment Block</option>
+            <option value="bungalow">Bungalow</option>
+          </select>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px">
+          <div class="fg">
+            <label>Wall Color</label>
+            <input type="color" id="b3d-wall" value="#C9A96E" oninput="previewBuilderModel()" style="width:100%;height:40px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;background:var(--input-bg)">
+          </div>
+          <div class="fg">
+            <label>Roof Color</label>
+            <input type="color" id="b3d-roof" value="#7A4F2A" oninput="previewBuilderModel()" style="width:100%;height:40px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;background:var(--input-bg)">
+          </div>
+          <div class="fg">
+            <label>Floor Color</label>
+            <input type="color" id="b3d-floor" value="#D2B48C" oninput="previewBuilderModel()" style="width:100%;height:40px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;background:var(--input-bg)">
+          </div>
+          <div class="fg">
+            <label>Floors (1–4)</label>
+            <input type="number" id="b3d-floors" min="1" max="4" value="1" onchange="previewBuilderModel()" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%">
+          </div>
+        </div>
+
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Extras</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;background:var(--input-bg);border-radius:9px;border:1px solid var(--border)">
+            <input type="checkbox" id="b3d-garden" onchange="previewBuilderModel()" style="width:16px;height:16px;accent-color:var(--gold)">
+            <span style="font-size:13px;color:var(--text)">🌿 Garden</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;background:var(--input-bg);border-radius:9px;border:1px solid var(--border)">
+            <input type="checkbox" id="b3d-pool" onchange="previewBuilderModel()" style="width:16px;height:16px;accent-color:var(--gold)">
+            <span style="font-size:13px;color:var(--text)">🏊 Swimming Pool</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;background:var(--input-bg);border-radius:9px;border:1px solid var(--border)">
+            <input type="checkbox" id="b3d-garage" onchange="previewBuilderModel()" style="width:16px;height:16px;accent-color:var(--gold)">
+            <span style="font-size:13px;color:var(--text)">🚗 Garage</span>
+          </label>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="submit-btn" id="b3d-save-btn" onclick="save3DModel()">💾 Save 3D Model</button>
+        </div>
+        <div id="b3d-msg" style="display:none;padding:8px 12px;border-radius:9px;font-size:12px;font-weight:600;margin-top:10px"></div>
+      </div>
+      <!-- 3D Preview -->
+      <div style="position:relative;background:#080B12">
+        <canvas id="c3d-builder" style="width:100%;height:100%;min-height:460px;display:block"></canvas>
+        <div style="position:absolute;bottom:10px;right:12px;display:flex;gap:6px">
+          <button onclick="h3d_front('c3d-builder')" style="padding:4px 10px;border-radius:7px;border:1px solid rgba(201,169,110,0.3);background:rgba(0,0,0,0.6);color:var(--gold);font-size:11px;cursor:pointer">Front</button>
+          <button onclick="h3d_side('c3d-builder')" style="padding:4px 10px;border-radius:7px;border:1px solid rgba(201,169,110,0.3);background:rgba(0,0,0,0.6);color:var(--gold);font-size:11px;cursor:pointer">Side</button>
+          <button onclick="h3d_top('c3d-builder')" style="padding:4px 10px;border-radius:7px;border:1px solid rgba(201,169,110,0.3);background:rgba(0,0,0,0.6);color:var(--gold);font-size:11px;cursor:pointer">Top</button>
+          <button onclick="h3d_night('c3d-builder')" style="padding:4px 10px;border-radius:7px;border:1px solid rgba(201,169,110,0.3);background:rgba(0,0,0,0.6);color:var(--gold);font-size:11px;cursor:pointer">🌙</button>
+        </div>
+        <div style="position:absolute;bottom:10px;left:12px;font-size:10px;color:rgba(255,255,255,0.4)">Drag to rotate · Scroll to zoom</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FURNITURE PLACEMENT MODAL -->
+<div class="ov" id="ov-furn">
+  <div class="ov-box" style="width:min(1100px,98vw);max-height:96vh;overflow:hidden;display:flex;flex-direction:column">
+
+    <!-- Header -->
+    <div class="ov-head" style="flex-shrink:0">
+      <span class="ov-title" id="ov-furn-title">Furniture Placement</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div id="furn-saved-toast" style="display:none;padding:5px 14px;border-radius:8px;background:rgba(78,205,196,0.15);border:1px solid var(--green);color:var(--green);font-size:12px;font-weight:600">✅ Saved!</div>
+        <button id="furn-save-btn" class="submit-btn" onclick="saveFurnitureLayout()" style="padding:8px 20px;font-size:13px">💾 Save Layout</button>
+        <button class="close-btn" onclick="closeFurnViewer()">✕</button>
+      </div>
+    </div>
+
+    <!-- Body: catalog sidebar + canvas -->
+    <div style="display:flex;flex:1;min-height:0;overflow:hidden">
+
+      <!-- Left: Furniture Catalog -->
+      <div style="width:200px;flex-shrink:0;padding:14px 10px;overflow-y:auto;border-right:1px solid var(--border);background:var(--input-bg)">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Add Furniture</div>
+        <div style="display:flex;flex-direction:column;gap:6px" id="furn-catalog"></div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Controls</div>
+          <div id="furn-action-panel" style="display:none;flex-direction:column;gap:6px">
+            <button onclick="furnRotate(-45)" style="padding:7px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">↺ Rotate -45°</button>
+            <button onclick="furnRotate(45)"  style="padding:7px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">↻ Rotate +45°</button>
+            <button onclick="furnRotate(90)"  style="padding:7px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">↻ Rotate 90°</button>
+            <button onclick="furnDelete()"    style="padding:7px;border-radius:8px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:#FF6B6B;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">🗑 Delete</button>
+          </div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.7;margin-top:10px">
+            <b>Click</b> item to select<br>
+            <b>Drag</b> to move<br>
+            <b>Right-drag</b> to orbit<br>
+            <b>Scroll</b> to zoom
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: 3D Canvas -->
+      <div style="flex:1;position:relative;background:#1A1A2E;min-height:500px">
+        <canvas id="c3d-furn" style="width:100%;height:100%;display:block;min-height:500px"></canvas>
+        <div style="position:absolute;bottom:10px;right:14px;font-size:10px;color:rgba(255,255,255,0.35)">Right-click drag to orbit · Scroll to zoom</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Build furniture catalog buttons
+(function buildCatalog() {
+  const catalog = [
+    { type:'sofa',         label:'Sofa',          color:'#5D5A7E', icon:'🛋️' },
+    { type:'armchair',     label:'Armchair',      color:'#7B4F3A', icon:'🪑' },
+    { type:'bed_double',   label:'Double Bed',    color:'#7B4F2A', icon:'🛏️' },
+    { type:'bed_single',   label:'Single Bed',    color:'#7A8B6E', icon:'🛏️' },
+    { type:'dining_table', label:'Dining Table',  color:'#A0734A', icon:'🍽️' },
+    { type:'dining_chair', label:'Dining Chair',  color:'#A0734A', icon:'🪑' },
+    { type:'chair',        label:'Chair',         color:'#8B6040', icon:'🪑' },
+    { type:'wardrobe',     label:'Wardrobe',      color:'#9B7B5A', icon:'🚪' },
+    { type:'tv_unit',      label:'TV Unit',       color:'#4A3A2A', icon:'📺' },
+    { type:'bookshelf',    label:'Bookshelf',     color:'#8B6A3A', icon:'📚' },
+    { type:'coffee_table', label:'Coffee Table',  color:'#A08060', icon:'☕' },
+    { type:'lamp',         label:'Floor Lamp',    color:'#C0A060', icon:'💡' },
+    { type:'plant',        label:'Indoor Plant',  color:'#3A6A40', icon:'🪴' },
+    { type:'mirror',       label:'Mirror',        color:'#C8A060', icon:'🪞' },
+    { type:'desk',         label:'Study Desk',    color:'#9B7A4A', icon:'🖥️' },
+  ];
+  const container = document.getElementById('furn-catalog');
+  if (!container) return;
+  catalog.forEach(item => {
+    const btn = document.createElement('button');
+    btn.style.cssText = `padding:8px 10px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;text-align:left;display:flex;align-items:center;gap:8px;transition:background 0.15s`;
+    btn.innerHTML = `<span style="font-size:16px">${item.icon}</span><span>${item.label}</span>`;
+    btn.onmouseenter = () => btn.style.background = 'var(--input-bg)';
+    btn.onmouseleave = () => btn.style.background = 'var(--card)';
+    btn.onclick = () => furnAddItem(item.type, item.color);
+    container.appendChild(btn);
+  });
+})();
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="../js/house3d.js"></script>
+<script src="../js/furniture3d.js"></script>
 </body>
 </html>

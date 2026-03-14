@@ -34,15 +34,8 @@ const propertySchema = new mongoose.Schema({
     hasGarage:   { type: Boolean, default: false },
   },
 
-  // Furniture Layout — saved positions
-  furnitureLayout: {
-    sofa:     { visible: Boolean, x: Number, z: Number },
-    bed:      { visible: Boolean, x: Number, z: Number },
-    table:    { visible: Boolean, x: Number, z: Number },
-    wardrobe: { visible: Boolean, x: Number, z: Number },
-    tv:       { visible: Boolean, x: Number, z: Number },
-    plant:    { visible: Boolean, x: Number, z: Number },
-  },
+  // Furniture Layout — flexible, stores array of placed items per type
+  furnitureLayout: { type: mongoose.Schema.Types.Mixed, default: {} },
 
   images: [String],
 }, { timestamps: true });

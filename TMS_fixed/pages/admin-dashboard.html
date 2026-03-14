@@ -280,19 +280,20 @@ async function loadLandlords(filter) {
   } catch{tbody.innerHTML='<tr><td colspan="7" class="loading">⚠️ Error.</td></tr>';}
 }
 
-// ══════════════════════════════════════
-// PROPERTIES
-// ══════════════════════════════════════
 async function loadAdminProps(filter) {
   const tbody=document.getElementById('props-tbody'); if(!tbody)return;
-  tbody.innerHTML='<tr><td colspan="7" class="loading"><span class="spinner"></span>Loading…</td></tr>';
+  tbody.innerHTML='<tr><td colspan="8" class="loading"><span class="spinner"></span>Loading…</td></tr>';
   try {
     const data=await aFetch('/properties');
     let list=data.properties||[];
     if(filter) list=list.filter(p=>p.title?.toLowerCase().includes(filter.toLowerCase())||p.area?.toLowerCase().includes(filter.toLowerCase()));
     set_count('props-count',list.length);
-    if(!list.length){tbody.innerHTML='<tr><td colspan="7" class="loading">No properties listed yet.</td></tr>';return;}
-    tbody.innerHTML=list.map((p,i)=>`<tr>
+    if(!list.length){tbody.innerHTML='<tr><td colspan="8" class="loading">No properties listed yet.</td></tr>';return;}
+    // Store in map to avoid JSON-in-HTML issues
+    window._adminPropMap = {};
+    list.forEach(p => { window._adminPropMap[p._id] = p; });
+    tbody.innerHTML=list.map((p,i)=>{
+      return `<tr>
       <td style="color:var(--muted)">${String(i+1).padStart(2,'0')}</td>
       <td><div style="font-weight:600">${p.title||'—'}</div><div style="font-size:11px;color:var(--muted)">${p.beds||'?'} Bed · ${p.baths||'?'} Bath · ${p.sqft||'?'} sqft</div></td>
       <td style="color:var(--muted)">${p.landlordName||'—'}</td>
@@ -300,9 +301,13 @@ async function loadAdminProps(filter) {
       <td style="color:var(--gold);font-weight:600">Rs. ${Number(p.rent||0).toLocaleString()}</td>
       <td>${p.area||p.city||'—'}</td>
       <td><span class="badge ${p.status==='available'?'b-green':p.status==='rented'?'b-gold':'b-red'}">${p.status||'available'}</span></td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteProperty('${p._id}')">Remove</button></td>
-    </tr>`).join('');
-  } catch{tbody.innerHTML='<tr><td colspan="7" class="loading">⚠️ Error.</td></tr>';}
+      <td><div style="display:flex;gap:6px">
+        <button class="btn btn-danger btn-sm" onclick="adminView3DById('${p._id}')">🏠 3D</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProperty('${p._id}')">Remove</button>
+      </div></td>
+    </tr>`;
+    }).join('');
+  } catch{tbody.innerHTML='<tr><td colspan="8" class="loading">⚠️ Error.</td></tr>';}
 }
 
 // ══════════════════════════════════════
@@ -419,6 +424,17 @@ async function deleteUser(id, role) { if(!confirm('Delete user permanently?'))re
 async function deleteProperty(id) { if(!confirm('Remove property?'))return; await aFetch(`/properties/${id}`,'DELETE'); loadAdminProps(); }
 async function updateMaintenanceStatus(id,status) { await aFetch(`/maintenance/${id}/status`,'PUT',{status}); }
 async function updateComplaintStatus(id,status) { await aFetch(`/complaints/${id}/status`,'PUT',{status}); }
+
+function adminView3D(propId, name, m3dJson, type) {
+  let cfg = {};
+  try { cfg = m3dJson ? JSON.parse(m3dJson.replace(/&quot;/g,'"')) : {}; } catch {}
+  cfg.houseType = cfg.houseType || type?.toLowerCase() || 'standard';
+  document.getElementById('admin-3d-title').textContent = name || '3D View';
+  document.getElementById('ov-admin3d').classList.add('open');
+  document.body.style.overflow='hidden';
+  setTimeout(()=>{ initHouse3D('c3d-admin', cfg); }, 120);
+}
+function closeAdmin3D() { document.getElementById('ov-admin3d')?.classList.remove('open'); document.body.style.overflow=''; }
 
 function set_count(id, v) { const e=document.getElementById(id); if(e) e.textContent=v+' records'; }
 </script>
@@ -676,5 +692,51 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
 
 </main>
 </div>
+
+<!-- ADMIN 3D VIEW MODAL -->
+<div class="ov" id="ov-admin3d" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border-radius:18px;border:1px solid var(--border);width:min(820px,97vw);overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)">
+      <span style="font-size:15px;font-weight:700;color:var(--text)" id="admin-3d-title">3D Property View</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button onclick="h3d_front('c3d-admin')" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Front</button>
+        <button onclick="h3d_side('c3d-admin')" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Side</button>
+        <button onclick="h3d_top('c3d-admin')" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Top</button>
+        <button onclick="h3d_night('c3d-admin')" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">🌙</button>
+        <button onclick="h3d_reset('c3d-admin')" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">↺</button>
+        <button onclick="closeAdmin3D()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,107,107,0.12);color:var(--red,#FF6B6B);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+    </div>
+    <canvas id="c3d-admin" style="width:100%;height:480px;display:block;background:#080B12"></canvas>
+    <div style="padding:10px 20px;font-size:11px;color:var(--muted);text-align:center;border-top:1px solid var(--border)">Drag to rotate · Scroll to zoom · Day/Night toggle</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="../js/house3d.js"></script>
+<script>
+// Fix admin 3D modal - use propMap to avoid JSON-in-HTML issues
+document.getElementById('ov-admin3d').style.display = 'none';
+
+window.adminView3DById = function(propId) {
+  const p = (window._adminPropMap||{})[propId]; if(!p) return;
+  const cfg = Object.assign({}, p.model3d||{});
+  if (!cfg.houseType) cfg.houseType = (p.type||'standard').toLowerCase();
+  document.getElementById('admin-3d-title').textContent = (p.title||'Property') + ' — 3D View';
+  document.getElementById('ov-admin3d').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => { initHouse3D('c3d-admin', cfg); }, 120);
+};
+
+window.closeAdmin3D = function() {
+  document.getElementById('ov-admin3d').style.display = 'none';
+  document.body.style.overflow = '';
+};
+// Close on backdrop click
+document.getElementById('ov-admin3d').addEventListener('click', function(e) {
+  if (e.target === this) closeAdmin3D();
+});
+</script>
+
 </body>
 </html>
