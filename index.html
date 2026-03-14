@@ -28,6 +28,9 @@
     .or-divider::before, .or-divider::after {
       content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08);
     }
+    /* Fix select dropdown text visibility */
+    select, select option { color: #EDE9E0 !important; background: #12151C !important; }
+    [data-theme="light"] select, [data-theme="light"] select option { color: #1A1E26 !important; background: #fff !important; }
 
     /* ── Google Button ── */
     .btn-google {
@@ -85,6 +88,14 @@
     [data-theme="light"] .tab.active { background: rgba(255,255,255,0.85); color: #1A1E26; }
     [data-theme="light"] .tab { color: #7A8390; }
     [data-theme="light"] .role-card-inline { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); }
+    /* Role selected bright state */
+    .role-card-inline.tenant.selected  { border-color:#4A9EFF!important; background:rgba(74,158,255,0.15)!important; box-shadow:0 0 0 3px rgba(74,158,255,0.3)!important; transform:translateY(-3px); }
+    .role-card-inline.landlord.selected{ border-color:#C9A96E!important; background:rgba(201,169,110,0.15)!important; box-shadow:0 0 0 3px rgba(201,169,110,0.3)!important; transform:translateY(-3px); }
+    .role-card-inline.tenant.selected  .role-inline-name { color:#4A9EFF; }
+    .role-card-inline.landlord.selected .role-inline-name { color:#C9A96E; }
+    .role-card-inline.selected::after  { content:'✓'; position:absolute; top:6px; right:8px; font-size:11px; font-weight:700; }
+    .role-card-inline.tenant.selected::after   { color:#4A9EFF; }
+    .role-card-inline.landlord.selected::after { color:#C9A96E; }
     [data-theme="light"] .btn-google { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); color: #1A1E26; }
     [data-theme="light"] .btn-google:hover { background: rgba(0,0,0,0.07); }
     [data-theme="light"] .or-divider::before, [data-theme="light"] .or-divider::after { background: rgba(0,0,0,0.1); }
