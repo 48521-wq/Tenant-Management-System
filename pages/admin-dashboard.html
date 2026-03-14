@@ -3,979 +3,678 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Dashboard — TMS</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --red:#E53935;--red-l:#FF6B6B;--red-d:#B71C1C;
-  --dark:#07090C;--card:rgba(14,18,26,0.97);--border:rgba(229,57,53,0.14);--border2:rgba(255,255,255,0.06);
-  --text:#EDE9E0;--muted:#566070;--text2:#9AA0AC;
-  --green:#4ECDC4;--blue:#4A9EFF;--gold:#C9A96E;--warn:#FFB347;
+  --red:#FF6B6B;--blue:#4A9EFF;--green:#4ECDC4;--gold:#C9A96E;--warn:#FFB347;--purple:#9B7FF5;
+  --bg:#050709;--card:rgba(12,16,24,0.97);--border:rgba(255,107,107,0.1);
+  --text:#EDF0F7;--muted:#52607A;--sidebar-bg:rgba(8,10,16,0.99);--input-bg:rgba(255,255,255,0.04);
 }
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(229,57,53,0.3);border-radius:4px}
-body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
-.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 70% 55% at 5% 12%,rgba(229,57,53,0.07) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 92% 85%,rgba(74,158,255,0.03) 0%,transparent 55%),linear-gradient(168deg,#07090C 0%,#0B0F16 100%)}
-.bg-grid{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(229,57,53,0.018) 1px,transparent 1px),linear-gradient(90deg,rgba(229,57,53,0.018) 1px,transparent 1px);background-size:58px 58px}
-
-/* ── TOPNAV ── */
-.topnav{position:sticky;top:0;z-index:200;background:rgba(7,9,12,0.94);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;height:60px;gap:12px}
-.tn-brand{display:flex;align-items:center;gap:10px;margin-right:auto;flex-shrink:0}
-.tn-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--red),var(--red-l));display:flex;align-items:center;justify-content:center;box-shadow:0 3px 14px rgba(229,57,53,0.35)}
-.tn-icon svg{width:16px;height:16px;stroke:#fff;fill:none}
-.tn-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;background:linear-gradient(135deg,var(--red-l),#FF9A9A);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.tn-sep{color:var(--muted);font-size:11px;margin-left:2px}
-.tn-pill{padding:4px 12px;border-radius:20px;border:1px solid rgba(229,57,53,0.25);background:rgba(229,57,53,0.09);color:var(--red-l);font-size:11px;font-weight:600;white-space:nowrap}
-.tn-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border2);background:rgba(255,255,255,0.04);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all 0.2s;flex-shrink:0;position:relative}
-.tn-btn:hover{background:rgba(255,255,255,0.09)}
-.tn-badge{position:absolute;top:-3px;right:-3px;width:16px;height:16px;border-radius:50%;background:var(--red);font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;border:2px solid var(--dark)}
-.tn-logout{display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:9px;background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.15);color:var(--red-l);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;white-space:nowrap}
-.tn-logout:hover{background:rgba(255,107,107,0.14)}
-.tn-logout svg{width:13px;height:13px;stroke:currentColor;fill:none}
-
-/* ── LAYOUT ── */
+[data-theme="light"]{
+  --bg:#F0F2F7;--card:#FFFFFF;--border:rgba(255,107,107,0.15);
+  --text:#1A1D28;--muted:#6470889;--sidebar-bg:#FFFFFF;--input-bg:#F5F7FF;
+  --muted:#647089;
+}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,107,107,0.3);border-radius:4px}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;transition:background 0.3s,color 0.3s}
+.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 70% 55% at 5% 12%,rgba(255,107,107,0.04) 0%,transparent 55%),linear-gradient(168deg,#050709 0%,#080B12 100%)}
+[data-theme="light"] .bg{background:radial-gradient(ellipse 70% 55% at 5% 12%,rgba(255,107,107,0.06) 0%,transparent 55%),linear-gradient(168deg,#F0F2F7 0%,#F7F9FF 100%)}
+/* TOPNAV */
+.topnav{position:sticky;top:0;z-index:200;background:var(--sidebar-bg);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;height:62px;gap:12px}
+.tn-brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.tn-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#FF6B6B,#FF8E53);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(255,107,107,0.3)}
+.tn-icon svg{width:17px;height:17px;fill:#fff;stroke:none}
+.tn-name{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;background:linear-gradient(135deg,var(--red),#FF8E53);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tn-pill{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:rgba(255,107,107,0.08);color:var(--red);font-size:12px;font-weight:600}
+.icon-btn{position:relative;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:var(--input-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.2s;flex-shrink:0;color:var(--text)}
+.icon-btn:hover{background:rgba(255,107,107,0.1);border-color:var(--red)}
+.logout-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:9px;background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.2);color:var(--red);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+.logout-btn:hover{background:rgba(255,107,107,0.15)}
+.logout-btn svg{width:14px;height:14px;stroke:currentColor;fill:none}
+/* LAYOUT */
 .layout{display:flex;flex:1;position:relative;z-index:1}
-
-/* ── SIDEBAR ── */
-.sidebar{width:220px;flex-shrink:0;background:rgba(9,11,16,0.98);backdrop-filter:blur(24px);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto}
-.sb-sec{padding:14px 12px 4px}
-.sb-lbl{font-size:9.5px;color:var(--muted);letter-spacing:1.4px;text-transform:uppercase;font-weight:600;padding:0 8px 7px;display:block}
-.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;color:var(--muted);font-size:12.5px;font-weight:500;cursor:pointer;transition:all 0.16s;margin-bottom:1px;border:none;background:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left;position:relative}
-.nav-item svg{width:14px;height:14px;stroke:currentColor;fill:none;flex-shrink:0;opacity:0.7}
-.nav-item:hover{color:var(--text);background:rgba(229,57,53,0.07)}
-.nav-item.active{color:var(--red-l);background:rgba(229,57,53,0.1);font-weight:600}
-.nav-item.active svg{opacity:1}
-.nb{margin-left:auto;min-width:17px;height:17px;border-radius:9px;background:var(--red);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0}
-.sb-foot{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,0.05)}
-.sb-user{display:flex;align-items:center;gap:9px;padding:9px 11px;background:rgba(255,255,255,0.03);border-radius:11px;border:1px solid rgba(255,255,255,0.05)}
-.sb-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red-l));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
-.sb-uname{font-size:11.5px;font-weight:600}.sb-urole{font-size:10px;color:var(--muted)}
-
-/* ── MAIN ── */
-.main{flex:1;min-width:0;overflow-y:auto}
-.page{display:none;padding:26px 32px 52px;animation:pgIn 0.27s ease both}
+/* SIDEBAR */
+.sidebar{width:220px;flex-shrink:0;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto}
+.sb-sec{padding:16px 12px 6px}
+.sb-lbl{font-size:10px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;padding:0 10px 8px;display:block}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.18s;margin-bottom:2px;border:none;background:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left}
+.nav-item svg{width:15px;height:15px;stroke:currentColor;fill:none;flex-shrink:0}
+.nav-item:hover{color:var(--text);background:rgba(255,107,107,0.06)}
+.nav-item.active{color:var(--red);background:rgba(255,107,107,0.09);font-weight:600}
+.nb-pill{margin-left:auto;min-width:18px;height:18px;border-radius:9px;background:var(--red);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.sb-foot{margin-top:auto;padding:14px 12px;border-top:1px solid var(--border)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--input-bg);border-radius:12px;border:1px solid var(--border)}
+.sb-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--red),#FF8E53);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.sb-uname{font-size:12px;font-weight:600;color:var(--text)}.sb-urole{font-size:10px;color:var(--muted)}
+/* MAIN */
+.main{flex:1;min-width:0}
+.page{display:none;padding:28px 32px 52px;animation:pgIn 0.27s ease both}
 .page.active{display:block}
 @keyframes pgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .pg-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:14px;flex-wrap:wrap}
-.pg-title{font-family:'Playfair Display',serif;font-size:23px;font-weight:700;line-height:1.2}
-.pg-sub{color:var(--text2);font-size:12.5px;margin-top:3px}
-
-/* ── BUTTONS ── */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;transition:all 0.2s;border:none;flex-shrink:0;white-space:nowrap}
+.pg-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--text)}
+.pg-sub{color:var(--muted);font-size:13px;margin-top:3px}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;transition:all 0.2s;border:none}
 .btn svg{width:13px;height:13px;stroke:currentColor;fill:none}
-.btn-red{background:linear-gradient(135deg,var(--red),var(--red-l));color:#fff;box-shadow:0 3px 12px rgba(229,57,53,0.28)}
-.btn-red:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(229,57,53,0.38)}
-.btn-ghost{background:rgba(255,255,255,0.04);color:var(--text2);border:1px solid var(--border2)}
-.btn-ghost:hover{background:rgba(255,255,255,0.09);color:var(--text)}
-.btn-green{background:linear-gradient(135deg,var(--green),#35B5AC);color:#051210;box-shadow:0 3px 12px rgba(78,205,196,0.2)}
+.btn-red{background:linear-gradient(135deg,var(--red),#FF8E53);color:#fff;box-shadow:0 3px 12px rgba(255,107,107,0.24)}
+.btn-red:hover{transform:translateY(-1px)}
+.btn-green{background:linear-gradient(135deg,var(--green),#35B5AC);color:#051210}
 .btn-green:hover{transform:translateY(-1px)}
-.btn-warn{background:rgba(255,179,71,0.09);color:var(--warn);border:1px solid rgba(255,179,71,0.18)}
-.btn-warn:hover{background:rgba(255,179,71,0.16)}
-.btn-danger{background:rgba(229,57,53,0.09);color:var(--red-l);border:1px solid rgba(229,57,53,0.18)}
-.btn-danger:hover{background:rgba(229,57,53,0.18)}
-.btn-blue{background:rgba(74,158,255,0.09);color:var(--blue);border:1px solid rgba(74,158,255,0.18)}
-.btn-blue:hover{background:rgba(74,158,255,0.18)}
-.btn-sm{padding:5px 10px;font-size:11px;border-radius:7px;gap:4px}
-.btn-sm svg{width:11px;height:11px}
-
-/* ── BADGES ── */
-.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:600}
+.btn-warn{background:rgba(255,179,71,0.1);color:var(--warn);border:1px solid rgba(255,179,71,0.2)}
+.btn-warn:hover{background:rgba(255,179,71,0.18)}
+.btn-danger{background:rgba(255,107,107,0.08);color:var(--red);border:1px solid rgba(255,107,107,0.18)}
+.btn-danger:hover{background:rgba(255,107,107,0.15)}
+.btn-sm{padding:5px 12px;font-size:11.5px;border-radius:7px}
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
+.card+.card{margin-top:16px}
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px;margin-bottom:22px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;align-items:center;gap:13px;transition:all 0.2s;cursor:pointer}
+.stat-card:hover{border-color:rgba(255,107,107,0.25);transform:translateY(-2px)}
+.stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.stat-val{font-size:26px;font-weight:700;font-family:'Playfair Display',serif;line-height:1;color:var(--text)}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:0.4px;font-weight:600}
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
 .b-green{background:rgba(78,205,196,0.1);color:var(--green);border:1px solid rgba(78,205,196,0.18)}
 .b-gold{background:rgba(201,169,110,0.1);color:var(--gold);border:1px solid rgba(201,169,110,0.18)}
 .b-blue{background:rgba(74,158,255,0.1);color:var(--blue);border:1px solid rgba(74,158,255,0.18)}
-.b-red{background:rgba(229,57,53,0.1);color:var(--red-l);border:1px solid rgba(229,57,53,0.18)}
+.b-red{background:rgba(255,107,107,0.1);color:var(--red);border:1px solid rgba(255,107,107,0.18)}
 .b-warn{background:rgba(255,179,71,0.1);color:var(--warn);border:1px solid rgba(255,179,71,0.18)}
-.b-muted{background:rgba(86,96,112,0.12);color:var(--muted);border:1px solid rgba(86,96,112,0.2)}
-
-/* ── CARDS ── */
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
-.card-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.ci{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.ci-red{background:rgba(229,57,53,0.12)}.ci-gold{background:rgba(201,169,110,0.12)}.ci-blue{background:rgba(74,158,255,0.1)}.ci-green{background:rgba(78,205,196,0.1)}.ci-warn{background:rgba(255,179,71,0.1)}
-.card-title{font-size:13.5px;font-weight:700}.card-sub{font-size:11px;color:var(--muted);margin-top:1px}
-
-/* ── STATS ── */
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:13px;transition:all 0.2s;cursor:default}
-.stat-card:hover{border-color:rgba(229,57,53,0.28);transform:translateY(-2px)}
-.stat-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.stat-val{font-size:21px;font-weight:700;font-family:'Playfair Display',serif;line-height:1}
-.stat-lbl{font-size:9.5px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:0.4px;font-weight:600}
-.stat-delta{font-size:10px;color:var(--green);margin-top:1px}
-
-/* ── TABLE ── */
-.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-table{width:100%;border-collapse:collapse}
-thead tr{background:rgba(0,0,0,0.2)}
-th{padding:11px 16px;text-align:left;font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap}
-td{padding:12px 16px;font-size:12.5px;border-top:1px solid rgba(255,255,255,0.04)}
-tr:hover td{background:rgba(255,255,255,0.02)}
-.td-actions{display:flex;gap:6px;align-items:center}
-
-/* ── SECTION HEAD ── */
-.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px;flex-wrap:wrap}
-.sec-title{font-size:14px;font-weight:700}
-
-/* ── FILTER BAR ── */
-.filter-bar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px}
-.fg{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px}
-.flbl{font-size:10.5px;color:var(--muted);font-weight:600;letter-spacing:0.4px;text-transform:uppercase}
-.fsel,.finp{background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.08);border-radius:8px;padding:8px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12.5px;outline:none;transition:border-color 0.2s;width:100%;appearance:none}
-.fsel{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
-.fsel:focus,.finp:focus{border-color:var(--red-l);box-shadow:0 0 0 3px rgba(229,57,53,0.07)}
-.fsel option{background:#0C1018}
-
-/* ── ACTIVITY ── */
-.activity-list{display:flex;flex-direction:column;gap:8px}
-.activity-item{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:12px 16px;display:flex;align-items:center;gap:13px}
-.act-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.act-dot.red{background:var(--red-l)}.act-dot.green{background:var(--green)}.act-dot.blue{background:var(--blue)}.act-dot.gold{background:var(--gold)}.act-dot.warn{background:var(--warn)}
-.act-text{flex:1;font-size:12.5px}
-.act-time{font-size:11px;color:var(--muted);white-space:nowrap}
-
-/* ── COMPLAINT / REPORT ITEM ── */
-.list-item{padding:13px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
-.li-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-.li-body{flex:1;min-width:0}
-.li-title{font-size:13px;font-weight:600;margin-bottom:3px}
-.li-sub{font-size:11.5px;color:var(--muted);line-height:1.5}
-.li-actions{display:flex;gap:6px;align-items:center;flex-shrink:0;flex-wrap:wrap}
-
-/* ── NOTIF ITEMS ── */
-.notif-item{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:8px;transition:border-color 0.2s}
-.notif-item.unread{border-color:rgba(229,57,53,0.25);background:rgba(229,57,53,0.03)}
-.ndot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:6px}
-.ndot.red{background:var(--red-l)}.ndot.green{background:var(--green)}.ndot.blue{background:var(--blue)}.ndot.gold{background:var(--gold)}
-.n-body{flex:1}
-.n-title{font-size:13px;font-weight:600;margin-bottom:3px}
-.n-msg{font-size:11.5px;color:var(--muted);line-height:1.5}
-.n-time{font-size:11px;color:var(--muted);white-space:nowrap;flex-shrink:0}
-
-/* ── GRID LAYOUTS ── */
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-
-/* ── FORM ── */
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.fs-g{display:flex;flex-direction:column;gap:5px}.fs-g.full{grid-column:1/-1}
-.fs-lbl{font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px}
-.fs-inp,.fs-sel,.fs-ta{background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.08);border-radius:9px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:all 0.2s;width:100%;resize:none}
-.fs-ta{min-height:80px}
-.fs-inp:focus,.fs-sel:focus,.fs-ta:focus{border-color:var(--red-l);background:rgba(229,57,53,0.03);box-shadow:0 0 0 3px rgba(229,57,53,0.06)}
-.fs-sel{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
-.fs-sel option{background:#0C1018}
-
-/* ── TOGGLE ── */
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
-.toggle-row:last-child{border-bottom:none}
-.tgl-info h4{font-size:13px;font-weight:600;margin-bottom:2px}
-.tgl-info p{font-size:11.5px;color:var(--muted)}
-.toggle{position:relative;width:40px;height:22px;cursor:pointer;flex-shrink:0}
-.toggle input{opacity:0;width:0;height:0;position:absolute}
-.toggle-track{position:absolute;inset:0;border-radius:11px;background:rgba(255,255,255,0.1);transition:background 0.2s}
-.toggle input:checked+.toggle-track{background:var(--red)}
-.toggle-knob{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform 0.2s;pointer-events:none}
-.toggle input:checked~.toggle-knob{transform:translateX(18px)}
-
-/* ── USER PROFILE CARD ── */
-.user-profile-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px;margin-bottom:16px}
-.upa{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;flex-shrink:0}
-.upa.red{background:linear-gradient(135deg,var(--red),var(--red-l))}
-.upa.gold{background:linear-gradient(135deg,#C9A96E,#E8C97A);color:#0A0C0F}
-.upa.blue{background:linear-gradient(135deg,var(--blue),#7BBFFF)}
-
-/* ── MODAL ── */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);backdrop-filter:blur(14px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
-.overlay.open{display:flex;animation:oFade 0.2s ease}
-@keyframes oFade{from{opacity:0}to{opacity:1}}
-.modal{background:#0C1018;border:1px solid rgba(229,57,53,0.2);border-radius:18px;width:100%;max-width:520px;overflow:hidden;animation:pgIn 0.28s ease both;box-shadow:0 24px 60px rgba(0,0,0,0.6)}
-.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(0,0,0,0.2)}
-.modal-title{font-size:14.5px;font-weight:700;display:flex;align-items:center;gap:8px}
-.modal-title svg{width:16px;height:16px;stroke:var(--red-l);fill:none}
-.modal-close{padding:5px 12px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
-.modal-close:hover{background:rgba(255,107,107,0.1);color:var(--red-l)}
-.modal-body{padding:22px}
-
-/* ── REPORT CHART ── */
-.chart-bar-wrap{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-.chart-row{display:flex;align-items:center;gap:10px}
-.chart-label{font-size:11.5px;color:var(--text2);width:90px;flex-shrink:0;text-align:right}
-.chart-track{flex:1;height:20px;background:rgba(255,255,255,0.04);border-radius:10px;overflow:hidden;position:relative}
-.chart-fill{height:100%;border-radius:10px;transition:width 1s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:8px}
-.chart-fill span{font-size:10px;font-weight:600;color:#fff}
-.chart-fill.red{background:linear-gradient(90deg,rgba(229,57,53,0.5),var(--red-l))}
-.chart-fill.blue{background:linear-gradient(90deg,rgba(74,158,255,0.4),var(--blue))}
-.chart-fill.green{background:linear-gradient(90deg,rgba(78,205,196,0.4),var(--green))}
-.chart-fill.gold{background:linear-gradient(90deg,rgba(201,169,110,0.4),var(--gold))}
-.chart-fill.warn{background:linear-gradient(90deg,rgba(255,179,71,0.4),var(--warn))}
-
-/* ── VERIFY CARD ── */
-.verify-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px;display:flex;align-items:flex-start;gap:14px;margin-bottom:8px}
-.vc-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0}
-.vc-info{flex:1}
-.vc-name{font-size:13.5px;font-weight:700;margin-bottom:2px}
-.vc-role{font-size:11px;color:var(--muted);margin-bottom:8px}
-.vc-docs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
-.doc-tag{padding:3px 10px;border-radius:7px;border:1px solid rgba(74,158,255,0.2);background:rgba(74,158,255,0.06);font-size:10.5px;color:var(--blue);cursor:pointer;transition:all 0.2s}
-.doc-tag:hover{background:rgba(74,158,255,0.14)}
-
-/* ── AGREEMENT CARD ── */
-.agr-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px;margin-bottom:8px}
-.agr-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.agr-icon{width:38px;height:38px;border-radius:10px;background:rgba(201,169,110,0.1);display:flex;align-items:center;justify-content:center;font-size:18px}
-.agr-info h4{font-size:13.5px;font-weight:700;margin-bottom:2px}
-.agr-info p{font-size:11px;color:var(--muted)}
-.agr-details{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-.agr-det{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:9px 11px}
-.agr-det-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;font-weight:600;margin-bottom:3px}
-.agr-det-val{font-size:12.5px;font-weight:600}
-
-/* ── LOG ITEM ── */
-.log-item{padding:10px 14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);border-radius:9px;display:flex;align-items:center;gap:12px;margin-bottom:6px;font-size:12px}
-.log-type{min-width:70px;text-align:center;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600}
-.log-type.info{background:rgba(74,158,255,0.1);color:var(--blue)}
-.log-type.warn{background:rgba(255,179,71,0.1);color:var(--warn)}
-.log-type.error{background:rgba(229,57,53,0.1);color:var(--red-l)}
-.log-type.success{background:rgba(78,205,196,0.1);color:var(--green)}
-.log-msg{flex:1;color:var(--text2)}
-.log-user{font-size:11px;color:var(--muted);width:110px;text-align:right}
-.log-time{font-size:10.5px;color:var(--muted);width:90px;text-align:right;flex-shrink:0}
-
-/* ── OK BANNER ── */
-.ok-banner{display:none;align-items:center;gap:8px;padding:10px 14px;background:rgba(78,205,196,0.08);border:1px solid rgba(78,205,196,0.2);border-radius:9px;font-size:12.5px;color:var(--green);margin-top:12px}
-.ok-banner.show{display:flex}
-
-/* ── LIGHT THEME ── */
-[data-theme="light"] body{background:#F0F4F8!important;color:#1A1E26!important}
-[data-theme="light"] .bg{background:radial-gradient(ellipse 80% 60% at 10% 20%,rgba(229,57,53,0.05) 0%,transparent 60%),linear-gradient(160deg,#EEF1F6 0%,#E4EAF2 100%)!important}
-[data-theme="light"] .bg-grid{background-image:linear-gradient(rgba(80,100,130,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(80,100,130,0.05) 1px,transparent 1px)!important}
-[data-theme="light"] .topnav,[data-theme="light"] .sidebar{background:rgba(240,244,248,0.97)!important;border-color:rgba(0,0,0,0.08)!important}
-[data-theme="light"] .sidebar{background:rgba(232,236,244,0.98)!important}
-[data-theme="light"] .card,.stat-card,.tbl-wrap,.activity-item,.list-item,.notif-item,.verify-card,.agr-card,.modal,.log-item,.filter-bar{background:rgba(255,255,255,0.92)!important;border-color:rgba(0,0,0,0.08)!important}
-[data-theme="light"] thead tr{background:rgba(0,0,0,0.04)!important}
-[data-theme="light"] td{border-top-color:rgba(0,0,0,0.05)!important;color:#1A1E26!important}
-[data-theme="light"] .fs-inp,[data-theme="light"] .fs-sel,[data-theme="light"] .fs-ta,[data-theme="light"] .finp,[data-theme="light"] .fsel{background:rgba(0,0,0,0.04)!important;border-color:rgba(0,0,0,0.1)!important;color:#1A1E26!important}
-[data-theme="light"] .pg-title{color:#1A1E26!important}
-[data-theme="light"] .sb-user{background:rgba(0,0,0,0.04)!important;border-color:rgba(0,0,0,0.07)!important}
+.b-muted{background:var(--input-bg);color:var(--muted);border:1px solid var(--border)}
+/* TABLE */
+.tbl-wrap{overflow-x:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 14px;font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border)}
+td{padding:12px 14px;border-bottom:1px solid var(--border);color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,107,107,0.02)}
+/* LOADING */
+.loading{text-align:center;padding:40px;color:var(--muted);font-size:13px}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin 0.7s linear infinite;margin-right:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* SEARCH BAR */
+.search-bar{background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;padding:9px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:260px}
+.search-bar:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(255,107,107,0.07)}
+/* PENDING ACTIONS */
+.action-item{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:var(--input-bg);border-radius:10px;margin-bottom:8px}
+.action-label{font-size:13px;font-weight:600;color:var(--text)}
+.action-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.action-count{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700}
+.count-zero{background:rgba(255,255,255,0.04);color:var(--muted)}
+.count-pos{background:rgba(255,107,107,0.1);color:var(--red);border:1px solid rgba(255,107,107,0.2)}
+/* COMPLAINT ACTIONS */
+.sel-status{background:var(--input-bg);border:1.5px solid var(--border);border-radius:8px;padding:5px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer}
+.sel-status:focus{border-color:var(--red)}
+.sel-status option{background:var(--bg);color:var(--text)}
 </style>
 </head>
 <body>
 <script>
-// ── Dashboard Auth Guard ─────────────────────────────
-// This runs on every dashboard page to verify the user is logged in
-(function dashboardAuthGuard() {
+(function(){
   const token = localStorage.getItem('tms_token');
-  const user  = JSON.parse(localStorage.getItem('tms_user') || 'null');
-  if (!token || !user) {
-    localStorage.clear();
-    window.location.replace('../index.html');
-    return;
-  }
-  const path = window.location.pathname;
-  if (path.includes('admin-dashboard') && user.role !== 'admin') {
-    localStorage.clear(); window.location.replace('../index.html'); return;
-  }
-  if (path.includes('landlord-dashboard') && user.role !== 'landlord') {
-    localStorage.clear(); window.location.replace('../index.html'); return;
-  }
-  if (path.includes('tenant-dashboard') && user.role !== 'tenant') {
-    localStorage.clear(); window.location.replace('../index.html'); return;
-  }
+  const user  = JSON.parse(localStorage.getItem('tms_user')||'null');
+  if (!token || !user || user.role !== 'admin') { localStorage.clear(); window.location.replace('../index.html'); }
 })();
-
-function tmsLogout() {
-  localStorage.clear();
-  sessionStorage.clear();
-  window.location.replace('../index.html');
-}
-
-function getTMSUser() {
-  return JSON.parse(localStorage.getItem('tms_user') || 'null');
-}
-
-async function tmsApiCall(endpoint, method = 'GET', body = null) {
-  const token = localStorage.getItem('tms_token');
-  const opts = {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + token
-    }
-  };
+const API = 'http://localhost:5000/api';
+const tok = () => localStorage.getItem('tms_token');
+async function aFetch(url, method='GET', body=null) {
+  const opts = { method, headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+tok() } };
   if (body) opts.body = JSON.stringify(body);
-  const res  = await fetch('http://localhost:5000/api' + endpoint, opts);
-  return res.json();
+  const r = await fetch(API + url, opts);
+  return r.json();
 }
+function tmsLogout() { localStorage.clear(); sessionStorage.clear(); window.location.replace('../index.html'); }
+
+// THEME
+function toggleTheme() {
+  const h=document.documentElement, n=h.getAttribute('data-theme')==='dark'?'light':'dark';
+  h.setAttribute('data-theme',n);
+  const b=document.getElementById('theme-btn'); if(b) b.textContent=n==='dark'?'🌙':'☀️';
+  localStorage.setItem('tms-theme',n);
+}
+(function(){ const s=localStorage.getItem('tms-theme')||'dark'; document.documentElement.setAttribute('data-theme',s); })();
+
+// NAV
+function sp(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id)?.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+  if(id==='dashboard')   loadDashboardStats();
+  if(id==='tenants')     loadTenants();
+  if(id==='landlords')   loadLandlords();
+  if(id==='properties')  loadAdminProps();
+  if(id==='maintenance') loadAdminMaintenance();
+  if(id==='complaints')  loadAdminComplaints();
+  if(id==='payments')    loadAdminPayments();
+  if(id==='leases')      loadAdminLeases();
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
+  const s = localStorage.getItem('tms-theme')||'dark';
+  document.documentElement.setAttribute('data-theme', s);
+  const tb = document.getElementById('theme-btn'); if(tb) tb.textContent=s==='dark'?'🌙':'☀️';
+  const an=document.getElementById('sb-admin-name'); if(an) an.textContent=user.name||'Super Admin';
+  const ae=document.getElementById('sb-admin-email'); if(ae) ae.textContent=user.email||'admin@tms.com';
+  await loadDashboardStats();
+});
+
+// ══════════════════════════════════════
+// DASHBOARD STATS
+// ══════════════════════════════════════
+async function loadDashboardStats() {
+  try {
+    const [uData, pData, mData, cData, payData] = await Promise.all([
+      aFetch('/users'), aFetch('/properties'),
+      aFetch('/maintenance'), aFetch('/complaints'), aFetch('/payments')
+    ]);
+    const users     = uData.users||[];
+    const props     = pData.properties||[];
+    const maint     = mData.requests||[];
+    const comps     = cData.complaints||[];
+    const payments  = payData.payments||[];
+
+    const tenants   = users.filter(u=>u.role==='tenant');
+    const landlords = users.filter(u=>u.role==='landlord');
+    const pending   = users.filter(u=>!u.verified);
+    const openComps = comps.filter(c=>c.status==='open');
+    const pendMaint = maint.filter(m=>m.status==='pending');
+
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+    set('d-tenants',tenants.length); set('d-landlords',landlords.length);
+    set('d-props',props.length); set('d-users',users.length);
+    set('d-avail',props.filter(p=>p.status==='available').length);
+    set('d-maint',maint.length); set('d-comps',comps.length);
+    set('d-payments',payments.length);
+
+    // Pending actions
+    set('pa-verif', pending.length);
+    set('pa-comps', openComps.length);
+    set('pa-maint', pendMaint.length);
+
+    // Style counts
+    ['pa-verif','pa-comps','pa-maint'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){const v=parseInt(el.textContent)||0;el.className='action-count '+(v>0?'count-pos':'count-zero');}
+    });
+
+    // Bar chart
+    const max=Math.max(tenants.length,landlords.length,props.length,1);
+    const bar=(id,v)=>{const el=document.getElementById(id);if(el){el.style.width=Math.min((v/max)*100,100).toFixed(1)+'%';const sp=el.querySelector('span');if(sp)sp.textContent=v;}};
+    bar('bar-tenants',tenants.length);bar('bar-landlords',landlords.length);bar('bar-props',props.length);
+
+  } catch(e) { console.log('Stats error:',e); }
+}
+
+// ══════════════════════════════════════
+// TENANTS
+// ══════════════════════════════════════
+async function loadTenants(filter) {
+  const tbody=document.getElementById('tenants-tbody'); if(!tbody)return;
+  tbody.innerHTML='<tr><td colspan="7" class="loading"><span class="spinner"></span>Loading tenants…</td></tr>';
+  try {
+    const data=await aFetch('/users?role=tenant');
+    let list=data.users||[];
+    if(filter) list=list.filter(u=>u.name?.toLowerCase().includes(filter.toLowerCase())||u.email?.toLowerCase().includes(filter.toLowerCase()));
+    set_count('tenants-count',list.length);
+    if(!list.length){tbody.innerHTML='<tr><td colspan="7" class="loading">No tenants registered yet. They will appear here after sign-up.</td></tr>';return;}
+    tbody.innerHTML=list.map((u,i)=>{
+      const init=(u.name||'T').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      const joined=u.createdAt?new Date(u.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'}):'—';
+      return `<tr>
+        <td style="color:var(--muted)">${String(i+1).padStart(2,'0')}</td>
+        <td><div style="display:flex;align-items:center;gap:9px">
+          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#4A9EFF,#7BBFFF);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">${init}</div>
+          <div><div style="font-weight:600">${u.name||'—'}</div><div style="font-size:11px;color:var(--muted)">${u.authProvider==='google'?'🔵 Google':'📧 Email'}</div></div>
+        </div></td>
+        <td>${u.email||'—'}</td>
+        <td style="color:var(--muted)">${u.phone||'—'}</td>
+        <td><span class="badge ${u.status==='active'?'b-green':'b-red'}">${u.status||'active'}</span></td>
+        <td style="color:var(--muted);font-size:12px">${joined}</td>
+        <td><div style="display:flex;gap:6px">
+          <button class="btn btn-warn btn-sm" onclick="blockUser('${u._id}','tenant')">${u.status==='blocked'?'Unblock':'Block'}</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteUser('${u._id}','tenant')">Delete</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  } catch{tbody.innerHTML='<tr><td colspan="7" class="loading">⚠️ Error. Is backend running?</td></tr>';}
+}
+
+// ══════════════════════════════════════
+// LANDLORDS
+// ══════════════════════════════════════
+async function loadLandlords(filter) {
+  const tbody=document.getElementById('landlords-tbody'); if(!tbody)return;
+  tbody.innerHTML='<tr><td colspan="7" class="loading"><span class="spinner"></span>Loading landlords…</td></tr>';
+  try {
+    const data=await aFetch('/users?role=landlord');
+    let list=data.users||[];
+    if(filter) list=list.filter(u=>u.name?.toLowerCase().includes(filter.toLowerCase())||u.email?.toLowerCase().includes(filter.toLowerCase()));
+    set_count('landlords-count',list.length);
+    if(!list.length){tbody.innerHTML='<tr><td colspan="7" class="loading">No landlords registered yet.</td></tr>';return;}
+    tbody.innerHTML=list.map((u,i)=>{
+      const init=(u.name||'L').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      const joined=u.createdAt?new Date(u.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'}):'—';
+      return `<tr>
+        <td style="color:var(--muted)">${String(i+1).padStart(2,'0')}</td>
+        <td><div style="display:flex;align-items:center;gap:9px">
+          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#C9A96E,#E8C97A);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#0A0C0F;flex-shrink:0">${init}</div>
+          <div><div style="font-weight:600">${u.name||'—'}</div><div style="font-size:11px;color:var(--muted)">${u.authProvider==='google'?'🔵 Google':'📧 Email'}</div></div>
+        </div></td>
+        <td>${u.email||'—'}</td>
+        <td style="color:var(--muted)">${u.phone||'—'}</td>
+        <td><span class="badge ${u.verified?'b-green':'b-warn'}">${u.verified?'✓ Verified':'Pending'}</span></td>
+        <td><span class="badge ${u.status==='active'?'b-green':'b-red'}">${u.status||'active'}</span></td>
+        <td><div style="display:flex;gap:6px">
+          ${!u.verified?`<button class="btn btn-green btn-sm" onclick="verifyUser('${u._id}')">✓ Verify</button>`:''}
+          <button class="btn btn-warn btn-sm" onclick="blockUser('${u._id}','landlord')">${u.status==='blocked'?'Unblock':'Block'}</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteUser('${u._id}','landlord')">Delete</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  } catch{tbody.innerHTML='<tr><td colspan="7" class="loading">⚠️ Error.</td></tr>';}
+}
+
+// ══════════════════════════════════════
+// PROPERTIES
+// ══════════════════════════════════════
+async function loadAdminProps(filter) {
+  const tbody=document.getElementById('props-tbody'); if(!tbody)return;
+  tbody.innerHTML='<tr><td colspan="7" class="loading"><span class="spinner"></span>Loading…</td></tr>';
+  try {
+    const data=await aFetch('/properties');
+    let list=data.properties||[];
+    if(filter) list=list.filter(p=>p.title?.toLowerCase().includes(filter.toLowerCase())||p.area?.toLowerCase().includes(filter.toLowerCase()));
+    set_count('props-count',list.length);
+    if(!list.length){tbody.innerHTML='<tr><td colspan="7" class="loading">No properties listed yet.</td></tr>';return;}
+    tbody.innerHTML=list.map((p,i)=>`<tr>
+      <td style="color:var(--muted)">${String(i+1).padStart(2,'0')}</td>
+      <td><div style="font-weight:600">${p.title||'—'}</div><div style="font-size:11px;color:var(--muted)">${p.beds||'?'} Bed · ${p.baths||'?'} Bath · ${p.sqft||'?'} sqft</div></td>
+      <td style="color:var(--muted)">${p.landlordName||'—'}</td>
+      <td><span class="badge b-blue">${p.type||'House'}</span></td>
+      <td style="color:var(--gold);font-weight:600">Rs. ${Number(p.rent||0).toLocaleString()}</td>
+      <td>${p.area||p.city||'—'}</td>
+      <td><span class="badge ${p.status==='available'?'b-green':p.status==='rented'?'b-gold':'b-red'}">${p.status||'available'}</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteProperty('${p._id}')">Remove</button></td>
+    </tr>`).join('');
+  } catch{tbody.innerHTML='<tr><td colspan="7" class="loading">⚠️ Error.</td></tr>';}
+}
+
+// ══════════════════════════════════════
+// MAINTENANCE
+// ══════════════════════════════════════
+async function loadAdminMaintenance() {
+  const tbody=document.getElementById('maint-tbody'); if(!tbody)return;
+  tbody.innerHTML='<tr><td colspan="6" class="loading"><span class="spinner"></span>Loading…</td></tr>';
+  try {
+    const data=await aFetch('/maintenance');
+    const list=data.requests||[];
+    set_count('maint-count',list.length);
+    if(!list.length){tbody.innerHTML='<tr><td colspan="6" class="loading">No maintenance requests yet.</td></tr>';return;}
+    tbody.innerHTML=list.map((r,i)=>`<tr>
+      <td style="color:var(--muted)">${String(i+1).padStart(2,'0')}</td>
+      <td><div style="font-weight:600">${r.type||'—'}</div><div style="font-size:11px;color:var(--muted)">${r.description?.slice(0,50)}…</div></td>
+      <td>${r.tenantName||'—'}</td>
+      <td><span class="badge ${r.priority==='urgent'?'b-red':r.priority==='high'?'b-warn':'b-muted'}">${r.priority||'medium'}</span></td>
+      <td>${new Date(r.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</td>
+      <td>
+        <select class="sel-status" onchange="updateMaintenanceStatus('${r._id}',this.value)">
+          <option value="pending"${r.status==='pending'?' selected':''}>Pending</option>
+          <option value="in_progress"${r.status==='in_progress'?' selected':''}>In Progress</option>
+          <option value="resolved"${r.status==='resolved'?' selected':''}>Resolved</option>
+          <option value="cancelled"${r.status==='cancelled'?' selected':''}>Cancelled</option>
+        </select>
+      </td>
+    </tr>`).join('');
+  } catch{tbody.innerHTML='<tr><td colspan="6" class="loading">⚠️ Error.</td></tr>';}
+}
+
+// ══════════════════════════════════════
+// COMPLAINTS
+// ══════════════════════════════════════
+async function loadAdminComplaints() {
+  const tbody=document.getElementById('comps-tbody'); if(!tbody)return;
+  tbody.innerHTML='<tr><td colspan="6" class="loading"><span class="spinner"></span>Loading…</td></tr>';
+  try {
+    const data=await aFetch('/complaints');
+    const list=data.complaints||[];
+    set_count('comps-count',list.length);
+    if(!list.length){tbody.innerHTML='<tr><td colspan="6" class="loading">No complaints filed yet.</td></tr>';return;}
+    tbody.innerHTML=list.map((c,i)=>`<tr>
+      <td style="color:var(--muted)">${String(i+1).padStart(2,'0')}</td>
+      <td><div style="font-weight:600">${c.subject||'—'}</div><div style="font-size:11px;color:var(--muted)">${c.description?.slice(0,50)||''}…</div></td>
+      <td>${c.tenantName||'—'}</td>
+      <td><span class="badge b-blue">${c.category||'Other'}</span></td>
+      <td>${new Date(c.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</td>
+      <td>
+        <select class="sel-status" onchange="updateComplaintStatus('${c._id}',this.value)">
+          <option value="open"${c.status==='open'?' selected':''}>Open</option>
+          <option value="in_progress"${c.status==='in_progress'?' selected':''}>In Progress</option>
+          <option value="resolved"${c.status==='resolved'?' selected':''}>Resolved</option>
+          <option value="closed"${c.status==='closed'?' selected':''}>Closed</option>
+        </select>
+      </td>
+    </tr>`).join('');
+  } catch{tbody.innerHTML='<tr><td colspan="6" class="loading">⚠️ Error.</td></tr>';}
+}
+
+// ══════════════════════════════════════
+// PAYMENTS
+// ══════════════════════════════════════
+async function loadAdminPayments() {
+  const tbody=document.getElementById('payments-tbody'); if(!tbody)return;
+  tbody.innerHTML='<tr><td colspan="6" class="loading"><span class="spinner"></span>Loading…</td></tr>';
+  try {
+    const data=await aFetch('/payments');
+    const list=data.payments||[];
+    set_count('payments-count',list.length);
+    const total=list.reduce((a,p)=>a+(p.amount||0),0);
+    const ts=document.getElementById('payments-total'); if(ts) ts.textContent='Rs. '+total.toLocaleString();
+    if(!list.length){tbody.innerHTML='<tr><td colspan="6" class="loading">No payment records yet.</td></tr>';return;}
+    tbody.innerHTML=list.map((p,i)=>`<tr>
+      <td style="color:var(--muted)">${String(i+1).padStart(2,'0')}</td>
+      <td>${p.tenantName||'—'}</td>
+      <td>${p.month||'—'}</td>
+      <td style="color:var(--gold);font-weight:600">Rs. ${Number(p.amount||0).toLocaleString()}</td>
+      <td>${p.method||'Cash'}</td>
+      <td><span class="badge ${p.status==='paid'?'b-green':'b-warn'}">${p.status||'paid'}</span></td>
+    </tr>`).join('');
+  } catch{tbody.innerHTML='<tr><td colspan="6" class="loading">⚠️ Error.</td></tr>';}
+}
+
+// ══════════════════════════════════════
+// LEASES
+// ══════════════════════════════════════
+async function loadAdminLeases() {
+  const tbody=document.getElementById('leases-tbody'); if(!tbody)return;
+  tbody.innerHTML='<tr><td colspan="6" class="loading"><span class="spinner"></span>Loading…</td></tr>';
+  try {
+    const data=await aFetch('/leases');
+    const list=data.leases||[];
+    set_count('leases-count',list.length);
+    if(!list.length){tbody.innerHTML='<tr><td colspan="6" class="loading">No lease agreements yet.</td></tr>';return;}
+    tbody.innerHTML=list.map((l,i)=>`<tr>
+      <td style="color:var(--muted)">${String(i+1).padStart(2,'0')}</td>
+      <td style="font-weight:600">${l.tenantName||'—'}</td>
+      <td>${l.propertyTitle||'—'}</td>
+      <td>${l.landlordName||'—'}</td>
+      <td style="color:var(--gold);font-weight:600">Rs. ${Number(l.rent||0).toLocaleString()}</td>
+      <td>${l.startDate||'—'} → ${l.endDate||'—'}</td>
+      <td><span class="badge ${l.status==='active'?'b-green':l.status==='expired'?'b-muted':'b-red'}">${l.status||'active'}</span></td>
+    </tr>`).join('');
+  } catch{tbody.innerHTML='<tr><td colspan="6" class="loading">⚠️ Error.</td></tr>';}
+}
+
+// ══════════════════════════════════════
+// ACTIONS
+// ══════════════════════════════════════
+async function blockUser(id, role) { await aFetch(`/users/${id}/block`,'PUT'); role==='tenant'?loadTenants():loadLandlords(); }
+async function verifyUser(id) { await aFetch(`/users/${id}/verify`,'PUT'); loadLandlords(); }
+async function deleteUser(id, role) { if(!confirm('Delete user permanently?'))return; await aFetch(`/users/${id}`,'DELETE'); role==='tenant'?loadTenants():loadLandlords(); }
+async function deleteProperty(id) { if(!confirm('Remove property?'))return; await aFetch(`/properties/${id}`,'DELETE'); loadAdminProps(); }
+async function updateMaintenanceStatus(id,status) { await aFetch(`/maintenance/${id}/status`,'PUT',{status}); }
+async function updateComplaintStatus(id,status) { await aFetch(`/complaints/${id}/status`,'PUT',{status}); }
+
+function set_count(id, v) { const e=document.getElementById(id); if(e) e.textContent=v+' records'; }
 </script>
 
-<div class="bg"></div><div class="bg-grid"></div>
+<div class="bg"></div>
 
-<!-- TOPNAV -->
+<!-- TOP NAV -->
 <nav class="topnav">
   <div class="tn-brand">
-    <div class="tn-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-    <span class="tn-name">TMS</span>
-    <span class="tn-sep">/ Admin</span>
+    <div class="tn-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+    <span class="tn-name">TMS</span><span style="color:var(--muted);font-size:12px;margin:0 4px">/</span><span style="font-size:12px;color:var(--muted)">Admin</span>
   </div>
-  <span class="tn-pill">⚙️ Super Admin</span>
-  <button class="tn-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
-  <button class="tn-btn" onclick="gp('notifications',this)" style="position:relative">
-    🔔<span class="tn-badge" id="notif-count">0</span>
-  </button>
-  <button class="tn-logout" onclick="tmsLogout()">
+  <span class="tn-pill">🛡️ Super Admin</span>
+  <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+  <button class="logout-btn" onclick="tmsLogout()">
     <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout
   </button>
 </nav>
 
 <div class="layout">
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sb-sec">
-      <span class="sb-lbl">Main</span>
-      <button class="nav-item active" onclick="gp('dashboard',this)">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-sec">
+    <span class="sb-lbl">Overview</span>
+    <button class="nav-item active" onclick="sp('dashboard',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
+    </button>
+  </div>
+  <div class="sb-sec">
+    <span class="sb-lbl">Users</span>
+    <button class="nav-item" onclick="sp('tenants',this)">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Tenants
+      <span class="nb-pill" id="nb-tenants" style="display:none">0</span>
+    </button>
+    <button class="nav-item" onclick="sp('landlords',this)">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Landlords
+      <span class="nb-pill" id="nb-landlords" style="display:none">0</span>
+    </button>
+  </div>
+  <div class="sb-sec">
+    <span class="sb-lbl">Properties</span>
+    <button class="nav-item" onclick="sp('properties',this)">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>All Properties
+    </button>
+    <button class="nav-item" onclick="sp('leases',this)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Lease Agreements
+    </button>
+    <button class="nav-item" onclick="sp('payments',this)">
+      <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payments
+    </button>
+  </div>
+  <div class="sb-sec">
+    <span class="sb-lbl">Support</span>
+    <button class="nav-item" onclick="sp('maintenance',this)">
+      <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Maintenance
+    </button>
+    <button class="nav-item" onclick="sp('complaints',this)">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Complaints
+    </button>
+  </div>
+  <div class="sb-foot">
+    <div class="sb-user">
+      <div class="sb-av">A</div>
+      <div><div class="sb-uname" id="sb-admin-name">Super Admin</div><div class="sb-urole" id="sb-admin-email">admin</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="pg-head">
+      <div><div class="pg-title">Admin Dashboard</div><div class="pg-sub">System overview — TMS Platform</div></div>
+      <button class="btn btn-red" onclick="loadDashboardStats()">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>Refresh
       </button>
-      <button class="nav-item" onclick="gp('tenants',this)">
-        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Tenants
-      </button>
-      <button class="nav-item" onclick="gp('landlords',this)">
-        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Landlords
-      </button>
-      <button class="nav-item" onclick="gp('properties',this)">
-        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Properties
-      </button>
-    </div>
-    <div class="sb-sec">
-      <span class="sb-lbl">Oversight</span>
-      <button class="nav-item" onclick="gp('reported',this)">
-        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Reported Props<span class="nb" id="nb-reported">0</span>
-      </button>
-      <button class="nav-item" onclick="gp('complaints',this)">
-        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Complaints<span class="nb" id="nb-complaints">0</span>
-      </button>
-      <button class="nav-item" onclick="gp('maintenance',this)">
-        <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Maintenance<span class="nb" id="nb-maintenance">0</span>
-      </button>
-      <button class="nav-item" onclick="gp('agreements',this)">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Agreements
-      </button>
-    </div>
-    <div class="sb-sec">
-      <span class="sb-lbl">System</span>
-      <button class="nav-item" onclick="gp('verification',this)">
-        <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Verification<span class="nb" id="nb-verification">0</span>
-      </button>
-      <button class="nav-item" onclick="gp('notifications',this)">
-        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>Notifications<span class="nb" id="nb-notifs">0</span>
-      </button>
-      <button class="nav-item" onclick="gp('reports',this)">
-        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>System Reports
-      </button>
-      <button class="nav-item" onclick="gp('logs',this)">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>Activity Logs
-      </button>
-      <button class="nav-item" onclick="gp('settings',this)">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings
-      </button>
-    </div>
-    <div class="sb-foot">
-      <div class="sb-user">
-        <div class="sb-av">A</div>
-        <div><div class="sb-uname">Super Admin</div><div class="sb-urole">System Administrator</div></div>
-      </div>
-    </div>
-  </aside>
-
-  <main class="main">
-
-    <!-- ═══════════ DASHBOARD ═══════════ -->
-    <div class="page active" id="page-dashboard">
-      <div class="pg-head">
-        <div><div class="pg-title">Admin Dashboard</div><div class="pg-sub">System overview — TMS Platform</div></div>
-        <button class="btn btn-red" onclick="gp('reports',document.querySelector('[onclick*=reports]'))">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Generate Report
-        </button>
-      </div>
-      <div class="stats-row">
-        <div class="stat-card"><div class="stat-icon" style="background:rgba(74,158,255,0.1)">👥</div><div><div class="stat-val" style="color:var(--blue)" data-stat="totalUsers">0</div><div class="stat-lbl">Total Users</div><div class="stat-delta" data-stat-sub="newUsers">Start adding users</div></div></div>
-        <div class="stat-card"><div class="stat-icon" style="background:rgba(201,169,110,0.1)">🏠</div><div><div class="stat-val" style="color:var(--gold)" data-stat="properties">0</div><div class="stat-lbl">Properties</div><div class="stat-delta" data-stat-sub="newProps">Start adding properties</div></div></div>
-        <div class="stat-card"><div class="stat-icon" style="background:rgba(78,205,196,0.1)">📋</div><div><div class="stat-val" style="color:var(--green)" data-stat="activeLeases">0</div><div class="stat-lbl">Active Leases</div><div class="stat-delta" data-stat-sub="newLeases">Create agreements</div></div></div>
-        <div class="stat-card"><div class="stat-icon" style="background:rgba(229,57,53,0.12)">⚠️</div><div><div class="stat-val" style="color:var(--red-l)" data-stat="openIssues">0</div><div class="stat-lbl">Open Issues</div><div class="stat-delta" style="color:var(--red-l)" data-stat-sub="newIssues">No open issues</div></div></div>
-      </div>
-      <div class="two-col" style="margin-bottom:16px">
-        <div class="card">
-          <div class="card-head"><div class="ci ci-blue">📊</div><div><div class="card-title">Monthly Overview</div><div class="card-sub">Activity by category</div></div></div>
-          <div class="chart-bar-wrap">
-            <div class="chart-row"><span class="chart-label">Tenants</span><div class="chart-track"><div class="chart-fill blue" id="chart-tenants" style="width:0%"><span>0</span></div></div></div>
-            <div class="chart-row"><span class="chart-label">Landlords</span><div class="chart-track"><div class="chart-fill gold" id="chart-landlords" style="width:0%"><span>0</span></div></div></div>
-            <div class="chart-row"><span class="chart-label">Properties</span><div class="chart-track"><div class="chart-fill green" id="chart-properties" style="width:0%"><span>0</span></div></div></div>
-            <div class="chart-row"><span class="chart-label">Complaints</span><div class="chart-track"><div class="chart-fill red" id="chart-complaints" style="width:0%"><span>0</span></div></div></div>
-            <div class="chart-row"><span class="chart-label">Maintenance</span><div class="chart-track"><div class="chart-fill warn" id="chart-maintenance" style="width:0%"><span>0</span></div></div></div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-head"><div class="ci ci-red">🔔</div><div><div class="card-title">Pending Actions</div><div class="card-sub">Requires admin attention</div></div></div>
-          <div id="pending-actions-list" style="display:flex;flex-direction:column;gap:8px"></div>
-        </div>
-      </div>
-      <div class="sec-head"><div class="sec-title">Recent Activity</div></div>
-      <div class="activity-list" id="activity-list"></div>
     </div>
 
-    <!-- ═══════════ TENANTS ═══════════ -->
-    <div class="page" id="page-tenants">
-      <div class="pg-head">
-        <div><div class="pg-title">Manage Tenants</div><div class="pg-sub">View, block, or remove tenant accounts</div></div>
+    <div class="stats-row">
+      <div class="stat-card" onclick="sp('tenants',document.querySelector('.nav-item:nth-child(1)'))">
+        <div class="stat-icon" style="background:rgba(74,158,255,0.1)">👤</div>
+        <div><div class="stat-val" id="d-tenants">—</div><div class="stat-lbl">Tenants</div></div>
       </div>
-      <div class="filter-bar">
-        <div class="fg"><label class="flbl">Search</label><input class="finp" placeholder="Name or email…"></div>
-        <div class="fg"><label class="flbl">Status</label>
-          <select class="fsel"><option>All Status</option><option>Active</option><option>Blocked</option><option>Unverified</option></select>
-        </div>
-        <div class="fg"><label class="flbl">Sort By</label>
-          <select class="fsel"><option>Newest First</option><option>Oldest First</option><option>Name A–Z</option></select>
-        </div>
-        <button class="btn btn-red" style="align-self:flex-end">Search</button>
+      <div class="stat-card" onclick="sp('landlords',null)">
+        <div class="stat-icon" style="background:rgba(201,169,110,0.1)">🔑</div>
+        <div><div class="stat-val" id="d-landlords">—</div><div class="stat-lbl">Landlords</div></div>
       </div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>#</th><th>Tenant</th><th>Email</th><th>Phone</th><th>Current Property</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
-          <tbody id="tenants-tbody"><tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No tenants yet. Add one using the form below.</td></tr></tbody>
-        </table>
-            </div>
-      <!-- Add Tenant Form -->
-      <div class="card" style="margin-top:16px">
-        <div class="card-head"><div class="ci ci-blue">➕</div><div><div class="card-title">Add New Tenant</div></div></div>
-        <form id="add-tenant-form" onsubmit="event.preventDefault();tmsSubmitAddTenant()">
-          <div class="form-grid">
-            <div class="fs-g"><label class="fs-lbl">Full Name *</label><input class="fs-inp" id="add-t-name" placeholder="Muhammad Ali" required></div>
-            <div class="fs-g"><label class="fs-lbl">Email *</label><input class="fs-inp" id="add-t-email" type="email" placeholder="email@example.com" required></div>
-            <div class="fs-g"><label class="fs-lbl">Phone</label><input class="fs-inp" id="add-t-phone" placeholder="0300-1234567"></div>
-            <div class="fs-g"><label class="fs-lbl">CNIC</label><input class="fs-inp" id="add-t-cnic" placeholder="35202-XXXXXXX-X"></div>
-            <div class="fs-g full"><label class="fs-lbl">Current Property</label><input class="fs-inp" id="add-t-property" placeholder="Property name or address"></div>
-          </div>
-          <button class="btn btn-red" type="submit" style="margin-top:12px">Add Tenant</button>
-          <div id="add-tenant-msg" class="ok-banner" style="display:none;margin-top:10px"></div>
-        </form>
+      <div class="stat-card" onclick="sp('properties',null)">
+        <div class="stat-icon" style="background:rgba(78,205,196,0.1)">🏠</div>
+        <div><div class="stat-val" id="d-props">—</div><div class="stat-lbl">Properties</div></div>
+      </div>
+      <div class="stat-card" onclick="sp('payments',null)">
+        <div class="stat-icon" style="background:rgba(255,179,71,0.1)">💰</div>
+        <div><div class="stat-val" id="d-payments">—</div><div class="stat-lbl">Payments</div></div>
+      </div>
+      <div class="stat-card" onclick="sp('maintenance',null)">
+        <div class="stat-icon" style="background:rgba(155,127,245,0.1)">🔧</div>
+        <div><div class="stat-val" id="d-maint">—</div><div class="stat-lbl">Maintenance</div></div>
+      </div>
+      <div class="stat-card" onclick="sp('complaints',null)">
+        <div class="stat-icon" style="background:rgba(255,107,107,0.1)">📝</div>
+        <div><div class="stat-val" id="d-comps">—</div><div class="stat-lbl">Complaints</div></div>
       </div>
     </div>
 
-    <!-- ═══════════ LANDLORDS ═══════════ -->
-    <div class="page" id="page-landlords">
-      <div class="pg-head">
-        <div><div class="pg-title">Manage Landlords</div><div class="pg-sub">Approve, monitor, or remove landlord accounts</div></div>
-      </div>
-      <div class="filter-bar">
-        <div class="fg"><label class="flbl">Search</label><input class="finp" placeholder="Name or email…"></div>
-        <div class="fg"><label class="flbl">Status</label>
-          <select class="fsel"><option>All Status</option><option>Approved</option><option>Pending</option><option>Rejected</option><option>Blocked</option></select>
-        </div>
-        <button class="btn btn-red" style="align-self:flex-end">Search</button>
-      </div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>#</th><th>Landlord</th><th>Email</th><th>Properties</th><th>Active Tenants</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody id="landlords-tbody"><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No landlords yet.</td></tr></tbody>
-        </table>
-            </div>
-      <!-- Add Landlord Form -->
-      <div class="card" style="margin-top:16px">
-        <div class="card-head"><div class="ci ci-gold">➕</div><div><div class="card-title">Add New Landlord</div></div></div>
-        <form id="add-landlord-form" onsubmit="event.preventDefault();tmsSubmitAddLandlord()">
-          <div class="form-grid">
-            <div class="fs-g"><label class="fs-lbl">Full Name *</label><input class="fs-inp" id="add-l-name" placeholder="Usman Khan" required></div>
-            <div class="fs-g"><label class="fs-lbl">Email *</label><input class="fs-inp" id="add-l-email" type="email" placeholder="email@example.com" required></div>
-            <div class="fs-g"><label class="fs-lbl">Phone</label><input class="fs-inp" id="add-l-phone" placeholder="0300-1234567"></div>
-            <div class="fs-g"><label class="fs-lbl">CNIC</label><input class="fs-inp" id="add-l-cnic" placeholder="35202-XXXXXXX-X"></div>
-          </div>
-          <button class="btn btn-red" type="submit" style="margin-top:12px">Add Landlord</button>
-          <div id="add-landlord-msg" class="ok-banner" style="display:none;margin-top:10px"></div>
-        </form>
-      </div>
-    </div>
-
-    <!-- ═══════════ PROPERTIES ═══════════ -->
-    <div class="page" id="page-properties">
-      <div class="pg-head">
-        <div><div class="pg-title">Property Listings</div><div class="pg-sub">Monitor all properties across the platform</div></div>
-      </div>
-      <div class="filter-bar">
-        <div class="fg"><label class="flbl">Search</label><input class="finp" placeholder="Address or landlord…"></div>
-        <div class="fg"><label class="flbl">Type</label>
-          <select class="fsel"><option>All Types</option><option>Apartment</option><option>House</option><option>Room</option><option>Shop</option></select>
-        </div>
-        <div class="fg"><label class="flbl">Status</label>
-          <select class="fsel"><option>All</option><option>Available</option><option>Rented</option><option>Suspended</option></select>
-        </div>
-        <button class="btn btn-red" style="align-self:flex-end">Filter</button>
-      </div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>#</th><th>Property</th><th>Landlord</th><th>Type</th><th>Rent/mo</th><th>City</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody id="properties-tbody"><tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No properties yet.</td></tr></tbody>
-        </table>
-            </div>
-      <!-- Add Property Form -->
-      <div class="card" style="margin-top:16px">
-        <div class="card-head"><div class="ci ci-green">➕</div><div><div class="card-title">Add New Property</div></div></div>
-        <form id="add-property-form" onsubmit="event.preventDefault();tmsSubmitAddProperty()">
-          <div class="form-grid">
-            <div class="fs-g"><label class="fs-lbl">Title *</label><input class="fs-inp" id="add-p-title" placeholder="DHA Phase 5 House" required></div>
-            <div class="fs-g"><label class="fs-lbl">City *</label><input class="fs-inp" id="add-p-city" placeholder="Lahore"></div>
-            <div class="fs-g full"><label class="fs-lbl">Address</label><input class="fs-inp" id="add-p-address" placeholder="Full address"></div>
-            <div class="fs-g"><label class="fs-lbl">Type</label>
-              <select class="fs-sel" id="add-p-type"><option value="apartment">Apartment</option><option value="house">House</option><option value="room">Room</option><option value="shop">Shop</option></select>
-            </div>
-            <div class="fs-g"><label class="fs-lbl">Rent/Month (Rs.)</label><input class="fs-inp" id="add-p-rent" type="number" placeholder="45000"></div>
-            <div class="fs-g"><label class="fs-lbl">Bedrooms</label><input class="fs-inp" id="add-p-beds" type="number" placeholder="3"></div>
-            <div class="fs-g"><label class="fs-lbl">Bathrooms</label><input class="fs-inp" id="add-p-baths" type="number" placeholder="2"></div>
-            <div class="fs-g"><label class="fs-lbl">Landlord Name</label><input class="fs-inp" id="add-p-landlord" placeholder="Landlord's name"></div>
-          </div>
-          <button class="btn btn-red" type="submit" style="margin-top:12px">Add Property</button>
-          <div id="add-property-msg" class="ok-banner" style="display:none;margin-top:10px"></div>
-        </form>
-      </div>
-    </div>
-
-    <!-- ═══════════ REPORTED PROPERTIES ═══════════ -->
-    <div class="page" id="page-reported">
-      <div class="pg-head">
-        <div><div class="pg-title">Reported Properties</div><div class="pg-sub">Review user-reported listings</div></div>
-        <span class="badge b-red" style="font-size:12px;padding:6px 14px">3 Active Reports</span>
-      </div>
-
-      <div id="reported-list">
-        <div style="text-align:center;padding:40px;color:var(--muted)">No reported properties. Reported properties from tenants will appear here.</div>
-      </div>
-    </div>
-
-    <!-- ═══════════ COMPLAINTS ═══════════ -->
-    <div class="page" id="page-complaints">
-      <div class="pg-head">
-        <div><div class="pg-title">Complaints</div><div class="pg-sub">Manage all tenant & landlord complaints</div></div>
-        <span class="badge b-red" style="font-size:12px;padding:6px 14px">4 Open</span>
-      </div>
-      <div class="filter-bar">
-        <div class="fg"><label class="flbl">Status</label>
-          <select class="fsel"><option>All</option><option>Open</option><option>In Progress</option><option>Resolved</option></select>
-        </div>
-        <div class="fg"><label class="flbl">Filed By</label>
-          <select class="fsel"><option>All Roles</option><option>Tenant</option><option>Landlord</option></select>
-        </div>
-      </div>
-
-      <div id="complaints-list"></div>
-
-      <!-- Add Complaint Form -->
-      <div class="card" style="margin-top:20px" id="add-complaint-card">
-        <div class="card-head"><div class="ci ci-red">➕</div><div><div class="card-title">File New Complaint</div><div class="card-sub">Record a complaint in the system</div></div></div>
-        <form id="add-complaint-form" onsubmit="event.preventDefault();tmsSubmitAddComplaint()">
-          <div class="form-grid">
-            <div class="fs-g"><label class="fs-lbl">Title</label><input class="fs-inp" id="add-c-title" placeholder="Complaint title" required></div>
-            <div class="fs-g"><label class="fs-lbl">Filed By</label><input class="fs-inp" id="add-c-filedby" placeholder="Name of person filing"></div>
-            <div class="fs-g"><label class="fs-lbl">Category</label>
-              <select class="fs-sel" id="add-c-category">
-                <option value="harassment">Harassment</option>
-                <option value="payment">Payment Dispute</option>
-                <option value="safety">Safety Issue</option>
-                <option value="noise">Noise</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div class="fs-g full"><label class="fs-lbl">Description</label><textarea class="fs-ta" id="add-c-desc" placeholder="Describe the complaint…"></textarea></div>
-          </div>
-          <button class="btn btn-red" type="submit" style="margin-top:12px">File Complaint</button>
-          <div id="add-complaint-msg" class="ok-banner" style="display:none;margin-top:10px"></div>
-        </form>
-      </div>
-    </div>
-
-    <!-- ═══════════ MAINTENANCE ═══════════ -->
-    <div class="page" id="page-maintenance">
-      <div class="pg-head">
-        <div><div class="pg-title">Maintenance Requests</div><div class="pg-sub">Monitor all maintenance tickets system-wide</div></div>
-      </div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>ID</th><th>Issue</th><th>Tenant</th><th>Property</th><th>Landlord</th><th>Priority</th><th>Status</th><th>Filed</th></tr></thead>
-          <tbody id="maintenance-tbody"><tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No maintenance requests yet.</td></tr></tbody>
-        </table>
-            </div>
-      <!-- Add Maintenance Form -->
-      <div class="card" style="margin-top:16px">
-        <div class="card-head"><div class="ci ci-warn">➕</div><div><div class="card-title">Add Maintenance Request</div></div></div>
-        <form id="add-maintenance-form" onsubmit="event.preventDefault();tmsSubmitAddMaintenance()">
-          <div class="form-grid">
-            <div class="fs-g"><label class="fs-lbl">Issue Title *</label><input class="fs-inp" id="add-m-title" placeholder="Water Leak in Ceiling" required></div>
-            <div class="fs-g"><label class="fs-lbl">Tenant Name</label><input class="fs-inp" id="add-m-tenant" placeholder="Tenant's name"></div>
-            <div class="fs-g"><label class="fs-lbl">Property</label><input class="fs-inp" id="add-m-property" placeholder="Property name"></div>
-            <div class="fs-g"><label class="fs-lbl">Priority</label>
-              <select class="fs-sel" id="add-m-priority"><option value="urgent">Urgent</option><option value="high">High</option><option value="normal">Normal</option><option value="low">Low</option></select>
-            </div>
-            <div class="fs-g full"><label class="fs-lbl">Description</label><textarea class="fs-ta" id="add-m-desc" placeholder="Describe the issue…"></textarea></div>
-          </div>
-          <button class="btn btn-red" type="submit" style="margin-top:12px">Add Request</button>
-          <div id="add-maint-msg" class="ok-banner" style="display:none;margin-top:10px"></div>
-        </form>
-      </div>
-    </div>
-
-    <!-- ═══════════ AGREEMENTS ═══════════ -->
-    <div class="page" id="page-agreements">
-      <div class="pg-head">
-        <div><div class="pg-title">Lease Agreements</div><div class="pg-sub">All rental agreement records on the platform</div></div>
-        <button class="btn btn-ghost" onclick="tmsExportAgreements()">Export CSV</button>
-      </div>
-
-      <div id="agreements-list"></div>
-
-      <!-- Add Agreement Form -->
-      <div class="card" style="margin-top:16px">
-        <div class="card-head"><div class="ci ci-gold">➕</div><div><div class="card-title">Create New Agreement</div></div></div>
-        <form id="add-agreement-form" onsubmit="event.preventDefault();tmsSubmitAddAgreement()">
-          <div class="form-grid">
-            <div class="fs-g"><label class="fs-lbl">Tenant Name *</label><input class="fs-inp" id="add-a-tenant" placeholder="Tenant's full name" required></div>
-            <div class="fs-g"><label class="fs-lbl">Landlord Name *</label><input class="fs-inp" id="add-a-landlord" placeholder="Landlord's full name" required></div>
-            <div class="fs-g full"><label class="fs-lbl">Property</label><input class="fs-inp" id="add-a-property" placeholder="Property name/address"></div>
-            <div class="fs-g"><label class="fs-lbl">Monthly Rent (Rs.)</label><input class="fs-inp" id="add-a-rent" type="number" placeholder="45000"></div>
-            <div class="fs-g"><label class="fs-lbl">Duration</label><input class="fs-inp" id="add-a-duration" placeholder="12 Months"></div>
-            <div class="fs-g"><label class="fs-lbl">Start Date</label><input class="fs-inp" id="add-a-start" type="date"></div>
-            <div class="fs-g"><label class="fs-lbl">End Date</label><input class="fs-inp" id="add-a-end" type="date"></div>
-          </div>
-          <button class="btn btn-red" type="submit" style="margin-top:12px">Create Agreement</button>
-          <div id="add-agr-msg" class="ok-banner" style="display:none;margin-top:10px"></div>
-        </form>
-      </div>
-    </div>
-
-    <!-- ═══════════ VERIFICATION ═══════════ -->
-    <div class="page" id="page-verification">
-      <div class="pg-head">
-        <div><div class="pg-title">User Verification</div><div class="pg-sub">Verify identities and approve submitted documents</div></div>
-        <span class="badge b-warn" style="font-size:12px;padding:6px 14px">2 Pending</span>
-      </div>
-
-      <div id="verification-pending"></div>
-
-      <div class="card" style="margin-top:16px">
-        <div class="card-head"><div class="ci ci-green">✅</div><div><div class="card-title">Recently Verified</div></div></div>
-        <div style="padding:20px;color:var(--muted);text-align:center;font-size:13px">
-          Approved landlords will appear in the Landlords list. Check there to see approved accounts.
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══════════ NOTIFICATIONS ═══════════ -->
-    <div class="page" id="page-notifications">
-      <div class="pg-head">
-        <div><div class="pg-title">Notifications</div><div class="pg-sub">System & user notifications management</div></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-ghost" onclick="markAllRead()">Mark All Read</button>
-          <button class="btn btn-red" onclick="showSendNotif()">Send Notification</button>
-        </div>
-      </div>
-
-      <div id="notifs-list"><div style="text-align:center;padding:40px;color:var(--muted)">No notifications yet.</div></div>
-
-      <!-- Send Notification Panel -->
-      <div id="send-notif-panel" style="display:none;margin-top:20px">
-        <div class="card">
-          <div class="card-head"><div class="ci ci-red">📢</div><div><div class="card-title">Send System Notification</div><div class="card-sub">Broadcast to users on the platform</div></div></div>
-          <div class="form-grid">
-            <div class="fs-g"><label class="fs-lbl">Send To</label>
-              <select class="fs-sel"><option>All Users</option><option>All Tenants</option><option>All Landlords</option><option>Specific User</option></select>
-            </div>
-            <div class="fs-g"><label class="fs-lbl">Type</label>
-              <select class="fs-sel"><option>System Alert</option><option>Announcement</option><option>Reminder</option><option>Warning</option></select>
-            </div>
-            <div class="fs-g"><label class="fs-lbl">Title</label><input class="fs-inp" id="notif-title" placeholder="Notification title…"></div>
-            <div class="fs-g full"><label class="fs-lbl">Message</label><textarea class="fs-ta" id="notif-msg" placeholder="Write notification message…"></textarea></div>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:14px">
-            <button class="btn btn-red" onclick="sendNotif()">Send Now</button>
-            <button class="btn btn-ghost" onclick="document.getElementById('send-notif-panel').style.display='none'">Cancel</button>
-          </div>
-          <div class="ok-banner" id="notif-ok">✅ Notification sent successfully to all users!</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══════════ REPORTS ═══════════ -->
-    <div class="page" id="page-reports">
-      <div class="pg-head">
-        <div><div class="pg-title">System Reports</div><div class="pg-sub">Generate and download platform analytics</div></div>
-      </div>
-      <div class="three-col" style="margin-bottom:20px">
-        <div class="card" style="text-align:center;cursor:pointer;transition:all 0.2s" onmouseenter="this.style.borderColor='rgba(229,57,53,0.4)'" onmouseleave="this.style.borderColor=''">
-          <div style="font-size:32px;margin-bottom:10px">👥</div>
-          <div style="font-size:13.5px;font-weight:700;margin-bottom:4px">User Report</div>
-          <div style="font-size:11.5px;color:var(--muted);margin-bottom:14px">Total tenants, landlords, verifications</div>
-          <button class="btn btn-red btn-sm" style="width:100%;justify-content:center">Generate PDF</button>
-        </div>
-        <div class="card" style="text-align:center;cursor:pointer;transition:all 0.2s" onmouseenter="this.style.borderColor='rgba(229,57,53,0.4)'" onmouseleave="this.style.borderColor=''">
-          <div style="font-size:32px;margin-bottom:10px">🏠</div>
-          <div style="font-size:13.5px;font-weight:700;margin-bottom:4px">Property Report</div>
-          <div style="font-size:11.5px;color:var(--muted);margin-bottom:14px">Listings, rented, available, suspended</div>
-          <button class="btn btn-red btn-sm" style="width:100%;justify-content:center">Generate PDF</button>
-        </div>
-        <div class="card" style="text-align:center;cursor:pointer;transition:all 0.2s" onmouseenter="this.style.borderColor='rgba(229,57,53,0.4)'" onmouseleave="this.style.borderColor=''">
-          <div style="font-size:32px;margin-bottom:10px">⚠️</div>
-          <div style="font-size:32px;margin-bottom:10px" style="display:none"></div>
-          <div style="font-size:13.5px;font-weight:700;margin-bottom:4px">Complaints Report</div>
-          <div style="font-size:11.5px;color:var(--muted);margin-bottom:14px">Open, resolved, escalated issues</div>
-          <button class="btn btn-red btn-sm" style="width:100%;justify-content:center">Generate PDF</button>
-        </div>
-        <div class="card" style="text-align:center;cursor:pointer;transition:all 0.2s" onmouseenter="this.style.borderColor='rgba(229,57,53,0.4)'" onmouseleave="this.style.borderColor=''">
-          <div style="font-size:32px;margin-bottom:10px">🔧</div>
-          <div style="font-size:13.5px;font-weight:700;margin-bottom:4px">Maintenance Report</div>
-          <div style="font-size:11.5px;color:var(--muted);margin-bottom:14px">All tickets, status, resolution times</div>
-          <button class="btn btn-red btn-sm" style="width:100%;justify-content:center">Generate PDF</button>
-        </div>
-        <div class="card" style="text-align:center;cursor:pointer;transition:all 0.2s" onmouseenter="this.style.borderColor='rgba(229,57,53,0.4)'" onmouseleave="this.style.borderColor=''">
-          <div style="font-size:32px;margin-bottom:10px">📄</div>
-          <div style="font-size:13.5px;font-weight:700;margin-bottom:4px">Agreements Report</div>
-          <div style="font-size:11.5px;color:var(--muted);margin-bottom:14px">Active, expired, terminated leases</div>
-          <button class="btn btn-red btn-sm" style="width:100%;justify-content:center">Generate PDF</button>
-        </div>
-        <div class="card" style="text-align:center;cursor:pointer;transition:all 0.2s" onmouseenter="this.style.borderColor='rgba(229,57,53,0.4)'" onmouseleave="this.style.borderColor=''">
-          <div style="font-size:32px;margin-bottom:10px">📊</div>
-          <div style="font-size:13.5px;font-weight:700;margin-bottom:4px">Full System Report</div>
-          <div style="font-size:11.5px;color:var(--muted);margin-bottom:14px">Complete platform analytics overview</div>
-          <button class="btn btn-red btn-sm" style="width:100%;justify-content:center">Generate PDF</button>
-        </div>
-      </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <!-- Activity Overview -->
       <div class="card">
-        <div class="card-head"><div class="ci ci-blue">📊</div><div><div class="card-title">Platform Statistics</div></div></div>
-        <div class="chart-bar-wrap">
-          <div class="chart-row"><span class="chart-label">Tenants</span><div class="chart-track"><div class="chart-fill blue" id="chart-tenants-r" style="width:0%"><span>0</span></div></div></div>
-          <div class="chart-row"><span class="chart-label">Landlords</span><div class="chart-track"><div class="chart-fill gold" id="chart-landlords-r" style="width:0%"><span>0</span></div></div></div>
-          <div class="chart-row"><span class="chart-label">Properties</span><div class="chart-track"><div class="chart-fill green" id="chart-properties-r" style="width:0%"><span>0</span></div></div></div>
-          <div class="chart-row"><span class="chart-label">Active Leases</span><div class="chart-track"><div class="chart-fill blue" id="chart-leases-r" style="width:0%"><span>0</span></div></div></div>
-          <div class="chart-row"><span class="chart-label">Complaints</span><div class="chart-track"><div class="chart-fill red" id="chart-complaints-r" style="width:0%"><span>0</span></div></div></div>
+        <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px">📊 Activity Overview</h3>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span style="color:var(--muted)">Tenants</span><span style="color:var(--blue)" id="d-users">—</span></div>
+            <div style="height:8px;background:var(--input-bg);border-radius:4px"><div id="bar-tenants" style="height:100%;background:linear-gradient(90deg,#4A9EFF,#7BBFFF);border-radius:4px;transition:width 0.6s ease;width:0%"><span style="display:none"></span></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span style="color:var(--muted)">Landlords</span><span style="color:var(--gold)" id="bar-ll-cnt">—</span></div>
+            <div style="height:8px;background:var(--input-bg);border-radius:4px"><div id="bar-landlords" style="height:100%;background:linear-gradient(90deg,#C9A96E,#E8C97A);border-radius:4px;transition:width 0.6s ease;width:0%"><span style="display:none"></span></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span style="color:var(--muted)">Properties</span><span style="color:var(--green)" id="d-avail">—</span></div>
+            <div style="height:8px;background:var(--input-bg);border-radius:4px"><div id="bar-props" style="height:100%;background:linear-gradient(90deg,#4ECDC4,#35B5AC);border-radius:4px;transition:width 0.6s ease;width:0%"><span style="display:none"></span></div></div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- ═══════════ ACTIVITY LOGS ═══════════ -->
-    <div class="page" id="page-logs">
-      <div class="pg-head">
-        <div><div class="pg-title">Activity Logs</div><div class="pg-sub">Full system event history</div></div>
-        <button class="btn btn-ghost">Export Logs</button>
-      </div>
-      <div class="filter-bar">
-        <div class="fg"><label class="flbl">Type</label>
-          <select class="fsel"><option>All Types</option><option>Info</option><option>Warning</option><option>Error</option><option>Success</option></select>
+      <!-- Pending Actions -->
+      <div class="card">
+        <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px">⚡ Pending Actions</h3>
+        <div class="action-item">
+          <div><div class="action-label">Unverified Landlords</div><div class="action-sub">Awaiting manual approval</div></div>
+          <span class="action-count count-zero" id="pa-verif">0</span>
         </div>
-        <div class="fg"><label class="flbl">Date</label><input class="finp" type="date" style="color:var(--text2)"></div>
-        <div class="fg"><label class="flbl">Search</label><input class="finp" placeholder="Search logs…"></div>
-      </div>
-      <div id="logs-container"></div>
-    </div>
-
-    <!-- ═══════════ SETTINGS ═══════════ -->
-    <div class="page" id="page-settings">
-      <div class="pg-head">
-        <div><div class="pg-title">System Settings</div><div class="pg-sub">Configure TMS platform behavior</div></div>
-      </div>
-      <div class="two-col">
-        <div class="card">
-          <div class="card-head"><div class="ci ci-red">⚙️</div><div><div class="card-title">Platform Controls</div></div></div>
-          <div class="toggle-row">
-            <div class="tgl-info"><h4>Maintenance Mode</h4><p>Take the platform offline for maintenance</p></div>
-            <label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-knob"></div></label>
-          </div>
-          <div class="toggle-row">
-            <div class="tgl-info"><h4>New Registrations</h4><p>Allow new user sign-ups</p></div>
-            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-knob"></div></label>
-          </div>
-          <div class="toggle-row">
-            <div class="tgl-info"><h4>Auto-Verification Emails</h4><p>Send email on document submission</p></div>
-            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-knob"></div></label>
-          </div>
-          <div class="toggle-row">
-            <div class="tgl-info"><h4>Landlord Auto-Approval</h4><p>Skip manual review for verified landlords</p></div>
-            <label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-knob"></div></label>
-          </div>
-          <div class="toggle-row">
-            <div class="tgl-info"><h4>Activity Logging</h4><p>Log all user & system events</p></div>
-            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-knob"></div></label>
-          </div>
+        <div class="action-item">
+          <div><div class="action-label">Open Complaints</div><div class="action-sub">Need resolution</div></div>
+          <span class="action-count count-zero" id="pa-comps">0</span>
         </div>
-        <div class="card">
-          <div class="card-head"><div class="ci ci-blue">🔔</div><div><div class="card-title">Notification Settings</div></div></div>
-          <div class="toggle-row">
-            <div class="tgl-info"><h4>Email Notifications</h4><p>Send system emails to users</p></div>
-            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-knob"></div></label>
-          </div>
-          <div class="toggle-row">
-            <div class="tgl-info"><h4>New Complaint Alerts</h4><p>Admin alert on new complaint</p></div>
-            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-knob"></div></label>
-          </div>
-          <div class="toggle-row">
-            <div class="tgl-info"><h4>Report Notifications</h4><p>Admin alert on property report</p></div>
-            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-knob"></div></label>
-          </div>
-          <div class="toggle-row">
-            <div class="tgl-info"><h4>Lease Alerts</h4><p>Notify when lease is near expiry</p></div>
-            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-knob"></div></label>
-          </div>
-          <div class="toggle-row">
-            <div class="tgl-info"><h4>Backup Reminders</h4><p>Notify after each system backup</p></div>
-            <label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-knob"></div></label>
-          </div>
+        <div class="action-item">
+          <div><div class="action-label">Pending Maintenance</div><div class="action-sub">Awaiting response</div></div>
+          <span class="action-count count-zero" id="pa-maint">0</span>
         </div>
-        <div class="card">
-          <div class="card-head"><div class="ci ci-warn">🔐</div><div><div class="card-title">Security Settings</div></div></div>
-          <div style="display:flex;flex-direction:column;gap:12px">
-            <div class="fs-g"><label class="fs-lbl">Session Timeout (minutes)</label><input class="fs-inp" value="30" type="number" min="5" max="120"></div>
-            <div class="fs-g"><label class="fs-lbl">Max Login Attempts</label><input class="fs-inp" value="5" type="number" min="3" max="10"></div>
-            <div class="fs-g"><label class="fs-lbl">Min Password Length</label><input class="fs-inp" value="8" type="number" min="6" max="20"></div>
-            <button class="btn btn-red" onclick="saveSettings()">Save Changes</button>
-            <div class="ok-banner" id="settings-ok">✅ Settings saved successfully!</div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-head"><div class="ci ci-green">🗄️</div><div><div class="card-title">Backup & Data</div></div></div>
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:9px;padding:12px">
-              <div style="font-size:11.5px;color:var(--muted);margin-bottom:3px">Last Backup</div>
-              <div style="font-size:13px;font-weight:600">March 7, 2026 — 15:00 · 2.4 GB</div>
-            </div>
-            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:9px;padding:12px">
-              <div style="font-size:11.5px;color:var(--muted);margin-bottom:3px">Next Scheduled</div>
-              <div style="font-size:13px;font-weight:600">March 9, 2026 — 15:00</div>
-            </div>
-            <button class="btn btn-green btn-sm">Run Backup Now</button>
-            <button class="btn btn-danger btn-sm">Clear Activity Logs</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </main>
-</div>
-
-<!-- TENANT DETAIL MODAL -->
-<div class="overlay" id="tenant-modal">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Tenant Details</div>
-      <button class="modal-close" onclick="closeModal('tenant-modal')">Close</button>
-    </div>
-    <div class="modal-body">
-      <div class="user-profile-card" style="margin-bottom:0">
-        <div class="upa blue" id="modal-avatar">S</div>
-        <div>
-          <div style="font-size:16px;font-weight:700" id="modal-name">Sara Ali</div>
-          <div style="font-size:12px;color:var(--muted)">Tenant · CNIC: 35202-XXXXX</div>
-          <div style="margin-top:6px"><span class="badge b-green">Active</span><span class="badge b-blue" style="margin-left:6px">Verified</span></div>
-        </div>
-      </div>
-      <div class="form-grid" style="margin-top:16px">
-        <div class="fs-g"><label class="fs-lbl">Email</label><input class="fs-inp" value="sara.ali@email.com" readonly></div>
-        <div class="fs-g"><label class="fs-lbl">Phone</label><input class="fs-inp" value="0300-1234567" readonly></div>
-        <div class="fs-g"><label class="fs-lbl">Current Property</label><input class="fs-inp" value="Gulberg Apartment #3" readonly></div>
-        <div class="fs-g"><label class="fs-lbl">Active Lease</label><input class="fs-inp" value="AGR-2026-001 (Mar 2026 – Feb 2027)" readonly></div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:16px">
-        <button class="btn btn-warn">Block Account</button>
-        <button class="btn btn-danger">Delete Account</button>
-        <button class="btn btn-ghost" onclick="closeModal('tenant-modal')">Close</button>
       </div>
     </div>
   </div>
+
+  <!-- TENANTS -->
+  <div class="page" id="page-tenants">
+    <div class="pg-head">
+      <div><div class="pg-title">Tenants</div><div class="pg-sub" id="tenants-count">Loading…</div></div>
+      <input class="search-bar" placeholder="🔍 Search tenants…" oninput="loadTenants(this.value)">
+    </div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Tenant</th><th>Email</th><th>Phone</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+          <tbody id="tenants-tbody"><tr><td colspan="7" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- LANDLORDS -->
+  <div class="page" id="page-landlords">
+    <div class="pg-head">
+      <div><div class="pg-title">Landlords</div><div class="pg-sub" id="landlords-count">Loading…</div></div>
+      <input class="search-bar" placeholder="🔍 Search landlords…" oninput="loadLandlords(this.value)">
+    </div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Landlord</th><th>Email</th><th>Phone</th><th>Verified</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="landlords-tbody"><tr><td colspan="7" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROPERTIES -->
+  <div class="page" id="page-properties">
+    <div class="pg-head">
+      <div><div class="pg-title">All Properties</div><div class="pg-sub" id="props-count">Loading…</div></div>
+      <input class="search-bar" placeholder="🔍 Search properties…" oninput="loadAdminProps(this.value)">
+    </div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Property</th><th>Landlord</th><th>Type</th><th>Rent</th><th>Area</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="props-tbody"><tr><td colspan="8" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAINTENANCE -->
+  <div class="page" id="page-maintenance">
+    <div class="pg-head">
+      <div><div class="pg-title">Maintenance Requests</div><div class="pg-sub" id="maint-count">Loading…</div></div>
+    </div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Issue</th><th>Tenant</th><th>Priority</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="maint-tbody"><tr><td colspan="6" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLAINTS -->
+  <div class="page" id="page-complaints">
+    <div class="pg-head">
+      <div><div class="pg-title">Complaints</div><div class="pg-sub" id="comps-count">Loading…</div></div>
+    </div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Subject</th><th>Tenant</th><th>Category</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="comps-tbody"><tr><td colspan="6" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYMENTS -->
+  <div class="page" id="page-payments">
+    <div class="pg-head">
+      <div><div class="pg-title">Payment Records</div><div class="pg-sub" id="payments-count">Loading…</div></div>
+      <span style="background:var(--card);border:1px solid var(--border);padding:7px 14px;border-radius:9px;font-size:13px;color:var(--gold);font-weight:700" id="payments-total">Rs. 0</span>
+    </div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Tenant</th><th>Month</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
+          <tbody id="payments-tbody"><tr><td colspan="6" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEASES -->
+  <div class="page" id="page-leases">
+    <div class="pg-head">
+      <div><div class="pg-title">Lease Agreements</div><div class="pg-sub" id="leases-count">Loading…</div></div>
+    </div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Tenant</th><th>Property</th><th>Landlord</th><th>Rent</th><th>Period</th><th>Status</th></tr></thead>
+          <tbody id="leases-tbody"><tr><td colspan="7" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
 </div>
-
-<script>
-function gp(id, el) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  if (el) el.classList.add('active');
-  tmsOnPageChange(id);
-}
-
-function toggleTheme() {
-  const html = document.documentElement;
-  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-  html.setAttribute('data-theme', next);
-  const btn = document.getElementById('theme-btn');
-  if (btn) btn.textContent = next === 'dark' ? '🌙' : '☀️';
-  localStorage.setItem('tms-theme', next);
-}
-
-function showTenantModal(name) {
-  document.getElementById('modal-name').textContent = name;
-  document.getElementById('modal-avatar').textContent = name[0];
-  document.getElementById('tenant-modal').classList.add('open');
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
-
-function markAllRead() { TMS.markAllNotifsRead(); tmsRenderNotifs(); }
-
-function showSendNotif() {
-  const p = document.getElementById('send-notif-panel');
-  p.style.display = p.style.display === 'none' ? 'block' : 'none';
-}
-
-function sendNotif() { tmsSendNotification(); }
-
-function saveSettings() {
-  const ok = document.getElementById('settings-ok');
-  ok.classList.add('show');
-  setTimeout(() => ok.classList.remove('show'), 3000);
-}
-
-// Theme init + populate user info
-(function(){
-  const saved = localStorage.getItem('tms-theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', saved);
-  const btn = document.getElementById('theme-btn');
-
-  // Populate admin name
-  const user = JSON.parse(localStorage.getItem('tms_user') || '{}');
-  const nameEl = document.getElementById('sb-admin-name');
-  const emailEl = document.getElementById('sb-admin-email');
-  if (nameEl) nameEl.textContent = user.name || 'Super Admin';
-  if (emailEl) emailEl.textContent = user.email || 'adboy768@gmail.com';
-  if (btn) btn.textContent = saved === 'dark' ? '🌙' : '☀️';
-})();
-
-// Close modal on backdrop click
-document.querySelectorAll('.overlay').forEach(ov => {
-  ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); });
-});
-
-// Export agreements to CSV
-function tmsExportAgreements() {
-  const data = TMS.getAgreements();
-  if (!data.length) { alert('No agreements to export.'); return; }
-  const csv = ['ID,Tenant,Landlord,Property,Rent,Start,End,Status']
-    .concat(data.map(a => [a.id,a.tenant,a.landlord,a.property,a.rent,a.startDate,a.endDate,a.status].join(',')))
-    .join('\n');
-  const a = document.createElement('a');
-  a.href = 'data:text/csv,' + encodeURIComponent(csv);
-  a.download = 'agreements.csv'; a.click();
-}
-
-// Init on page load
-document.addEventListener('DOMContentLoaded', () => {
-  tmsUpdateStats();
-  tmsRenderPendingActions();
-  tmsRenderRecentActivity();
-  // Update reports chart too
-  const stats = TMS.getStats();
-  const maxR = Math.max(stats.tenants, stats.landlords, stats.properties, stats.activeLeases, stats.complaints, 1);
-  [['chart-tenants-r', stats.tenants], ['chart-landlords-r', stats.landlords],
-   ['chart-properties-r', stats.properties], ['chart-leases-r', stats.activeLeases],
-   ['chart-complaints-r', stats.complaints]].forEach(([id, val]) => {
-    const el = document.getElementById(id);
-    if (el) { el.style.width = Math.max((val/maxR)*100,0).toFixed(1)+'%'; const s=el.querySelector('span'); if(s)s.textContent=val; }
-  });
-});
-</script>
-<script src="../js/tms-data.js"></script>
 </body>
 </html>

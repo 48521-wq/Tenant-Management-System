@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
 const dns = require('dns');
-
-// Force IPv4 DNS — fixes querySrv ECONNREFUSED on Windows
 dns.setDefaultResultOrder('ipv4first');
 
 const connectDB = async () => {
@@ -18,5 +16,4 @@ const connectDB = async () => {
     process.exit(1);
   }
 };
-
 module.exports = connectDB;

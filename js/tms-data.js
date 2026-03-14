@@ -311,137 +311,88 @@ function tmsUpdateStats() {
   if (notifBadge) notifBadge.textContent = stats.unreadNotifs;
 }
 
-// ── Render Tenants Table — MongoDB API ─────────────────
-async function tmsRenderTenants(filter) {
+// ── Render Tenants Table ────────────────────────────────
+function tmsRenderTenants(filter) {
   const tbody = document.getElementById('tenants-tbody');
   if (!tbody) return;
-  tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--muted)">Loading...</td></tr>`;
-  try {
-    const token = localStorage.getItem('tms_token');
-    const res = await fetch('http://localhost:5000/api/users?role=tenant', {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const data = await res.json();
-    let list = data.users || [];
-    if (filter) list = list.filter(t =>
-      t.name?.toLowerCase().includes(filter.toLowerCase()) ||
-      t.email?.toLowerCase().includes(filter.toLowerCase())
-    );
-    if (!list.length) {
-      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No tenants registered yet.</td></tr>`;
-      tmsUpdateDBStats();
-      return;
-    }
-    tbody.innerHTML = list.map((t, i) => {
-      const joined = t.createdAt ? new Date(t.createdAt).toLocaleDateString('en-PK', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
-      const initials = (t.name || t.email || '?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-      return `<tr>
-        <td style="color:var(--muted)">${String(i + 1).padStart(2, '0')}</td>
-        <td><div style="display:flex;align-items:center;gap:9px">
-          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#7BBFFF);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">${initials}</div>
-          <div><div style="font-weight:600">${t.name || '—'}</div><div style="font-size:11px;color:var(--muted)">${t.authProvider === 'google' ? '🔵 Google' : '📧 Email'}</div></div>
-        </div></td>
-        <td>${t.email || '—'}</td>
-        <td style="color:var(--text2)">${t.phone || '—'}</td>
-        <td><span class="badge ${t.verified ? 'b-green' : 'b-warn'}">${t.verified ? '✓ Verified' : 'Pending'}</span></td>
-        <td><span class="badge ${t.status === 'active' ? 'b-green' : t.status === 'blocked' ? 'b-red' : 'b-warn'}">${t.status || 'active'}</span></td>
-        <td style="color:var(--muted);font-size:12px">${joined}</td>
-        <td><div class="td-actions">
-          <button class="btn btn-warn btn-sm" onclick="tmsBlockUser('${t._id}','tenant')">${t.status === 'blocked' ? 'Unblock' : 'Block'}</button>
-          <button class="btn btn-danger btn-sm" onclick="tmsDeleteUser('${t._id}','tenant')">Delete</button>
-        </div></td>
-      </tr>`;
-    }).join('');
-    tmsUpdateDBStats();
-  } catch(e) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--muted)">Error loading tenants. Is backend running?</td></tr>`;
+  let list = TMS.getTenants();
+  if (filter) list = list.filter(t =>
+    t.name?.toLowerCase().includes(filter.toLowerCase()) ||
+    t.email?.toLowerCase().includes(filter.toLowerCase())
+  );
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No tenants yet. Add one from the form below.</td></tr>`;
+    return;
   }
+  tbody.innerHTML = list.map((t, i) => `
+    <tr>
+      <td style="color:var(--muted)">${String(i + 1).padStart(2, '0')}</td>
+      <td><div style="font-weight:600">${t.name}</div><div style="font-size:11px;color:var(--muted)">CNIC: ${t.cnic || 'Not provided'}</div></td>
+      <td>${t.email || '—'}</td>
+      <td style="color:var(--text2)">${t.phone || '—'}</td>
+      <td><span style="color:var(--blue)">${t.property || 'None'}</span></td>
+      <td><span class="badge ${t.status === 'active' ? 'b-green' : t.status === 'blocked' ? 'b-red' : 'b-warn'}">${t.status || 'active'}</span></td>
+      <td style="color:var(--muted)">${t.joinedAt || '—'}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-warn btn-sm" onclick="tmsBlockTenant('${t.id}')">${t.status === 'blocked' ? 'Unblock' : 'Block'}</button>
+        <button class="btn btn-danger btn-sm" onclick="tmsDeleteTenant('${t.id}')">Delete</button>
+      </div></td>
+    </tr>`).join('');
 }
 
-async function tmsBlockUser(id, role) {
-  const token = localStorage.getItem('tms_token');
-  await fetch(`http://localhost:5000/api/users/${id}/block`, {
-    method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }
-  });
-  if (role === 'tenant') tmsRenderTenants();
-  else tmsRenderLandlords();
-  tmsUpdateDBStats();
+function tmsBlockTenant(id) {
+  const t = TMS.getTenants().find(t => t.id === id);
+  TMS.updateTenant(id, { status: t?.status === 'blocked' ? 'active' : 'blocked' });
+  tmsRenderTenants(); tmsUpdateStats();
 }
-async function tmsDeleteUser(id, role) {
-  if (!confirm('Delete this user permanently?')) return;
-  const token = localStorage.getItem('tms_token');
-  await fetch(`http://localhost:5000/api/users/${id}`, {
-    method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }
-  });
-  if (role === 'tenant') tmsRenderTenants();
-  else tmsRenderLandlords();
-  tmsUpdateDBStats();
+function tmsDeleteTenant(id) {
+  if (!confirm('Delete this tenant?')) return;
+  TMS.deleteTenant(id); tmsRenderTenants(); tmsUpdateStats();
 }
-async function tmsVerifyUser(id, role) {
-  const token = localStorage.getItem('tms_token');
-  await fetch(`http://localhost:5000/api/users/${id}/verify`, {
-    method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }
-  });
-  if (role === 'tenant') tmsRenderTenants();
-  else tmsRenderLandlords();
-  tmsUpdateDBStats();
-}
-// Keep old functions as aliases for backward compat
-function tmsBlockTenant(id) { tmsBlockUser(id,'tenant'); }
-function tmsDeleteTenant(id) { tmsDeleteUser(id,'tenant'); }
 
-// ── Render Landlords Table — MongoDB API ───────────────
-async function tmsRenderLandlords(filter) {
+// ── Render Landlords Table ──────────────────────────────
+function tmsRenderLandlords(filter) {
   const tbody = document.getElementById('landlords-tbody');
   if (!tbody) return;
-  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">Loading...</td></tr>`;
-  try {
-    const token = localStorage.getItem('tms_token');
-    const res = await fetch('http://localhost:5000/api/users?role=landlord', {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const data = await res.json();
-    let list = data.users || [];
-    if (filter) list = list.filter(l =>
-      l.name?.toLowerCase().includes(filter.toLowerCase()) ||
-      l.email?.toLowerCase().includes(filter.toLowerCase())
-    );
-    if (!list.length) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No landlords registered yet.</td></tr>`;
-      tmsUpdateDBStats();
-      return;
-    }
-    tbody.innerHTML = list.map((l, i) => {
-      const joined = l.createdAt ? new Date(l.createdAt).toLocaleDateString('en-PK', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
-      const initials = (l.name || l.email || '?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-      return `<tr>
-        <td style="color:var(--muted)">${String(i + 1).padStart(2, '0')}</td>
-        <td><div style="display:flex;align-items:center;gap:9px">
-          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#E8C97A);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#0A0C0F;flex-shrink:0">${initials}</div>
-          <div><div style="font-weight:600">${l.name || '—'}</div><div style="font-size:11px;color:var(--muted)">${l.authProvider === 'google' ? '🔵 Google' : '📧 Email'}</div></div>
-        </div></td>
-        <td>${l.email || '—'}</td>
-        <td>${l.phone || '—'}</td>
-        <td><span class="badge ${l.verified ? 'b-green' : 'b-warn'}">${l.verified ? '✓ Verified' : 'Pending'}</span></td>
-        <td><span class="badge ${l.status === 'active' ? 'b-green' : l.status === 'blocked' ? 'b-red' : 'b-warn'}">${l.status || 'active'}</span></td>
-        <td style="color:var(--muted);font-size:12px">${joined}</td>
-        <td><div class="td-actions">
-          ${!l.verified ? `<button class="btn btn-green btn-sm" onclick="tmsVerifyUser('${l._id}','landlord')">✓ Verify</button>` : ''}
-          <button class="btn btn-warn btn-sm" onclick="tmsBlockUser('${l._id}','landlord')">${l.status === 'blocked' ? 'Unblock' : 'Block'}</button>
-          <button class="btn btn-danger btn-sm" onclick="tmsDeleteUser('${l._id}','landlord')">Delete</button>
-        </div></td>
-      </tr>`;
-    }).join('');
-    tmsUpdateDBStats();
-  } catch(e) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">Error loading landlords. Is backend running?</td></tr>`;
+  let list = TMS.getLandlords();
+  if (filter) list = list.filter(l =>
+    l.name?.toLowerCase().includes(filter.toLowerCase()) ||
+    l.email?.toLowerCase().includes(filter.toLowerCase())
+  );
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No landlords registered yet.</td></tr>`;
+    return;
   }
+  tbody.innerHTML = list.map((l, i) => `
+    <tr>
+      <td style="color:var(--muted)">${String(i + 1).padStart(2, '0')}</td>
+      <td><div style="font-weight:600">${l.name}</div><div style="font-size:11px;color:var(--muted)">CNIC: ${l.cnic || 'Not provided'}</div></td>
+      <td>${l.email || '—'}</td>
+      <td style="color:var(--gold);font-weight:600">${TMS.getProperties().filter(p => p.landlordId === l.id).length}</td>
+      <td style="color:var(--green);font-weight:600">${TMS.getTenants().filter(t => t.landlordId === l.id).length}</td>
+      <td><span class="badge ${l.status === 'approved' ? 'b-green' : l.status === 'rejected' ? 'b-red' : 'b-warn'}">${l.status || 'pending'}</span></td>
+      <td><div class="td-actions">
+        ${l.status === 'pending' ? `<button class="btn btn-green btn-sm" onclick="tmsApproveLandlord('${l.id}')">Approve</button><button class="btn btn-danger btn-sm" onclick="tmsRejectLandlord('${l.id}')">Reject</button>` : `<button class="btn btn-warn btn-sm" onclick="tmsBlockLandlord('${l.id}')">${l.status === 'blocked' ? 'Unblock' : 'Block'}</button>`}
+        <button class="btn btn-danger btn-sm" onclick="tmsDeleteLandlord('${l.id}')">Delete</button>
+      </div></td>
+    </tr>`).join('');
 }
-// Aliases
-function tmsApproveLandlord(id) { tmsVerifyUser(id,'landlord'); }
-function tmsRejectLandlord(id) { tmsBlockUser(id,'landlord'); }
-function tmsBlockLandlord(id) { tmsBlockUser(id,'landlord'); }
-function tmsDeleteLandlord(id) { tmsDeleteUser(id,'landlord'); }
+
+function tmsApproveLandlord(id) {
+  TMS.approveLandlord(id); tmsRenderLandlords(); tmsUpdateStats();
+}
+function tmsRejectLandlord(id) {
+  TMS.rejectLandlord(id); tmsRenderLandlords(); tmsUpdateStats();
+}
+function tmsBlockLandlord(id) {
+  const l = TMS.getLandlords().find(l => l.id === id);
+  TMS.updateLandlord(id, { status: l?.status === 'blocked' ? 'approved' : 'blocked' });
+  tmsRenderLandlords(); tmsUpdateStats();
+}
+function tmsDeleteLandlord(id) {
+  if (!confirm('Delete this landlord?')) return;
+  TMS.deleteLandlord(id); tmsRenderLandlords(); tmsUpdateStats();
+}
 
 // ── Render Properties Table ─────────────────────────────
 function tmsRenderProperties(filter) {
@@ -810,57 +761,10 @@ function tmsRenderVerification() {
 }
 
 // ── Page render dispatcher ───────────────────────────────
-
-
-// ── Update Stats from MongoDB API ──────────────────────
-async function tmsUpdateDBStats() {
-  try {
-    const token = localStorage.getItem('tms_token');
-    const res = await fetch('http://localhost:5000/api/users', {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const data = await res.json();
-    const users = data.users || [];
-    const tenants   = users.filter(u => u.role === 'tenant').length;
-    const landlords = users.filter(u => u.role === 'landlord').length;
-    const blocked   = users.filter(u => u.status === 'blocked').length;
-    const pending   = users.filter(u => !u.verified).length;
-    const total     = users.length;
-
-    // Update stat cards
-    const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
-    set('stat-total-users', total);
-    set('stat-tenants', tenants);
-    set('stat-landlords', landlords);
-    set('stat-blocked', blocked);
-    set('stat-pending', pending);
-
-    // Update data-stat elements
-    document.querySelectorAll('[data-stat="totalUsers"]').forEach(el => el.textContent = total);
-    document.querySelectorAll('[data-stat="tenants"]').forEach(el => el.textContent = tenants);
-    document.querySelectorAll('[data-stat="landlords"]').forEach(el => el.textContent = landlords);
-
-    // Update sidebar badges
-    const nbT = document.getElementById('nb-tenants'); if(nbT){ nbT.textContent = tenants; nbT.style.display = tenants > 0 ? '' : 'none'; }
-    const nbL = document.getElementById('nb-landlords'); if(nbL){ nbL.textContent = landlords; nbL.style.display = landlords > 0 ? '' : 'none'; }
-    const nbP = document.getElementById('nb-verification'); if(nbP){ nbP.textContent = pending; nbP.style.display = pending > 0 ? '' : 'none'; }
-
-    // Update chart bars
-    const max = Math.max(total, 1);
-    const setBar = (id, val) => {
-      const el = document.getElementById(id);
-      if(el){ el.style.width = Math.min((val/max)*100,100).toFixed(1)+'%'; const sp=el.querySelector('span'); if(sp) sp.textContent=val; }
-    };
-    setBar('chart-tenants', tenants);
-    setBar('chart-landlords', landlords);
-
-  } catch(e) { console.log('Stats fetch error:', e.message); }
-}
 function tmsOnPageChange(pageId) {
   switch (pageId) {
     case 'dashboard':
       tmsUpdateStats();
-      tmsUpdateDBStats();
       tmsRenderPendingActions();
       tmsRenderRecentActivity();
       break;
@@ -879,7 +783,6 @@ function tmsOnPageChange(pageId) {
 // Auto-init on page load
 document.addEventListener('DOMContentLoaded', () => {
   tmsUpdateStats();
-  tmsUpdateDBStats();
   tmsRenderPendingActions();
   tmsRenderRecentActivity();
 });
