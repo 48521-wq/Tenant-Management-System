@@ -911,21 +911,19 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
 // Build furniture catalog buttons
 (function buildCatalog() {
   const catalog = [
-    { type:'sofa',         label:'Sofa',          color:'#5D5A7E', icon:'🛋️' },
+    { type:'sofa',         label:'Sofa',          color:'#6B5B95', icon:'🛋️' },
     { type:'armchair',     label:'Armchair',      color:'#7B4F3A', icon:'🪑' },
-    { type:'bed_double',   label:'Double Bed',    color:'#7B4F2A', icon:'🛏️' },
+    { type:'bed_double',   label:'Double Bed',    color:'#8B6D5E', icon:'🛏️' },
     { type:'bed_single',   label:'Single Bed',    color:'#7A8B6E', icon:'🛏️' },
-    { type:'dining_table', label:'Dining Table',  color:'#A0734A', icon:'🍽️' },
-    { type:'dining_chair', label:'Dining Chair',  color:'#A0734A', icon:'🪑' },
-    { type:'chair',        label:'Chair',         color:'#8B6040', icon:'🪑' },
-    { type:'wardrobe',     label:'Wardrobe',      color:'#9B7B5A', icon:'🚪' },
-    { type:'tv_unit',      label:'TV Unit',       color:'#4A3A2A', icon:'📺' },
-    { type:'bookshelf',    label:'Bookshelf',     color:'#8B6A3A', icon:'📚' },
-    { type:'coffee_table', label:'Coffee Table',  color:'#A08060', icon:'☕' },
+    { type:'dining_table', label:'Dining Table',  color:'#AA8855', icon:'🍽️' },
+    { type:'dining_chair', label:'Dining Chair',  color:'#BB9966', icon:'🪑' },
+    { type:'chair',        label:'Chair',         color:'#5B7A8E', icon:'🪑' },
+    { type:'wardrobe',     label:'Wardrobe',      color:'#6B5A4E', icon:'🚪' },
+    { type:'tv_unit',      label:'TV Unit',       color:'#4A5568', icon:'📺' },
+    { type:'bookshelf',    label:'Bookshelf',     color:'#7A6040', icon:'📚' },
+    { type:'coffee_table', label:'Coffee Table',  color:'#8A7060', icon:'☕' },
     { type:'lamp',         label:'Floor Lamp',    color:'#C0A060', icon:'💡' },
-    { type:'plant',        label:'Indoor Plant',  color:'#3A6A40', icon:'🪴' },
-    { type:'mirror',       label:'Mirror',        color:'#C8A060', icon:'🪞' },
-    { type:'desk',         label:'Study Desk',    color:'#9B7A4A', icon:'🖥️' },
+    { type:'plant',        label:'Plant',         color:'#3A6A40', icon:'🪴' },
   ];
   const container = document.getElementById('furn-catalog');
   if (!container) return;
