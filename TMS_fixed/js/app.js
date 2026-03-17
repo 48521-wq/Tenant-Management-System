@@ -3,45 +3,88 @@
 //  MongoDB Atlas + Real Google OAuth
 // ═══════════════════════════════════════════════════════
 
+// ── Configuration constants ───────────────────────────
 const GOOGLE_CLIENT_ID = '1092570435598-nicfmpo6mpqo6a1h36eg614082k8994l.apps.googleusercontent.com';
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE         = 'http://localhost:5000/api';
+
+// LocalStorage keys (centralized to avoid typo bugs)
+const LS_TOKEN = 'tms_token';
+const LS_USER  = 'tms_user';
+
+// Role → dashboard path mapping
+const DASHBOARD_MAP = {
+  admin:    'pages/admin-dashboard.html',
+  landlord: 'pages/landlord-dashboard.html',
+  tenant:   'pages/tenant-dashboard.html',
+};
 
 // ── Session helpers ───────────────────────────────────
-const getToken = ()    => localStorage.getItem('tms_token');
-const setToken = (t)   => localStorage.setItem('tms_token', t);
-const setUser  = (u)   => localStorage.setItem('tms_user', JSON.stringify(u));
-const getUser  = ()    => { try { return JSON.parse(localStorage.getItem('tms_user')); } catch { return null; } };
-const clearAuth= ()    => { localStorage.removeItem('tms_token'); localStorage.removeItem('tms_user'); };
+const getToken  = ()    => localStorage.getItem(LS_TOKEN);
+const setToken  = (t)   => localStorage.setItem(LS_TOKEN, t);
+const setUser   = (u)   => localStorage.setItem(LS_USER, JSON.stringify(u));
+const getUser   = ()    => {
+  try { return JSON.parse(localStorage.getItem(LS_USER)); }
+  catch { return null; }
+};
+const clearAuth = ()    => {
+  localStorage.removeItem(LS_TOKEN);
+  localStorage.removeItem(LS_USER);
+};
 
 // ── API helper ────────────────────────────────────────
+// Centralised fetch wrapper — attaches auth token automatically
 async function api(endpoint, method = 'GET', body = null) {
-  const opts = { method, headers: { 'Content-Type': 'application/json' } };
-  const t = getToken();
-  if (t) opts.headers['Authorization'] = 'Bearer ' + t;
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+  };
+
+  // Attach JWT if available
+  const token = getToken();
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+
+  // Attach body for POST/PUT/PATCH requests
   if (body) opts.body = JSON.stringify(body);
+
   const res  = await fetch(API_BASE + endpoint, opts);
   const data = await res.json();
   return { ok: res.ok, data };
 }
 
 // ── Redirect by role ──────────────────────────────────
+// Sends user to the correct dashboard based on their role
 function goToDashboard(role) {
-  const map = { admin: 'pages/admin-dashboard.html', landlord: 'pages/landlord-dashboard.html', tenant: 'pages/tenant-dashboard.html' };
-  window.location.replace(map[role] || 'pages/tenant-dashboard.html');
+  const path = DASHBOARD_MAP[role] || DASHBOARD_MAP.tenant;
+  window.location.replace(path);
 }
 
 // ── UI helpers ────────────────────────────────────────
+
+// Display an error message in the error box element
 function showErr(msg) {
-  const b = document.getElementById('error-box');
-  if (b) { b.textContent = msg; b.style.display = 'block'; }
+  const box = document.getElementById('error-box');
+  if (box) {
+    box.textContent    = msg;
+    box.style.display  = 'block';
+  }
 }
+
+// Clear and hide the error box
 function clearErr() {
-  const b = document.getElementById('error-box');
-  if (b) { b.textContent = ''; b.style.display = 'none'; }
+  const box = document.getElementById('error-box');
+  if (box) {
+    box.textContent   = '';
+    box.style.display = 'none';
+  }
 }
+
+// Toggle button loading state — disables button and shows spinner text
 function setBtnLoad(id, loading, txt) {
-  const b = document.getElementById(id);
-  if (b) { b.disabled = loading; b.textContent = loading ? 'Please wait…' : txt; }
+  const btn = document.getElementById(id);
+  if (btn) {
+    btn.disabled    = loading;
+    btn.textContent = loading ? 'Please wait…' : txt;
+  }
 }
 
 // ── Tabs ──────────────────────────────────────────────
