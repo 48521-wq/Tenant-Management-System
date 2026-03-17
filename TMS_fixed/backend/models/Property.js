@@ -34,8 +34,10 @@ const propertySchema = new mongoose.Schema({
     hasGarage:   { type: Boolean, default: false },
   },
 
-  // Furniture Layout — flexible, stores array of placed items per type
-  furnitureLayout: { type: mongoose.Schema.Types.Mixed, default: {} },
+  // Furniture Layouts — separate for landlord and tenant
+  furnitureLayout:         { type: mongoose.Schema.Types.Mixed, default: {} }, // legacy
+  landlordFurnitureLayout: { type: mongoose.Schema.Types.Mixed, default: {} },
+  tenantFurnitureLayout:   { type: mongoose.Schema.Types.Mixed, default: {} },
 
   images: [String],
 }, { timestamps: true });

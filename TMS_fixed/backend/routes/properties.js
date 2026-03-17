@@ -80,7 +80,31 @@ router.put('/:id/model3d', protect, async (req, res) => {
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
-// PUT save furniture layout
+// PUT save landlord furniture layout
+router.put('/:id/furniture/landlord', protect, async (req, res) => {
+  try {
+    const prop = await Property.findById(req.params.id);
+    if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
+    prop.landlordFurnitureLayout = req.body;
+    prop.markModified('landlordFurnitureLayout');
+    await prop.save();
+    res.json({ success: true, property: prop });
+  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
+});
+
+// PUT save tenant furniture layout
+router.put('/:id/furniture/tenant', protect, async (req, res) => {
+  try {
+    const prop = await Property.findById(req.params.id);
+    if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
+    prop.tenantFurnitureLayout = req.body;
+    prop.markModified('tenantFurnitureLayout');
+    await prop.save();
+    res.json({ success: true, property: prop });
+  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
+});
+
+// PUT save furniture layout (legacy)
 router.put('/:id/furniture', protect, async (req, res) => {
   try {
     const prop = await Property.findById(req.params.id);
