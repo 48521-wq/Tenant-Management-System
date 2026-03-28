@@ -7,157 +7,80 @@
 
 const TMS = {
 
-  // ── Storage Keys ─────────────────────────────────────
-  // Centralized key map — prevents typo bugs across files
+  // ── Keys ────────────────────────────────────────────
   KEYS: {
-    tenants:       'tms_tenants',
-    landlords:     'tms_landlords',
-    properties:    'tms_properties',
-    complaints:    'tms_complaints',
-    maintenance:   'tms_maintenance',
-    agreements:    'tms_agreements',
-    logs:          'tms_logs',
+    tenants: 'tms_tenants',
+    landlords: 'tms_landlords',
+    properties: 'tms_properties',
+    complaints: 'tms_complaints',
+    maintenance: 'tms_maintenance',
+    agreements: 'tms_agreements',
+    logs: 'tms_logs',
     notifications: 'tms_notifications',
-    users:         'tms_users',
+    users: 'tms_users',
   },
 
-  // ── Generic get/save ──────────────────────────────────
-
-  /**
-   * Read a JSON array from LocalStorage.
-   * Returns empty array if key is missing or JSON is invalid.
-   * @param {string} key - localStorage key
-   * @returns {Array}
-   */
+  // ── Generic get/save ────────────────────────────────
   get(key) {
-    try {
-      return JSON.parse(localStorage.getItem(key) || '[]');
-    } catch (e) {
-      return [];
-    }
+    try { return JSON.parse(localStorage.getItem(key) || '[]'); }
+    catch (e) { return []; }
   },
-
-  /**
-   * Persist a JSON array to LocalStorage.
-   * @param {string} key - localStorage key
-   * @param {Array}  arr - data to store
-   */
   save(key, arr) {
     localStorage.setItem(key, JSON.stringify(arr));
   },
 
-  // ── ID generator ──────────────────────────────────────
-
-  /**
-   * Generate a short unique ID with a readable prefix.
-   * Example: newId('T') → "T-LXYZ123"
-   * @param {string} prefix
-   * @returns {string}
-   */
+  // ── ID generator ────────────────────────────────────
   newId(prefix) {
     return prefix + '-' + Date.now().toString(36).toUpperCase();
   },
 
   // ─────────────────── TENANTS ───────────────────────
-
-  /** @returns {Array} all tenants from storage */
   getTenants() { return this.get(this.KEYS.tenants); },
-
-  /** @param {Array} d - tenant list to persist */
   saveTenants(d) { this.save(this.KEYS.tenants, d); },
 
-  /**
-   * Add a new tenant record to storage.
-   * Auto-assigns ID, default status, and join date.
-   * @param {Object} data - tenant fields
-   * @returns {Object} created tenant
-   */
   addTenant(data) {
     const list = this.getTenants();
-    const t = {
-      id:       this.newId('T'),
-      ...data,
-      status:   data.status || 'active',
-      joinedAt: new Date().toLocaleDateString('en-PK', { month: 'short', year: 'numeric' }),
-    };
+    const t = { id: this.newId('T'), ...data, status: data.status || 'active', joinedAt: new Date().toLocaleDateString('en-PK', { month: 'short', year: 'numeric' }) };
     list.push(t);
     this.saveTenants(list);
     this.addLog('success', `New tenant registered: ${t.name}`, 'admin');
     return t;
   },
 
-  /**
-   * Remove a tenant by ID.
-   * @param {string} id
-   */
   deleteTenant(id) {
     const list = this.getTenants().filter(t => t.id !== id);
     this.saveTenants(list);
     this.addLog('warn', `Tenant deleted: ${id}`, 'admin');
   },
 
-  /**
-   * Merge updated fields into an existing tenant record.
-   * @param {string} id
-   * @param {Object} data - fields to update
-   */
   updateTenant(id, data) {
     const list = this.getTenants().map(t => t.id === id ? { ...t, ...data } : t);
     this.saveTenants(list);
   },
 
   // ─────────────────── LANDLORDS ─────────────────────
-
-  /** @returns {Array} all landlords from storage */
   getLandlords() { return this.get(this.KEYS.landlords); },
-
-  /** @param {Array} d - landlord list to persist */
   saveLandlords(d) { this.save(this.KEYS.landlords, d); },
 
-  /**
-   * Add a new landlord record to storage.
-   * Default status is 'pending' until admin approves.
-   * @param {Object} data - landlord fields
-   * @returns {Object} created landlord
-   */
   addLandlord(data) {
     const list = this.getLandlords();
-    const l = {
-      id:       this.newId('L'),
-      ...data,
-      status:   data.status || 'pending',
-      joinedAt: new Date().toLocaleDateString('en-PK', { month: 'short', year: 'numeric' }),
-    };
+    const l = { id: this.newId('L'), ...data, status: data.status || 'pending', joinedAt: new Date().toLocaleDateString('en-PK', { month: 'short', year: 'numeric' }) };
     list.push(l);
     this.saveLandlords(list);
     this.addLog('info', `New landlord registered: ${l.name}`, 'system');
     return l;
   },
 
-  /**
-   * Remove a landlord by ID.
-   * @param {string} id
-   */
   deleteLandlord(id) {
     const list = this.getLandlords().filter(l => l.id !== id);
     this.saveLandlords(list);
   },
 
-  /**
-   * Merge updated fields into an existing landlord record.
-   * @param {string} id
-   * @param {Object} data - fields to update
-   */
   updateLandlord(id, data) {
     const list = this.getLandlords().map(l => l.id === id ? { ...l, ...data } : l);
     this.saveLandlords(list);
   },
 
-  /**
-   * Approve a landlord — sets status to 'approved' and
-   * fires a system notification.
-   * @param {string} id
-   */
   approveLandlord(id) {
     this.updateLandlord(id, { status: 'approved' });
     const l = this.getLandlords().find(l => l.id === id);
@@ -165,101 +88,51 @@ const TMS = {
     this.addNotif('Landlord Approved', `${l?.name || 'A landlord'} has been approved and can now list properties.`, 'green');
   },
 
-  /**
-   * Reject a landlord application — sets status to 'rejected'.
-   * @param {string} id
-   */
   rejectLandlord(id) {
     this.updateLandlord(id, { status: 'rejected' });
     this.addLog('warn', `Landlord rejected: ${id}`, 'admin');
   },
 
   // ─────────────────── PROPERTIES ────────────────────
-
-  /** @returns {Array} all properties from storage */
   getProperties() { return this.get(this.KEYS.properties); },
-
-  /** @param {Array} d - property list to persist */
   saveProperties(d) { this.save(this.KEYS.properties, d); },
 
-  /**
-   * Add a new property listing to storage.
-   * @param {Object} data - property fields
-   * @returns {Object} created property
-   */
   addProperty(data) {
     const list = this.getProperties();
-    const p = {
-      id:       this.newId('P'),
-      ...data,
-      status:   data.status || 'available',
-      listedAt: new Date().toLocaleDateString('en-PK', { month: 'short', year: 'numeric' }),
-    };
+    const p = { id: this.newId('P'), ...data, status: data.status || 'available', listedAt: new Date().toLocaleDateString('en-PK', { month: 'short', year: 'numeric' }) };
     list.push(p);
     this.saveProperties(list);
     this.addLog('success', `New property listed: ${p.title}`, 'landlord');
     return p;
   },
 
-  /**
-   * Remove a property by ID.
-   * @param {string} id
-   */
   deleteProperty(id) {
     const list = this.getProperties().filter(p => p.id !== id);
     this.saveProperties(list);
   },
 
-  /**
-   * Merge updated fields into an existing property record.
-   * @param {string} id
-   * @param {Object} data - fields to update
-   */
   updateProperty(id, data) {
     const list = this.getProperties().map(p => p.id === id ? { ...p, ...data } : p);
     this.saveProperties(list);
   },
 
-  /**
-   * Suspend a property — sets status to 'suspended'.
-   * @param {string} id
-   */
   suspendProperty(id) {
     this.updateProperty(id, { status: 'suspended' });
     this.addLog('warn', `Property suspended: ${id}`, 'admin');
   },
 
-  /**
-   * Restore a suspended property — sets status back to 'available'.
-   * @param {string} id
-   */
   restoreProperty(id) {
     this.updateProperty(id, { status: 'available' });
     this.addLog('info', `Property restored: ${id}`, 'admin');
   },
 
   // ─────────────────── COMPLAINTS ────────────────────
-
-  /** @returns {Array} all complaints from storage */
   getComplaints() { return this.get(this.KEYS.complaints); },
-
-  /** @param {Array} d - complaints list to persist */
   saveComplaints(d) { this.save(this.KEYS.complaints, d); },
 
-  /**
-   * File a new complaint and notify admin.
-   * Default status is 'open'.
-   * @param {Object} data - complaint fields (title, filedBy, etc.)
-   * @returns {Object} created complaint
-   */
   addComplaint(data) {
     const list = this.getComplaints();
-    const c = {
-      id:      this.newId('C'),
-      ...data,
-      status:  data.status || 'open',
-      filedAt: new Date().toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' }),
-    };
+    const c = { id: this.newId('C'), ...data, status: data.status || 'open', filedAt: new Date().toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' }) };
     list.push(c);
     this.saveComplaints(list);
     this.addLog('warn', `New complaint filed: ${c.title}`, data.filedBy || 'user');
@@ -267,85 +140,41 @@ const TMS = {
     return c;
   },
 
-  /**
-   * Mark a complaint as resolved.
-   * @param {string} id
-   */
   resolveComplaint(id) {
     this.updateComplaint(id, { status: 'resolved' });
     this.addLog('success', `Complaint resolved: ${id}`, 'admin');
   },
 
-  /**
-   * Merge updated fields into an existing complaint.
-   * @param {string} id
-   * @param {Object} data - fields to update
-   */
   updateComplaint(id, data) {
     const list = this.getComplaints().map(c => c.id === id ? { ...c, ...data } : c);
     this.saveComplaints(list);
   },
 
   // ─────────────────── MAINTENANCE ───────────────────
-
-  /** @returns {Array} all maintenance requests from storage */
   getMaintenance() { return this.get(this.KEYS.maintenance); },
-
-  /** @param {Array} d - maintenance list to persist */
   saveMaintenance(d) { this.save(this.KEYS.maintenance, d); },
 
-  /**
-   * Submit a new maintenance request.
-   * Default status is 'pending'.
-   * @param {Object} data - request fields (title, tenant, etc.)
-   * @returns {Object} created request
-   */
   addMaintenance(data) {
     const list = this.getMaintenance();
-    const m = {
-      id:      this.newId('M'),
-      ...data,
-      status:  data.status || 'pending',
-      filedAt: new Date().toLocaleDateString('en-PK', { day: '2-digit', month: 'short' }),
-    };
+    const m = { id: this.newId('M'), ...data, status: data.status || 'pending', filedAt: new Date().toLocaleDateString('en-PK', { day: '2-digit', month: 'short' }) };
     list.push(m);
     this.saveMaintenance(list);
     this.addLog('info', `Maintenance request: ${m.title}`, data.tenant || 'tenant');
     return m;
   },
 
-  /**
-   * Merge updated fields into an existing maintenance request.
-   * @param {string} id
-   * @param {Object} data - fields to update
-   */
   updateMaintenance(id, data) {
     const list = this.getMaintenance().map(m => m.id === id ? { ...m, ...data } : m);
     this.saveMaintenance(list);
   },
 
   // ─────────────────── AGREEMENTS ────────────────────
-
-  /** @returns {Array} all lease agreements from storage */
   getAgreements() { return this.get(this.KEYS.agreements); },
-
-  /** @param {Array} d - agreements list to persist */
   saveAgreements(d) { this.save(this.KEYS.agreements, d); },
 
-  /**
-   * Create a new lease agreement record.
-   * Default status is 'active'.
-   * @param {Object} data - agreement fields
-   * @returns {Object} created agreement
-   */
   addAgreement(data) {
     const list = this.getAgreements();
-    const a = {
-      id:        this.newId('AGR'),
-      ...data,
-      status:    data.status || 'active',
-      createdAt: new Date().toLocaleDateString('en-PK', { day: 'numeric', month: 'long', year: 'numeric' }),
-    };
+    const a = { id: this.newId('AGR'), ...data, status: data.status || 'active', createdAt: new Date().toLocaleDateString('en-PK', { day: 'numeric', month: 'long', year: 'numeric' }) };
     list.push(a);
     this.saveAgreements(list);
     this.addLog('success', `Lease agreement created: ${a.id}`, 'admin');
@@ -353,40 +182,18 @@ const TMS = {
   },
 
   // ─────────────────── LOGS ──────────────────────────
-
-  /** @returns {Array} activity log entries (most recent first) */
   getLogs() { return this.get(this.KEYS.logs); },
 
-  /**
-   * Prepend a new log entry. Keeps max 100 entries.
-   * @param {string} type - 'success' | 'warn' | 'info' | 'error'
-   * @param {string} msg  - human-readable log message
-   * @param {string} user - who triggered the action
-   */
   addLog(type, msg, user) {
     const logs = this.getLogs();
-    logs.unshift({
-      type,
-      msg,
-      user: user || 'system',
-      time: new Date().toLocaleString('en-PK', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
-    });
+    logs.unshift({ type, msg, user: user || 'system', time: new Date().toLocaleString('en-PK', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' }) });
     if (logs.length > 100) logs.pop();
     this.save(this.KEYS.logs, logs);
   },
 
   // ─────────────────── NOTIFICATIONS ─────────────────
-
-  /** @returns {Array} all notifications (most recent first) */
   getNotifs() { return this.get(this.KEYS.notifications); },
 
-  /**
-   * Prepend a notification and update badge counts in the UI.
-   * Keeps max 50 notifications.
-   * @param {string} title
-   * @param {string} msg
-   * @param {string} color - 'blue' | 'green' | 'red' | 'warn'
-   */
   addNotif(title, msg, color) {
     const notifs = this.getNotifs();
     notifs.unshift({ title, msg, color: color || 'blue', read: false, time: 'just now' });
