@@ -1,51 +1,141 @@
 // ═══════════════════════════════════════════════════════
-//  TMS — app.js  v3.0
-//  MongoDB Atlas + Real Google OAuth
+//  TENANT MANAGEMENT SYSTEM - Authentication Module
+//  Version: 3.0
+//  Framework: Vanilla JavaScript + MongoDB Atlas + Google OAuth
+//  Author: Muhammad Shahzaib
 // ═══════════════════════════════════════════════════════
 
 const GOOGLE_CLIENT_ID = '1092570435598-nicfmpo6mpqo6a1h36eg614082k8994l.apps.googleusercontent.com';
 const API_BASE = 'http://localhost:5000/api';
 
-// ── Session helpers ───────────────────────────────────
-const getToken = ()    => localStorage.getItem('tms_token');
-const setToken = (t)   => localStorage.setItem('tms_token', t);
-const setUser  = (u)   => localStorage.setItem('tms_user', JSON.stringify(u));
-const getUser  = ()    => { try { return JSON.parse(localStorage.getItem('tms_user')); } catch { return null; } };
-const clearAuth= ()    => { localStorage.removeItem('tms_token'); localStorage.removeItem('tms_user'); };
+// ═══════════════════════════════════════════════════════
+// LOCAL STORAGE HELPERS
+// ═══════════════════════════════════════════════════════
 
-// ── API helper ────────────────────────────────────────
+/**
+ * Retrieve authentication token from localStorage
+ * @returns {string|null} JWT token or null
+ */
+const getToken = () => localStorage.getItem('tms_token');
+
+/**
+ * Store authentication token in localStorage
+ * @param {string} t - JWT token
+ */
+const setToken = (t) => localStorage.setItem('tms_token', t);
+
+/**
+ * Store user data in localStorage
+ * @param {object} u - User object
+ */
+const setUser  = (u) => localStorage.setItem('tms_user', JSON.stringify(u));
+
+/**
+ * Retrieve user data from localStorage (with error handling)
+ * @returns {object|null} User object or null
+ */
+const getUser  = () => {
+  try {
+    return JSON.parse(localStorage.getItem('tms_user'));
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Clear authentication data from localStorage
+ */
+const clearAuth = () => {
+  localStorage.removeItem('tms_token');
+  localStorage.removeItem('tms_user');
+};
+
+// ═══════════════════════════════════════════════════════
+// API COMMUNICATION
+// ═══════════════════════════════════════════════════════
+
+/**
+ * Make API request with authentication
+ * @param {string} endpoint - API endpoint path
+ * @param {string} method - HTTP method (GET, POST, PUT, DELETE)
+ * @param {object|null} body - Request body for POST/PUT
+ * @returns {object} Response object with {ok, data}
+ */
 async function api(endpoint, method = 'GET', body = null) {
-  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json' }
+  };
+
   const t = getToken();
   if (t) opts.headers['Authorization'] = 'Bearer ' + t;
   if (body) opts.body = JSON.stringify(body);
+
   const res  = await fetch(API_BASE + endpoint, opts);
   const data = await res.json();
   return { ok: res.ok, data };
 }
 
-// ── Redirect by role ──────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// NAVIGATION & ROUTING
+// ═══════════════════════════════════════════════════════
+
+/**
+ * Redirect user to role-based dashboard
+ * @param {string} role - User role (admin, landlord, tenant)
+ */
 function goToDashboard(role) {
-  const map = { admin: 'pages/admin-dashboard.html', landlord: 'pages/landlord-dashboard.html', tenant: 'pages/tenant-dashboard.html' };
-  window.location.replace(map[role] || 'pages/tenant-dashboard.html');
+  const dashboards = {
+    admin: 'pages/admin-dashboard.html',
+    landlord: 'pages/landlord-dashboard.html',
+    tenant: 'pages/tenant-dashboard.html'
+  };
+  window.location.replace(dashboards[role] || 'pages/tenant-dashboard.html');
 }
 
-// ── UI helpers ────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// UI HELPERS & ERROR HANDLING
+// ═══════════════════════════════════════════════════════
+
+/**
+ * Display error message in UI
+ * @param {string} msg - Error message
+ */
 function showErr(msg) {
   const b = document.getElementById('error-box');
-  if (b) { b.textContent = msg; b.style.display = 'block'; }
-}
-function clearErr() {
-  const b = document.getElementById('error-box');
-  if (b) { b.textContent = ''; b.style.display = 'none'; }
-}
-function setBtnLoad(id, loading, txt) {
-  const b = document.getElementById(id);
-  if (b) { b.disabled = loading; b.textContent = loading ? 'Please wait…' : txt; }
+  if (b) {
+    b.textContent = msg;
+    b.style.display = 'block';
+  }
 }
 
-// ── Tabs ──────────────────────────────────────────────
-function switchTab(tab) {
+/**
+ * Clear error message from UI
+ */
+function clearErr() {
+  const b = document.getElementById('error-box');
+  if (b) {
+    b.textContent = '';
+    b.style.display = 'none';
+  }
+}
+
+/**
+ * Set button loading state
+ * @param {string} id - Element ID
+ * @param {boolean} loading - Loading state
+ * @param {string} txt - Button text when not loading
+ */
+function setBtnLoad(id, loading, txt) {
+  const b = document.getElementById(id);
+  if (b) {
+    b.disabled = loading;
+    b.textContent = loading ? 'Please wait…' : txt;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// TAB MANAGEMENT
   clearErr();
   const si = document.getElementById('form-signin');
   const su = document.getElementById('form-signup');
