@@ -1,67 +1,111 @@
 // ═══════════════════════════════════════════════════════════════
-//  TMS Backend  —  Express Server Entry Point
-//  Tenant Management System  |  Node.js + Express + MongoDB
+//  TMS Backend  —  server.js
+//  Tenant Management System  |  Node.js + Express + MongoDB Atlas
+//
+//  Responsibilities:
+//    - Bootstrap Express application
+//    - Connect to MongoDB Atlas via Mongoose
+//    - Configure CORS, body parsing, and request limits
+//    - Mount all API route handlers
+//    - Provide health check, 404, and global error endpoints
+//    - Start HTTP server on configured PORT
+//
+//  Start: node server.js  or  npm start
 // ═══════════════════════════════════════════════════════════════
 
+// ── Environment variables ─────────────────────────────────────
+// Must be loaded before any other module reads process.env
 require('dotenv').config();
 
+// ── Core dependencies ─────────────────────────────────────────
 const express   = require('express');
 const cors      = require('cors');
 const connectDB = require('./config/database');
 
-// ── Create app ───────────────────────────────────────────────────
+// ── Create Express application ────────────────────────────────
 const app = express();
 
-// ── Connect to database ──────────────────────────────────────────
+// ── Connect to MongoDB Atlas ──────────────────────────────────
+// Runs on startup — process exits automatically on connection failure
 connectDB();
 
-// ── CORS Configuration ───────────────────────────────────────────
-// In development we allow all origins; tighten this in production
+// ── CORS Configuration ────────────────────────────────────────
+// Allows cross-origin requests from the frontend (HTML files
+// opened via file:// or a local dev server on a different port).
+//
+// ⚠  In production: replace the wildcard with your actual domain:
+//    origin: 'https://your-domain.com'
 const corsOptions = {
-  origin: function(origin, callback) {
-    // Allow requests with no origin (e.g. mobile apps, Postman, curl)
+  origin: function (origin, callback) {
+    // Allow requests with no origin header (Postman, curl, mobile apps)
     if (!origin) return callback(null, true);
-    // Allow all origins in dev mode
+
+    // Allow all origins in development mode
     callback(null, true);
   },
   credentials: true,
 };
 app.use(cors(corsOptions));
 
-// ── Body parsers ─────────────────────────────────────────────────
+// ── Body parsers ──────────────────────────────────────────────
+// Parse incoming JSON payloads (limit prevents large-payload attacks)
 app.use(express.json({ limit: '10mb' }));
+
+// Parse URL-encoded form data (extended: true allows nested objects)
 app.use(express.urlencoded({ extended: true }));
 
-// ── API Routes ───────────────────────────────────────────────────
-app.use('/api/auth',        require('./routes/auth'));
-app.use('/api/users',       require('./routes/users'));
-app.use('/api/properties',  require('./routes/properties'));
-app.use('/api/complaints',  require('./routes/complaints'));
-app.use('/api/maintenance', require('./routes/maintenance'));
-app.use('/api/payments',    require('./routes/payments'));
-app.use('/api/leases',      require('./routes/leases'));
+// ── API Route Handlers ────────────────────────────────────────
+// Each route module is mounted under its own /api/* namespace.
+// All route files live in ./routes/ and export an Express router.
 
-// ── Health check ─────────────────────────────────────────────────
+app.use('/api/auth',        require('./routes/auth'));        // login, register, Google OAuth
+app.use('/api/users',       require('./routes/users'));       // admin user management
+app.use('/api/properties',  require('./routes/properties')); // property CRUD + 3D config
+app.use('/api/complaints',  require('./routes/complaints')); // tenant complaints
+app.use('/api/maintenance', require('./routes/maintenance')); // maintenance requests
+app.use('/api/payments',    require('./routes/payments'));    // rent payment records
+app.use('/api/leases',      require('./routes/leases'));      // lease agreements
+
+// ── Health Check ──────────────────────────────────────────────
+// Quick endpoint to verify the server is up and responding.
+// Useful for uptime monitors and deployment checks.
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', time: new Date().toISOString() });
+  res.json({
+    status: 'OK',
+    time:   new Date().toISOString(),
+  });
 });
 
-// ── 404 Handler ──────────────────────────────────────────────────
+// ── 404 Handler ───────────────────────────────────────────────
+// Catches any request that didn't match a registered route.
+// Must be defined AFTER all routes.
 app.use((req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found.' });
+  res.status(404).json({
+    success: false,
+    message: 'Route not found.',
+  });
 });
 
-// ── Global Error Handler ─────────────────────────────────────────
+// ── Global Error Handler ──────────────────────────────────────
+// Catches any unhandled errors thrown inside route handlers.
+// Express identifies this as an error handler via the 4-argument signature.
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-  res.status(500).json({ success: false, message: 'Server error.' });
+  console.error('Unhandled error:', err.message || err);
+  res.status(500).json({
+    success: false,
+    message: 'Server error.',
+  });
 });
 
-// ── Start server ─────────────────────────────────────────────────
+// ── Start HTTP Server ─────────────────────────────────────────
+// Falls back to port 5000 if PORT is not set in .env
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`🚀 TMS Backend running on http://localhost:${PORT}`);
-  console.log(`📍 API: http://localhost:${PORT}/api`);
-  console.log(`🔑 Admin: ${process.env.ADMIN_EMAIL}`);
-  console.log(`✅ Routes: auth, users, properties, complaints, maintenance, payments, leases`);
+  console.log(`📍 API Base:  http://localhost:${PORT}/api`);
+  console.log(`❤️  Health:   http://localhost:${PORT}/api/health`);
+  console.log(`🔑 Admin:     ${process.env.ADMIN_EMAIL}`);
+  console.log(`✅ Routes:    auth, users, properties, complaints, maintenance, payments, leases`);
 });
