@@ -1,30 +1,13 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-  <!-- Meta Tags for SEO & Mobile optimization -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Tenant Management System - Property Management Portal for Landlords and Tenants. Manage properties, payments, leases and maintenance requests efficiently.">
-  <meta name="keywords" content="property management, tenant, landlord, lease agreement, maintenance, payments, complaint tracking">
-  <meta name="author" content="Muhammad Shahzaib">
-  <meta name="theme-color" content="#12151C">
-  <meta property="og:title" content="Tenant Management System">
-  <meta property="og:description" content="Modern property management portal for landlords and tenants">
-  <meta property="og:type" content="website">
-  
-  <title>Tenant Management System - Property Management Portal</title>
-  
-  <!-- Font Preconnection for Performance -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <title>Tenant Management System</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    /* ═══════════════════════════════════════════════════════════ */
-    /* THEME TOGGLE & UI COMPONENTS */
-    /* ═══════════════════════════════════════════════════════════ */
-    
-    /* Theme Button - Fixed top-right position */
+    /* ── Theme Toggle ── */
     .theme-btn {
       position: fixed; top: 20px; right: 24px; z-index: 999;
       width: 44px; height: 44px; border-radius: 50%;
@@ -37,7 +20,7 @@
     }
     .theme-btn:hover { transform: rotate(20deg) scale(1.1); border-color: var(--gold); }
 
-    /* OR Divider - Horizontal line with text */
+    /* ── Divider ── */
     .or-divider {
       display: flex; align-items: center; gap: 12px;
       margin: 18px 0; color: var(--muted); font-size: 12px;
@@ -45,18 +28,17 @@
     .or-divider::before, .or-divider::after {
       content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08);
     }
-    
-    /* Select Dropdown - Fix text visibility across themes */
+    /* Fix select dropdown text visibility */
     select, select option { color: #EDE9E0 !important; background: #12151C !important; }
     [data-theme="light"] select, [data-theme="light"] select option { color: #1A1E26 !important; background: #fff !important; }
 
-    /* Google Sign-In Button */
+    /* ── Google Button ── */
     .btn-google {
       width: 100%; padding: 12px 14px;
       border: 1.5px solid rgba(255,255,255,0.1);
       border-radius: 12px; background: rgba(255,255,255,0.04);
       color: var(--text); font-family: 'DM Sans', sans-serif;
-      font-size: 14px; font-weight: 600;
+      font-size: 14px; font-weight: 500;
       cursor: pointer; display: flex; align-items: center; justify-content: center;
       gap: 10px; transition: all 0.2s;
     }
@@ -65,7 +47,7 @@
       border-color: rgba(255,255,255,0.2);
       transform: translateY(-1px);
     }
-    .btn-google:disabled { opacity: 0.9; cursor: not-allowed; transform: none; }
+    .btn-google:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
     .google-icon { width: 20px; height: 20px; flex-shrink: 0; }
     .google-spinner {
       width: 16px; height: 16px; border-radius: 50%;
@@ -75,11 +57,7 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ═══════════════════════════════════════════════════════════ */
-    /* LIGHT THEME OVERRIDES */
-    /* ═══════════════════════════════════════════════════════════ */
-    
-    /* Light Theme Root Variables */
+    /* ── Light Theme ── */
     [data-theme="light"] {
       --dark:  #F0F2F5; --dark2: #E4E8EE; --card: #FFFFFF;
       --border: rgba(201,169,110,0.25); --text: #1A1E26; --muted: #7A8390;
@@ -124,11 +102,7 @@
     [data-theme="light"] .panel-footer { color: #AAB0BA; }
     [data-theme="light"] .strength-seg { background: rgba(0,0,0,0.08); }
 
-    /* ═══════════════════════════════════════════════════════════ */
-    /* GOOGLE SIGN-IN MODAL */
-    /* ═══════════════════════════════════════════════════════════ */
-    
-    /* Modal Overlay - Blur backdrop */
+    /* ── Google Account Modal ── */
     .g-overlay {
       position: fixed; inset: 0; z-index: 1000;
       background: rgba(0,0,0,0.75); backdrop-filter: blur(10px);
@@ -137,7 +111,6 @@
     .g-overlay.open { display: flex; animation: gfadein 0.2s ease; }
     @keyframes gfadein { from{opacity:0} to{opacity:1} }
 
-    /* Modal Card */
     .g-modal {
       background: #14181F; border: 1px solid rgba(201,169,110,0.2);
       border-radius: 20px; padding: 32px 30px; width: 100%; max-width: 400px;
@@ -150,7 +123,6 @@
     .g-modal-title { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 700; }
     .g-modal-sub { color: var(--muted); font-size: 13px; margin-bottom: 22px; line-height: 1.6; }
 
-    /* Modal Input Field with Icon */
     .g-input-wrap { position: relative; margin-bottom: 14px; }
     .g-input {
       width: 100%; background: rgba(255,255,255,0.05);
@@ -165,12 +137,9 @@
       position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
       width: 17px; height: 17px; stroke: var(--muted); fill: none; pointer-events: none;
     }
-    
-    /* Error Message */
     .g-error { font-size: 12px; color: #FF6B6B; margin: -8px 0 10px 2px; display: none; }
     .g-error.show { display: block; }
 
-    /* Modal Action Buttons */
     .g-modal-btns { display: flex; gap: 10px; margin-top: 20px; }
     .g-btn-primary {
       flex: 1; padding: 12px; border: none; border-radius: 11px;
@@ -187,7 +156,7 @@
     }
     .g-btn-cancel:hover { background: rgba(255,255,255,0.08); color: var(--text); }
 
-    /* Light Theme - Google Modal */
+    /* Light mode for google modal */
     [data-theme="light"] .g-modal { background: #fff; border-color: rgba(201,169,110,0.25); }
     [data-theme="light"] .g-input { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); color: #1A1E26; }
     [data-theme="light"] .g-input:focus { background: rgba(201,169,110,0.05); border-color: var(--gold); }
@@ -410,23 +379,18 @@
 
   <script src="js/app.js"></script>
   <script>
-    /* Theme Management */
-    (function() {
-      // Restore saved theme preference or default to dark
-      const savedTheme = localStorage.getItem('tms-theme') || 'dark';
-      document.documentElement.setAttribute('data-theme', savedTheme);
-      document.getElementById('theme-btn').textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+    /* Theme */
+    (function(){
+      const saved = localStorage.getItem('tms-theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+      document.getElementById('theme-btn').textContent = saved === 'dark' ? '🌙' : '☀️';
     })();
-    
-    // Toggle between light and dark themes
     function toggleTheme() {
       const html = document.documentElement;
-      const currentTheme = html.getAttribute('data-theme');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      
-      html.setAttribute('data-theme', newTheme);
-      document.getElementById('theme-btn').textContent = newTheme === 'dark' ? '🌙' : '☀️';
-      localStorage.setItem('tms-theme', newTheme);
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('theme-btn').textContent = next === 'dark' ? '🌙' : '☀️';
+      localStorage.setItem('tms-theme', next);
     }
   </script>
 </body>
