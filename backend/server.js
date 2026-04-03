@@ -1,97 +1,111 @@
+// ═══════════════════════════════════════════════════════════════
+//  TMS Backend  —  server.js
+//  Tenant Management System  |  Node.js + Express + MongoDB Atlas
+//
+//  Responsibilities:
+//    - Bootstrap Express application
+//    - Connect to MongoDB Atlas via Mongoose
+//    - Configure CORS, body parsing, and request limits
+//    - Mount all API route handlers
+//    - Provide health check, 404, and global error endpoints
+//    - Start HTTP server on configured PORT
+//
+//  Start: node server.js  or  npm start
+// ═══════════════════════════════════════════════════════════════
+
+// ── Environment variables ─────────────────────────────────────
+// Must be loaded before any other module reads process.env
 require('dotenv').config();
+
+// ── Core dependencies ─────────────────────────────────────────
 const express   = require('express');
 const cors      = require('cors');
 const connectDB = require('./config/database');
 
+// ── Create Express application ────────────────────────────────
 const app = express();
 
-// ═════════════════════════════════════════════════════
-// DATABASE CONNECTION
-// ═════════════════════════════════════════════════════
+// ── Connect to MongoDB Atlas ──────────────────────────────────
+// Runs on startup — process exits automatically on connection failure
 connectDB();
 
-// ═════════════════════════════════════════════════════
-// MIDDLEWARE
-// ═════════════════════════════════════════════════════
-
-// CORS - Cross-Origin Resource Sharing
-app.use(cors({
-  origin: function(origin, callback) {
+// ── CORS Configuration ────────────────────────────────────────
+// Allows cross-origin requests from the frontend (HTML files
+// opened via file:// or a local dev server on a different port).
+//
+// ⚠  In production: replace the wildcard with your actual domain:
+//    origin: 'https://your-domain.com'
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin header (Postman, curl, mobile apps)
     if (!origin) return callback(null, true);
-    callback(null, true); // Allow all origins in development
-  },
-  credentials: true
-}));
 
-// Body Parser - Handle JSON and URL-encoded data
-// Body Parser - Handle JSON and URL-encoded data
+    // Allow all origins in development mode
+    callback(null, true);
+  },
+  credentials: true,
+};
+app.use(cors(corsOptions));
+
+// ── Body parsers ──────────────────────────────────────────────
+// Parse incoming JSON payloads (limit prevents large-payload attacks)
 app.use(express.json({ limit: '10mb' }));
+
+// Parse URL-encoded form data (extended: true allows nested objects)
 app.use(express.urlencoded({ extended: true }));
 
-// ═════════════════════════════════════════════════════
-// API ROUTES
-// ═════════════════════════════════════════════════════
-app.use('/api/auth',        require('./routes/auth'));
-app.use('/api/users',       require('./routes/users'));
-app.use('/api/properties',  require('./routes/properties'));
-app.use('/api/complaints',  require('./routes/complaints'));
-app.use('/api/maintenance', require('./routes/maintenance'));
-app.use('/api/payments',    require('./routes/payments'));
-app.use('/api/leases',      require('./routes/leases'));
+// ── API Route Handlers ────────────────────────────────────────
+// Each route module is mounted under its own /api/* namespace.
+// All route files live in ./routes/ and export an Express router.
 
-// ═════════════════════════════════════════════════════
-// HEALTH CHECK
-// ═════════════════════════════════════════════════════
+app.use('/api/auth',        require('./routes/auth'));        // login, register, Google OAuth
+app.use('/api/users',       require('./routes/users'));       // admin user management
+app.use('/api/properties',  require('./routes/properties')); // property CRUD + 3D config
+app.use('/api/complaints',  require('./routes/complaints')); // tenant complaints
+app.use('/api/maintenance', require('./routes/maintenance')); // maintenance requests
+app.use('/api/payments',    require('./routes/payments'));    // rent payment records
+app.use('/api/leases',      require('./routes/leases'));      // lease agreements
+
+// ── Health Check ──────────────────────────────────────────────
+// Quick endpoint to verify the server is up and responding.
+// Useful for uptime monitors and deployment checks.
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'OK',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    time:   new Date().toISOString(),
   });
 });
 
-// ═════════════════════════════════════════════════════
-// ERROR HANDLING
-// ═════════════════════════════════════════════════════
-
-// 404 - Route Not Found
+// ── 404 Handler ───────────────────────────────────────────────
+// Catches any request that didn't match a registered route.
+// Must be defined AFTER all routes.
 app.use((req, res) => {
   res.status(404).json({
     success: false,
-    message: 'Endpoint not found',
-    path: req.path,
-    method: req.method
+    message: 'Route not found.',
   });
 });
 
-// 500 - Server Error
+// ── Global Error Handler ──────────────────────────────────────
+// Catches any unhandled errors thrown inside route handlers.
+// Express identifies this as an error handler via the 4-argument signature.
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-  console.error('❌ Server Error:', err);
+  console.error('Unhandled error:', err.message || err);
   res.status(500).json({
     success: false,
-    message: 'Internal server error',
-    error: process.env.NODE_ENV === 'development' ? err.message : 'Server error'
+    message: 'Server error.',
   });
 });
 
-// ═════════════════════════════════════════════════════
-// SERVER STARTUP
-// ═════════════════════════════════════════════════════
+// ── Start HTTP Server ─────────────────────────────────────────
+// Falls back to port 5000 if PORT is not set in .env
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  console.log('\n╔════════════════════════════════════════════╗');
-  console.log('║   🚀 Tenant Management System Backend      ║');
-  console.log('║          Server Started Successfully        ║');
-  console.log('╚════════════════════════════════════════════╝\n');
-  console.log(`📍 Server: http://localhost:${PORT}`);
-  console.log(`🔗 API Base: http://localhost:${PORT}/api`);
-  console.log(`🏥 Health Check: http://localhost:${PORT}/api/health`);
-  console.log('\n📚 Available Endpoints:');
-  console.log('   • Authentication: /api/auth');
-  console.log('   • Users: /api/users');
-  console.log('   • Properties: /api/properties');
-  console.log('   • Complaints: /api/complaints');
-  console.log('   • Maintenance: /api/maintenance');
-  console.log('   • Payments: /api/payments');
-  console.log('   • Leases: /api/leases\n');
+  console.log(`🚀 TMS Backend running on http://localhost:${PORT}`);
+  console.log(`📍 API Base:  http://localhost:${PORT}/api`);
+  console.log(`❤️  Health:   http://localhost:${PORT}/api/health`);
+  console.log(`🔑 Admin:     ${process.env.ADMIN_EMAIL}`);
+  console.log(`✅ Routes:    auth, users, properties, complaints, maintenance, payments, leases`);
 });

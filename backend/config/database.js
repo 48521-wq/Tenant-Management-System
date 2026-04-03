@@ -1,48 +1,40 @@
-/**
- * Database Configuration & Connection Handler
- * MongoDB Atlas Connection with Mongoose
- */
+// ═══════════════════════════════════════════════════════════════
+//  Database Config  —  MongoDB Atlas Connection
+//  Uses Mongoose to connect to the Atlas cluster defined in .env
+// ═══════════════════════════════════════════════════════════════
 
 const mongoose = require('mongoose');
-const dns = require('dns');
+const dns      = require('dns');
 
-// Use IPv4 as default (ensures compatibility)
+// Force IPv4 DNS resolution — prevents IPv6 timeout issues on some networks
 dns.setDefaultResultOrder('ipv4first');
 
-/**
- * Connect to MongoDB Atlas
- * Includes error handling, retry logic, and connection events
- */
+// ── Connection options ───────────────────────────────────────────
+const MONGO_OPTIONS = {
+  // Max time (ms) to wait when selecting a server before throwing
+  serverSelectionTimeoutMS: 15000,
+
+  // Max time (ms) to wait for a response on an open socket
+  socketTimeoutMS: 45000,
+
+  // Force IPv4 socket connections (consistent with DNS setting above)
+  family: 4,
+};
+
+// ── connectDB ────────────────────────────────────────────────────
+// Establishes connection to MongoDB Atlas.
+// Called once on server startup — process exits on failure.
 const connectDB = async () => {
   try {
-    console.log('🔄 Connecting to MongoDB Atlas...');
+    const conn = await mongoose.connect(process.env.MONGODB_URI, MONGO_OPTIONS);
 
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 15000,
-      socketTimeoutMS: 45000,
-      retryWrites: true,
-      w: 'majority',
-      family: 4,
-    });
-
-    console.log('\n✅ MongoDB Connection Successful!');
-    console.log(`📍 Host: ${conn.connection.host}`);
+    console.log(`✅ MongoDB Atlas Connected: ${conn.connection.host}`);
     console.log(`📦 Database: ${conn.connection.name}`);
-    console.log(`🔗 Connection State: ${conn.connection.readyState === 1 ? 'Connected' : 'Disconnected'}\n`);
-
-    // Handle connection events
-    mongoose.connection.on('error', (error) => {
-      console.error('❌ MongoDB Connection Error:', error.message);
-    });
-
-    mongoose.connection.on('disconnected', () => {
-      console.warn('⚠️  MongoDB Disconnected - Attempting to reconnect...');
-    });
 
   } catch (error) {
-    console.error('\n❌ MongoDB Connection Failed!');
-    console.error(`📌 Error: ${error.message}`);
-    console.error(`💡 Tip: Check your MONGODB_URI in .env file\n`);
+    console.error('❌ MongoDB connection error:', error.message);
+
+    // Exit the process so the server does not run without a DB
     process.exit(1);
   }
 };
