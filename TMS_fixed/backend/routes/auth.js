@@ -14,15 +14,29 @@ const gClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ── Token helpers ────────────────────────────────────────────────
 
-// Generate a signed JWT valid for 7 days
+/**
+ * Sign a JWT with the application secret.
+ * Tokens are valid for 7 days — after that the user must log in again.
+ * @param {Object} payload - data to embed in the token (id, role, etc.)
+ * @returns {string} signed JWT string
+ */
 const genToken = (payload) =>
   jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-// Generate a special admin token (no DB lookup needed)
+/**
+ * Generate an admin-specific JWT.
+ * Admin is not stored in the database — identity is carried in the token.
+ * @returns {string} signed admin JWT
+ */
 const adminTok = () =>
   genToken({ isAdmin: true, email: process.env.ADMIN_EMAIL });
 
-// Build the public user object returned in responses
+/**
+ * Build the safe public user object that is returned in API responses.
+ * Sensitive fields (hashed password, internal flags) are excluded.
+ * @param {Object} user - Mongoose user document
+ * @returns {Object} plain serializable user object
+ */
 const publicUser = (user) => ({
   id:        user._id,
   name:      user.name,
@@ -35,7 +49,11 @@ const publicUser = (user) => ({
   createdAt: user.createdAt,
 });
 
-// Admin user object (no DB record)
+/**
+ * Build the admin user object returned when an admin logs in.
+ * Since admin has no DB record, this is constructed from env variables.
+ * @returns {Object} admin identity object
+ */
 const adminUser = () => ({
   id:      'admin',
   name:    'Super Admin',
@@ -44,11 +62,16 @@ const adminUser = () => ({
   isAdmin: true,
 });
 
-// Check whether the given email belongs to the admin account
+/**
+ * Check whether an email address matches the admin account.
+ * Comparison is case-insensitive.
+ * @param {string} email
+ * @returns {boolean}
+ */
 const isAdminEmail = (email) =>
   email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase();
 
-// Valid roles a user can register as
+// Roles that a regular user is allowed to register with
 const VALID_ROLES = ['tenant', 'landlord'];
 
 // ── POST /api/auth/register ──────────────────────────────────────
@@ -78,7 +101,7 @@ router.post('/register', async (req, res) => {
     if (exists)
       return res.status(400).json({ success: false, message: 'Account already exists. Please sign in.' });
 
-    // 6. Create user and return token
+    // 6. Create user record and issue a JWT
     const user  = await User.create({
       name:         name.trim(),
       email:        email.toLowerCase(),
@@ -87,8 +110,10 @@ router.post('/register', async (req, res) => {
       authProvider: 'email',
     });
 
+    // Sign a token carrying the new user's ID and role
     const token = genToken({ id: user._id, role: user.role });
 
+    // Return 201 Created with the token and safe user object
     res.status(201).json({
       success: true,
       token,
@@ -96,9 +121,11 @@ router.post('/register', async (req, res) => {
     });
 
   } catch (e) {
+    // MongoDB duplicate key error — email already taken
     if (e.code === 11000)
       return res.status(400).json({ success: false, message: 'Email already registered.' });
-    console.error('Register:', e);
+
+    console.error('Register error:', e);
     res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
@@ -212,7 +239,9 @@ router.post('/google', async (req, res) => {
 });
 
 // ── POST /api/auth/google-fallback ──────────────────────────────
-// Dev-mode fallback: authenticate by email only (no real Google token)
+// Development-mode fallback when the Google GSI popup is blocked.
+// Authenticates using email address only — no real Google token needed.
+// This route should NOT be used in production.
 router.post('/google-fallback', async (req, res) => {
   try {
     const { email, role, mode } = req.body;
@@ -222,22 +251,26 @@ router.post('/google-fallback', async (req, res) => {
 
     const lEmail = email.toLowerCase().trim();
 
-    // Admin shortcut
+    // Admin shortcut — no DB lookup needed
     if (isAdminEmail(lEmail))
       return res.json({ success: true, token: adminTok(), user: adminUser() });
 
     let user = await User.findOne({ email: lEmail });
 
     if (mode === 'signin') {
+      // Signing in — account must already exist
       if (!user)
         return res.status(401).json({ success: false, message: 'No account for ' + email + '.' });
       if (user.status === 'blocked')
         return res.status(403).json({ success: false, message: 'Account suspended.' });
     } else {
+      // Signing up — account must not already exist
       if (user)
         return res.status(400).json({ success: false, message: 'Account already exists.' });
       if (!role)
         return res.status(400).json({ success: false, message: 'Select role first.' });
+
+      // Create new user — derive name from email prefix
       user = await User.create({
         name:         lEmail.split('@')[0],
         email:        lEmail,
@@ -264,14 +297,18 @@ router.get('/me', protect, (req, res) => {
 });
 
 // ── PUT /api/auth/profile ────────────────────────────────────────
-// Update the logged-in user's editable profile fields
+// Update the logged-in user's editable profile fields.
+// Admin has no DB record so we skip the update and return success.
 router.put('/profile', protect, async (req, res) => {
   try {
+    // Admin identity is stored in JWT only — nothing to update in DB
     if (req.user?.isAdmin)
       return res.json({ success: true, message: 'Admin profile updated.' });
 
+    // Extract only the fields that users are allowed to edit
     const { name, phone, cnic, city, address } = req.body;
 
+    // findByIdAndUpdate with { new: true } returns the updated document
     const user = await User.findByIdAndUpdate(
       req.user._id,
       { name, phone, cnic, city, address },
