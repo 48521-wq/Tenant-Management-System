@@ -396,58 +396,106 @@ const TMS = {
     document.querySelectorAll('.tn-badge, #notif-nb').forEach(el => el && (el.textContent = unread));
   },
 
+  /**
+   * Mark every notification as read and reset all badge counters to 0.
+   * Called when the user opens the notifications panel.
+   */
   markAllNotifsRead() {
     const notifs = this.getNotifs().map(n => ({ ...n, read: true }));
     this.save(this.KEYS.notifications, notifs);
+    // Reset all badge elements to 0 in the UI
     document.querySelectorAll('.tn-badge, #notif-nb').forEach(el => el && (el.textContent = '0'));
   },
 
   // ─────────────────── DASHBOARD STATS ───────────────
+
+  /**
+   * Compute a summary stats object used to populate the admin dashboard.
+   * Reads all data collections from localStorage and derives counts.
+   *
+   * Returned keys:
+   *   totalUsers, tenants, landlords, properties, activeLeases,
+   *   openIssues, openComplaints, pendingLandlords, pendingMaintenance,
+   *   reportedProps, maintenance, complaints, unreadNotifs
+   *
+   * @returns {Object} flat stats object for dashboard rendering
+   */
   getStats() {
-    const tenants = this.getTenants();
-    const landlords = this.getLandlords();
+    // Read all collections from localStorage
+    const tenants    = this.getTenants();
+    const landlords  = this.getLandlords();
     const properties = this.getProperties();
     const complaints = this.getComplaints();
     const maintenance = this.getMaintenance();
     const agreements = this.getAgreements();
-    const users = (() => { try { return Object.keys(JSON.parse(localStorage.getItem('tms_users') || '{}')); } catch (e) { return []; } })();
 
-    const openIssues = complaints.filter(c => c.status === 'open').length + maintenance.filter(m => m.status === 'pending').length;
-    const activeLeases = agreements.filter(a => a.status === 'active').length;
+    // tms_users is an email-keyed object (separate from the tenants/landlords arrays)
+    const users = (() => {
+      try {
+        return Object.keys(JSON.parse(localStorage.getItem('tms_users') || '{}'));
+      } catch (e) {
+        return [];
+      }
+    })();
+
+    // Derive computed counts from the raw arrays
+    const openIssues       = complaints.filter(c => c.status === 'open').length
+                           + maintenance.filter(m => m.status === 'pending').length;
+    const activeLeases     = agreements.filter(a => a.status === 'active').length;
     const pendingLandlords = landlords.filter(l => l.status === 'pending').length;
-    const openComplaints = complaints.filter(c => c.status === 'open').length;
-    const unreadNotifs = this.getNotifs().filter(n => !n.read).length;
+    const openComplaints   = complaints.filter(c => c.status === 'open').length;
+    const unreadNotifs     = this.getNotifs().filter(n => !n.read).length;
 
     return {
-      totalUsers: users.length,
-      properties: properties.length,
-      tenants: tenants.length,
-      landlords: landlords.length,
+      totalUsers:         users.length,
+      properties:         properties.length,
+      tenants:            tenants.length,
+      landlords:          landlords.length,
       activeLeases,
       openIssues,
       openComplaints,
       pendingLandlords,
       pendingMaintenance: maintenance.filter(m => m.status === 'pending').length,
-      reportedProps: properties.filter(p => p.status === 'reported').length,
-      maintenance: maintenance.length,
-      complaints: complaints.length,
+      reportedProps:      properties.filter(p => p.status === 'reported').length,
+      maintenance:        maintenance.length,
+      complaints:         complaints.length,
       unreadNotifs,
     };
   },
 
   // ─────────────────── CURRENT USER ──────────────────
+
+  /**
+   * Return the currently logged-in user's profile object.
+   * Checks localStorage for the active session email and looks
+   * up the matching user record.
+   *
+   * Returns null if no session is active or the user is not found.
+   * Admin is detected by comparing email against tms_admin_email.
+   *
+   * @returns {Object|null} user profile with name, role, email, initial
+   */
   getCurrentUser() {
     try {
       const email = localStorage.getItem('tms_current_user');
       if (!email) return null;
+
+      // Admin check — admin is not stored in tms_users object
       if (email === localStorage.getItem('tms_admin_email')) {
         return { name: 'Super Admin', role: 'admin', email, initial: 'A' };
       }
+
+      // Regular user — look up in the email-keyed users object
       const users = JSON.parse(localStorage.getItem('tms_users') || '{}');
       const u = users[email];
       if (!u) return null;
+
+      // Derive avatar initial from name, falling back to first char of email
       return { ...u, email, initial: (u.name || email)[0].toUpperCase() };
-    } catch (e) { return null; }
+
+    } catch (e) {
+      return null;
+    }
   },
 };
 
