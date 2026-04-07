@@ -989,16 +989,28 @@ function tmsRenderPendingActions() {
     </div>`).join('');
 }
 
-// ── Recent Activity on Dashboard ────────────────────────
+// ── Recent Activity on Dashboard ─────────────────────────────────
+
+/**
+ * Render the 6 most recent activity log entries on the main dashboard.
+ * Uses a colour-coded dot to indicate the log type visually.
+ * Shows a placeholder message when no activity has been recorded yet.
+ */
 function tmsRenderRecentActivity() {
   const container = document.getElementById('activity-list');
   if (!container) return;
+
+  // Only show the 6 most recent entries to keep the widget compact
   const logs = TMS.getLogs().slice(0, 6);
+
   if (!logs.length) {
     container.innerHTML = `<div class="activity-item"><div class="act-dot blue"></div><div class="act-text" style="color:var(--muted)">No activity recorded yet. Start by adding tenants, landlords, or properties.</div><div class="act-time">now</div></div>`;
     return;
   }
+
+  // Map log type to the CSS dot colour class
   const dotColor = { success: 'green', warn: 'warn', error: 'red', info: 'blue' };
+
   container.innerHTML = logs.map(l => `
     <div class="activity-item">
       <div class="act-dot ${dotColor[l.type] || 'blue'}"></div>
@@ -1007,138 +1019,233 @@ function tmsRenderRecentActivity() {
     </div>`).join('');
 }
 
-// ── Add Tenant Form Handler ──────────────────────────────
+// ── Form handlers — Add Tenant ────────────────────────────────────
+
+/**
+ * Handle submission of the "Add Tenant" form on the admin dashboard.
+ * Validates required fields, creates the tenant, resets the form,
+ * shows a success message, and refreshes the table and stats.
+ */
 function tmsSubmitAddTenant() {
-  const name = document.getElementById('add-t-name')?.value.trim();
-  const email = document.getElementById('add-t-email')?.value.trim();
-  const phone = document.getElementById('add-t-phone')?.value.trim();
-  const cnic = document.getElementById('add-t-cnic')?.value.trim();
+  // Read all form field values
+  const name     = document.getElementById('add-t-name')?.value.trim();
+  const email    = document.getElementById('add-t-email')?.value.trim();
+  const phone    = document.getElementById('add-t-phone')?.value.trim();
+  const cnic     = document.getElementById('add-t-cnic')?.value.trim();
   const property = document.getElementById('add-t-property')?.value.trim();
 
-  if (!name || !email) { tmsShowFormMsg('add-tenant-msg', 'Name and email are required.', false); return; }
+  // Name and email are the only required fields
+  if (!name || !email) {
+    tmsShowFormMsg('add-tenant-msg', 'Name and email are required.', false);
+    return;
+  }
 
   TMS.addTenant({ name, email, phone, cnic, property, status: 'active' });
   document.getElementById('add-tenant-form')?.reset();
   tmsShowFormMsg('add-tenant-msg', '✅ Tenant added successfully!', true);
-  tmsRenderTenants(); tmsUpdateStats();
+  tmsRenderTenants();
+  tmsUpdateStats();
 }
 
-// ── Add Landlord Form Handler ────────────────────────────
+// ── Form handlers — Add Landlord ──────────────────────────────────
+
+/**
+ * Handle submission of the "Add Landlord" form on the admin dashboard.
+ * New landlords start with status 'pending' until admin approves them.
+ */
 function tmsSubmitAddLandlord() {
-  const name = document.getElementById('add-l-name')?.value.trim();
+  const name  = document.getElementById('add-l-name')?.value.trim();
   const email = document.getElementById('add-l-email')?.value.trim();
   const phone = document.getElementById('add-l-phone')?.value.trim();
-  const cnic = document.getElementById('add-l-cnic')?.value.trim();
+  const cnic  = document.getElementById('add-l-cnic')?.value.trim();
 
-  if (!name || !email) { tmsShowFormMsg('add-landlord-msg', 'Name and email are required.', false); return; }
+  if (!name || !email) {
+    tmsShowFormMsg('add-landlord-msg', 'Name and email are required.', false);
+    return;
+  }
 
+  // Landlords start as 'pending' — admin must approve before they can list properties
   TMS.addLandlord({ name, email, phone, cnic, status: 'pending' });
   document.getElementById('add-landlord-form')?.reset();
   tmsShowFormMsg('add-landlord-msg', '✅ Landlord added! Status: Pending approval.', true);
-  tmsRenderLandlords(); tmsUpdateStats();
+  tmsRenderLandlords();
+  tmsUpdateStats();
 }
 
-// ── Add Property Form Handler ────────────────────────────
+// ── Form handlers — Add Property ──────────────────────────────────
+
+/**
+ * Handle submission of the "Add Property" form on the admin dashboard.
+ * Requires title and city; other fields are optional.
+ */
 function tmsSubmitAddProperty() {
-  const title = document.getElementById('add-p-title')?.value.trim();
-  const address = document.getElementById('add-p-address')?.value.trim();
-  const city = document.getElementById('add-p-city')?.value.trim();
-  const type = document.getElementById('add-p-type')?.value;
-  const rent = document.getElementById('add-p-rent')?.value.trim();
-  const beds = document.getElementById('add-p-beds')?.value.trim();
-  const baths = document.getElementById('add-p-baths')?.value.trim();
+  const title    = document.getElementById('add-p-title')?.value.trim();
+  const address  = document.getElementById('add-p-address')?.value.trim();
+  const city     = document.getElementById('add-p-city')?.value.trim();
+  const type     = document.getElementById('add-p-type')?.value;
+  const rent     = document.getElementById('add-p-rent')?.value.trim();
+  const beds     = document.getElementById('add-p-beds')?.value.trim();
+  const baths    = document.getElementById('add-p-baths')?.value.trim();
   const landlord = document.getElementById('add-p-landlord')?.value.trim();
 
-  if (!title || !city) { tmsShowFormMsg('add-property-msg', 'Title and city are required.', false); return; }
+  if (!title || !city) {
+    tmsShowFormMsg('add-property-msg', 'Title and city are required.', false);
+    return;
+  }
 
+  // Convert rent to number; new properties default to 'available' status
   TMS.addProperty({ title, address, city, type, rent: Number(rent), beds, baths, landlord, status: 'available' });
   document.getElementById('add-property-form')?.reset();
   tmsShowFormMsg('add-property-msg', '✅ Property added successfully!', true);
-  tmsRenderProperties(); tmsUpdateStats();
+  tmsRenderProperties();
+  tmsUpdateStats();
 }
 
-// ── Add Complaint Form Handler ───────────────────────────
-function tmsSubmitAddComplaint() {
-  const title = document.getElementById('add-c-title')?.value.trim();
-  const description = document.getElementById('add-c-desc')?.value.trim();
-  const category = document.getElementById('add-c-category')?.value;
-  const filedBy = document.getElementById('add-c-filedby')?.value.trim();
+// ── Form handlers — Add Complaint ─────────────────────────────────
 
-  if (!title) { tmsShowFormMsg('add-complaint-msg', 'Title is required.', false); return; }
+/**
+ * Handle submission of the "Add Complaint" form.
+ * Title is the only required field; category and description are optional.
+ */
+function tmsSubmitAddComplaint() {
+  const title       = document.getElementById('add-c-title')?.value.trim();
+  const description = document.getElementById('add-c-desc')?.value.trim();
+  const category    = document.getElementById('add-c-category')?.value;
+  const filedBy     = document.getElementById('add-c-filedby')?.value.trim();
+
+  if (!title) {
+    tmsShowFormMsg('add-complaint-msg', 'Title is required.', false);
+    return;
+  }
 
   TMS.addComplaint({ title, description, category, filedBy, status: 'open' });
   document.getElementById('add-complaint-form')?.reset();
   tmsShowFormMsg('add-complaint-msg', '✅ Complaint filed successfully!', true);
-  tmsRenderComplaints(); tmsUpdateStats();
+  tmsRenderComplaints();
+  tmsUpdateStats();
 }
 
-// ── Add Maintenance Form Handler ─────────────────────────
+// ── Form handlers — Add Maintenance ───────────────────────────────
+
+/**
+ * Handle submission of the "Add Maintenance" form.
+ * Title is the only required field; all other fields are optional.
+ */
 function tmsSubmitAddMaintenance() {
-  const title = document.getElementById('add-m-title')?.value.trim();
-  const desc = document.getElementById('add-m-desc')?.value.trim();
-  const tenant = document.getElementById('add-m-tenant')?.value.trim();
+  const title    = document.getElementById('add-m-title')?.value.trim();
+  const desc     = document.getElementById('add-m-desc')?.value.trim();
+  const tenant   = document.getElementById('add-m-tenant')?.value.trim();
   const property = document.getElementById('add-m-property')?.value.trim();
   const priority = document.getElementById('add-m-priority')?.value;
 
-  if (!title) { tmsShowFormMsg('add-maint-msg', 'Title is required.', false); return; }
+  if (!title) {
+    tmsShowFormMsg('add-maint-msg', 'Title is required.', false);
+    return;
+  }
 
   TMS.addMaintenance({ title, description: desc, tenant, property, priority, status: 'pending' });
   document.getElementById('add-maintenance-form')?.reset();
   tmsShowFormMsg('add-maint-msg', '✅ Maintenance request added!', true);
-  tmsRenderMaintenance(); tmsUpdateStats();
+  tmsRenderMaintenance();
+  tmsUpdateStats();
 }
 
-// ── Add Agreement Form Handler ───────────────────────────
-function tmsSubmitAddAgreement() {
-  const tenant = document.getElementById('add-a-tenant')?.value.trim();
-  const landlord = document.getElementById('add-a-landlord')?.value.trim();
-  const property = document.getElementById('add-a-property')?.value.trim();
-  const rent = document.getElementById('add-a-rent')?.value.trim();
-  const startDate = document.getElementById('add-a-start')?.value;
-  const endDate = document.getElementById('add-a-end')?.value;
-  const duration = document.getElementById('add-a-duration')?.value.trim();
+// ── Form handlers — Add Agreement ─────────────────────────────────
 
-  if (!tenant || !landlord) { tmsShowFormMsg('add-agr-msg', 'Tenant and landlord are required.', false); return; }
+/**
+ * Handle submission of the "Add Agreement" form.
+ * Tenant and landlord names are required; all other fields are optional.
+ */
+function tmsSubmitAddAgreement() {
+  const tenant    = document.getElementById('add-a-tenant')?.value.trim();
+  const landlord  = document.getElementById('add-a-landlord')?.value.trim();
+  const property  = document.getElementById('add-a-property')?.value.trim();
+  const rent      = document.getElementById('add-a-rent')?.value.trim();
+  const startDate = document.getElementById('add-a-start')?.value;
+  const endDate   = document.getElementById('add-a-end')?.value;
+  const duration  = document.getElementById('add-a-duration')?.value.trim();
+
+  if (!tenant || !landlord) {
+    tmsShowFormMsg('add-agr-msg', 'Tenant and landlord are required.', false);
+    return;
+  }
 
   TMS.addAgreement({ tenant, landlord, property, rent: Number(rent), startDate, endDate, duration, status: 'active' });
   document.getElementById('add-agreement-form')?.reset();
   tmsShowFormMsg('add-agr-msg', '✅ Agreement created successfully!', true);
-  tmsRenderAgreements(); tmsUpdateStats();
+  tmsRenderAgreements();
+  tmsUpdateStats();
 }
 
-// ── Form message helper ──────────────────────────────────
+// ── Utility: Form feedback message ───────────────────────────────
+
+/**
+ * Show a temporary success or error banner below a form.
+ * The banner automatically hides after 3 seconds.
+ *
+ * @param {string}  elId    - ID of the message element
+ * @param {string}  msg     - message text to display
+ * @param {boolean} success - true = green success banner, false = red error banner
+ */
 function tmsShowFormMsg(elId, msg, success) {
   const el = document.getElementById(elId);
   if (!el) return;
-  el.textContent = msg;
-  el.className = success ? 'ok-banner show' : 'err-banner show';
+  el.textContent  = msg;
+  el.className    = success ? 'ok-banner show' : 'err-banner show';
   el.style.display = 'flex';
+  // Auto-hide after 3 seconds
   setTimeout(() => { el.style.display = 'none'; }, 3000);
 }
 
-// ── Send Notification Handler ────────────────────────────
+// ── Admin notification sender ─────────────────────────────────────
+
+/**
+ * Read the notification form inputs and broadcast a new notification
+ * to all users via TMS.addNotif(). Also logs the action.
+ * Clears the form and shows a confirmation badge on success.
+ */
 function tmsSendNotification() {
   const title = document.getElementById('notif-title')?.value.trim();
-  const msg = document.getElementById('notif-msg')?.value.trim();
+  const msg   = document.getElementById('notif-msg')?.value.trim();
+
   if (!title || !msg) { alert('Title and message required.'); return; }
+
   TMS.addNotif(title, msg, 'blue');
   TMS.addLog('info', `Admin sent notification: "${title}"`, 'super_admin');
+
+  // Clear the form after sending
   document.getElementById('notif-title').value = '';
-  document.getElementById('notif-msg').value = '';
-  tmsRenderNotifs(); tmsUpdateStats();
+  document.getElementById('notif-msg').value   = '';
+
+  tmsRenderNotifs();
+  tmsUpdateStats();
+
+  // Show a brief confirmation badge
   const ok = document.getElementById('notif-ok');
-  if (ok) { ok.classList.add('show'); setTimeout(() => ok.classList.remove('show'), 3000); }
+  if (ok) {
+    ok.classList.add('show');
+    setTimeout(() => ok.classList.remove('show'), 3000);
+  }
 }
 
-// ── Verify Page: Render Pending Landlords ────────────────
+// ── Verification page ─────────────────────────────────────────────
+
+/**
+ * Render the landlord verification panel showing all pending applications.
+ * Admin can approve or reject each landlord from this view.
+ */
 function tmsRenderVerification() {
   const container = document.getElementById('verification-pending');
   if (!container) return;
+
+  // Filter to only landlords awaiting approval
   const pending = TMS.getLandlords().filter(l => l.status === 'pending');
+
   if (!pending.length) {
     container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">✅ No pending verifications right now.</div>`;
     return;
   }
+
   container.innerHTML = pending.map(l => `
     <div class="verify-card">
       <div class="vc-av" style="background:linear-gradient(135deg,#4A9EFF,#7BBFFF)">${l.name[0].toUpperCase()}</div>
@@ -1157,7 +1264,14 @@ function tmsRenderVerification() {
     </div>`).join('');
 }
 
-// ── Page render dispatcher ───────────────────────────────
+// ── Page render dispatcher ────────────────────────────────────────
+
+/**
+ * Called whenever the admin navigates to a different dashboard section.
+ * Triggers the appropriate render function for the active page.
+ *
+ * @param {string} pageId - the dashboard section identifier
+ */
 function tmsOnPageChange(pageId) {
   switch (pageId) {
     case 'dashboard':
@@ -1165,19 +1279,21 @@ function tmsOnPageChange(pageId) {
       tmsRenderPendingActions();
       tmsRenderRecentActivity();
       break;
-    case 'tenants': tmsRenderTenants(); break;
-    case 'landlords': tmsRenderLandlords(); break;
-    case 'properties': tmsRenderProperties(); break;
-    case 'complaints': tmsRenderComplaints(); break;
-    case 'maintenance': tmsRenderMaintenance(); break;
-    case 'agreements': tmsRenderAgreements(); break;
-    case 'logs': tmsRenderLogs(); break;
-    case 'notifications': tmsRenderNotifs(); break;
+    case 'tenants':      tmsRenderTenants();      break;
+    case 'landlords':    tmsRenderLandlords();    break;
+    case 'properties':   tmsRenderProperties();   break;
+    case 'complaints':   tmsRenderComplaints();   break;
+    case 'maintenance':  tmsRenderMaintenance();  break;
+    case 'agreements':   tmsRenderAgreements();   break;
+    case 'logs':         tmsRenderLogs();         break;
+    case 'notifications':tmsRenderNotifs();       break;
     case 'verification': tmsRenderVerification(); break;
   }
 }
 
-// Auto-init on page load
+// ── Auto-init on page load ────────────────────────────────────────
+// Runs once when the DOM is ready — populates the main dashboard
+// with live stats and the latest activity feed.
 document.addEventListener('DOMContentLoaded', () => {
   tmsUpdateStats();
   tmsRenderPendingActions();
