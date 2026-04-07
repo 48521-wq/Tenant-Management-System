@@ -499,21 +499,46 @@ const TMS = {
   },
 };
 
-// ── Render helpers ──────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+//  Render Helpers — tms-data.js
+//  DOM update functions that read from TMS storage and
+//  write directly to the admin dashboard HTML elements.
+// ══════════════════════════════════════════════════════════════
 
+/**
+ * Refresh all stat counters, chart bars, sidebar badges, and
+ * action counts across the admin dashboard in one call.
+ *
+ * Reads: TMS.getStats()
+ * Writes to:
+ *   [data-stat]       — any element with a matching stat key
+ *   chart-*           — horizontal bar chart segments
+ *   nb-*              — sidebar notification badges
+ *   act-*             — action panel counters
+ *   #notif-count      — notification bell badge
+ */
 function tmsUpdateStats() {
   const stats = TMS.getStats();
+
+  // ── [data-stat] elements ──────────────────────────────────
+  // Any element with data-stat="key" gets its textContent updated
   document.querySelectorAll('[data-stat]').forEach(el => {
     const key = el.getAttribute('data-stat');
     if (stats[key] !== undefined) el.textContent = stats[key];
   });
 
-  const max = Math.max(stats.tenants, stats.landlords, stats.properties, stats.complaints, stats.maintenance, 1);
+  // ── Chart bars ────────────────────────────────────────────
+  // Each bar's width is a percentage of the largest value in the set
+  const max = Math.max(
+    stats.tenants, stats.landlords, stats.properties,
+    stats.complaints, stats.maintenance,
+    1  // minimum of 1 to avoid division by zero
+  );
   const bars = {
-    'chart-tenants': stats.tenants,
-    'chart-landlords': stats.landlords,
-    'chart-properties': stats.properties,
-    'chart-complaints': stats.complaints,
+    'chart-tenants':     stats.tenants,
+    'chart-landlords':   stats.landlords,
+    'chart-properties':  stats.properties,
+    'chart-complaints':  stats.complaints,
     'chart-maintenance': stats.maintenance,
   };
   Object.entries(bars).forEach(([id, val]) => {
@@ -525,22 +550,29 @@ function tmsUpdateStats() {
     }
   });
 
+  // ── Sidebar notification badges ───────────────────────────
+  // Badges are hidden (display:none) when their count is zero
   const badgeMap = {
-    'nb-reported': stats.reportedProps,
-    'nb-complaints': stats.openComplaints,
-    'nb-maintenance': stats.pendingMaintenance,
+    'nb-reported':     stats.reportedProps,
+    'nb-complaints':   stats.openComplaints,
+    'nb-maintenance':  stats.pendingMaintenance,
     'nb-verification': stats.pendingLandlords,
-    'nb-notifs': stats.unreadNotifs,
+    'nb-notifs':       stats.unreadNotifs,
   };
   Object.entries(badgeMap).forEach(([id, val]) => {
     const el = document.getElementById(id);
-    if (el) { el.textContent = val; el.style.display = val > 0 ? '' : 'none'; }
+    if (el) {
+      el.textContent   = val;
+      el.style.display = val > 0 ? '' : 'none';
+    }
   });
 
+  // ── Action panel counters ─────────────────────────────────
+  // Plain text counters shown in the quick-action cards
   const actMap = {
-    'act-pending-docs': stats.pendingLandlords,
-    'act-new-reports': stats.reportedProps,
-    'act-awaiting-appr': stats.pendingLandlords,
+    'act-pending-docs':    stats.pendingLandlords,
+    'act-new-reports':     stats.reportedProps,
+    'act-awaiting-appr':   stats.pendingLandlords,
     'act-open-complaints': stats.openComplaints,
   };
   Object.entries(actMap).forEach(([id, val]) => {
@@ -548,23 +580,37 @@ function tmsUpdateStats() {
     if (el) el.textContent = val;
   });
 
+  // ── Notification bell badge ───────────────────────────────
   const notifBadge = document.getElementById('notif-count');
   if (notifBadge) notifBadge.textContent = stats.unreadNotifs;
 }
 
-// ── Render Tenants Table ────────────────────────────────
+// ── Render Tenants Table ──────────────────────────────────────
+
+/**
+ * Re-render the tenants table on the admin dashboard.
+ * Optionally filters by name or email (case-insensitive).
+ * @param {string} [filter] - search term to filter by
+ */
 function tmsRenderTenants(filter) {
   const tbody = document.getElementById('tenants-tbody');
   if (!tbody) return;
+
   let list = TMS.getTenants();
-  if (filter) list = list.filter(t =>
-    t.name?.toLowerCase().includes(filter.toLowerCase()) ||
-    t.email?.toLowerCase().includes(filter.toLowerCase())
-  );
+
+  // Apply search filter if provided
+  if (filter) {
+    list = list.filter(t =>
+      t.name?.toLowerCase().includes(filter.toLowerCase()) ||
+      t.email?.toLowerCase().includes(filter.toLowerCase())
+    );
+  }
+
   if (!list.length) {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No tenants yet. Add one from the form below.</td></tr>`;
     return;
   }
+
   tbody.innerHTML = list.map((t, i) => `
     <tr>
       <td style="color:var(--muted)">${String(i + 1).padStart(2, '0')}</td>
@@ -581,29 +627,48 @@ function tmsRenderTenants(filter) {
     </tr>`).join('');
 }
 
+/** Toggle a tenant's status between active and blocked, then re-render. */
 function tmsBlockTenant(id) {
   const t = TMS.getTenants().find(t => t.id === id);
   TMS.updateTenant(id, { status: t?.status === 'blocked' ? 'active' : 'blocked' });
-  tmsRenderTenants(); tmsUpdateStats();
-}
-function tmsDeleteTenant(id) {
-  if (!confirm('Delete this tenant?')) return;
-  TMS.deleteTenant(id); tmsRenderTenants(); tmsUpdateStats();
+  tmsRenderTenants();
+  tmsUpdateStats();
 }
 
-// ── Render Landlords Table ──────────────────────────────
+/** Confirm and permanently delete a tenant record, then re-render. */
+function tmsDeleteTenant(id) {
+  if (!confirm('Delete this tenant?')) return;
+  TMS.deleteTenant(id);
+  tmsRenderTenants();
+  tmsUpdateStats();
+}
+
+// ── Render Landlords Table ────────────────────────────────────
+
+/**
+ * Re-render the landlords table on the admin dashboard.
+ * Optionally filters by name or email (case-insensitive).
+ * @param {string} [filter] - search term to filter by
+ */
 function tmsRenderLandlords(filter) {
   const tbody = document.getElementById('landlords-tbody');
   if (!tbody) return;
+
   let list = TMS.getLandlords();
-  if (filter) list = list.filter(l =>
-    l.name?.toLowerCase().includes(filter.toLowerCase()) ||
-    l.email?.toLowerCase().includes(filter.toLowerCase())
-  );
+
+  // Apply search filter if provided
+  if (filter) {
+    list = list.filter(l =>
+      l.name?.toLowerCase().includes(filter.toLowerCase()) ||
+      l.email?.toLowerCase().includes(filter.toLowerCase())
+    );
+  }
+
   if (!list.length) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No landlords registered yet.</td></tr>`;
     return;
   }
+
   tbody.innerHTML = list.map((l, i) => `
     <tr>
       <td style="color:var(--muted)">${String(i + 1).padStart(2, '0')}</td>
@@ -619,20 +684,34 @@ function tmsRenderLandlords(filter) {
     </tr>`).join('');
 }
 
+/** Approve a pending landlord application, then re-render. */
 function tmsApproveLandlord(id) {
-  TMS.approveLandlord(id); tmsRenderLandlords(); tmsUpdateStats();
+  TMS.approveLandlord(id);
+  tmsRenderLandlords();
+  tmsUpdateStats();
 }
+
+/** Reject a pending landlord application, then re-render. */
 function tmsRejectLandlord(id) {
-  TMS.rejectLandlord(id); tmsRenderLandlords(); tmsUpdateStats();
+  TMS.rejectLandlord(id);
+  tmsRenderLandlords();
+  tmsUpdateStats();
 }
+
+/** Toggle a landlord between approved and blocked, then re-render. */
 function tmsBlockLandlord(id) {
   const l = TMS.getLandlords().find(l => l.id === id);
   TMS.updateLandlord(id, { status: l?.status === 'blocked' ? 'approved' : 'blocked' });
-  tmsRenderLandlords(); tmsUpdateStats();
+  tmsRenderLandlords();
+  tmsUpdateStats();
 }
+
+/** Confirm and permanently delete a landlord record, then re-render. */
 function tmsDeleteLandlord(id) {
   if (!confirm('Delete this landlord?')) return;
-  TMS.deleteLandlord(id); tmsRenderLandlords(); tmsUpdateStats();
+  TMS.deleteLandlord(id);
+  tmsRenderLandlords();
+  tmsUpdateStats();
 }
 
 // ── Render Properties Table ─────────────────────────────
