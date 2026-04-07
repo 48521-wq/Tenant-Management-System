@@ -714,19 +714,32 @@ function tmsDeleteLandlord(id) {
   tmsUpdateStats();
 }
 
-// ── Render Properties Table ─────────────────────────────
+// ── Render Properties Table ──────────────────────────────────────
+
+/**
+ * Re-render the properties table on the admin dashboard.
+ * Optionally filters by property title or city (case-insensitive).
+ * @param {string} [filter] - search term to filter by
+ */
 function tmsRenderProperties(filter) {
   const tbody = document.getElementById('properties-tbody');
   if (!tbody) return;
+
   let list = TMS.getProperties();
-  if (filter) list = list.filter(p =>
-    p.title?.toLowerCase().includes(filter.toLowerCase()) ||
-    p.city?.toLowerCase().includes(filter.toLowerCase())
-  );
+
+  // Apply search filter if provided
+  if (filter) {
+    list = list.filter(p =>
+      p.title?.toLowerCase().includes(filter.toLowerCase()) ||
+      p.city?.toLowerCase().includes(filter.toLowerCase())
+    );
+  }
+
   if (!list.length) {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No properties listed yet.</td></tr>`;
     return;
   }
+
   tbody.innerHTML = list.map((p, i) => `
     <tr>
       <td style="color:var(--muted)">${p.id}</td>
@@ -743,26 +756,41 @@ function tmsRenderProperties(filter) {
     </tr>`).join('');
 }
 
+/** Toggle a property between suspended and available, then re-render. */
 function tmsSuspendProperty(id) {
   const p = TMS.getProperties().find(p => p.id === id);
+  // If already suspended, restore it; otherwise suspend it
   if (p?.status === 'suspended') TMS.restoreProperty(id);
   else TMS.suspendProperty(id);
-  tmsRenderProperties(); tmsUpdateStats();
-}
-function tmsDeleteProperty(id) {
-  if (!confirm('Delete this property?')) return;
-  TMS.deleteProperty(id); tmsRenderProperties(); tmsUpdateStats();
+  tmsRenderProperties();
+  tmsUpdateStats();
 }
 
-// ── Render Complaints List ──────────────────────────────
+/** Confirm and permanently delete a property listing, then re-render. */
+function tmsDeleteProperty(id) {
+  if (!confirm('Delete this property?')) return;
+  TMS.deleteProperty(id);
+  tmsRenderProperties();
+  tmsUpdateStats();
+}
+
+// ── Render Complaints List ────────────────────────────────────────
+
+/**
+ * Re-render the complaints list on the admin dashboard.
+ * Shows all complaints with status badges and resolve/delete actions.
+ */
 function tmsRenderComplaints() {
   const container = document.getElementById('complaints-list');
   if (!container) return;
+
   const list = TMS.getComplaints();
+
   if (!list.length) {
     container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">No complaints filed yet.</div>`;
     return;
   }
+
   container.innerHTML = list.map(c => `
     <div class="list-item">
       <div class="li-icon ci-red">📣</div>
@@ -781,23 +809,38 @@ function tmsRenderComplaints() {
     </div>`).join('');
 }
 
+/** Mark a complaint as resolved, then re-render the complaints list. */
 function tmsResolveComplaint(id) {
-  TMS.resolveComplaint(id); tmsRenderComplaints(); tmsUpdateStats();
-}
-function tmsDeleteComplaint(id) {
-  const list = TMS.getComplaints().filter(c => c.id !== id);
-  TMS.saveComplaints(list); tmsRenderComplaints(); tmsUpdateStats();
+  TMS.resolveComplaint(id);
+  tmsRenderComplaints();
+  tmsUpdateStats();
 }
 
-// ── Render Maintenance Table ────────────────────────────
+/** Remove a complaint from storage, then re-render the complaints list. */
+function tmsDeleteComplaint(id) {
+  const list = TMS.getComplaints().filter(c => c.id !== id);
+  TMS.saveComplaints(list);
+  tmsRenderComplaints();
+  tmsUpdateStats();
+}
+
+// ── Render Maintenance Table ──────────────────────────────────────
+
+/**
+ * Re-render the maintenance requests table on the admin dashboard.
+ * Shows all requests with priority and status badges.
+ */
 function tmsRenderMaintenance() {
   const tbody = document.getElementById('maintenance-tbody');
   if (!tbody) return;
+
   const list = TMS.getMaintenance();
+
   if (!list.length) {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No maintenance requests yet.</td></tr>`;
     return;
   }
+
   tbody.innerHTML = list.map(m => `
     <tr>
       <td style="color:var(--muted)">${m.id}</td>
@@ -811,15 +854,23 @@ function tmsRenderMaintenance() {
     </tr>`).join('');
 }
 
-// ── Render Agreements ───────────────────────────────────
+// ── Render Agreements ─────────────────────────────────────────────
+
+/**
+ * Re-render the lease agreements list on the admin dashboard.
+ * Shows full agreement details with terminate and delete actions.
+ */
 function tmsRenderAgreements() {
   const container = document.getElementById('agreements-list');
   if (!container) return;
+
   const list = TMS.getAgreements();
+
   if (!list.length) {
     container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">No lease agreements created yet.</div>`;
     return;
   }
+
   container.innerHTML = list.map(a => `
     <div class="agr-card">
       <div class="agr-top">
@@ -842,26 +893,44 @@ function tmsRenderAgreements() {
     </div>`).join('');
 }
 
+/** Set an agreement's status to 'terminated', then re-render. */
 function tmsTerminateAgreement(id) {
   const list = TMS.getAgreements().map(a => a.id === id ? { ...a, status: 'terminated' } : a);
-  TMS.saveAgreements(list); tmsRenderAgreements(); tmsUpdateStats();
+  TMS.saveAgreements(list);
+  tmsRenderAgreements();
+  tmsUpdateStats();
 }
+
+/** Confirm and permanently delete a lease agreement, then re-render. */
 function tmsDeleteAgreement(id) {
   if (!confirm('Delete this agreement?')) return;
   const list = TMS.getAgreements().filter(a => a.id !== id);
-  TMS.saveAgreements(list); tmsRenderAgreements(); tmsUpdateStats();
+  TMS.saveAgreements(list);
+  tmsRenderAgreements();
+  tmsUpdateStats();
 }
 
-// ── Render Logs ─────────────────────────────────────────
+// ── Render Activity Logs ──────────────────────────────────────────
+
+/**
+ * Re-render the activity log panel on the admin dashboard.
+ * Shows all log entries with type badge, message, user, and timestamp.
+ * Log types: info | warn | error | success
+ */
 function tmsRenderLogs() {
   const container = document.getElementById('logs-container');
   if (!container) return;
+
   const list = TMS.getLogs();
+
   if (!list.length) {
     container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">No activity recorded yet.</div>`;
     return;
   }
+
+  // Map log type to CSS class for colored badge
   const typeStyle = { info: 'info', warn: 'warn', error: 'error', success: 'success' };
+
   container.innerHTML = list.map(l => `
     <div class="log-item">
       <span class="log-type ${typeStyle[l.type] || 'info'}">${l.type?.toUpperCase() || 'INFO'}</span>
@@ -871,15 +940,23 @@ function tmsRenderLogs() {
     </div>`).join('');
 }
 
-// ── Render Notifications ────────────────────────────────
+// ── Render Notifications Panel ────────────────────────────────────
+
+/**
+ * Re-render the notifications list in the admin panel.
+ * Unread notifications get an 'unread' CSS class for highlighting.
+ */
 function tmsRenderNotifs() {
   const container = document.getElementById('notifs-list');
   if (!container) return;
+
   const list = TMS.getNotifs();
+
   if (!list.length) {
     container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">No notifications yet.</div>`;
     return;
   }
+
   container.innerHTML = list.map(n => `
     <div class="notif-item ${n.read ? '' : 'unread'}">
       <div class="ndot ${n.color || 'blue'}"></div>
