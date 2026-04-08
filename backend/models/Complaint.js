@@ -1,7 +1,18 @@
 // ═══════════════════════════════════════════════════════════════
 //  Complaint Model  —  TMS
 //  A complaint is filed by a tenant and reviewed by admin.
-//  Status progresses: open → in_progress → resolved / closed
+//
+//  Status lifecycle:
+//    open → in_progress → resolved
+//    open → closed  (admin closes without resolving)
+//
+//  Key design decisions:
+//    - tenantName is cached so the record is readable even if the
+//      User document is later deleted or anonymised.
+//    - landlordId and propertyId are optional ObjectId references —
+//      a tenant may not know the landlord ID at the time of filing.
+//    - resolvedAt is stamped by the route, not the model, so it only
+//      appears when the admin explicitly marks status as 'resolved'.
 // ═══════════════════════════════════════════════════════════════
 
 const mongoose = require('mongoose');
@@ -9,19 +20,22 @@ const mongoose = require('mongoose');
 const complaintSchema = new mongoose.Schema(
   {
     // ── Who filed the complaint ──────────────────────────────────
+    // tenantId links to the User document that owns this complaint
     tenantId: {
       type:     mongoose.Schema.Types.ObjectId,
       ref:      'User',
       required: true,
     },
+    // Cached display name — avoids a populate() call on every read
     tenantName: { type: String, default: '' },
 
     // ── Which landlord / property it concerns ────────────────────
-    // Optional — tenant may not know the landlord ID at filing time
+    // Both are optional — tenant may not know IDs at filing time
     landlordId: { type: mongoose.Schema.Types.ObjectId, ref: 'User',     default: null },
     propertyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Property', default: null },
 
     // ── Complaint details ────────────────────────────────────────
+    // Subject is the short headline; description is the full narrative
     subject: {
       type:     String,
       required: true,
@@ -29,7 +43,7 @@ const complaintSchema = new mongoose.Schema(
     },
     description: { type: String, default: '' },
 
-    // Complaint category — helps admin route and prioritise
+    // Category helps admin route and prioritise the complaint
     category: {
       type:    String,
       enum:    ['Noise', 'Water', 'Electricity', 'Neighbor', 'Rent', 'Security', 'Other'],
@@ -37,6 +51,7 @@ const complaintSchema = new mongoose.Schema(
     },
 
     // ── Priority & status ────────────────────────────────────────
+    // Priority set by tenant; status updated by admin
     priority: {
       type:    String,
       enum:    ['low', 'medium', 'high'],
@@ -45,17 +60,19 @@ const complaintSchema = new mongoose.Schema(
     status: {
       type:    String,
       enum:    ['open', 'in_progress', 'resolved', 'closed'],
-      default: 'open',
+      default: 'open',   // all new complaints start as open
     },
 
     // ── Admin response ───────────────────────────────────────────
-    adminNote:  { type: String, default: '' },
+    // Admin can leave a note explaining the action taken
+    adminNote: { type: String, default: '' },
 
-    // Timestamp set by the route when status is changed to 'resolved'
+    // Set by PUT /:id/status route when status becomes 'resolved'
+    // null until the complaint is officially resolved
     resolvedAt: { type: Date, default: null },
   },
   {
-    // Adds createdAt and updatedAt automatically
+    // Mongoose auto-manages createdAt and updatedAt timestamps
     timestamps: true,
   }
 );
