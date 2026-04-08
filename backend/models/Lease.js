@@ -1,7 +1,25 @@
 // ═══════════════════════════════════════════════════════════════
 //  Lease Model  —  TMS
-//  A lease agreement is created when a tenant signs a contract.
-//  Status: draft → active → expired / terminated
+//  Represents a signed rental lease agreement between a tenant
+//  and a landlord for a specific property.
+//
+//  Status lifecycle:
+//    draft      — agreement created but not yet signed
+//    active     — signed and currently in effect
+//    expired    — end date has passed naturally
+//    terminated — cancelled early by admin or mutual agreement
+//
+//  Key design decisions:
+//    - Property details (title, address) and both party names are
+//      cached at signing time. This makes the lease record fully
+//      self-contained — readable even if the property or user
+//      documents are later deleted or modified.
+//    - signedAt defaults to Date.now (function reference) so each
+//      new document gets the timestamp at insertion time, not at
+//      schema definition time.
+//    - startDate and endDate are stored as strings (not Date objects)
+//      so they can be displayed directly without date formatting.
+//    - New leases created via POST /api/leases start as 'active'.
 // ═══════════════════════════════════════════════════════════════
 
 const mongoose = require('mongoose');
