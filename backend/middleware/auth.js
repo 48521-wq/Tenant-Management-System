@@ -72,44 +72,54 @@ function extractToken(req) {
 const protect = async (req, res, next) => {
   try {
     // ── Step 1: Extract token ─────────────────────────────────
+    // Returns null if the Authorization header is absent or malformed
     const token = extractToken(req);
     if (!token) {
       return unauthorized(res, 'Not authorized. No token provided.');
     }
 
     // ── Step 2: Verify JWT signature and expiry ───────────────
-    // Throws TokenExpiredError or JsonWebTokenError on failure
+    // jwt.verify() throws synchronously on invalid/expired tokens.
+    // We catch those in the catch block below.
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // ── Step 3: Admin shortcut ────────────────────────────────
-    // Admin tokens carry an isAdmin flag and do not map to a DB record.
-    // The admin account is managed entirely via .env variables.
+    // Admin tokens carry isAdmin: true and an email claim.
+    // The admin account has no User document in MongoDB — it is
+    // managed entirely through ADMIN_EMAIL and ADMIN_PASSWORD in .env.
     if (decoded.isAdmin) {
       req.user = {
         isAdmin: true,
         email:   decoded.email,
       };
-      return next();
+      return next(); // skip DB lookup entirely
     }
 
     // ── Step 4: Regular user — look up in database ────────────
+    // decoded.id is the MongoDB ObjectId stored in the JWT payload
     const user = await User.findById(decoded.id);
     if (!user) {
+      // Token was valid but user was deleted from DB since it was issued
       return unauthorized(res, 'User not found.');
     }
 
     // ── Step 5: Check account status ─────────────────────────
-    // Blocked accounts cannot access any protected route
+    // A blocked account cannot access any protected route,
+    // even with a valid token — until admin unblocks it.
     if (user.status === 'blocked') {
       return forbidden(res, 'Account suspended. Contact admin.');
     }
 
-    // ── Step 6: Attach user and proceed ──────────────────────
+    // ── Step 6: Attach user document and proceed ─────────────
+    // Downstream route handlers access the user via req.user
     req.user = user;
     next();
 
   } catch (err) {
-    // Handles: TokenExpiredError, JsonWebTokenError, NotBeforeError
+    // jwt.verify() throws one of:
+    //   JsonWebTokenError  — malformed token or wrong secret
+    //   TokenExpiredError  — token exp claim is in the past
+    //   NotBeforeError     — token nbf claim is in the future
     unauthorized(res, 'Invalid or expired token.');
   }
 };
