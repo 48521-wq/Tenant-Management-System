@@ -437,25 +437,47 @@ function handleGoogleSignup() {
  * Programmatically trigger the GSI popup by rendering a hidden
  * button and clicking it. Falls back to the prompt API on failure.
  */
+/**
+ * Programmatically trigger the Google Identity Services OAuth popup.
+ *
+ * Strategy:
+ *   1. Create (or reuse) a hidden off-screen div: #_g_btn_box
+ *   2. Ask GSI to render a button into that div
+ *   3. After a 100ms delay (button needs time to render), click it
+ *   4. If the button is not found, fall back to the One Tap prompt
+ *   5. If One Tap is suppressed (browser policy), open the email modal
+ *
+ * The off-screen div is positioned at -999px so it is never visible
+ * but still attached to the DOM (required for GSI to render into it).
+ */
 function triggerGPopup() {
+  // Reuse existing hidden container or create one on first call
   let box = document.getElementById('_g_btn_box');
   if (!box) {
-    box           = document.createElement('div');
-    box.id        = '_g_btn_box';
+    box               = document.createElement('div');
+    box.id            = '_g_btn_box';
+    // Off-screen — invisible but still in the DOM
     box.style.cssText = 'position:fixed;top:-999px;left:-999px';
     document.body.appendChild(box);
   }
+
+  // Clear any previously rendered button before re-rendering
   box.innerHTML = '';
 
+  // Ask GSI to render its standard sign-in button into the hidden div
   google.accounts.id.renderButton(box, { theme: 'outline', size: 'large' });
 
+  // 100ms delay lets the GSI script finish rendering the button
   setTimeout(() => {
     const btn = box.querySelector('[role=button]') || box.firstElementChild;
+
     if (btn) {
+      // Simulate a click to trigger the OAuth popup
       btn.click();
     } else {
-      // Fall back to the One Tap prompt if button not found
+      // Button not found — try One Tap as a secondary approach
       google.accounts.id.prompt(notification => {
+        // If One Tap is blocked or suppressed, fall back to email modal
         if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
           openGModal(gMode);
         }
@@ -465,53 +487,64 @@ function triggerGPopup() {
 }
 
 // ── Google fallback modal ──────────────────────────────────────
-// Used when GSI popup is blocked or unavailable (dev environments)
+// Used when the GSI popup is blocked by the browser or unavailable
+// in development environments (e.g. file:// protocol).
 
 /**
  * Open the email-only Google fallback modal.
+ * Title and subtitle text adapt based on whether user is signing in or up.
  * @param {string} mode - 'signin' | 'signup'
  */
 function openGModal(mode) {
+  // Update modal title and subtitle to match the current flow
   document.getElementById('g-modal-title').textContent =
     mode === 'signin' ? 'Sign in with Google' : 'Sign up with Google';
   document.getElementById('g-modal-sub').textContent =
     mode === 'signin' ? 'Enter your Gmail address.' : 'Enter Gmail to register with.';
 
+  // Reset form state before showing
   document.getElementById('g-email-input').value = '';
   document.getElementById('g-error').classList.remove('show');
+
+  // Show the modal overlay
   document.getElementById('g-overlay').classList.add('open');
 
-  // Auto-focus the email input after the modal animates in
+  // 120ms delay lets the CSS open animation finish before focusing
   setTimeout(() => document.getElementById('g-email-input').focus(), 120);
 }
 
-/** Close the Google fallback modal */
+/**
+ * Close the Google fallback modal by removing the 'open' CSS class.
+ * Also triggered on Escape key (see keydown listener below).
+ */
 function closeGModal() {
   document.getElementById('g-overlay')?.classList.remove('open');
 }
 
 /**
- * Submit the Google fallback modal (email-only authentication).
- * Calls the /auth/google-fallback endpoint with the email.
+ * Handle submission of the Google fallback email form.
+ * Validates the email format then calls /auth/google-fallback.
+ * On success: stores session and navigates to the correct dashboard.
+ * On error: shows the error message inside the modal.
  */
 async function confirmGoogle() {
   const email = document.getElementById('g-email-input')?.value.trim().toLowerCase();
   const errEl = document.getElementById('g-error');
 
-  // Helper to show an error inside the modal
+  // Inline error helper — shows message inside the modal, not the main error box
   const gErr = (msg) => {
     if (errEl) { errEl.textContent = msg; errEl.classList.add('show'); }
   };
 
-  // Validate email format
+  // Basic email format check before hitting the server
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!email || !emailRegex.test(email)) { gErr('Enter valid email.'); return; }
 
   try {
     const { ok, data } = await api('/auth/google-fallback', 'POST', {
       email,
-      role: selRole,
-      mode: gMode,
+      role: selRole,  // needed for signup mode
+      mode: gMode,    // 'signin' | 'signup'
     });
 
     if (ok && data.success) {
@@ -527,16 +560,17 @@ async function confirmGoogle() {
   }
 }
 
-// Close modal on Escape key
+// Close the fallback modal when the user presses Escape
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeGModal(); });
 
 // ── Load Google GSI script dynamically ────────────────────────
-// Injected at runtime to keep the HTML clean
+// Injected at runtime rather than a static <script> tag in HTML —
+// keeps the HTML clean and lets us set onload = initGoogleAuth.
 (function () {
   const script   = document.createElement('script');
   script.src     = 'https://accounts.google.com/gsi/client';
   script.async   = true;
   script.defer   = true;
-  script.onload  = initGoogleAuth;
+  script.onload  = initGoogleAuth;  // initialise GSI once the library loads
   document.head.appendChild(script);
 })();
