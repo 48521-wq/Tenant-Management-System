@@ -515,7 +515,7 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
       </button>
     </div>
 
-    <div class="stats-row">
+    <div class="stats-row" id="statsOverview">
       <div class="stat-card" onclick="sp('tenants',document.querySelector('.nav-item:nth-child(1)'))">
         <div class="stat-icon" style="background:rgba(74,158,255,0.1)">👤</div>
         <div><div class="stat-val" id="d-tenants">—</div><div class="stat-lbl">Tenants</div></div>
@@ -582,7 +582,7 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
   </div>
 
   <!-- TENANTS -->
-  <div class="page" id="page-tenants">
+  <div class="page" id="page-tenants" data-section="tenants">
     <div class="pg-head">
       <div><div class="pg-title">Tenants</div><div class="pg-sub" id="tenants-count">Loading…</div></div>
       <input class="search-bar" placeholder="🔍 Search tenants…" oninput="loadTenants(this.value)">
@@ -598,7 +598,7 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
   </div>
 
   <!-- LANDLORDS -->
-  <div class="page" id="page-landlords">
+  <div class="page" id="page-landlords" data-section="landlords">
     <div class="pg-head">
       <div><div class="pg-title">Landlords</div><div class="pg-sub" id="landlords-count">Loading…</div></div>
       <input class="search-bar" placeholder="🔍 Search landlords…" oninput="loadLandlords(this.value)">
@@ -623,7 +623,7 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
       <div class="tbl-wrap">
         <table>
           <thead><tr><th>#</th><th>Property</th><th>Landlord</th><th>Type</th><th>Rent</th><th>Area</th><th>Status</th><th>Action</th></tr></thead>
-          <tbody id="props-tbody"><tr><td colspan="8" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
+          <tbody id="props-tbody" class="properties-list"><tr><td colspan="8" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -638,7 +638,7 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
       <div class="tbl-wrap">
         <table>
           <thead><tr><th>#</th><th>Issue</th><th>Tenant</th><th>Priority</th><th>Date</th><th>Status</th></tr></thead>
-          <tbody id="maint-tbody"><tr><td colspan="6" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
+          <tbody id="maint-tbody" class="maintenance-list"><tr><td colspan="6" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -653,7 +653,7 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
       <div class="tbl-wrap">
         <table>
           <thead><tr><th>#</th><th>Subject</th><th>Tenant</th><th>Category</th><th>Date</th><th>Status</th></tr></thead>
-          <tbody id="comps-tbody"><tr><td colspan="6" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
+          <tbody id="comps-tbody" class="complaints-list"><tr><td colspan="6" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -669,7 +669,7 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
       <div class="tbl-wrap">
         <table>
           <thead><tr><th>#</th><th>Tenant</th><th>Month</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
-          <tbody id="payments-tbody"><tr><td colspan="6" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
+          <tbody id="payments-tbody" class="payments-list"><tr><td colspan="6" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
