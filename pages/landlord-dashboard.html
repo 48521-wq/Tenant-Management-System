@@ -86,7 +86,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .b-muted{background:var(--input-bg);color:var(--muted);border:1px solid var(--border)}
 /* FORM */
 .form-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
 .fg{display:flex;flex-direction:column;gap:5px}
 .fg.full{grid-column:1/-1}
 .fg label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px}
@@ -188,6 +188,7 @@ function sp(id, el) {
   if(el) el.classList.add('active');
   if(id==='dashboard')   loadMyProperties();
   if(id==='properties')  loadMyProperties();
+  if(id==='lfurniture')  loadLFurniturePage();
   if(id==='maintenance') loadLandlordMaintenance();
   if(id==='complaints')  loadLandlordComplaints();
   if(id==='payments')    loadLandlordPayments();
@@ -284,7 +285,7 @@ function renderMyProperties() {
         <div class="pcard-price">Rs. ${Number(p.rent||0).toLocaleString()} <span>/mo</span></div>
         <div class="pcard-actions" style="flex-wrap:wrap;gap:6px">
           <button class="btn btn-gold btn-sm" style="flex:1" onclick="edit3DByPropId('${id}')">🏗️ Edit 3D</button>
-          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="furnViewByPropId('${id}')">🛋️ Interior</button>
+          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="furnViewByPropId('${id}')">${Object.keys((window._propMap&&window._propMap[id]&&window._propMap[id].landlordFurnitureLayout)||{}).length>0?'✅ My Layout':'🛋️ Interior'}</button>
           <button class="btn btn-danger btn-sm" onclick="deleteProp('${id}')">🗑</button>
         </div>
       </div>
@@ -386,22 +387,37 @@ async function save3DModel() {
 // ══════════════════════════════════════
 // FURNITURE VIEWER
 // ══════════════════════════════════════
-function openFurnitureViewer(propId, propTitle, propObj) {
+function openFurnitureViewer(propId, propTitle, propObj, showTenant) {
   let prop = {};
   if (propObj && typeof propObj === 'object') prop = propObj;
   else { try { prop = propObj ? JSON.parse(propObj) : {}; } catch {} }
 
-  window._furnPropId    = propId;
-  window._furnPropTitle = propTitle || 'Property';
-  window._furnRole      = 'landlord';
+  window._furnPropId     = propId;
+  window._furnPropTitle  = propTitle || 'Property';
+  window._furnProp       = prop;
+  window._furnShowingTenant = !!showTenant;
 
-  document.getElementById('ov-furn-title').textContent = '🏠 ' + window._furnPropTitle + ' — My Furniture Layout';
+  const landlordLayout = prop.landlordFurnitureLayout || prop.furnitureLayout || {};
+  const tenantLayout   = prop.tenantFurnitureLayout || {};
+  const hasTenant   = Object.keys(tenantLayout).length > 0;
+  const hasLandlord = Object.keys(landlordLayout).length > 0;
 
-  // Show saved badge if layout exists
-  const savedLayout = prop.landlordFurnitureLayout || prop.furnitureLayout || {};
-  const hasSaved = Object.keys(savedLayout).length > 0;
-  const badge = document.getElementById('furn-saved-badge');
-  if (badge) badge.style.display = hasSaved ? 'flex' : 'none';
+  const savedLayout = showTenant ? tenantLayout : landlordLayout;
+  const badge    = document.getElementById('furn-saved-badge');
+  const toggleBtn = document.getElementById('furn-toggle-btn');
+  const saveBtnEl = document.getElementById('furn-save-btn');
+
+  if (showTenant) {
+    document.getElementById('ov-furn-title').textContent = '🛋️ ' + window._furnPropTitle + ' — Tenant Layout (View Only)';
+    if (badge) { badge.style.display = hasTenant ? 'flex' : 'none'; badge.textContent = '✅ Tenant Saved'; }
+    if (saveBtnEl) saveBtnEl.style.display = 'none';
+    if (toggleBtn) { toggleBtn.style.display = 'flex'; toggleBtn.textContent = '🏠 My Layout'; }
+  } else {
+    document.getElementById('ov-furn-title').textContent = '🏠 ' + window._furnPropTitle + ' — My Furniture Layout';
+    if (badge) { badge.style.display = hasLandlord ? 'flex' : 'none'; badge.textContent = '✅ Layout Saved'; }
+    if (saveBtnEl) saveBtnEl.style.display = '';
+    if (toggleBtn) { toggleBtn.style.display = hasTenant ? 'flex' : 'none'; toggleBtn.textContent = '🛋️ Tenant Layout'; }
+  }
 
   document.getElementById('ov-furn').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -411,24 +427,39 @@ function openFurnitureViewer(propId, propTitle, propObj) {
     window._furnScene = sc;
   }, 150);
 }
+function furnToggleView() {
+  const pid  = window._furnPropId;
+  const prop = window._furnProp;
+  const title = window._furnPropTitle;
+  openFurnitureViewer(pid, title, prop, !window._furnShowingTenant);
+}
 function closeFurnViewer() {
   document.getElementById('ov-furn')?.classList.remove('open');
   document.body.style.overflow = '';
 }
 async function saveFurnitureLayout() {
+  if (window._furnShowingTenant) { alert('Tenant layout sirf view kiya ja sakta hai, save nahi.'); return; }
   const sc = window._furnScene;
   if (!sc) return;
   const layout = sc.getLayout();
   const btn = document.getElementById('furn-save-btn');
   if (btn) { btn.disabled=true; btn.textContent='Saving…'; }
   try {
-    const role = window._furnRole || 'landlord';
-    await lFetch('/properties/'+window._furnPropId+'/furniture/'+role, 'PUT', layout);
+    await lFetch('/properties/'+window._furnPropId+'/furniture/landlord', 'PUT', layout);
     const toast = document.getElementById('furn-saved-toast');
     if (toast) { toast.style.display='flex'; setTimeout(()=>toast.style.display='none',2500); }
     const badge = document.getElementById('furn-saved-badge');
-    if (badge) badge.style.display = 'flex';
+    if (badge) { badge.style.display='flex'; badge.textContent='✅ Layout Saved'; }
+    // Show tenant toggle if tenant has layout
     await loadMyProperties();
+    // Re-check if tenant has layout now
+    const updatedProp = (window._propMap||{})[window._furnPropId];
+    if (updatedProp) window._furnProp = updatedProp;
+    const toggleBtn = document.getElementById('furn-toggle-btn');
+    if (toggleBtn) {
+      const hasTenant = Object.keys((updatedProp||{}).tenantFurnitureLayout||{}).length > 0;
+      toggleBtn.style.display = hasTenant ? 'flex' : 'none';
+    }
   } catch(e) { alert('Layout save nahi ho saki. Server check karein.'); }
   finally { if(btn){btn.disabled=false;btn.textContent='💾 Save Layout';} }
 }
@@ -620,6 +651,9 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
     <button class="nav-item" onclick="sp('add-property',this)">
       <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Property
     </button>
+    <button class="nav-item" onclick="sp('lfurniture',this)">
+      <svg viewBox="0 0 24 24"><path d="M2 9V7a2 2 0 012-2h16a2 2 0 012 2v2"/><path d="M2 9h20v11H2z"/><line x1="6" y1="9" x2="6" y2="20"/><line x1="18" y1="9" x2="18" y2="20"/></svg>Furniture Placement
+    </button>
     <button class="nav-item" onclick="sp('payments',this)">
       <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Rent Payments
     </button>
@@ -660,7 +694,49 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
     </div>
     <div class="card">
       <h3 style="font-size:15px;font-weight:700;margin-bottom:14px;color:var(--text)">Your Properties</h3>
-      <div class="props-grid" id="prop-grid" style="margin-top:0"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+      <div class="props-grid" id="prop-grid" class="property-list" style="margin-top:0"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- FURNITURE PLACEMENT PAGE -->
+  <div class="page" id="page-lfurniture">
+    <div class="pg-head">
+      <div><div class="pg-title">🛋️ Furniture Placement</div><div class="pg-sub">Design room layouts for your properties — tenants can also save their own</div></div>
+    </div>
+    <div style="margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <label style="font-size:13px;font-weight:600;color:var(--muted)">Select Property:</label>
+      <select id="lfurn-prop-select" onchange="loadLFurnForProp(this.value)"
+        style="padding:9px 16px;border-radius:10px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;min-width:220px">
+        <option value="">— Select a property —</option>
+      </select>
+      <div id="lfurn-saved-badge" style="display:none;padding:4px 12px;border-radius:20px;background:rgba(201,169,110,0.12);border:1px solid rgba(201,169,110,0.4);color:var(--gold);font-size:11px;font-weight:700">✅ My Layout Saved</div>
+      <button id="lfurn-toggle-btn" onclick="lFurnToggleView()" style="display:none;padding:7px 16px;border-radius:9px;border:1px solid #4ECDC4;background:rgba(78,205,196,0.08);color:#4ECDC4;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600">🛋️ View Tenant Layout</button>
+    </div>
+    <div id="lfurn-placeholder" style="display:flex;align-items:center;justify-content:center;min-height:420px;border-radius:16px;border:1px dashed var(--border);background:var(--input-bg);color:var(--muted);font-size:14px;flex-direction:column;gap:10px">
+      <span style="font-size:48px">🏠</span><span>Property select karein upar se</span>
+    </div>
+    <div id="lfurn-main" style="display:none;flex-direction:column;gap:12px">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-right:4px">Add:</div>
+        <div id="lfurn-catalog" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <div id="lfurn-controls" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-radius:10px;background:var(--input-bg);border:1px solid var(--border)">
+        <span style="font-size:12px;font-weight:600;color:var(--gold)">Selected:</span>
+        <button onclick="lFurnRotate(-45)" style="padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">↺ -45°</button>
+        <button onclick="lFurnRotate(45)"  style="padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">↻ +45°</button>
+        <button onclick="lFurnRotate(90)"  style="padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">↻ 90°</button>
+        <button onclick="lFurnDelete()"    style="padding:6px 12px;border-radius:7px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:#FF6B6B;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">🗑 Delete</button>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px">Right-drag: orbit · Scroll: zoom</span>
+      </div>
+      <div style="position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--border)">
+        <canvas id="c3d-lfurnpage" style="width:100%;height:520px;display:block;background:#1A1A2E"></canvas>
+        <div id="lfurn-viewlabel" style="display:none;position:absolute;top:12px;left:14px;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.6);font-size:11px;font-weight:700;color:#4ECDC4"></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button id="lfurn-save-btn" onclick="lFurnSave()" style="padding:10px 24px;border-radius:10px;background:var(--gold-grad,linear-gradient(135deg,#C9A96E,#B8954A));color:#fff;border:none;cursor:pointer;font-weight:600;font-family:'DM Sans',sans-serif;font-size:13px;background:linear-gradient(135deg,#C9A96E,#B8954A)">💾 Save My Layout</button>
+        <button onclick="lFurnDownloadPNG()"  style="padding:10px 18px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px">📷 Download PNG</button>
+        <button onclick="lFurnDownloadJSON()" style="padding:10px 18px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px">⬇️ Download JSON</button>
+      </div>
     </div>
   </div>
 
@@ -672,13 +748,14 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Property
       </button>
     </div>
-    <div class="props-grid" id="prop-grid-2"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+    <div class="props-grid" id="prop-grid-2" class="property-list"><div class="loading"><span class="spinner"></span>Loading…</div></div>
   </div>
 
   <!-- ADD PROPERTY -->
   <div class="page" id="page-add-property">
+    <div id="addPropertyModal" class="add-property-form-container">
     <div class="pg-head"><div><div class="pg-title">Add New Property</div><div class="pg-sub">List a property for rent</div></div></div>
-    <div class="form-card" style="max-width:600px">
+    <div class="form-card">
       <div class="form-grid">
         <div class="fg full"><label>Property Title *</label><input id="ap-title" placeholder="e.g. Modern 3-Bed House in DHA"></div>
         <div class="fg"><label>Type</label>
@@ -705,8 +782,8 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
         <div style="font-size:12px;color:var(--muted)">Configure house type, colors, floors, garden, pool, garage for your property's 3D model.</div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;margin-top:16px">
-        <button class="submit-btn" id="ap-btn" onclick="submitAddProp()">🏠 Add Property</button>
-        <div id="ap-msg" style="display:none;padding:8px 14px;border-radius:9px;font-size:13px;font-weight:600"></div>
+        <button class="submit-btn" id="ap-btn" type="submit" form="addPropertyModal" onclick="submitAddProp()">🏠 Add Property</button>
+        <div id="ap-msg" class="alert-error" style="display:none;padding:8px 14px;border-radius:9px;font-size:13px;font-weight:600"></div>
       </div>
     </div>
   </div>
@@ -745,7 +822,7 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
   <!-- PROFILE -->
   <div class="page" id="page-profile">
     <div class="pg-head"><div><div class="pg-title">My Profile</div><div class="pg-sub">Manage your account information</div></div></div>
-    <div style="max-width:560px">
+    <div>
       <div class="prof-header">
         <div class="prof-av" id="prof-av">L</div>
         <div>
@@ -889,6 +966,7 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
       </div>
       <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;flex-wrap:wrap">
         <div id="furn-saved-toast" style="display:none;align-items:center;gap:6px;padding:5px 12px;border-radius:8px;background:rgba(78,205,196,0.15);border:1px solid #4ECDC4;color:#4ECDC4;font-size:12px;font-weight:700">✅ Saved!</div>
+        <button id="furn-toggle-btn" onclick="furnToggleView()" style="display:none;padding:7px 14px;border-radius:9px;border:1px solid #4ECDC4;background:rgba(78,205,196,0.1);color:#4ECDC4;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600">🛋️ Tenant Layout</button>
         <button onclick="furnDownloadPNG()" style="padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;display:flex;align-items:center;gap:5px">📷 PNG</button>
         <button onclick="furnDownloadJSON()" style="padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;display:flex;align-items:center;gap:5px">⬇️ JSON</button>
         <button id="furn-save-btn" class="submit-btn" onclick="saveFurnitureLayout()" style="padding:8px 18px;font-size:13px">💾 Save Layout</button>
@@ -961,5 +1039,150 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="../js/house3d.js"></script>
 <script src="../js/furniture3d.js"></script>
+<script>
+// ── Landlord Furniture Placement Page ──────────────────────
+const LFURN_CATALOG = [
+  {type:'sofa',         label:'Sofa',         color:'#5D5A7E', icon:'🛋️'},
+  {type:'armchair',     label:'Armchair',     color:'#7B4F3A', icon:'🪑'},
+  {type:'bed_double',   label:'Double Bed',   color:'#7B4F2A', icon:'🛏️'},
+  {type:'bed_single',   label:'Single Bed',   color:'#7A8B6E', icon:'🛏️'},
+  {type:'dining_table', label:'Dining Table', color:'#A0734A', icon:'🍽️'},
+  {type:'dining_chair', label:'Din. Chair',   color:'#A0734A', icon:'🪑'},
+  {type:'chair',        label:'Chair',        color:'#8B6040', icon:'🪑'},
+  {type:'wardrobe',     label:'Wardrobe',     color:'#9B7B5A', icon:'🚪'},
+  {type:'tv_unit',      label:'TV Unit',      color:'#4A3A2A', icon:'📺'},
+  {type:'bookshelf',    label:'Bookshelf',    color:'#8B6A3A', icon:'📚'},
+  {type:'coffee_table', label:'Coffee Table', color:'#A08060', icon:'☕'},
+  {type:'lamp',         label:'Floor Lamp',   color:'#C0A060', icon:'💡'},
+  {type:'plant',        label:'Plant',        color:'#3A6A40', icon:'🪴'},
+  {type:'mirror',       label:'Mirror',       color:'#C8A060', icon:'🪞'},
+  {type:'desk',         label:'Desk',         color:'#9B7A4A', icon:'🖥️'},
+];
+
+let _lFurnPropId = null;
+let _lFurnShowingTenant = false;
+
+function loadLFurniturePage() {
+  const sel = document.getElementById('lfurn-prop-select');
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— Select a property —</option>';
+  myProps.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p._id; opt.textContent = p.title || 'Property';
+    sel.appendChild(opt);
+  });
+  if (current) sel.value = current;
+
+  const cat = document.getElementById('lfurn-catalog');
+  if (cat && !cat.hasChildNodes()) {
+    LFURN_CATALOG.forEach(item => {
+      const btn = document.createElement('button');
+      btn.style.cssText = 'padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:DM Sans,sans-serif;font-size:11.5px;display:flex;align-items:center;gap:5px;transition:background 0.12s';
+      btn.innerHTML = `<span>${item.icon}</span><span>${item.label}</span>`;
+      btn.onmouseenter = () => btn.style.background = 'var(--input-bg)';
+      btn.onmouseleave = () => btn.style.background = 'var(--card)';
+      btn.onclick = () => { const sc=getFurnitureScene('c3d-lfurnpage'); if(sc) sc.addFurniture(item.type, parseInt(item.color.replace('#',''),16)); };
+      cat.appendChild(btn);
+    });
+  }
+
+  // Wire controls panel
+  const actionPanel = document.getElementById('furn-action-panel');
+  if (actionPanel && !actionPanel._lfObserved) {
+    actionPanel._lfObserved = true;
+    new MutationObserver(() => {
+      const ctrl = document.getElementById('lfurn-controls');
+      if (ctrl) ctrl.style.display = actionPanel.style.display === 'flex' ? 'flex' : 'none';
+    }).observe(actionPanel, { attributes: true, attributeFilter: ['style'] });
+  }
+}
+
+function loadLFurnForProp(propId) {
+  _lFurnPropId = propId;
+  _lFurnShowingTenant = false;
+  const placeholder = document.getElementById('lfurn-placeholder');
+  const main = document.getElementById('lfurn-main');
+  const badge = document.getElementById('lfurn-saved-badge');
+  const toggleBtn = document.getElementById('lfurn-toggle-btn');
+  const saveBtn = document.getElementById('lfurn-save-btn');
+  const label = document.getElementById('lfurn-viewlabel');
+
+  if (!propId) {
+    if (placeholder) placeholder.style.display = 'flex';
+    if (main) main.style.display = 'none';
+    return;
+  }
+
+  const p = (window._propMap||{})[propId];
+  if (!p) return;
+
+  const landlordLayout = p.landlordFurnitureLayout || p.furnitureLayout || {};
+  const tenantLayout   = p.tenantFurnitureLayout   || {};
+  const hasLandlord = Object.keys(landlordLayout).length > 0;
+  const hasTenant   = Object.keys(tenantLayout).length > 0;
+
+  if (placeholder) placeholder.style.display = 'none';
+  if (main) main.style.display = 'flex';
+  if (badge) badge.style.display = hasLandlord ? 'flex' : 'none';
+  if (toggleBtn) { toggleBtn.style.display = hasTenant ? 'inline-flex' : 'none'; toggleBtn.textContent = '🛋️ View Tenant Layout'; }
+  if (saveBtn) saveBtn.style.display = '';
+  if (label) label.style.display = 'none';
+
+  setTimeout(() => {
+    if (typeof initFurniturePlacement === 'function') {
+      window._lFurnScene = initFurniturePlacement('c3d-lfurnpage', landlordLayout, null);
+    }
+  }, 100);
+}
+
+function lFurnToggleView() {
+  const propId = _lFurnPropId; if (!propId) return;
+  const p = (window._propMap||{})[propId]; if (!p) return;
+  _lFurnShowingTenant = !_lFurnShowingTenant;
+  const isTenant = _lFurnShowingTenant;
+  const layout = isTenant ? (p.tenantFurnitureLayout||{}) : (p.landlordFurnitureLayout||p.furnitureLayout||{});
+  const toggleBtn = document.getElementById('lfurn-toggle-btn');
+  const saveBtn   = document.getElementById('lfurn-save-btn');
+  const label     = document.getElementById('lfurn-viewlabel');
+  const badge     = document.getElementById('lfurn-saved-badge');
+  if (toggleBtn) toggleBtn.textContent = isTenant ? '🏠 Back to My Layout' : '🛋️ View Tenant Layout';
+  if (saveBtn)   saveBtn.style.display = isTenant ? 'none' : '';
+  if (label)     { label.style.display = isTenant ? 'block' : 'none'; label.textContent = '🛋️ Tenant Layout (View Only)'; }
+  if (badge)     { const hasL = Object.keys(p.landlordFurnitureLayout||p.furnitureLayout||{}).length>0; badge.style.display = isTenant ? 'none' : (hasL?'flex':'none'); }
+  setTimeout(() => { if(typeof initFurniturePlacement==='function') window._lFurnScene = initFurniturePlacement('c3d-lfurnpage', layout, null); }, 80);
+}
+
+async function lFurnSave() {
+  if (_lFurnShowingTenant) { alert('Tenant layout sirf view mode mein hai.'); return; }
+  const sc = window._lFurnScene; if (!sc || !_lFurnPropId) return;
+  const layout = sc.getLayout();
+  const btn = document.getElementById('lfurn-save-btn');
+  if (btn) { btn.disabled=true; btn.textContent='Saving…'; }
+  try {
+    await lFetch('/properties/'+_lFurnPropId+'/furniture/landlord','PUT',layout);
+    const badge = document.getElementById('lfurn-saved-badge');
+    if (badge) badge.style.display = 'flex';
+    await loadMyProperties();
+    const updated = (window._propMap||{})[_lFurnPropId];
+    const hasTenant = Object.keys((updated||{}).tenantFurnitureLayout||{}).length > 0;
+    const toggleBtn = document.getElementById('lfurn-toggle-btn');
+    if (toggleBtn) toggleBtn.style.display = hasTenant ? 'inline-flex' : 'none';
+    if (btn) { btn.textContent='✅ Saved!'; setTimeout(()=>btn.textContent='💾 Save My Layout',2000); }
+  } catch(e) { alert('Save nahi hua.'); }
+  finally { if(btn) btn.disabled=false; }
+}
+
+function lFurnRotate(deg) { const sc=window._lFurnScene; if(sc) sc.rotateSelected(deg); }
+function lFurnDelete()    { const sc=window._lFurnScene; if(sc) sc.deleteSelected(); }
+function lFurnDownloadPNG() {
+  const p=(window._propMap||{})[_lFurnPropId];
+  if(typeof downloadFurnitureScreenshot==='function') downloadFurnitureScreenshot('c3d-lfurnpage',(p?.title||'property')+'-landlord-layout');
+}
+function lFurnDownloadJSON() {
+  const p=(window._propMap||{})[_lFurnPropId];
+  if(typeof downloadFurnitureJSON==='function') downloadFurnitureJSON('c3d-lfurnpage',p?.title||'property','landlord');
+}
+</script>
 </body>
 </html>

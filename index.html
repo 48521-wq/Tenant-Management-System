@@ -189,10 +189,10 @@
         <button class="tab" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
       </div>
 
-      <div id="error-box" class="error-msg" style="display:none;"></div>
+      <div id="error-box" class="error-msg alert-error" style="display:none;"></div>
 
       <!-- ===== SIGN IN ===== -->
-      <div id="form-signin">
+      <div id="loginModal">
 
         <!-- Google Sign In -->
         <button class="btn-google" id="google-signin-btn" onclick="handleGoogleSignin()">
@@ -210,29 +210,29 @@
         <div class="form-group">
           <label class="form-label">Email Address</label>
           <div class="input-wrap">
-            <input type="email" class="form-input" id="signin-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter') handleSignin()">
+            <input type="email" class="form-input" id="loginEmail" placeholder="your@email.com" onkeydown="if(event.key==='Enter') handleSignin()">
             <svg class="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           </div>
         </div>
         <div class="form-group">
           <label class="form-label">Password</label>
           <div class="input-wrap">
-            <input type="password" class="form-input" id="signin-password" placeholder="Enter your password" onkeydown="if(event.key==='Enter') handleSignin()">
+            <input type="password" class="form-input" id="loginPassword" placeholder="Enter your password" onkeydown="if(event.key==='Enter') handleSignin()">
             <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-            <button class="eye-btn" onclick="togglePass('signin-password', this)">
+            <button class="eye-btn" onclick="togglePass('loginPassword', this)">
               <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
           </div>
         </div>
         <button class="forgot-link" onclick="showForgot()">Forgot Password?</button>
-        <button class="btn-primary btn-gold" id="signin-btn" onclick="handleSignin()">Sign In</button>
+        <button class="btn-primary btn-gold" id="signin-btn" type="submit" form="loginForm" onclick="handleSignin()">Sign In</button>
         <div class="switch-text">
           Don't have an account? <button class="switch-link" onclick="switchTab('signup')">Create one</button>
         </div>
       </div>
 
       <!-- ===== SIGN UP ===== -->
-      <div id="form-signup" style="display:none;">
+      <div id="registerModal" style="display:none;">
 
         <!-- Google Sign Up -->
         <button class="btn-google" id="google-signup-btn" onclick="handleGoogleSignup()">
@@ -250,23 +250,23 @@
         <div class="form-group">
           <label class="form-label">Full Name</label>
           <div class="input-wrap">
-            <input type="text" class="form-input" id="signup-name" placeholder="John Doe">
+            <input type="text" class="form-input" id="registerName" placeholder="John Doe">
             <svg class="input-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </div>
         </div>
         <div class="form-group">
           <label class="form-label">Email Address</label>
           <div class="input-wrap">
-            <input type="email" class="form-input" id="signup-email" placeholder="your@email.com">
+            <input type="email" class="form-input" id="registerEmail" placeholder="your@email.com">
             <svg class="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           </div>
         </div>
         <div class="form-group">
           <label class="form-label">Password</label>
           <div class="input-wrap">
-            <input type="password" class="form-input" id="signup-password" placeholder="Create a strong password" oninput="checkStrength(this.value)">
+            <input type="password" class="form-input" id="registerPassword" placeholder="Create a strong password" oninput="checkStrength(this.value)">
             <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-            <button class="eye-btn" onclick="togglePass('signup-password', this)">
+            <button class="eye-btn" onclick="togglePass('registerPassword', this)">
               <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
           </div>
@@ -279,12 +279,18 @@
         <div class="form-group">
           <label class="form-label">Confirm Password</label>
           <div class="input-wrap">
-            <input type="password" class="form-input" id="signup-confirm" placeholder="Repeat your password">
+            <input type="password" class="form-input" id="registerConfirm" placeholder="Repeat your password">
             <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
           </div>
         </div>
         <div class="form-group">
           <label class="form-label">Select Your Role</label>
+          <!-- Hidden select for Selenium testing compatibility -->
+          <select id="registerRole" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;" aria-hidden="true" tabindex="-1">
+            <option value="">Select Role</option>
+            <option value="tenant">Tenant</option>
+            <option value="landlord">Landlord</option>
+          </select>
           <div class="role-cards-inline">
             <div class="role-card-inline tenant" id="role-tenant" onclick="selectRole('tenant')">
               <span class="role-inline-icon">🏠</span>
@@ -299,7 +305,7 @@
           </div>
           <div id="role-error" class="role-error-msg">Please select a role to continue.</div>
         </div>
-        <button class="btn-primary btn-gold" id="signup-btn" onclick="handleSignup()">Create Account</button>
+        <button class="btn-primary btn-gold" id="signup-btn" type="submit" form="registerForm" onclick="handleSignup()">Create Account</button>
         <div class="switch-text">
           Already have an account? <button class="switch-link" onclick="switchTab('signin')">Sign in</button>
         </div>

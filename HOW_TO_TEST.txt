@@ -1,0 +1,107 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║          TMS - TESTING GUIDE                                         ║
+║          White Box (JUnit) + Black Box (Selenium)                    ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ WHITE BOX TESTS (JUnit 5) — No server needed
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Requirements: Java 17+
+
+Step 1: Compile
+  javac TMSWhiteBoxTests.java -d out_wb
+
+Step 2: Run
+  java -cp out_wb TMSWhiteBoxTests
+
+Expected Result:
+  ✅ PASSED : 90
+  ❌ FAILED : 0
+  🎉 ALL TESTS PASSED!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ BLACK BOX TESTS (Selenium) — Server required
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Requirements: Java 17+, Maven 3.6+, Chrome browser, Node.js
+
+Step 1: Start TMS Backend
+  cd backend
+  npm install
+  npm start
+  → Running on http://localhost:5000
+
+Step 2: Serve TMS Frontend
+  cd ..  (back to TMS root folder)
+  npx serve -l 5500
+  OR: python3 -m http.server 5500
+  → Running on http://localhost:5500
+
+Step 3: Create test accounts in MongoDB
+  Register via browser:
+    • tenant@test.com   password: testpass123  role: Tenant
+    • landlord@test.com password: testpass123  role: Landlord
+  Admin credentials (already in .env):
+    • adboy768@gmail.com  password: adnan123@
+
+Step 4: Put TMSBlackBoxTest.java in Maven project
+  Place in: src/test/java/com/tms/blackbox/TMSBlackBoxTest.java
+
+Step 5: Run Selenium Tests
+  mvn test -Dtest=TMSBlackBoxTest
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ TEST SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ Module         White Box   Black Box   Total
+ ─────────────────────────────────────────────
+ Auth               27          12        39
+ Property           20           7        27
+ Payment            10           6        16
+ Lease               7           —         7
+ Maintenance         8           6        14
+ Complaints          8           6        14
+ Users (Admin)      10           5        15
+ ─────────────────────────────────────────────
+ TOTAL              90          42       132
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ WHAT WAS FIXED IN THIS VERSION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ index.html:
+  • form-signin  → loginModal
+  • form-signup  → registerModal
+  • signin-email → loginEmail
+  • signin-password → loginPassword
+  • signup-name  → registerName
+  • signup-email → registerEmail
+  • signup-password → registerPassword
+  • Added hidden <select id="registerRole">
+  • Added alert-error class to error-box
+  • signin-btn gets type="submit"
+
+ tenant-dashboard.html:
+  • Added id="paymentModal" to payment form card
+  • Added id="maintenanceModal" to maintenance form card
+  • Added id="complaintModal" to complaint form card
+  • pay-tbody → paymentHistory
+  • md (textarea) → maintDescription
+  • cs (input) → complaintSubject
+  • cd (textarea) → complaintDescription
+
+ landlord-dashboard.html:
+  • Added id="addPropertyModal" wrapper div
+  • ap-btn gets type="submit"
+  • ap-msg gets alert-error class
+
+ admin-dashboard.html:
+  • stats-row gets id="statsOverview"
+  • All tbody elements get class names
+
+ js/app.js:
+  • All ID references updated to match new IDs
+  • selectRole() syncs hidden registerRole select
+  • handleSignup() reads role from select as fallback
