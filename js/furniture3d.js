@@ -7,38 +7,71 @@
 const _fScenes = {};
 
 // ── PBR Material helpers ────────────────────────────────────
-function woodMat(hex){
+// ── Material factory functions ───────────────────────────────
+// Each returns a fresh MeshStandardMaterial with PBR properties
+// tuned for that surface type. Pass hex to override base color.
+
+/** Warm wood — matte, no metalness */
+function woodMat(hex) {
   return new THREE.MeshStandardMaterial({
-    color: hex||0x8B5E3C, roughness:0.75, metalness:0.0
+    color:     hex || 0x8B5E3C,
+    roughness: 0.75,
+    metalness: 0.0,
   });
 }
-function fabricMat(hex){
+
+/** Upholstery fabric — very rough, soft appearance */
+function fabricMat(hex) {
   return new THREE.MeshStandardMaterial({
-    color: hex||0x6B7A8D, roughness:0.95, metalness:0.0
+    color:     hex || 0x6B7A8D,
+    roughness: 0.95,
+    metalness: 0.0,
   });
 }
-function metalMat(hex){
+
+/** Brushed / polished metal — low roughness, high metalness */
+function metalMat(hex) {
   return new THREE.MeshStandardMaterial({
-    color: hex||0xB0B0B0, roughness:0.25, metalness:0.9
+    color:     hex || 0xB0B0B0,
+    roughness: 0.25,
+    metalness: 0.9,
   });
 }
-function glassMat(){
+
+/** Transparent glass — near-zero roughness, slight metalness */
+function glassMat() {
   return new THREE.MeshStandardMaterial({
-    color:0xBBDDFF, roughness:0.05, metalness:0.1,
-    transparent:true, opacity:0.35
+    color:       0xBBDDFF,
+    roughness:   0.05,
+    metalness:   0.1,
+    transparent: true,
+    opacity:     0.35,
   });
 }
-function leatherMat(hex){
+
+/** Leather — semi-rough, very slight sheen */
+function leatherMat(hex) {
   return new THREE.MeshStandardMaterial({
-    color: hex||0x3D2B1F, roughness:0.6, metalness:0.05
+    color:     hex || 0x3D2B1F,
+    roughness: 0.6,
+    metalness: 0.05,
   });
 }
-function mattressMat(){
-  return new THREE.MeshStandardMaterial({ color:0xF2EEE8, roughness:0.9 });
-}
-function concreteMat(hex){
+
+/** Mattress fabric — off-white, very rough */
+function mattressMat() {
   return new THREE.MeshStandardMaterial({
-    color:hex||0xC8C0B4, roughness:0.85, metalness:0.0
+    color:     0xF2EEE8,
+    roughness: 0.9,
+  });
+}
+
+/** Concrete / plaster — matte, no metalness */
+function concreteMat(hex) {
+  return new THREE.MeshStandardMaterial({
+    color:     hex || 0xC8C0B4,
+    roughness: 0.85,
+    metalness: 0.0,
   });
 }
 
@@ -63,39 +96,64 @@ function roundedBox(w,h,d,r,segs){
   return geo;
 }
 
-// ── Main furniture builder ───────────────────────────────────
-function buildFurniture(scene, type, colorHex){
+// ═══════════════════════════════════════════════════════════════
+//  buildFurniture  —  Procedural 3D furniture generator
+//  Builds a THREE.Group containing all meshes for one furniture item.
+//  All geometry is procedural — no external GLB / OBJ files needed.
+//
+//  @param {THREE.Scene} scene    - scene to add the group to
+//  @param {string}      type     - furniture type key (e.g. 'sofa', 'bed_double')
+//  @param {number}      colorHex - base color as Three.js integer
+//  @returns {THREE.Group}
+// ═══════════════════════════════════════════════════════════════
+function buildFurniture(scene, type, colorHex) {
   const g = new THREE.Group();
-  function add(geo,mat,x,y,z,rx,ry,rz){
-    const m = new THREE.Mesh(geo,mat);
-    m.position.set(x||0,y||0,z||0);
-    if(rx) m.rotation.x=rx;
-    if(ry) m.rotation.y=ry;
-    if(rz) m.rotation.z=rz;
-    m.castShadow=true; m.receiveShadow=true;
-    g.add(m); return m;
-  }
-  function box(w,h,d,mat,x,y,z,rx,ry,rz){
-    return add(new THREE.BoxGeometry(w,h,d,1,1,1), mat, x,y,z,rx,ry,rz);
-  }
-  function cyl(rt,rb,h,seg,mat,x,y,z,rx,ry,rz){
-    return add(new THREE.CylinderGeometry(rt,rb,h,seg||16), mat, x,y,z,rx,ry,rz);
-  }
-  function sph(r,mat,x,y,z){
-    return add(new THREE.SphereGeometry(r,16,12), mat, x,y,z);
-  }
-  function rbox(w,h,d,r,mat,x,y,z){
-    return add(roundedBox(w,h,d,r), mat, x,y,z);
-  }
-  function tor(R,r,seg,tseg,mat,x,y,z,rx){
-    return add(new THREE.TorusGeometry(R,r,seg||8,tseg||24), mat, x,y,z,rx||0,0,0);
+
+  // ── Internal mesh helper ────────────────────────────────────
+  // Creates a mesh, positions/rotates it, enables shadows, adds to group
+  function add(geo, mat, x, y, z, rx, ry, rz) {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x || 0, y || 0, z || 0);
+    if (rx) m.rotation.x = rx;
+    if (ry) m.rotation.y = ry;
+    if (rz) m.rotation.z = rz;
+    m.castShadow    = true;
+    m.receiveShadow = true;
+    g.add(m);
+    return m;
   }
 
-  const C = colorHex||0x8B5E3C;
-  const Cdark  = Math.max(0, C - 0x303030);
-  const Clight = Math.min(0xFFFFFF, C + 0x404040);
+  /** Shorthand: box mesh */
+  function box(w, h, d, mat, x, y, z, rx, ry, rz) {
+    return add(new THREE.BoxGeometry(w, h, d, 1, 1, 1), mat, x, y, z, rx, ry, rz);
+  }
+  /** Shorthand: cylinder mesh */
+  function cyl(rt, rb, h, seg, mat, x, y, z, rx, ry, rz) {
+    return add(new THREE.CylinderGeometry(rt, rb, h, seg || 16), mat, x, y, z, rx, ry, rz);
+  }
 
-  switch(type){
+  /** Shorthand: sphere mesh */
+  function sph(r, mat, x, y, z) {
+    return add(new THREE.SphereGeometry(r, 16, 12), mat, x, y, z);
+  }
+
+  /** Shorthand: rounded-corner box mesh */
+  function rbox(w, h, d, r, mat, x, y, z) {
+    return add(roundedBox(w, h, d, r), mat, x, y, z);
+  }
+
+  /** Shorthand: torus mesh */
+  function tor(R, r, seg, tseg, mat, x, y, z, rx) {
+    return add(new THREE.TorusGeometry(R, r, seg || 8, tseg || 24), mat, x, y, z, rx || 0, 0, 0);
+  }
+
+  // ── Color variants derived from the base color ──────────────
+  const C      = colorHex || 0x8B5E3C;
+  const Cdark  = Math.max(0,        C - 0x303030); // darker shade for contrast
+  const Clight = Math.min(0xFFFFFF, C + 0x404040); // lighter shade for highlights
+
+  // ── Build geometry based on furniture type ────────────────────
+  switch (type) {
 
     // ══════════════════════════════════════════════════════════
     case 'sofa': {
@@ -488,54 +546,85 @@ function buildFurniture(scene, type, colorHex){
     }
   }
 
-  g.traverse(m=>{ if(m.isMesh){ m.castShadow=true; m.receiveShadow=true; } });
+  // Enable shadows on every mesh in the group
+  g.traverse(m => {
+    if (m.isMesh) {
+      m.castShadow    = true;
+      m.receiveShadow = true;
+    }
+  });
+
   return g;
 }
 
-// ══════════════════════════════════════════════════════════════
-// Main Drag-Drop Placement Scene
-// ══════════════════════════════════════════════════════════════
-function initFurniturePlacement(canvasId, savedLayout, onSave){
+// ═══════════════════════════════════════════════════════════════
+//  initFurniturePlacement  —  Interactive drag-and-drop room planner
+//  Renders a 3D room where furniture items can be placed, rotated,
+//  and repositioned by dragging. Layout is saved/restored as JSON.
+//
+//  @param {string}   canvasId    - ID of the target <canvas> element
+//  @param {Object}   savedLayout - previously saved layout to restore
+//  @param {Function} onSave      - callback when layout is exported
+// ═══════════════════════════════════════════════════════════════
+function initFurniturePlacement(canvasId, savedLayout, onSave) {
   const canvas = document.getElementById(canvasId);
-  if(!canvas) return;
-  if(_fScenes[canvasId]){
-    try{ _fScenes[canvasId].renderer.dispose(); }catch{}
+  if (!canvas) return;
+
+  // Dispose any existing scene on this canvas before re-initialising
+  if (_fScenes[canvasId]) {
+    try { _fScenes[canvasId].renderer.dispose(); } catch {}
     delete _fScenes[canvasId];
   }
 
-  savedLayout = savedLayout||{};
-  const W=canvas.clientWidth||800, H=canvas.clientHeight||550;
+  savedLayout = savedLayout || {};
 
-  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, preserveDrawingBuffer:true});
-  renderer.setSize(W,H);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  renderer.shadowMap.enabled=true;
-  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  renderer.setClearColor(0x1C1C28,1);
-  renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.1;
+  // ── Canvas dimensions ────────────────────────────────────────
+  const W = canvas.clientWidth  || 800;
+  const H = canvas.clientHeight || 550;
 
+  // ── Renderer — ACESFilmic tonemapping for realistic look ──────
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled   = true;
+  renderer.shadowMap.type      = THREE.PCFSoftShadowMap;
+  renderer.setClearColor(0x1C1C28, 1);
+  renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+
+  // ── Scene & depth fog ────────────────────────────────────────
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x1C1C28, 0.035);
 
-  const camera = new THREE.PerspectiveCamera(42,W/H,0.1,80);
-  camera.position.set(0,9,10);
-  camera.lookAt(0,0,0);
+  // ── Camera — perspective, positioned above and in front ───────
+  const camera = new THREE.PerspectiveCamera(42, W / H, 0.1, 80);
+  camera.position.set(0, 9, 10);
+  camera.lookAt(0, 0, 0);
 
-  // ── Lighting ──
-  const ambL = new THREE.AmbientLight(0xFFEEDD,0.5);
+  // ── Lighting ─────────────────────────────────────────────────
+  // Warm ambient fill
+  const ambL = new THREE.AmbientLight(0xFFEEDD, 0.5);
   scene.add(ambL);
-  const sunL = new THREE.DirectionalLight(0xFFF8F0,1.2);
-  sunL.position.set(5,10,6);
-  sunL.castShadow=true;
-  sunL.shadow.mapSize.width=sunL.shadow.mapSize.height=2048;
-  sunL.shadow.camera.near=0.5; sunL.shadow.camera.far=30;
-  sunL.shadow.camera.left=sunL.shadow.camera.bottom=-8;
-  sunL.shadow.camera.right=sunL.shadow.camera.top=8;
-  sunL.shadow.bias=-0.001;
+
+  // Main directional sun light with shadows
+  const sunL = new THREE.DirectionalLight(0xFFF8F0, 1.2);
+  sunL.position.set(5, 10, 6);
+  sunL.castShadow                = true;
+  sunL.shadow.mapSize.width      = 2048;
+  sunL.shadow.mapSize.height     = 2048;
+  sunL.shadow.camera.near        = 0.5;
+  sunL.shadow.camera.far         = 30;
+  sunL.shadow.camera.left        = -8;
+  sunL.shadow.camera.bottom      = -8;
+  sunL.shadow.camera.right       =  8;
+  sunL.shadow.camera.top         =  8;
+  sunL.shadow.bias               = -0.001;
   scene.add(sunL);
-  const fillL = new THREE.DirectionalLight(0xCCDDFF,0.35);
-  fillL.position.set(-4,4,-3); scene.add(fillL);
+
+  // Cool blue fill from opposite side for depth
+  const fillL = new THREE.DirectionalLight(0xCCDDFF, 0.35);
+  fillL.position.set(-4, 4, -3);
+  scene.add(fillL);
 
   // ── Room ──
   const ROOM_W=8, ROOM_D=8;
@@ -709,94 +798,158 @@ function initFurniturePlacement(canvasId, savedLayout, onSave){
   },{passive:false});
   canvas.addEventListener('contextmenu',e=>e.preventDefault());
 
-  // ── Public API ──
-  function addFurniture(type,colorHex){
-    const cat=CATALOG.find(c=>c.id===type);
-    const color=colorHex||cat?.color||0x888888;
-    const mesh=buildFurniture(scene,type,color);
-    mesh.position.set((Math.random()-0.5)*3,0,(Math.random()-0.5)*3);
+  // ── Public API ──────────────────────────────────────────────
+
+  /**
+   * Add a furniture item to the center of the room.
+   * The item is immediately selected so the user can drag it.
+   * @param {string} type     - furniture type key
+   * @param {number} colorHex - optional color override
+   */
+  function addFurniture(type, colorHex) {
+    const cat   = CATALOG.find(c => c.id === type);
+    const color = colorHex || cat?.color || 0x888888;
+    const mesh  = buildFurniture(scene, type, color);
+
+    // Place near center with slight random offset to avoid stacking
+    mesh.position.set(
+      (Math.random() - 0.5) * 3,
+      0,
+      (Math.random() - 0.5) * 3
+    );
     scene.add(mesh);
-    const item={mesh,type,id:type+'_'+Date.now(),rotY:0};
+
+    const item = { mesh, type, id: type + '_' + Date.now(), rotY: 0 };
     placed.push(item);
     selectObj(item);
   }
 
-  function rotateSelected(deg){
-    if(!selected) return;
-    selected.rotY+=deg*Math.PI/180;
-    selected.mesh.rotation.y=selected.rotY;
+  /**
+   * Rotate the currently selected furniture item by the given degrees.
+   * @param {number} deg - degrees to rotate (positive = clockwise)
+   */
+  function rotateSelected(deg) {
+    if (!selected) return;
+    selected.rotY             += deg * Math.PI / 180;
+    selected.mesh.rotation.y  = selected.rotY;
   }
 
-  function deleteSelected(){
-    if(!selected) return;
+  /**
+   * Remove the currently selected item from the scene and placed list.
+   */
+  function deleteSelected() {
+    if (!selected) return;
     scene.remove(selected.mesh);
-    placed.splice(placed.indexOf(selected),1);
+    placed.splice(placed.indexOf(selected), 1);
     selectObj(null);
   }
 
-  function getLayout(){
-    const layout={};
-    placed.forEach(p=>{
-      if(!layout[p.type]) layout[p.type]=[];
+  /**
+   * Export the current layout as a plain JSON-serialisable object.
+   * Coordinates are rounded to 2 decimal places.
+   * @returns {Object} layout keyed by furniture type
+   */
+  function getLayout() {
+    const layout = {};
+    placed.forEach(p => {
+      if (!layout[p.type]) layout[p.type] = [];
       layout[p.type].push({
-        x:Math.round(p.mesh.position.x*100)/100,
-        z:Math.round(p.mesh.position.z*100)/100,
-        rotY:Math.round(p.rotY*100)/100,
-        visible:true
+        x:       Math.round(p.mesh.position.x * 100) / 100,
+        z:       Math.round(p.mesh.position.z * 100) / 100,
+        rotY:    Math.round(p.rotY             * 100) / 100,
+        visible: true,
       });
     });
     return layout;
   }
 
-  function animate(){
+  // ── Render loop ───────────────────────────────────────────────
+  function animate() {
     requestAnimationFrame(animate);
-    renderer.render(scene,camera);
+    renderer.render(scene, camera);
   }
   animate();
 
-  const ro=new ResizeObserver(()=>{
-    const w=canvas.clientWidth,h=canvas.clientHeight;
-    if(!w||!h) return;
-    renderer.setSize(w,h);
-    camera.aspect=w/h;
+  // ── Responsive resize ─────────────────────────────────────────
+  const ro = new ResizeObserver(() => {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
   });
   ro.observe(canvas);
 
-  _fScenes[canvasId]={renderer,scene,camera,placed,CATALOG,
-    addFurniture,rotateSelected,deleteSelected,getLayout,updateCamera};
+  // Store and return the scene reference
+  _fScenes[canvasId] = {
+    renderer, scene, camera, placed, CATALOG,
+    addFurniture, rotateSelected, deleteSelected, getLayout, updateCamera,
+  };
   return _fScenes[canvasId];
 }
 
-function getFurnitureScene(canvasId){return _fScenes[canvasId];}
+/** Get a previously initialised furniture scene by canvas ID */
+function getFurnitureScene(canvasId) { return _fScenes[canvasId]; }
 
-// ── Download layout as PNG screenshot ───────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  Export helpers
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Download a PNG screenshot of the furniture layout.
+ * Triggers one extra render to ensure the frame is up-to-date
+ * before converting the canvas to a data URL.
+ *
+ * @param {string} canvasId - ID of the canvas to capture
+ * @param {string} filename - base filename (without extension)
+ */
 function downloadFurnitureScreenshot(canvasId, filename) {
   const sc = _fScenes[canvasId];
   if (!sc) return;
-  // render one more frame
+
+  // Render one extra frame so the screenshot is current
   sc.renderer.render(sc.scene, sc.camera);
+
   const dataURL = sc.renderer.domElement.toDataURL('image/png');
-  const a = document.createElement('a');
-  a.href = dataURL;
-  a.download = (filename || 'furniture-layout') + '.png';
+  const a       = document.createElement('a');
+  a.href         = dataURL;
+  a.download     = (filename || 'furniture-layout') + '.png';
   a.click();
 }
 
-// ── Download layout as JSON ──────────────────────────────────
+/**
+ * Download the current furniture layout as a JSON file.
+ * The JSON includes property name, role, timestamp, and item positions.
+ *
+ * @param {string} canvasId  - ID of the canvas whose layout to export
+ * @param {string} propTitle - property name to embed in the JSON
+ * @param {string} role      - 'landlord' | 'tenant' label for the file
+ */
 function downloadFurnitureJSON(canvasId, propTitle, role) {
   const sc = _fScenes[canvasId];
   if (!sc) return;
+
   const layout = sc.getLayout();
-  const blob = new Blob([JSON.stringify({
-    property: propTitle || 'Property',
-    role: role || 'layout',
-    savedAt: new Date().toISOString(),
-    furniture: layout
-  }, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = (propTitle || 'furniture').replace(/\s+/g,'-').toLowerCase() + '-' + (role||'layout') + '.json';
+
+  const payload = {
+    property:  propTitle || 'Property',
+    role:      role      || 'layout',
+    savedAt:   new Date().toISOString(),
+    furniture: layout,
+  };
+
+  const blob = new Blob(
+    [JSON.stringify(payload, null, 2)],
+    { type: 'application/json' }
+  );
+
+  const safeTitle = (propTitle || 'furniture').replace(/\s+/g, '-').toLowerCase();
+  const safeRole  = role || 'layout';
+
+  const a   = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `${safeTitle}-${safeRole}.json`;
   a.click();
+
   URL.revokeObjectURL(a.href);
 }
