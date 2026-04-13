@@ -584,77 +584,146 @@ function initFurniture3D(canvasId, cfg) {
 
 // ═══════════════════════════════════════════════════════════════
 //  Camera control helpers — called from dashboard buttons
+//
+//  All h3d_* functions operate on the house scene (_scenes registry).
+//  All furn3d_* functions operate on the furniture room (_furnitureScenes).
+//
+//  Each function silently no-ops if the scene ID is not found,
+//  so buttons can safely call these before a canvas is initialised.
+//
+//  @param {string} id - the canvasId used when initHouse3D was called
 // ═══════════════════════════════════════════════════════════════
 
-/** Reset house 3D camera to default position */
+/**
+ * Reset house 3D camera to the default angled view.
+ * rotX=0.32 (slightly elevated), rotY=0.5 (slight left turn), zoom=12
+ * @param {string} id
+ */
 function h3d_reset(id) {
-  const s = _scenes[id]; if (!s) return;
-  s.rotX = 0.32; s.rotY = 0.5; s.zoom = 12;
+  const s = _scenes[id];
+  if (!s) return;
+  s.rotX = 0.32;
+  s.rotY = 0.5;
+  s.zoom = 12;
   s.updateCamera();
 }
 
-/** Front view — looking straight at the facade */
+/**
+ * Switch to front view — camera looks straight at the house facade.
+ * rotX=0.1 (near-horizontal), rotY=0 (no horizontal rotation)
+ * @param {string} id
+ */
 function h3d_front(id) {
-  const s = _scenes[id]; if (!s) return;
-  s.rotX = 0.1; s.rotY = 0;
+  const s = _scenes[id];
+  if (!s) return;
+  s.rotX = 0.1;
+  s.rotY = 0;
   s.updateCamera();
 }
 
-/** Side view */
+/**
+ * Switch to side view — camera looks at the house from 90 degrees.
+ * rotY = Math.PI/2 rotates the view by exactly a quarter turn.
+ * @param {string} id
+ */
 function h3d_side(id) {
-  const s = _scenes[id]; if (!s) return;
-  s.rotX = 0.15; s.rotY = Math.PI / 2;
+  const s = _scenes[id];
+  if (!s) return;
+  s.rotX = 0.15;
+  s.rotY = Math.PI / 2;
   s.updateCamera();
 }
 
-/** Top-down bird's-eye view */
+/**
+ * Switch to top-down bird's-eye view.
+ * rotX=1.1 pushes the camera almost directly above the scene.
+ * @param {string} id
+ */
 function h3d_top(id) {
-  const s = _scenes[id]; if (!s) return;
-  s.rotX = 1.1; s.rotY = 0;
+  const s = _scenes[id];
+  if (!s) return;
+  s.rotX = 1.1;
+  s.rotY = 0;
   s.updateCamera();
 }
 
-/** Zoom in */
+/**
+ * Zoom the house camera in by 2 units (minimum zoom is 5).
+ * Smaller zoom value = camera closer to the scene centre.
+ * @param {string} id
+ */
 function h3d_zoomin(id) {
-  const s = _scenes[id]; if (!s) return;
+  const s = _scenes[id];
+  if (!s) return;
   s.zoom = Math.max(5, s.zoom - 2);
   s.updateCamera();
 }
 
-/** Zoom out */
+/**
+ * Zoom the house camera out by 2 units (maximum zoom is 25).
+ * Larger zoom value = camera further from the scene centre.
+ * @param {string} id
+ */
 function h3d_zoomout(id) {
-  const s = _scenes[id]; if (!s) return;
+  const s = _scenes[id];
+  if (!s) return;
   s.zoom = Math.min(25, s.zoom + 2);
   s.updateCamera();
 }
 
-/** Toggle day / night lighting mode */
+/**
+ * Toggle between day and night lighting for the house 3D scene.
+ *
+ * Day  mode: bright sun (1.2), soft ambient (0.55), cool blue fill (0.35)
+ * Night mode: dim sun (0.1), dark ambient (0.1), deep blue fill (0.7)
+ *
+ * State is stored in s._isNight so subsequent calls correctly toggle.
+ * @param {string} id
+ */
 function h3d_night(id) {
-  const s = _scenes[id]; if (!s) return;
+  const s = _scenes[id];
+  if (!s) return;
+
   s._isNight = !s._isNight;
+
   if (s._isNight) {
-    s.sun.intensity    = 0.1;
+    // Night: reduce all lights, make fill deep blue for moonlight feel
+    s.sun.intensity     = 0.1;
     s.ambient.intensity = 0.1;
     s.fill.color.setHex(0x1133AA);
-    s.fill.intensity   = 0.7;
+    s.fill.intensity    = 0.7;
   } else {
-    s.sun.intensity    = 1.2;
+    // Day: restore original light values
+    s.sun.intensity     = 1.2;
     s.ambient.intensity = 0.55;
     s.fill.color.setHex(0x4A9EFF);
-    s.fill.intensity   = 0.35;
+    s.fill.intensity    = 0.35;
   }
 }
 
-/** Reset furniture room camera to default position */
+/**
+ * Reset furniture room camera to the default angled interior view.
+ * rotX=0.55, rotY=0.3, zoom=9 — slightly elevated and offset.
+ * @param {string} id
+ */
 function furn3d_reset(id) {
-  const s = _furnitureScenes[id]; if (!s) return;
-  s.rotX = 0.55; s.rotY = 0.3; s.zoom = 9;
+  const s = _furnitureScenes[id];
+  if (!s) return;
+  s.rotX = 0.55;
+  s.rotY = 0.3;
+  s.zoom = 9;
   s.uc();
 }
 
-/** Top-down view of the furniture room */
+/**
+ * Switch the furniture room camera to top-down view.
+ * rotX=1.3 places the camera almost directly overhead.
+ * @param {string} id
+ */
 function furn3d_top(id) {
-  const s = _furnitureScenes[id]; if (!s) return;
-  s.rotX = 1.3; s.rotY = 0;
+  const s = _furnitureScenes[id];
+  if (!s) return;
+  s.rotX = 1.3;
+  s.rotY = 0;
   s.uc();
 }
