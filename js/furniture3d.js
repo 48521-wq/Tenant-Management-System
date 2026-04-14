@@ -626,88 +626,138 @@ function initFurniturePlacement(canvasId, savedLayout, onSave) {
   fillL.position.set(-4, 4, -3);
   scene.add(fillL);
 
-  // ── Room ──
-  const ROOM_W=8, ROOM_D=8;
-  // Floor — parquet wood look via grid pattern
-  const floorGeo = new THREE.PlaneGeometry(ROOM_W,ROOM_D,16,16);
-  const floorMat = new THREE.MeshStandardMaterial({color:0xC4A882,roughness:0.78,metalness:0.02});
-  const floor = new THREE.Mesh(floorGeo,floorMat);
-  floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
+  // ── Room geometry ────────────────────────────────────────────
+  // The room is an 8×8 unit square. Walls are thin planes rather than
+  // box meshes to keep the polygon count low.
+  const ROOM_W = 8;  // width  (X axis)
+  const ROOM_D = 8;  // depth  (Z axis)
 
-  // Subtle floor grid lines (plank lines)
-  const gridH = new THREE.GridHelper(ROOM_W,16,0xAA9060,0xAA9060);
-  gridH.material.opacity=0.18; gridH.material.transparent=true;
-  gridH.position.y=0.002; scene.add(gridH);
+  // Floor — warm wood tone with slight metalness for a varnished look
+  const floorGeo = new THREE.PlaneGeometry(ROOM_W, ROOM_D, 16, 16);
+  const floorMat = new THREE.MeshStandardMaterial({
+    color:     0xC4A882,
+    roughness: 0.78,
+    metalness: 0.02,
+  });
+  const floor = new THREE.Mesh(floorGeo, floorMat);
+  floor.rotation.x    = -Math.PI / 2;  // rotate to lie flat on Y=0
+  floor.receiveShadow = true;
+  scene.add(floor);
 
-  // Walls
-  const wallMat = new THREE.MeshStandardMaterial({color:0xEDE8E0,roughness:0.92});
-  const wallMatL = new THREE.MeshStandardMaterial({color:0xE5E0D8,roughness:0.92});
-  // Back wall
-  const bwGeo = new THREE.PlaneGeometry(ROOM_W,3.6);
-  const bw = new THREE.Mesh(bwGeo,wallMat);
-  bw.position.set(0,1.8,-ROOM_D/2); scene.add(bw);
-  // Left wall
-  const lw = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_D,3.6),wallMatL);
-  lw.rotation.y=Math.PI/2; lw.position.set(-ROOM_W/2,1.8,0); scene.add(lw);
-  // Right wall
-  const rw = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_D,3.6),wallMatL);
-  rw.rotation.y=-Math.PI/2; rw.position.set(ROOM_W/2,1.8,0); scene.add(rw);
-  // Ceiling
-  const ceilGeo = new THREE.PlaneGeometry(ROOM_W+0.1,ROOM_D+0.1);
-  const ceilMat = new THREE.MeshStandardMaterial({color:0xF8F5EE,roughness:0.95});
-  const ceil = new THREE.Mesh(ceilGeo,ceilMat);
-  ceil.rotation.x=Math.PI/2; ceil.position.set(0,3.6,0); scene.add(ceil);
+  // Subtle grid overlay to simulate wood plank lines on the floor
+  const gridH = new THREE.GridHelper(ROOM_W, 16, 0xAA9060, 0xAA9060);
+  gridH.material.opacity     = 0.18;  // very faint — purely decorative
+  gridH.material.transparent = true;
+  gridH.position.y           = 0.002; // slightly above floor to avoid z-fighting
+  scene.add(gridH);
 
-  // Ceiling light fixture
-  cyl(0.32,0.24,0.12,24, new THREE.MeshStandardMaterial({color:0xF8F0D8,emissive:0x442200,emissiveIntensity:0.3,roughness:0.5}),
-    0,3.5,0);
-  function cyl(rt,rb,h,seg,mat,x,y,z){ // local helper for room
-    const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,seg), mat);
-    m.position.set(x,y,z); scene.add(m);
+  // ── Walls ────────────────────────────────────────────────────
+  // Back wall is slightly lighter than side walls for depth perception
+  const wallMat  = new THREE.MeshStandardMaterial({ color: 0xEDE8E0, roughness: 0.92 });
+  const wallMatL = new THREE.MeshStandardMaterial({ color: 0xE5E0D8, roughness: 0.92 });
+
+  // Back wall — centre of negative Z edge
+  const bwGeo = new THREE.PlaneGeometry(ROOM_W, 3.6);
+  const bw    = new THREE.Mesh(bwGeo, wallMat);
+  bw.position.set(0, 1.8, -ROOM_D / 2);
+  scene.add(bw);
+
+  // Left wall — rotated 90° to face inward (positive X direction)
+  const lw = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_D, 3.6), wallMatL);
+  lw.rotation.y = Math.PI / 2;
+  lw.position.set(-ROOM_W / 2, 1.8, 0);
+  scene.add(lw);
+
+  // Right wall — rotated -90° to face inward (negative X direction)
+  const rw = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_D, 3.6), wallMatL);
+  rw.rotation.y = -Math.PI / 2;
+  rw.position.set(ROOM_W / 2, 1.8, 0);
+  scene.add(rw);
+
+  // Ceiling — slightly larger than floor to avoid visible gaps at edges
+  const ceilGeo = new THREE.PlaneGeometry(ROOM_W + 0.1, ROOM_D + 0.1);
+  const ceilMat = new THREE.MeshStandardMaterial({ color: 0xF8F5EE, roughness: 0.95 });
+  const ceil    = new THREE.Mesh(ceilGeo, ceilMat);
+  ceil.rotation.x = Math.PI / 2;   // rotate to face downward
+  ceil.position.set(0, 3.6, 0);
+  scene.add(ceil);
+
+  // ── Ceiling light fixture ────────────────────────────────────
+  // Local cyl helper — scoped to room setup only, not exported
+  function cyl(rt, rb, h, seg, mat, x, y, z) {
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat);
+    m.position.set(x, y, z);
+    scene.add(m);
   }
-  const cLight = new THREE.PointLight(0xFFEECC,1.5,12);
-  cLight.position.set(0,3.4,0); scene.add(cLight);
 
-  // ── Catalog ──
-  const CATALOG=[
-    {id:'sofa',         label:'Sofa',          color:0x5D5A7E, icon:'🛋️'},
-    {id:'armchair',     label:'Armchair',      color:0x7B4F3A, icon:'🪑'},
-    {id:'bed_double',   label:'Double Bed',    color:0x7B4F2A, icon:'🛏️'},
-    {id:'bed_single',   label:'Single Bed',    color:0x7A8B6E, icon:'🛏️'},
-    {id:'dining_table', label:'Dining Table',  color:0xA0734A, icon:'🍽️'},
-    {id:'dining_chair', label:'Dining Chair',  color:0xA0734A, icon:'🪑'},
-    {id:'chair',        label:'Chair',         color:0x8B6040, icon:'🪑'},
-    {id:'wardrobe',     label:'Wardrobe',      color:0x9B7B5A, icon:'🚪'},
-    {id:'tv_unit',      label:'TV Unit',       color:0x4A3A2A, icon:'📺'},
-    {id:'bookshelf',    label:'Bookshelf',     color:0x8B6A3A, icon:'📚'},
-    {id:'coffee_table', label:'Coffee Table',  color:0xA08060, icon:'☕'},
-    {id:'lamp',         label:'Floor Lamp',    color:0xC0A060, icon:'💡'},
-    {id:'plant',        label:'Indoor Plant',  color:0x3A6A40, icon:'🪴'},
-    {id:'mirror',       label:'Mirror',        color:0xC8A060, icon:'🪞'},
-    {id:'desk',         label:'Desk',          color:0x9B7A4A, icon:'🖥️'},
+  // Visible pendant light shade with warm emissive glow
+  cyl(0.32, 0.24, 0.12, 24,
+    new THREE.MeshStandardMaterial({
+      color:            0xF8F0D8,
+      emissive:         0x442200,
+      emissiveIntensity: 0.3,
+      roughness:        0.5,
+    }),
+    0, 3.5, 0
+  );
+
+  // Warm point light below the fixture — radius 12 covers the whole room
+  const cLight = new THREE.PointLight(0xFFEECC, 1.5, 12);
+  cLight.position.set(0, 3.4, 0);
+  scene.add(cLight);
+
+  // ── Furniture catalog ────────────────────────────────────────
+  // All 15 available furniture types with default colors and UI icons.
+  // The id field maps to buildFurniture() type keys.
+  const CATALOG = [
+    { id: 'sofa',         label: 'Sofa',          color: 0x5D5A7E, icon: '🛋️' },
+    { id: 'armchair',     label: 'Armchair',      color: 0x7B4F3A, icon: '🪑' },
+    { id: 'bed_double',   label: 'Double Bed',    color: 0x7B4F2A, icon: '🛏️' },
+    { id: 'bed_single',   label: 'Single Bed',    color: 0x7A8B6E, icon: '🛏️' },
+    { id: 'dining_table', label: 'Dining Table',  color: 0xA0734A, icon: '🍽️' },
+    { id: 'dining_chair', label: 'Dining Chair',  color: 0xA0734A, icon: '🪑' },
+    { id: 'chair',        label: 'Chair',         color: 0x8B6040, icon: '🪑' },
+    { id: 'wardrobe',     label: 'Wardrobe',      color: 0x9B7B5A, icon: '🚪' },
+    { id: 'tv_unit',      label: 'TV Unit',       color: 0x4A3A2A, icon: '📺' },
+    { id: 'bookshelf',    label: 'Bookshelf',     color: 0x8B6A3A, icon: '📚' },
+    { id: 'coffee_table', label: 'Coffee Table',  color: 0xA08060, icon: '☕' },
+    { id: 'lamp',         label: 'Floor Lamp',    color: 0xC0A060, icon: '💡' },
+    { id: 'plant',        label: 'Indoor Plant',  color: 0x3A6A40, icon: '🪴' },
+    { id: 'mirror',       label: 'Mirror',        color: 0xC8A060, icon: '🪞' },
+    { id: 'desk',         label: 'Desk',          color: 0x9B7A4A, icon: '🖥️' },
   ];
 
-  // ── Placed items ──
-  const placed=[];
+  // ── Restore saved layout ─────────────────────────────────────
+  // Placed items array — tracks all furniture currently in the scene
+  const placed = [];
 
-  Object.entries(savedLayout).forEach(([key,data])=>{
-    if(!data) return;
-    const cat=CATALOG.find(c=>c.id===key); if(!cat) return;
-    const items=Array.isArray(data)?data:[data];
-    items.forEach(item=>{
-      if(item.visible===false) return;
-      const mesh=buildFurniture(scene,cat.id,cat.color);
-      mesh.position.set(item.x||0,0,item.z||0);
-      mesh.rotation.y=item.rotY||0;
+  // Rebuild scene from the savedLayout object passed at init time.
+  // Each key maps to a CATALOG id; value can be a single item or an array.
+  Object.entries(savedLayout).forEach(([key, data]) => {
+    if (!data) return;
+
+    const cat = CATALOG.find(c => c.id === key);
+    if (!cat) return;
+
+    // Normalise single-item layouts to arrays for consistent processing
+    const items = Array.isArray(data) ? data : [data];
+
+    items.forEach(item => {
+      if (item.visible === false) return;  // skip hidden items
+
+      const mesh = buildFurniture(scene, cat.id, cat.color);
+      mesh.position.set(item.x || 0, 0, item.z || 0);
+      mesh.rotation.y = item.rotY || 0;
       scene.add(mesh);
-      placed.push({mesh,type:cat.id,id:key+'_'+Date.now(),rotY:item.rotY||0});
+      placed.push({ mesh, type: cat.id, id: key + '_' + Date.now(), rotY: item.rotY || 0 });
     });
   });
 
-  // ── Interaction ──
-  const raycaster=new THREE.Raycaster();
-  const mouse=new THREE.Vector2();
-  let dragging=null, dragOffset=new THREE.Vector3();
+  // ── Interaction state ─────────────────────────────────────────
+  const raycaster  = new THREE.Raycaster();
+  const mouse      = new THREE.Vector2();
+  let dragging     = null;
+  let dragOffset   = new THREE.Vector3();
   let selected=null;
   let orbitDragging=false, orbitPrev={x:0,y:0};
   let camTheta=0.48, camPhi=0.72, camDist=16;
