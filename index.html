@@ -389,7 +389,7 @@
       const html = document.documentElement;
       const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       html.setAttribute('data-theme', next);
-      document.getElementById('theme-btn').textContent = next === 'dark' ? '🌙' : '☀️';
+      
       localStorage.setItem('tms-theme', next);
     }
   </script>
