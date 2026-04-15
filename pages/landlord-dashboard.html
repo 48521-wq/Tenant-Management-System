@@ -386,28 +386,18 @@ async function save3DModel() {
 // ══════════════════════════════════════
 // FURNITURE VIEWER
 // ══════════════════════════════════════
-function openFurnitureViewer(propId, propTitle, propObj) {
-  let prop = {};
-  if (propObj && typeof propObj === 'object') prop = propObj;
-  else { try { prop = propObj ? JSON.parse(propObj) : {}; } catch {} }
+function openFurnitureViewer(propId, propTitle, model3dOrJson) {
+  let cfg = {};
+  if (model3dOrJson && typeof model3dOrJson === 'object') cfg = model3dOrJson;
+  else { try { cfg = model3dOrJson ? JSON.parse(model3dOrJson) : {}; } catch {} }
 
-  window._furnPropId    = propId;
-  window._furnPropTitle = propTitle || 'Property';
-  window._furnRole      = 'landlord';
-
-  document.getElementById('ov-furn-title').textContent = '🏠 ' + window._furnPropTitle + ' — My Furniture Layout';
-
-  // Show saved badge if layout exists
-  const savedLayout = prop.landlordFurnitureLayout || prop.furnitureLayout || {};
-  const hasSaved = Object.keys(savedLayout).length > 0;
-  const badge = document.getElementById('furn-saved-badge');
-  if (badge) badge.style.display = hasSaved ? 'flex' : 'none';
-
+  window._furnPropId = propId;
+  document.getElementById('ov-furn-title').textContent = (propTitle||'Property') + ' — Furniture Placement';
   document.getElementById('ov-furn').classList.add('open');
   document.body.style.overflow = 'hidden';
 
   setTimeout(() => {
-    const sc = initFurniturePlacement('c3d-furn', savedLayout, null);
+    const sc = initFurniturePlacement('c3d-furn', cfg.furnitureLayout || {}, null);
     window._furnScene = sc;
   }, 150);
 }
@@ -422,28 +412,21 @@ async function saveFurnitureLayout() {
   const btn = document.getElementById('furn-save-btn');
   if (btn) { btn.disabled=true; btn.textContent='Saving…'; }
   try {
-    const role = window._furnRole || 'landlord';
-    await lFetch('/properties/'+window._furnPropId+'/furniture/'+role, 'PUT', layout);
+    if (window._furnPropId) {
+      await lFetch('/properties/'+window._furnPropId+'/furniture','PUT', layout);
+    }
     const toast = document.getElementById('furn-saved-toast');
-    if (toast) { toast.style.display='flex'; setTimeout(()=>toast.style.display='none',2500); }
-    const badge = document.getElementById('furn-saved-badge');
-    if (badge) badge.style.display = 'flex';
+    if (toast) { toast.style.display='block'; setTimeout(()=>toast.style.display='none',2000); }
     await loadMyProperties();
-  } catch(e) { alert('Layout save nahi ho saki. Server check karein.'); }
+  } catch(e) { alert('Error saving layout'); }
   finally { if(btn){btn.disabled=false;btn.textContent='💾 Save Layout';} }
 }
 function furnAddItem(type, color) {
   const sc = window._furnScene;
-  if (sc) sc.addFurniture(type, parseInt((color||'#888888').replace('#',''),16));
+  if (sc) sc.addFurniture(type, parseInt(color.replace('#',''),16));
 }
 function furnRotate(deg) { const sc=window._furnScene; if(sc) sc.rotateSelected(deg); }
 function furnDelete()    { const sc=window._furnScene; if(sc) sc.deleteSelected(); }
-function furnDownloadPNG() {
-  downloadFurnitureScreenshot('c3d-furn', window._furnPropTitle+'-landlord-layout');
-}
-function furnDownloadJSON() {
-  downloadFurnitureJSON('c3d-furn', window._furnPropTitle, 'landlord');
-}
 async function deleteProp(id) {
   if (!confirm('Delete this property permanently?')) return;
   await lFetch('/properties/'+id,'DELETE');
@@ -563,7 +546,7 @@ function edit3DByPropId(propId) {
 }
 function furnViewByPropId(propId) {
   const p = (window._propMap||{})[propId]; if(!p) return;
-  openFurnitureViewer(propId, p.title, p);
+  openFurnitureViewer(propId, p.title, p.model3d);
 }
 
 // ══════════════════════════════════════
@@ -877,80 +860,80 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
   </div>
 </div>
 
-<!-- FURNITURE PLACEMENT MODAL (LANDLORD) -->
+<!-- FURNITURE PLACEMENT MODAL -->
 <div class="ov" id="ov-furn">
-  <div class="ov-box" style="width:min(1150px,99vw);max-height:97vh;overflow:hidden;display:flex;flex-direction:column">
+  <div class="ov-box" style="width:min(1100px,98vw);max-height:96vh;overflow:hidden;display:flex;flex-direction:column">
 
     <!-- Header -->
-    <div class="ov-head" style="flex-shrink:0;gap:10px;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:10px;min-width:0">
-        <span class="ov-title" id="ov-furn-title" style="font-size:15px">Furniture Placement</span>
-        <span id="furn-saved-badge" style="display:none;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;background:rgba(78,205,196,0.12);border:1px solid rgba(78,205,196,0.4);color:#4ECDC4;font-size:10px;font-weight:700">✅ Layout Saved</span>
-      </div>
-      <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;flex-wrap:wrap">
-        <div id="furn-saved-toast" style="display:none;align-items:center;gap:6px;padding:5px 12px;border-radius:8px;background:rgba(78,205,196,0.15);border:1px solid #4ECDC4;color:#4ECDC4;font-size:12px;font-weight:700">✅ Saved!</div>
-        <button onclick="furnDownloadPNG()" style="padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;display:flex;align-items:center;gap:5px">📷 PNG</button>
-        <button onclick="furnDownloadJSON()" style="padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;display:flex;align-items:center;gap:5px">⬇️ JSON</button>
-        <button id="furn-save-btn" class="submit-btn" onclick="saveFurnitureLayout()" style="padding:8px 18px;font-size:13px">💾 Save Layout</button>
+    <div class="ov-head" style="flex-shrink:0">
+      <span class="ov-title" id="ov-furn-title">Furniture Placement</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div id="furn-saved-toast" style="display:none;padding:5px 14px;border-radius:8px;background:rgba(78,205,196,0.15);border:1px solid var(--green);color:var(--green);font-size:12px;font-weight:600">✅ Saved!</div>
+        <button id="furn-save-btn" class="submit-btn" onclick="saveFurnitureLayout()" style="padding:8px 20px;font-size:13px">💾 Save Layout</button>
         <button class="close-btn" onclick="closeFurnViewer()">✕</button>
       </div>
     </div>
 
-    <!-- Body -->
+    <!-- Body: catalog sidebar + canvas -->
     <div style="display:flex;flex:1;min-height:0;overflow:hidden">
-      <!-- Sidebar -->
-      <div style="width:195px;flex-shrink:0;padding:12px 8px;overflow-y:auto;border-right:1px solid var(--border);background:var(--input-bg);display:flex;flex-direction:column;gap:0">
-        <div style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding:0 4px">🏠 Landlord Layout</div>
-        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;padding:0 4px">Add Furniture</div>
-        <div style="display:flex;flex-direction:column;gap:5px" id="furn-catalog"></div>
-        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
-          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Selected Item</div>
-          <div id="furn-action-panel" style="display:none;flex-direction:column;gap:5px">
-            <button onclick="furnRotate(-45)" style="padding:6px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:11px;font-family:'DM Sans',sans-serif">↺ -45°</button>
-            <button onclick="furnRotate(45)"  style="padding:6px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:11px;font-family:'DM Sans',sans-serif">↻ +45°</button>
-            <button onclick="furnRotate(90)"  style="padding:6px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:11px;font-family:'DM Sans',sans-serif">↻ 90°</button>
-            <button onclick="furnDelete()"    style="padding:6px;border-radius:7px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:#FF6B6B;cursor:pointer;font-size:11px;font-family:'DM Sans',sans-serif">🗑 Delete</button>
+
+      <!-- Left: Furniture Catalog -->
+      <div style="width:200px;flex-shrink:0;padding:14px 10px;overflow-y:auto;border-right:1px solid var(--border);background:var(--input-bg)">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Add Furniture</div>
+        <div style="display:flex;flex-direction:column;gap:6px" id="furn-catalog"></div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Controls</div>
+          <div id="furn-action-panel" style="display:none;flex-direction:column;gap:6px">
+            <button onclick="furnRotate(-45)" style="padding:7px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">↺ Rotate -45°</button>
+            <button onclick="furnRotate(45)"  style="padding:7px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">↻ Rotate +45°</button>
+            <button onclick="furnRotate(90)"  style="padding:7px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">↻ Rotate 90°</button>
+            <button onclick="furnDelete()"    style="padding:7px;border-radius:8px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:#FF6B6B;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">🗑 Delete</button>
           </div>
-          <div style="font-size:10px;color:var(--muted);line-height:1.9;margin-top:8px">
-            <b>Click</b> to select<br><b>Drag</b> to move<br><b>Right-drag</b> orbit<br><b>Scroll</b> zoom
+          <div style="font-size:11px;color:var(--muted);line-height:1.7;margin-top:10px">
+            <b>Click</b> item to select<br>
+            <b>Drag</b> to move<br>
+            <b>Right-drag</b> to orbit<br>
+            <b>Scroll</b> to zoom
           </div>
         </div>
       </div>
-      <!-- Canvas -->
-      <div style="flex:1;position:relative;background:#1A1A2E">
-        <canvas id="c3d-furn" style="width:100%;height:100%;display:block;min-height:520px"></canvas>
-        <div style="position:absolute;bottom:10px;right:14px;font-size:10px;color:rgba(255,255,255,0.3)">Right-drag orbit · Scroll zoom</div>
+
+      <!-- Right: 3D Canvas -->
+      <div style="flex:1;position:relative;background:#1A1A2E;min-height:500px">
+        <canvas id="c3d-furn" style="width:100%;height:100%;display:block;min-height:500px"></canvas>
+        <div style="position:absolute;bottom:10px;right:14px;font-size:10px;color:rgba(255,255,255,0.35)">Right-click drag to orbit · Scroll to zoom</div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-(function buildFurnCatalog() {
+// Build furniture catalog buttons
+(function buildCatalog() {
   const catalog = [
-    {type:'sofa',         label:'Sofa',         color:'#5D5A7E', icon:'🛋️'},
-    {type:'armchair',     label:'Armchair',     color:'#7B4F3A', icon:'🪑'},
-    {type:'bed_double',   label:'Double Bed',   color:'#7B4F2A', icon:'🛏️'},
-    {type:'bed_single',   label:'Single Bed',   color:'#7A8B6E', icon:'🛏️'},
-    {type:'dining_table', label:'Dining Table', color:'#A0734A', icon:'🍽️'},
-    {type:'dining_chair', label:'Din. Chair',   color:'#A0734A', icon:'🪑'},
-    {type:'chair',        label:'Chair',        color:'#8B6040', icon:'🪑'},
-    {type:'wardrobe',     label:'Wardrobe',     color:'#9B7B5A', icon:'🚪'},
-    {type:'tv_unit',      label:'TV Unit',      color:'#4A3A2A', icon:'📺'},
-    {type:'bookshelf',    label:'Bookshelf',    color:'#8B6A3A', icon:'📚'},
-    {type:'coffee_table', label:'Coffee Table', color:'#A08060', icon:'☕'},
-    {type:'lamp',         label:'Floor Lamp',   color:'#C0A060', icon:'💡'},
-    {type:'plant',        label:'Plant',        color:'#3A6A40', icon:'🪴'},
-    {type:'mirror',       label:'Mirror',       color:'#C8A060', icon:'🪞'},
-    {type:'desk',         label:'Desk',         color:'#9B7A4A', icon:'🖥️'},
+    { type:'sofa',         label:'Sofa',          color:'#5D5A7E', icon:'🛋️' },
+    { type:'armchair',     label:'Armchair',      color:'#7B4F3A', icon:'🪑' },
+    { type:'bed_double',   label:'Double Bed',    color:'#7B4F2A', icon:'🛏️' },
+    { type:'bed_single',   label:'Single Bed',    color:'#7A8B6E', icon:'🛏️' },
+    { type:'dining_table', label:'Dining Table',  color:'#A0734A', icon:'🍽️' },
+    { type:'dining_chair', label:'Dining Chair',  color:'#A0734A', icon:'🪑' },
+    { type:'chair',        label:'Chair',         color:'#8B6040', icon:'🪑' },
+    { type:'wardrobe',     label:'Wardrobe',      color:'#9B7B5A', icon:'🚪' },
+    { type:'tv_unit',      label:'TV Unit',       color:'#4A3A2A', icon:'📺' },
+    { type:'bookshelf',    label:'Bookshelf',     color:'#8B6A3A', icon:'📚' },
+    { type:'coffee_table', label:'Coffee Table',  color:'#A08060', icon:'☕' },
+    { type:'lamp',         label:'Floor Lamp',    color:'#C0A060', icon:'💡' },
+    { type:'plant',        label:'Indoor Plant',  color:'#3A6A40', icon:'🪴' },
+    { type:'mirror',       label:'Mirror',        color:'#C8A060', icon:'🪞' },
+    { type:'desk',         label:'Study Desk',    color:'#9B7A4A', icon:'🖥️' },
   ];
   const container = document.getElementById('furn-catalog');
   if (!container) return;
   catalog.forEach(item => {
     const btn = document.createElement('button');
-    btn.style.cssText = 'padding:7px 8px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:DM Sans,sans-serif;font-size:11.5px;text-align:left;display:flex;align-items:center;gap:7px;transition:background 0.12s';
-    btn.innerHTML = `<span style="font-size:15px">${item.icon}</span><span>${item.label}</span>`;
-    btn.onmouseenter = () => btn.style.background = 'var(--hover)';
+    btn.style.cssText = `padding:8px 10px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;text-align:left;display:flex;align-items:center;gap:8px;transition:background 0.15s`;
+    btn.innerHTML = `<span style="font-size:16px">${item.icon}</span><span>${item.label}</span>`;
+    btn.onmouseenter = () => btn.style.background = 'var(--input-bg)';
     btn.onmouseleave = () => btn.style.background = 'var(--card)';
     btn.onclick = () => furnAddItem(item.type, item.color);
     container.appendChild(btn);
