@@ -1,490 +1,754 @@
-/* ============================================
+/* ============================================================
    Tenant Management System — Main Stylesheet
    File: css/style.css
-   ============================================ */
+   Covers: scrollbar, reset, variables, layout, components,
+           forms, buttons, role cards, animations, admin styles
+   ============================================================ */
 
-/* ---------- Custom Scrollbar ---------- */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--dark2); }
+/* ── Custom Scrollbar ──────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--dark2);
+}
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, var(--gold) 0%, var(--gold-light) 100%);
   border-radius: 10px;
 }
-::-webkit-scrollbar-thumb:hover { background: var(--gold-light); }
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-light);
+}
 
-/* ---------- Reset & Base ---------- */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── Reset & Box Model ─────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin:     0;
+  padding:    0;
+}
 
-/* ---------- CSS Variables ---------- */
+/* ── CSS Variables ─────────────────────────────────────────── */
+/* Design tokens used throughout the stylesheet */
 :root {
+  /* Brand gold */
   --gold:       #C9A96E;
   --gold-light: #E8C97A;
-  --dark:       #0A0C0F;
-  --dark2:      #111418;
-  --card:       #14181F;
-  --border:     rgba(201,169,110,0.18);
-  --text:       #E8E4DC;
-  --muted:      #6B7280;
-  --tenant:     #4A9EFF;
-  --landlord:   #C9A96E;
-  --error:      #FF6B6B;
-  --success:    #4ECDC4;
+
+  /* Dark backgrounds */
+  --dark:   #0A0C0F;
+  --dark2:  #111418;
+  --card:   #14181F;
+
+  /* Borders and text */
+  --border: rgba(201, 169, 110, 0.18);
+  --text:   #E8E4DC;
+  --muted:  #6B7280;
+
+  /* Role accent colors */
+  --tenant:   #4A9EFF;
+  --landlord: #C9A96E;
+
+  /* Status colors */
+  --error:   #FF6B6B;
+  --success: #4ECDC4;
 }
 
-/* ---------- Body ---------- */
+/* ── Body ──────────────────────────────────────────────────── */
 body {
   font-family: 'DM Sans', sans-serif;
-  background: var(--dark);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  position: relative;
+  background:  var(--dark);
+  color:       var(--text);
+  min-height:  100vh;
+  overflow-y:  auto;
+  overflow-x:  hidden;
+  position:    relative;
 }
 
-/* ---------- Background ---------- */
+/* ── Background Scene ──────────────────────────────────────── */
+/* Fixed full-screen layered gradient background */
 .bg-scene {
-  position: fixed; inset: 0; z-index: 0;
+  position: fixed;
+  inset:    0;
+  z-index:  0;
   background:
-    radial-gradient(ellipse 80% 60% at 20% 30%, rgba(201,169,110,0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 80% 70%, rgba(74,158,255,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 60% at 20% 30%, rgba(201, 169, 110, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 70%, rgba(74,  158, 255, 0.05) 0%, transparent 60%),
     linear-gradient(160deg, #0A0C0F 0%, #111418 50%, #0D1117 100%);
 }
 
+/* Subtle grid lines overlaid on the background */
 .grid-overlay {
-  position: fixed; inset: 0; z-index: 0;
+  position: fixed;
+  inset:    0;
+  z-index:  0;
   background-image:
-    linear-gradient(rgba(201,169,110,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(201,169,110,0.03) 1px, transparent 1px);
+    linear-gradient(rgba(201, 169, 110, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201, 169, 110, 0.03) 1px, transparent 1px);
   background-size: 60px 60px;
 }
 
+/* Floating ambient orb — top-left, gold tint */
 .orb1 {
-  position: fixed; width: 500px; height: 500px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(201,169,110,0.08) 0%, transparent 70%);
-  top: -100px; left: -100px; z-index: 0;
+  position:      fixed;
+  width:         500px;
+  height:        500px;
+  border-radius: 50%;
+  background:    radial-gradient(circle, rgba(201, 169, 110, 0.08) 0%, transparent 70%);
+  top:     -100px;
+  left:    -100px;
+  z-index: 0;
   animation: float1 8s ease-in-out infinite;
 }
 
+/* Floating ambient orb — bottom-right, blue tint */
 .orb2 {
-  position: fixed; width: 400px; height: 400px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(74,158,255,0.06) 0%, transparent 70%);
-  bottom: -80px; right: -80px; z-index: 0;
+  position:      fixed;
+  width:         400px;
+  height:        400px;
+  border-radius: 50%;
+  background:    radial-gradient(circle, rgba(74, 158, 255, 0.06) 0%, transparent 70%);
+  bottom:  -80px;
+  right:   -80px;
+  z-index: 0;
   animation: float2 10s ease-in-out infinite;
 }
 
-/* ---------- Animations ---------- */
-@keyframes float1  { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,20px)} }
-@keyframes float2  { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,-30px)} }
-@keyframes panelIn { from{opacity:0;transform:translateY(30px) scale(0.96)} to{opacity:1;transform:translateY(0) scale(1)} }
-@keyframes fadeIn  { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-@keyframes shake   { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
-@keyframes successPop { from{transform:scale(0)} to{transform:scale(1)} }
+/* ── Animations ────────────────────────────────────────────── */
 
-/* ---------- Layout ---------- */
+/* Orb1 gentle float */
+@keyframes float1 {
+  0%,  100% { transform: translate(0,    0);    }
+  50%        { transform: translate(30px, 20px); }
+}
+
+/* Orb2 gentle float in opposite direction */
+@keyframes float2 {
+  0%,  100% { transform: translate(0,     0);     }
+  50%        { transform: translate(-20px, -30px); }
+}
+
+/* Auth panel slide-up entrance */
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(30px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* Generic fade-up for content sections */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* Horizontal shake for error feedback */
+@keyframes shake {
+  0%,  100% { transform: translateX(0);   }
+  25%        { transform: translateX(-6px);}
+  75%        { transform: translateX(6px); }
+}
+
+/* Pop-in for success icon */
+@keyframes successPop {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}
+
+/* ── Layout ────────────────────────────────────────────────── */
+
+/* Outer centering wrapper */
 .container {
-  position: relative; z-index: 1;
-  min-height: 100vh;
-  display: flex; align-items: center; justify-content: center;
-  padding: 40px 20px;
+  position:        relative;
+  z-index:         1;
+  min-height:      100vh;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  padding:         40px 20px;
 }
 
+/* Glassmorphism auth card */
 .panel {
-  background: rgba(20,24,31,0.85);
+  background:      rgba(20, 24, 31, 0.85);
   backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  width: 100%; max-width: 480px;
-  padding: 48px 44px;
-  box-shadow: 0 40px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
-  animation: panelIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+  border:          1px solid var(--border);
+  border-radius:   24px;
+  width:           100%;
+  max-width:       480px;
+  padding:         48px 44px;
+  box-shadow:
+    0 40px 80px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  animation: panelIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
-/* ---------- Logo ---------- */
-.logo { text-align: center; margin-bottom: 36px; }
+/* ── Logo ──────────────────────────────────────────────────── */
+.logo {
+  text-align:    center;
+  margin-bottom: 36px;
+}
 
+/* Gold gradient icon badge */
 .logo-icon {
-  width: 52px; height: 52px;
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
-  border-radius: 14px;
-  display: inline-flex; align-items: center; justify-content: center;
-  margin-bottom: 14px;
-  box-shadow: 0 8px 24px rgba(201,169,110,0.3);
+  width:           52px;
+  height:          52px;
+  background:      linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+  border-radius:   14px;
+  display:         inline-flex;
+  align-items:     center;
+  justify-content: center;
+  margin-bottom:   14px;
+  box-shadow:      0 8px 24px rgba(201, 169, 110, 0.3);
+}
+.logo-icon svg {
+  width:  28px;
+  height: 28px;
+  fill:   #0A0C0F;
 }
 
-.logo-icon svg { width: 28px; height: 28px; fill: #0A0C0F; }
-
+/* Brand name with gold gradient text */
 .logo h1 {
-  font-family: 'Playfair Display', serif;
-  font-size: 18px; font-weight: 700;
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+  font-family:             'Playfair Display', serif;
+  font-size:               18px;
+  font-weight:             700;
+  background:              linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  letter-spacing: -0.3px;
+  letter-spacing:          -0.3px;
+}
+.logo p {
+  font-size:      13px;
+  color:          var(--muted);
+  margin-top:     4px;
+  letter-spacing: 0.5px;
 }
 
-.logo p { font-size: 13px; color: var(--muted); margin-top: 4px; letter-spacing: 0.5px; }
-
-/* ---------- Tabs ---------- */
+/* ── Tabs ──────────────────────────────────────────────────── */
 .tabs {
-  display: flex;
-  background: rgba(255,255,255,0.04);
-  border-radius: 12px; padding: 4px; margin-bottom: 28px;
+  display:       flex;
+  background:    rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding:       4px;
+  margin-bottom: 28px;
 }
 
 .tab {
-  flex: 1; padding: 10px; text-align: center;
-  font-size: 14px; font-weight: 500; border-radius: 9px;
-  cursor: pointer; border: none; background: none;
-  color: var(--muted); transition: all 0.2s;
-  font-family: 'DM Sans', sans-serif;
+  flex:          1;
+  padding:       10px;
+  text-align:    center;
+  font-size:     14px;
+  font-weight:   500;
+  border-radius: 9px;
+  cursor:        pointer;
+  border:        none;
+  background:    none;
+  color:         var(--muted);
+  transition:    all 0.2s;
+  font-family:   'DM Sans', sans-serif;
 }
-
 .tab.active {
-  background: rgba(255,255,255,0.08);
-  color: var(--text);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color:      var(--text);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* ---------- Forms ---------- */
-.form-group { margin-bottom: 18px; }
+/* ── Forms ─────────────────────────────────────────────────── */
+.form-group {
+  margin-bottom: 18px;
+}
 
 .form-label {
-  display: block; font-size: 13px; font-weight: 500;
-  color: #9CA3AF; margin-bottom: 8px; letter-spacing: 0.3px;
+  display:        block;
+  font-size:      13px;
+  font-weight:    500;
+  color:          #9CA3AF;
+  margin-bottom:  8px;
+  letter-spacing: 0.3px;
 }
 
-.input-wrap { position: relative; }
-
+/* Input with leading icon */
+.input-wrap {
+  position: relative;
+}
 .input-icon {
-  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-  width: 18px; height: 18px; stroke: var(--muted); fill: none;
-  pointer-events: none; transition: stroke 0.2s;
+  position:       absolute;
+  left:           14px;
+  top:            50%;
+  transform:      translateY(-50%);
+  width:          18px;
+  height:         18px;
+  stroke:         var(--muted);
+  fill:           none;
+  pointer-events: none;
+  transition:     stroke 0.2s;
 }
-
-.input-wrap:focus-within .input-icon { stroke: var(--gold); }
+/* Highlight icon when input is focused */
+.input-wrap:focus-within .input-icon {
+  stroke: var(--gold);
+}
 
 .form-input {
-  width: 100%;
-  background: rgba(255,255,255,0.04);
-  border: 1.5px solid rgba(255,255,255,0.08);
+  width:       100%;
+  background:  rgba(255, 255, 255, 0.04);
+  border:      1.5px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  padding: 13px 14px 13px 42px;
-  color: var(--text); font-family: 'DM Sans', sans-serif;
-  font-size: 14px; transition: all 0.2s; outline: none;
+  padding:     13px 14px 13px 42px;
+  color:       var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size:   14px;
+  transition:  all 0.2s;
+  outline:     none;
 }
-
-.form-input::placeholder { color: #4B5563; }
-
+.form-input::placeholder {
+  color: #4B5563;
+}
 .form-input:focus {
   border-color: var(--gold);
-  background: rgba(201,169,110,0.04);
-  box-shadow: 0 0 0 3px rgba(201,169,110,0.08);
+  background:   rgba(201, 169, 110, 0.04);
+  box-shadow:   0 0 0 3px rgba(201, 169, 110, 0.08);
 }
 
-/* ---------- Eye Button ---------- */
+/* ── Eye / Password Toggle Button ──────────────────────────── */
 .eye-btn {
-  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
-  background: none; border: none; cursor: pointer; padding: 0;
-  color: var(--muted); transition: color 0.2s;
+  position:   absolute;
+  right:      14px;
+  top:        50%;
+  transform:  translateY(-50%);
+  background: none;
+  border:     none;
+  cursor:     pointer;
+  padding:    0;
+  color:      var(--muted);
+  transition: color 0.2s;
 }
 .eye-btn:hover { color: var(--text); }
-.eye-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; }
-
-/* ---------- Buttons ---------- */
-.btn-primary {
-  width: 100%; padding: 14px; border: none; border-radius: 12px;
-  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
-  cursor: pointer; margin-top: 4px; transition: all 0.25s;
-  position: relative; overflow: hidden;
+.eye-btn svg {
+  width:  18px;
+  height: 18px;
+  stroke: currentColor;
+  fill:   none;
 }
 
+/* ── Primary Button ────────────────────────────────────────── */
+.btn-primary {
+  width:       100%;
+  padding:     14px;
+  border:      none;
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size:   15px;
+  font-weight: 600;
+  cursor:      pointer;
+  margin-top:  4px;
+  transition:  all 0.25s;
+  position:    relative;
+  overflow:    hidden;
+}
+/* Hover shimmer overlay */
 .btn-primary::after {
-  content: ''; position: absolute; inset: 0;
-  background: rgba(255,255,255,0.1); opacity: 0; transition: opacity 0.2s;
+  content:    '';
+  position:   absolute;
+  inset:      0;
+  background: rgba(255, 255, 255, 0.1);
+  opacity:    0;
+  transition: opacity 0.2s;
 }
 .btn-primary:hover::after { opacity: 1; }
-.btn-primary:active { transform: scale(0.98); }
+.btn-primary:active        { transform: scale(0.98); }
 
+/* Gold variant */
 .btn-gold {
   background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
-  color: #0A0C0F;
-  box-shadow: 0 6px 20px rgba(201,169,110,0.3);
+  color:      #0A0C0F;
+  box-shadow: 0 6px 20px rgba(201, 169, 110, 0.3);
 }
-.btn-gold:hover { box-shadow: 0 8px 28px rgba(201,169,110,0.4); transform: translateY(-1px); }
+.btn-gold:hover {
+  box-shadow: 0 8px 28px rgba(201, 169, 110, 0.4);
+  transform:  translateY(-1px);
+}
 
-/* ---------- Forgot Link ---------- */
+/* ── Forgot Password Link ───────────────────────────────────── */
 .forgot-link {
-  display: block; text-align: right;
-  font-size: 12px; color: var(--muted); text-decoration: none;
-  margin-top: -10px; margin-bottom: 20px;
-  cursor: pointer; transition: color 0.2s;
-  background: none; border: none; font-family: 'DM Sans', sans-serif;
+  display:        block;
+  text-align:     right;
+  font-size:      12px;
+  color:          var(--muted);
+  text-decoration: none;
+  margin-top:     -10px;
+  margin-bottom:  20px;
+  cursor:         pointer;
+  transition:     color 0.2s;
+  background:     none;
+  border:         none;
+  font-family:    'DM Sans', sans-serif;
 }
 .forgot-link:hover { color: var(--gold); }
 
-/* ---------- Switch Text ---------- */
-.switch-text { text-align: center; margin-top: 22px; font-size: 13px; color: var(--muted); }
-
+/* ── Switch Text ───────────────────────────────────────────── */
+.switch-text {
+  text-align: center;
+  margin-top: 22px;
+  font-size:  13px;
+  color:      var(--muted);
+}
 .switch-link {
-  color: var(--gold); cursor: pointer; font-weight: 500;
-  text-decoration: none; background: none; border: none;
-  font-family: 'DM Sans', sans-serif; font-size: inherit; padding: 0;
-  transition: color 0.2s;
+  color:       var(--gold);
+  cursor:      pointer;
+  font-weight: 500;
+  text-decoration: none;
+  background:  none;
+  border:      none;
+  font-family: 'DM Sans', sans-serif;
+  font-size:   inherit;
+  padding:     0;
+  transition:  color 0.2s;
 }
 .switch-link:hover { color: var(--gold-light); }
 
-/* ---------- Error Message ---------- */
+/* ── Error Messages ────────────────────────────────────────── */
 .error-msg {
-  background: rgba(255,107,107,0.08);
-  border: 1px solid rgba(255,107,107,0.2);
-  border-radius: 10px; padding: 10px 14px;
-  font-size: 13px; color: var(--error); margin-bottom: 16px; display: none;
+  background:    rgba(255, 107, 107, 0.08);
+  border:        1px solid rgba(255, 107, 107, 0.2);
+  border-radius: 10px;
+  padding:       10px 14px;
+  font-size:     13px;
+  color:         var(--error);
+  margin-bottom: 16px;
+  display:       none;
 }
-.error-msg.show { display: block; animation: shake 0.3s ease; }
+.error-msg.show {
+  display:   block;
+  animation: shake 0.3s ease;
+}
 
-/* ---------- Role Error ---------- */
 .role-error-msg {
-  font-size: 12px; color: var(--error);
-  margin-top: 8px; display: none;
+  font-size:  12px;
+  color:      var(--error);
+  margin-top: 8px;
+  display:    none;
 }
 .role-error-msg.show { display: block; }
 
-/* ---------- Inline Role Cards (inside signup) ---------- */
+/* ── Role Cards ────────────────────────────────────────────── */
 .role-cards-inline {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-  margin-top: 4px;
+  display:               grid;
+  grid-template-columns: 1fr 1fr;
+  gap:                   12px;
+  margin-top:            4px;
 }
 
 .role-card-inline {
-  background: rgba(255,255,255,0.03);
-  border: 2px solid rgba(255,255,255,0.07);
-  border-radius: 14px;
-  padding: 16px 12px;
-  text-align: center; cursor: pointer;
-  transition: all 0.25s ease;
-  position: relative; overflow: hidden;
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background:      rgba(255, 255, 255, 0.03);
+  border:          2px solid rgba(255, 255, 255, 0.07);
+  border-radius:   14px;
+  padding:         16px 12px;
+  text-align:      center;
+  cursor:          pointer;
+  transition:      all 0.25s ease;
+  position:        relative;
+  overflow:        hidden;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  gap:             4px;
 }
 
+/* Radial gradient overlay revealed on hover/select */
 .role-card-inline::before {
-  content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.25s;
+  content:    '';
+  position:   absolute;
+  inset:      0;
+  opacity:    0;
+  transition: opacity 0.25s;
 }
-
 .role-card-inline.tenant::before {
-  background: radial-gradient(circle at 50% 0%, rgba(74,158,255,0.12), transparent 70%);
+  background: radial-gradient(circle at 50% 0%, rgba(74, 158, 255, 0.12), transparent 70%);
 }
 .role-card-inline.landlord::before {
-  background: radial-gradient(circle at 50% 0%, rgba(201,169,110,0.12), transparent 70%);
+  background: radial-gradient(circle at 50% 0%, rgba(201, 169, 110, 0.12), transparent 70%);
 }
 
-.role-card-inline:hover { transform: translateY(-2px); }
-.role-card-inline:hover::before { opacity: 1; }
+.role-card-inline:hover             { transform: translateY(-2px); }
+.role-card-inline:hover::before     { opacity: 1; }
 
 .role-card-inline.tenant:hover {
-  border-color: rgba(74,158,255,0.5);
-  box-shadow: 0 6px 20px rgba(74,158,255,0.15);
+  border-color: rgba(74, 158, 255, 0.5);
+  box-shadow:   0 6px 20px rgba(74, 158, 255, 0.15);
 }
 .role-card-inline.landlord:hover {
-  border-color: rgba(201,169,110,0.5);
-  box-shadow: 0 6px 20px rgba(201,169,110,0.15);
+  border-color: rgba(201, 169, 110, 0.5);
+  box-shadow:   0 6px 20px rgba(201, 169, 110, 0.15);
 }
 
 /* Selected state */
 .role-card-inline.tenant.selected {
   border-color: var(--tenant);
-  background: rgba(74,158,255,0.08);
-  box-shadow: 0 0 0 3px rgba(74,158,255,0.15);
+  background:   rgba(74, 158, 255, 0.08);
+  box-shadow:   0 0 0 3px rgba(74, 158, 255, 0.15);
 }
 .role-card-inline.landlord.selected {
   border-color: var(--landlord);
-  background: rgba(201,169,110,0.08);
-  box-shadow: 0 0 0 3px rgba(201,169,110,0.15);
+  background:   rgba(201, 169, 110, 0.08);
+  box-shadow:   0 0 0 3px rgba(201, 169, 110, 0.15);
 }
 
 .role-inline-icon { font-size: 22px; position: relative; z-index: 1; }
-
 .role-inline-name {
-  font-weight: 600; font-size: 14px;
-  position: relative; z-index: 1;
+  font-weight: 600;
+  font-size:   14px;
+  position:    relative;
+  z-index:     1;
 }
-
 .role-inline-desc {
-  font-size: 11px; color: var(--muted);
-  position: relative; z-index: 1; line-height: 1.3;
+  font-size:   11px;
+  color:       var(--muted);
+  position:    relative;
+  z-index:     1;
+  line-height: 1.3;
 }
 
-/* ---------- Password Strength ---------- */
-.strength-bar { display: flex; gap: 4px; margin-top: 8px; }
-
+/* ── Password Strength Bar ─────────────────────────────────── */
+.strength-bar {
+  display:    flex;
+  gap:        4px;
+  margin-top: 8px;
+}
 .strength-seg {
-  flex: 1; height: 3px; border-radius: 2px;
-  background: rgba(255,255,255,0.08); transition: background 0.3s;
+  flex:          1;
+  height:        3px;
+  border-radius: 2px;
+  background:    rgba(255, 255, 255, 0.08);
+  transition:    background 0.3s;
 }
-
 .strength-seg.weak   { background: #FF6B6B; }
 .strength-seg.medium { background: #FFA500; }
 .strength-seg.strong { background: var(--success); }
 
-.strength-label { font-size: 11px; color: var(--muted); margin-top: 5px; text-align: right; }
+.strength-label {
+  font-size:  11px;
+  color:      var(--muted);
+  margin-top: 5px;
+  text-align: right;
+}
 
-/* ---------- Back Button ---------- */
+/* ── Back Button ───────────────────────────────────────────── */
 .back-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  color: var(--muted); font-size: 13px;
-  cursor: pointer; border: none; background: none;
-  padding: 0; margin-bottom: 20px; transition: color 0.2s;
+  display:       inline-flex;
+  align-items:   center;
+  gap:           6px;
+  color:         var(--muted);
+  font-size:     13px;
+  cursor:        pointer;
+  border:        none;
+  background:    none;
+  padding:       0;
+  margin-bottom: 20px;
+  transition:    color 0.2s;
 }
 .back-btn:hover { color: var(--text); }
-.back-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
+.back-btn svg {
+  width:  16px;
+  height: 16px;
+  stroke: currentColor;
+  fill:   none;
+}
 
-/* ---------- Forgot Password Screen ---------- */
+/* ── Forgot Password Screen ────────────────────────────────── */
 .fp-icon {
-  width: 56px; height: 56px;
-  background: rgba(201,169,110,0.1);
-  border: 1px solid rgba(201,169,110,0.2);
-  border-radius: 50%; display: flex;
-  align-items: center; justify-content: center;
-  margin: 0 auto 20px;
+  width:           56px;
+  height:          56px;
+  background:      rgba(201, 169, 110, 0.1);
+  border:          1px solid rgba(201, 169, 110, 0.2);
+  border-radius:   50%;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  margin:          0 auto 20px;
 }
-.fp-icon svg { width: 26px; height: 26px; stroke: var(--gold); fill: none; }
+.fp-icon svg {
+  width:  26px;
+  height: 26px;
+  stroke: var(--gold);
+  fill:   none;
+}
+.fp-title {
+  font-family:   'Playfair Display', serif;
+  font-size:     22px;
+  text-align:    center;
+  margin-bottom: 8px;
+}
+.fp-sub {
+  color:         var(--muted);
+  font-size:     14px;
+  text-align:    center;
+  line-height:   1.6;
+  margin-bottom: 28px;
+}
 
-.fp-title { font-family: 'Playfair Display', serif; font-size: 22px; text-align: center; margin-bottom: 8px; }
-
-.fp-sub { color: var(--muted); font-size: 14px; text-align: center; line-height: 1.6; margin-bottom: 28px; }
-
-/* ---------- Success State ---------- */
-.success-state { text-align: center; padding: 10px 0; }
-
+/* ── Success State ─────────────────────────────────────────── */
+.success-state {
+  text-align: center;
+  padding:    10px 0;
+}
 .success-icon {
-  width: 64px; height: 64px;
-  background: rgba(78,205,196,0.1);
-  border: 2px solid rgba(78,205,196,0.3);
-  border-radius: 50%; display: flex;
-  align-items: center; justify-content: center;
-  margin: 0 auto 20px;
-  animation: successPop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  width:           64px;
+  height:          64px;
+  background:      rgba(78, 205, 196, 0.1);
+  border:          2px solid rgba(78, 205, 196, 0.3);
+  border-radius:   50%;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  margin:          0 auto 20px;
+  animation:       successPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
-.success-icon svg { width: 30px; height: 30px; stroke: var(--success); fill: none; stroke-width: 2.5; }
+.success-icon svg {
+  width:        30px;
+  height:       30px;
+  stroke:       var(--success);
+  fill:         none;
+  stroke-width: 2.5;
+}
+.success-title {
+  font-family:   'Playfair Display', serif;
+  font-size:     22px;
+  margin-bottom: 10px;
+}
+.success-msg   { color: var(--muted); font-size: 14px; line-height: 1.6; }
+.success-email { color: var(--gold);  font-weight: 500; }
 
-.success-title { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 10px; }
-.success-msg { color: var(--muted); font-size: 14px; line-height: 1.6; }
-.success-email { color: var(--gold); font-weight: 500; }
-
-/* ---------- Panel Footer ---------- */
+/* ── Panel Footer ──────────────────────────────────────────── */
 .panel-footer {
-  text-align: center; margin-top: 28px;
-  font-size: 11px; color: #374151; letter-spacing: 0.3px;
+  text-align:     center;
+  margin-top:     28px;
+  font-size:      11px;
+  color:          #374151;
+  letter-spacing: 0.3px;
 }
 
-/* ---------- Responsive ---------- */
+/* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 520px) {
-  .panel { padding: 36px 24px; }
-  .role-cards-inline { gap: 8px; }
+  .panel               { padding: 36px 24px; }
+  .role-cards-inline   { gap: 8px; }
 }
 
-/* ---------- Admin Tab ---------- */
+/* ── Admin Tab ─────────────────────────────────────────────── */
 .tab-admin {
-  background: none;
-  border: none;
+  background:  none;
+  border:      none;
   font-family: 'DM Sans', sans-serif;
 }
 .tab-admin.active {
   background: rgba(255, 60, 60, 0.1);
-  color: #FF6B6B;
+  color:      #FF6B6B;
   box-shadow: 0 2px 8px rgba(255, 60, 60, 0.15);
 }
-.tab-admin:hover {
-  color: #FF6B6B !important;
-}
+.tab-admin:hover { color: #FF6B6B !important; }
 
-/* ---------- Admin Banner ---------- */
+/* ── Admin Banner ──────────────────────────────────────────── */
 .admin-banner {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: rgba(255, 60, 60, 0.06);
-  border: 1px solid rgba(255, 60, 60, 0.2);
+  display:       flex;
+  align-items:   center;
+  gap:           14px;
+  background:    rgba(255, 60, 60, 0.06);
+  border:        1px solid rgba(255, 60, 60, 0.2);
   border-radius: 12px;
-  padding: 14px 16px;
+  padding:       14px 16px;
   margin-bottom: 24px;
 }
 .admin-banner-icon {
-  font-size: 26px;
-  width: 44px;
-  height: 44px;
-  background: rgba(255, 60, 60, 0.1);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
+  font-size:       26px;
+  width:           44px;
+  height:          44px;
+  background:      rgba(255, 60, 60, 0.1);
+  border-radius:   10px;
+  display:         flex;
+  align-items:     center;
   justify-content: center;
-  flex-shrink: 0;
+  flex-shrink:     0;
 }
 .admin-banner-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: #FF6B6B;
+  font-size:     14px;
+  font-weight:   700;
+  color:         #FF6B6B;
   margin-bottom: 2px;
 }
 .admin-banner-sub {
   font-size: 12px;
-  color: var(--muted);
+  color:     var(--muted);
 }
 
-/* ---------- Admin Input Focus ---------- */
+/* ── Admin Input Focus ─────────────────────────────────────── */
 .admin-input:focus {
-  border-color: #FF6B6B !important;
-  background: rgba(255, 60, 60, 0.04) !important;
-  box-shadow: 0 0 0 3px rgba(255, 60, 60, 0.08) !important;
+  border-color: #FF6B6B                      !important;
+  background:   rgba(255, 60, 60, 0.04)     !important;
+  box-shadow:   0 0 0 3px rgba(255, 60, 60, 0.08) !important;
 }
 .form-input.admin-input + .input-icon { stroke: var(--muted); }
 .input-wrap:focus-within .admin-input ~ .input-icon,
-.input-wrap:has(.admin-input:focus) .input-icon { stroke: #FF6B6B; }
+.input-wrap:has(.admin-input:focus)   .input-icon { stroke: #FF6B6B; }
 
-/* ---------- Admin Button ---------- */
+/* ── Admin Button ──────────────────────────────────────────── */
 .btn-red {
   background: linear-gradient(135deg, #E53935 0%, #FF6B6B 100%);
-  color: #fff;
+  color:      #fff;
   box-shadow: 0 6px 20px rgba(229, 57, 53, 0.35);
 }
 .btn-red:hover {
   box-shadow: 0 8px 28px rgba(229, 57, 53, 0.5);
-  transform: translateY(-1px);
+  transform:  translateY(-1px);
 }
 
-
-/* ═══════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════
    GLOBAL FIXES
-═══════════════════════════════════════════════════ */
+═══════════════════════════════════════════════════════════ */
 
-/* Fix dropdown text color */
-select { color: #EDE9E0; background: #12151C; }
-select option { background: #12151C; color: #EDE9E0; }
-[data-theme="light"] select { color: #1A1E26; background: #fff; }
+/* Fix dropdown text color across themes */
+select         { color: #EDE9E0; background: #12151C; }
+select option  { background: #12151C; color: #EDE9E0; }
+[data-theme="light"] select        { color: #1A1E26; background: #fff; }
 [data-theme="light"] select option { background: #fff; color: #1A1E26; }
 
-/* Role card selected — bright visible highlight */
+/* Role card selected — bright visible highlight (overrides base) */
 .role-card-inline.tenant.selected {
-  border-color: #4A9EFF !important;
-  background: rgba(74,158,255,0.15) !important;
-  box-shadow: 0 0 0 3px rgba(74,158,255,0.3), 0 8px 24px rgba(74,158,255,0.2) !important;
-  transform: translateY(-3px) !important;
+  border-color: #4A9EFF                              !important;
+  background:   rgba(74, 158, 255, 0.15)            !important;
+  box-shadow:
+    0 0 0 3px rgba(74, 158, 255, 0.3),
+    0 8px 24px rgba(74, 158, 255, 0.2)              !important;
+  transform: translateY(-3px)                        !important;
 }
 .role-card-inline.landlord.selected {
-  border-color: #C9A96E !important;
-  background: rgba(201,169,110,0.15) !important;
-  box-shadow: 0 0 0 3px rgba(201,169,110,0.3), 0 8px 24px rgba(201,169,110,0.2) !important;
-  transform: translateY(-3px) !important;
+  border-color: #C9A96E                             !important;
+  background:   rgba(201, 169, 110, 0.15)           !important;
+  box-shadow:
+    0 0 0 3px rgba(201, 169, 110, 0.3),
+    0 8px 24px rgba(201, 169, 110, 0.2)             !important;
+  transform: translateY(-3px)                        !important;
 }
-.role-card-inline.tenant.selected .role-inline-name { color: #4A9EFF !important; font-weight: 700 !important; }
+.role-card-inline.tenant.selected   .role-inline-name { color: #4A9EFF !important; font-weight: 700 !important; }
 .role-card-inline.landlord.selected .role-inline-name { color: #C9A96E !important; font-weight: 700 !important; }
+
+/* Checkmark badge on selected role card */
 .role-card-inline.selected::after {
-  content: '✓';
-  position: absolute; top: 6px; right: 8px;
-  font-size: 12px; font-weight: 700;
+  content:   '✓';
+  position:  absolute;
+  top:       6px;
+  right:     8px;
+  font-size: 12px;
+  font-weight: 700;
 }
 .role-card-inline.tenant.selected::after   { color: #4A9EFF; }
 .role-card-inline.landlord.selected::after { color: #C9A96E; }
 
-/* Error box */
-.error-box { display:none; background:rgba(255,107,107,0.1); border:1px solid rgba(255,107,107,0.3); border-radius:10px; padding:10px 14px; color:#FF6B6B; font-size:13px; margin-top:10px; }
+/* Inline error box */
+.error-box {
+  display:       none;
+  background:    rgba(255, 107, 107, 0.1);
+  border:        1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 10px;
+  padding:       10px 14px;
+  color:         #FF6B6B;
+  font-size:     13px;
+  margin-top:    10px;
+}

@@ -7,38 +7,71 @@
 const _fScenes = {};
 
 // ── PBR Material helpers ────────────────────────────────────
-function woodMat(hex){
+// ── Material factory functions ───────────────────────────────
+// Each returns a fresh MeshStandardMaterial with PBR properties
+// tuned for that surface type. Pass hex to override base color.
+
+/** Warm wood — matte, no metalness */
+function woodMat(hex) {
   return new THREE.MeshStandardMaterial({
-    color: hex||0x8B5E3C, roughness:0.75, metalness:0.0
+    color:     hex || 0x8B5E3C,
+    roughness: 0.75,
+    metalness: 0.0,
   });
 }
-function fabricMat(hex){
+
+/** Upholstery fabric — very rough, soft appearance */
+function fabricMat(hex) {
   return new THREE.MeshStandardMaterial({
-    color: hex||0x6B7A8D, roughness:0.95, metalness:0.0
+    color:     hex || 0x6B7A8D,
+    roughness: 0.95,
+    metalness: 0.0,
   });
 }
-function metalMat(hex){
+
+/** Brushed / polished metal — low roughness, high metalness */
+function metalMat(hex) {
   return new THREE.MeshStandardMaterial({
-    color: hex||0xB0B0B0, roughness:0.25, metalness:0.9
+    color:     hex || 0xB0B0B0,
+    roughness: 0.25,
+    metalness: 0.9,
   });
 }
-function glassMat(){
+
+/** Transparent glass — near-zero roughness, slight metalness */
+function glassMat() {
   return new THREE.MeshStandardMaterial({
-    color:0xBBDDFF, roughness:0.05, metalness:0.1,
-    transparent:true, opacity:0.35
+    color:       0xBBDDFF,
+    roughness:   0.05,
+    metalness:   0.1,
+    transparent: true,
+    opacity:     0.35,
   });
 }
-function leatherMat(hex){
+
+/** Leather — semi-rough, very slight sheen */
+function leatherMat(hex) {
   return new THREE.MeshStandardMaterial({
-    color: hex||0x3D2B1F, roughness:0.6, metalness:0.05
+    color:     hex || 0x3D2B1F,
+    roughness: 0.6,
+    metalness: 0.05,
   });
 }
-function mattressMat(){
-  return new THREE.MeshStandardMaterial({ color:0xF2EEE8, roughness:0.9 });
-}
-function concreteMat(hex){
+
+/** Mattress fabric — off-white, very rough */
+function mattressMat() {
   return new THREE.MeshStandardMaterial({
-    color:hex||0xC8C0B4, roughness:0.85, metalness:0.0
+    color:     0xF2EEE8,
+    roughness: 0.9,
+  });
+}
+
+/** Concrete / plaster — matte, no metalness */
+function concreteMat(hex) {
+  return new THREE.MeshStandardMaterial({
+    color:     hex || 0xC8C0B4,
+    roughness: 0.85,
+    metalness: 0.0,
   });
 }
 
@@ -63,39 +96,64 @@ function roundedBox(w,h,d,r,segs){
   return geo;
 }
 
-// ── Main furniture builder ───────────────────────────────────
-function buildFurniture(scene, type, colorHex){
+// ═══════════════════════════════════════════════════════════════
+//  buildFurniture  —  Procedural 3D furniture generator
+//  Builds a THREE.Group containing all meshes for one furniture item.
+//  All geometry is procedural — no external GLB / OBJ files needed.
+//
+//  @param {THREE.Scene} scene    - scene to add the group to
+//  @param {string}      type     - furniture type key (e.g. 'sofa', 'bed_double')
+//  @param {number}      colorHex - base color as Three.js integer
+//  @returns {THREE.Group}
+// ═══════════════════════════════════════════════════════════════
+function buildFurniture(scene, type, colorHex) {
   const g = new THREE.Group();
-  function add(geo,mat,x,y,z,rx,ry,rz){
-    const m = new THREE.Mesh(geo,mat);
-    m.position.set(x||0,y||0,z||0);
-    if(rx) m.rotation.x=rx;
-    if(ry) m.rotation.y=ry;
-    if(rz) m.rotation.z=rz;
-    m.castShadow=true; m.receiveShadow=true;
-    g.add(m); return m;
-  }
-  function box(w,h,d,mat,x,y,z,rx,ry,rz){
-    return add(new THREE.BoxGeometry(w,h,d,1,1,1), mat, x,y,z,rx,ry,rz);
-  }
-  function cyl(rt,rb,h,seg,mat,x,y,z,rx,ry,rz){
-    return add(new THREE.CylinderGeometry(rt,rb,h,seg||16), mat, x,y,z,rx,ry,rz);
-  }
-  function sph(r,mat,x,y,z){
-    return add(new THREE.SphereGeometry(r,16,12), mat, x,y,z);
-  }
-  function rbox(w,h,d,r,mat,x,y,z){
-    return add(roundedBox(w,h,d,r), mat, x,y,z);
-  }
-  function tor(R,r,seg,tseg,mat,x,y,z,rx){
-    return add(new THREE.TorusGeometry(R,r,seg||8,tseg||24), mat, x,y,z,rx||0,0,0);
+
+  // ── Internal mesh helper ────────────────────────────────────
+  // Creates a mesh, positions/rotates it, enables shadows, adds to group
+  function add(geo, mat, x, y, z, rx, ry, rz) {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x || 0, y || 0, z || 0);
+    if (rx) m.rotation.x = rx;
+    if (ry) m.rotation.y = ry;
+    if (rz) m.rotation.z = rz;
+    m.castShadow    = true;
+    m.receiveShadow = true;
+    g.add(m);
+    return m;
   }
 
-  const C = colorHex||0x8B5E3C;
-  const Cdark  = Math.max(0, C - 0x303030);
-  const Clight = Math.min(0xFFFFFF, C + 0x404040);
+  /** Shorthand: box mesh */
+  function box(w, h, d, mat, x, y, z, rx, ry, rz) {
+    return add(new THREE.BoxGeometry(w, h, d, 1, 1, 1), mat, x, y, z, rx, ry, rz);
+  }
+  /** Shorthand: cylinder mesh */
+  function cyl(rt, rb, h, seg, mat, x, y, z, rx, ry, rz) {
+    return add(new THREE.CylinderGeometry(rt, rb, h, seg || 16), mat, x, y, z, rx, ry, rz);
+  }
 
-  switch(type){
+  /** Shorthand: sphere mesh */
+  function sph(r, mat, x, y, z) {
+    return add(new THREE.SphereGeometry(r, 16, 12), mat, x, y, z);
+  }
+
+  /** Shorthand: rounded-corner box mesh */
+  function rbox(w, h, d, r, mat, x, y, z) {
+    return add(roundedBox(w, h, d, r), mat, x, y, z);
+  }
+
+  /** Shorthand: torus mesh */
+  function tor(R, r, seg, tseg, mat, x, y, z, rx) {
+    return add(new THREE.TorusGeometry(R, r, seg || 8, tseg || 24), mat, x, y, z, rx || 0, 0, 0);
+  }
+
+  // ── Color variants derived from the base color ──────────────
+  const C      = colorHex || 0x8B5E3C;
+  const Cdark  = Math.max(0,        C - 0x303030); // darker shade for contrast
+  const Clight = Math.min(0xFFFFFF, C + 0x404040); // lighter shade for highlights
+
+  // ── Build geometry based on furniture type ────────────────────
+  switch (type) {
 
     // ══════════════════════════════════════════════════════════
     case 'sofa': {
@@ -488,137 +546,218 @@ function buildFurniture(scene, type, colorHex){
     }
   }
 
-  g.traverse(m=>{ if(m.isMesh){ m.castShadow=true; m.receiveShadow=true; } });
+  // Enable shadows on every mesh in the group
+  g.traverse(m => {
+    if (m.isMesh) {
+      m.castShadow    = true;
+      m.receiveShadow = true;
+    }
+  });
+
   return g;
 }
 
-// ══════════════════════════════════════════════════════════════
-// Main Drag-Drop Placement Scene
-// ══════════════════════════════════════════════════════════════
-function initFurniturePlacement(canvasId, savedLayout, onSave){
+// ═══════════════════════════════════════════════════════════════
+//  initFurniturePlacement  —  Interactive drag-and-drop room planner
+//  Renders a 3D room where furniture items can be placed, rotated,
+//  and repositioned by dragging. Layout is saved/restored as JSON.
+//
+//  @param {string}   canvasId    - ID of the target <canvas> element
+//  @param {Object}   savedLayout - previously saved layout to restore
+//  @param {Function} onSave      - callback when layout is exported
+// ═══════════════════════════════════════════════════════════════
+function initFurniturePlacement(canvasId, savedLayout, onSave) {
   const canvas = document.getElementById(canvasId);
-  if(!canvas) return;
-  if(_fScenes[canvasId]){
-    try{ _fScenes[canvasId].renderer.dispose(); }catch{}
+  if (!canvas) return;
+
+  // Dispose any existing scene on this canvas before re-initialising
+  if (_fScenes[canvasId]) {
+    try { _fScenes[canvasId].renderer.dispose(); } catch {}
     delete _fScenes[canvasId];
   }
 
-  savedLayout = savedLayout||{};
-  const W=canvas.clientWidth||800, H=canvas.clientHeight||550;
+  savedLayout = savedLayout || {};
 
-  const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
-  renderer.setSize(W,H);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  renderer.shadowMap.enabled=true;
-  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  renderer.setClearColor(0x1C1C28,1);
-  renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.1;
+  // ── Canvas dimensions ────────────────────────────────────────
+  const W = canvas.clientWidth  || 800;
+  const H = canvas.clientHeight || 550;
 
+  // ── Renderer — ACESFilmic tonemapping for realistic look ──────
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled   = true;
+  renderer.shadowMap.type      = THREE.PCFSoftShadowMap;
+  renderer.setClearColor(0x1C1C28, 1);
+  renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+
+  // ── Scene & depth fog ────────────────────────────────────────
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x1C1C28, 0.035);
 
-  const camera = new THREE.PerspectiveCamera(42,W/H,0.1,80);
-  camera.position.set(0,9,10);
-  camera.lookAt(0,0,0);
+  // ── Camera — perspective, positioned above and in front ───────
+  const camera = new THREE.PerspectiveCamera(42, W / H, 0.1, 80);
+  camera.position.set(0, 9, 10);
+  camera.lookAt(0, 0, 0);
 
-  // ── Lighting ──
-  const ambL = new THREE.AmbientLight(0xFFEEDD,0.5);
+  // ── Lighting ─────────────────────────────────────────────────
+  // Warm ambient fill
+  const ambL = new THREE.AmbientLight(0xFFEEDD, 0.5);
   scene.add(ambL);
-  const sunL = new THREE.DirectionalLight(0xFFF8F0,1.2);
-  sunL.position.set(5,10,6);
-  sunL.castShadow=true;
-  sunL.shadow.mapSize.width=sunL.shadow.mapSize.height=2048;
-  sunL.shadow.camera.near=0.5; sunL.shadow.camera.far=30;
-  sunL.shadow.camera.left=sunL.shadow.camera.bottom=-8;
-  sunL.shadow.camera.right=sunL.shadow.camera.top=8;
-  sunL.shadow.bias=-0.001;
+
+  // Main directional sun light with shadows
+  const sunL = new THREE.DirectionalLight(0xFFF8F0, 1.2);
+  sunL.position.set(5, 10, 6);
+  sunL.castShadow                = true;
+  sunL.shadow.mapSize.width      = 2048;
+  sunL.shadow.mapSize.height     = 2048;
+  sunL.shadow.camera.near        = 0.5;
+  sunL.shadow.camera.far         = 30;
+  sunL.shadow.camera.left        = -8;
+  sunL.shadow.camera.bottom      = -8;
+  sunL.shadow.camera.right       =  8;
+  sunL.shadow.camera.top         =  8;
+  sunL.shadow.bias               = -0.001;
   scene.add(sunL);
-  const fillL = new THREE.DirectionalLight(0xCCDDFF,0.35);
-  fillL.position.set(-4,4,-3); scene.add(fillL);
 
-  // ── Room ──
-  const ROOM_W=8, ROOM_D=8;
-  // Floor — parquet wood look via grid pattern
-  const floorGeo = new THREE.PlaneGeometry(ROOM_W,ROOM_D,16,16);
-  const floorMat = new THREE.MeshStandardMaterial({color:0xC4A882,roughness:0.78,metalness:0.02});
-  const floor = new THREE.Mesh(floorGeo,floorMat);
-  floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
+  // Cool blue fill from opposite side for depth
+  const fillL = new THREE.DirectionalLight(0xCCDDFF, 0.35);
+  fillL.position.set(-4, 4, -3);
+  scene.add(fillL);
 
-  // Subtle floor grid lines (plank lines)
-  const gridH = new THREE.GridHelper(ROOM_W,16,0xAA9060,0xAA9060);
-  gridH.material.opacity=0.18; gridH.material.transparent=true;
-  gridH.position.y=0.002; scene.add(gridH);
+  // ── Room geometry ────────────────────────────────────────────
+  // The room is an 8×8 unit square. Walls are thin planes rather than
+  // box meshes to keep the polygon count low.
+  const ROOM_W = 8;  // width  (X axis)
+  const ROOM_D = 8;  // depth  (Z axis)
 
-  // Walls
-  const wallMat = new THREE.MeshStandardMaterial({color:0xEDE8E0,roughness:0.92});
-  const wallMatL = new THREE.MeshStandardMaterial({color:0xE5E0D8,roughness:0.92});
-  // Back wall
-  const bwGeo = new THREE.PlaneGeometry(ROOM_W,3.6);
-  const bw = new THREE.Mesh(bwGeo,wallMat);
-  bw.position.set(0,1.8,-ROOM_D/2); scene.add(bw);
-  // Left wall
-  const lw = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_D,3.6),wallMatL);
-  lw.rotation.y=Math.PI/2; lw.position.set(-ROOM_W/2,1.8,0); scene.add(lw);
-  // Right wall
-  const rw = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_D,3.6),wallMatL);
-  rw.rotation.y=-Math.PI/2; rw.position.set(ROOM_W/2,1.8,0); scene.add(rw);
-  // Ceiling
-  const ceilGeo = new THREE.PlaneGeometry(ROOM_W+0.1,ROOM_D+0.1);
-  const ceilMat = new THREE.MeshStandardMaterial({color:0xF8F5EE,roughness:0.95});
-  const ceil = new THREE.Mesh(ceilGeo,ceilMat);
-  ceil.rotation.x=Math.PI/2; ceil.position.set(0,3.6,0); scene.add(ceil);
+  // Floor — warm wood tone with slight metalness for a varnished look
+  const floorGeo = new THREE.PlaneGeometry(ROOM_W, ROOM_D, 16, 16);
+  const floorMat = new THREE.MeshStandardMaterial({
+    color:     0xC4A882,
+    roughness: 0.78,
+    metalness: 0.02,
+  });
+  const floor = new THREE.Mesh(floorGeo, floorMat);
+  floor.rotation.x    = -Math.PI / 2;  // rotate to lie flat on Y=0
+  floor.receiveShadow = true;
+  scene.add(floor);
 
-  // Ceiling light fixture
-  cyl(0.32,0.24,0.12,24, new THREE.MeshStandardMaterial({color:0xF8F0D8,emissive:0x442200,emissiveIntensity:0.3,roughness:0.5}),
-    0,3.5,0);
-  function cyl(rt,rb,h,seg,mat,x,y,z){ // local helper for room
-    const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,seg), mat);
-    m.position.set(x,y,z); scene.add(m);
+  // Subtle grid overlay to simulate wood plank lines on the floor
+  const gridH = new THREE.GridHelper(ROOM_W, 16, 0xAA9060, 0xAA9060);
+  gridH.material.opacity     = 0.18;  // very faint — purely decorative
+  gridH.material.transparent = true;
+  gridH.position.y           = 0.002; // slightly above floor to avoid z-fighting
+  scene.add(gridH);
+
+  // ── Walls ────────────────────────────────────────────────────
+  // Back wall is slightly lighter than side walls for depth perception
+  const wallMat  = new THREE.MeshStandardMaterial({ color: 0xEDE8E0, roughness: 0.92 });
+  const wallMatL = new THREE.MeshStandardMaterial({ color: 0xE5E0D8, roughness: 0.92 });
+
+  // Back wall — centre of negative Z edge
+  const bwGeo = new THREE.PlaneGeometry(ROOM_W, 3.6);
+  const bw    = new THREE.Mesh(bwGeo, wallMat);
+  bw.position.set(0, 1.8, -ROOM_D / 2);
+  scene.add(bw);
+
+  // Left wall — rotated 90° to face inward (positive X direction)
+  const lw = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_D, 3.6), wallMatL);
+  lw.rotation.y = Math.PI / 2;
+  lw.position.set(-ROOM_W / 2, 1.8, 0);
+  scene.add(lw);
+
+  // Right wall — rotated -90° to face inward (negative X direction)
+  const rw = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_D, 3.6), wallMatL);
+  rw.rotation.y = -Math.PI / 2;
+  rw.position.set(ROOM_W / 2, 1.8, 0);
+  scene.add(rw);
+
+  // Ceiling — slightly larger than floor to avoid visible gaps at edges
+  const ceilGeo = new THREE.PlaneGeometry(ROOM_W + 0.1, ROOM_D + 0.1);
+  const ceilMat = new THREE.MeshStandardMaterial({ color: 0xF8F5EE, roughness: 0.95 });
+  const ceil    = new THREE.Mesh(ceilGeo, ceilMat);
+  ceil.rotation.x = Math.PI / 2;   // rotate to face downward
+  ceil.position.set(0, 3.6, 0);
+  scene.add(ceil);
+
+  // ── Ceiling light fixture ────────────────────────────────────
+  // Local cyl helper — scoped to room setup only, not exported
+  function cyl(rt, rb, h, seg, mat, x, y, z) {
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat);
+    m.position.set(x, y, z);
+    scene.add(m);
   }
-  const cLight = new THREE.PointLight(0xFFEECC,1.5,12);
-  cLight.position.set(0,3.4,0); scene.add(cLight);
 
-  // ── Catalog ──
-  const CATALOG=[
-    {id:'sofa',         label:'Sofa',          color:0x5D5A7E, icon:'🛋️'},
-    {id:'armchair',     label:'Armchair',      color:0x7B4F3A, icon:'🪑'},
-    {id:'bed_double',   label:'Double Bed',    color:0x7B4F2A, icon:'🛏️'},
-    {id:'bed_single',   label:'Single Bed',    color:0x7A8B6E, icon:'🛏️'},
-    {id:'dining_table', label:'Dining Table',  color:0xA0734A, icon:'🍽️'},
-    {id:'dining_chair', label:'Dining Chair',  color:0xA0734A, icon:'🪑'},
-    {id:'chair',        label:'Chair',         color:0x8B6040, icon:'🪑'},
-    {id:'wardrobe',     label:'Wardrobe',      color:0x9B7B5A, icon:'🚪'},
-    {id:'tv_unit',      label:'TV Unit',       color:0x4A3A2A, icon:'📺'},
-    {id:'bookshelf',    label:'Bookshelf',     color:0x8B6A3A, icon:'📚'},
-    {id:'coffee_table', label:'Coffee Table',  color:0xA08060, icon:'☕'},
-    {id:'lamp',         label:'Floor Lamp',    color:0xC0A060, icon:'💡'},
-    {id:'plant',        label:'Indoor Plant',  color:0x3A6A40, icon:'🪴'},
-    {id:'mirror',       label:'Mirror',        color:0xC8A060, icon:'🪞'},
-    {id:'desk',         label:'Desk',          color:0x9B7A4A, icon:'🖥️'},
+  // Visible pendant light shade with warm emissive glow
+  cyl(0.32, 0.24, 0.12, 24,
+    new THREE.MeshStandardMaterial({
+      color:            0xF8F0D8,
+      emissive:         0x442200,
+      emissiveIntensity: 0.3,
+      roughness:        0.5,
+    }),
+    0, 3.5, 0
+  );
+
+  // Warm point light below the fixture — radius 12 covers the whole room
+  const cLight = new THREE.PointLight(0xFFEECC, 1.5, 12);
+  cLight.position.set(0, 3.4, 0);
+  scene.add(cLight);
+
+  // ── Furniture catalog ────────────────────────────────────────
+  // All 15 available furniture types with default colors and UI icons.
+  // The id field maps to buildFurniture() type keys.
+  const CATALOG = [
+    { id: 'sofa',         label: 'Sofa',          color: 0x5D5A7E, icon: '🛋️' },
+    { id: 'armchair',     label: 'Armchair',      color: 0x7B4F3A, icon: '🪑' },
+    { id: 'bed_double',   label: 'Double Bed',    color: 0x7B4F2A, icon: '🛏️' },
+    { id: 'bed_single',   label: 'Single Bed',    color: 0x7A8B6E, icon: '🛏️' },
+    { id: 'dining_table', label: 'Dining Table',  color: 0xA0734A, icon: '🍽️' },
+    { id: 'dining_chair', label: 'Dining Chair',  color: 0xA0734A, icon: '🪑' },
+    { id: 'chair',        label: 'Chair',         color: 0x8B6040, icon: '🪑' },
+    { id: 'wardrobe',     label: 'Wardrobe',      color: 0x9B7B5A, icon: '🚪' },
+    { id: 'tv_unit',      label: 'TV Unit',       color: 0x4A3A2A, icon: '📺' },
+    { id: 'bookshelf',    label: 'Bookshelf',     color: 0x8B6A3A, icon: '📚' },
+    { id: 'coffee_table', label: 'Coffee Table',  color: 0xA08060, icon: '☕' },
+    { id: 'lamp',         label: 'Floor Lamp',    color: 0xC0A060, icon: '💡' },
+    { id: 'plant',        label: 'Indoor Plant',  color: 0x3A6A40, icon: '🪴' },
+    { id: 'mirror',       label: 'Mirror',        color: 0xC8A060, icon: '🪞' },
+    { id: 'desk',         label: 'Desk',          color: 0x9B7A4A, icon: '🖥️' },
   ];
 
-  // ── Placed items ──
-  const placed=[];
+  // ── Restore saved layout ─────────────────────────────────────
+  // Placed items array — tracks all furniture currently in the scene
+  const placed = [];
 
-  Object.entries(savedLayout).forEach(([key,data])=>{
-    if(!data) return;
-    const cat=CATALOG.find(c=>c.id===key); if(!cat) return;
-    const items=Array.isArray(data)?data:[data];
-    items.forEach(item=>{
-      if(item.visible===false) return;
-      const mesh=buildFurniture(scene,cat.id,cat.color);
-      mesh.position.set(item.x||0,0,item.z||0);
-      mesh.rotation.y=item.rotY||0;
+  // Rebuild scene from the savedLayout object passed at init time.
+  // Each key maps to a CATALOG id; value can be a single item or an array.
+  Object.entries(savedLayout).forEach(([key, data]) => {
+    if (!data) return;
+
+    const cat = CATALOG.find(c => c.id === key);
+    if (!cat) return;
+
+    // Normalise single-item layouts to arrays for consistent processing
+    const items = Array.isArray(data) ? data : [data];
+
+    items.forEach(item => {
+      if (item.visible === false) return;  // skip hidden items
+
+      const mesh = buildFurniture(scene, cat.id, cat.color);
+      mesh.position.set(item.x || 0, 0, item.z || 0);
+      mesh.rotation.y = item.rotY || 0;
       scene.add(mesh);
-      placed.push({mesh,type:cat.id,id:key+'_'+Date.now(),rotY:item.rotY||0});
+      placed.push({ mesh, type: cat.id, id: key + '_' + Date.now(), rotY: item.rotY || 0 });
     });
   });
 
-  // ── Interaction ──
-  const raycaster=new THREE.Raycaster();
-  const mouse=new THREE.Vector2();
-  let dragging=null, dragOffset=new THREE.Vector3();
+  // ── Interaction state ─────────────────────────────────────────
+  const raycaster  = new THREE.Raycaster();
+  const mouse      = new THREE.Vector2();
+  let dragging     = null;
+  let dragOffset   = new THREE.Vector3();
   let selected=null;
   let orbitDragging=false, orbitPrev={x:0,y:0};
   let camTheta=0.48, camPhi=0.72, camDist=16;
@@ -654,7 +793,7 @@ function initFurniturePlacement(canvasId, savedLayout, onSave){
         if(m.isMesh) m.material.emissive?.setHex(0x1A1400);
       });
     }
-    const rp=document.getElementById('furn-action-panel');
+    const rp=document.getElementById(canvasId==='c3d-tfurn' ? 'tfurn-action-panel' : 'furn-action-panel');
     if(rp) rp.style.display=selected?'flex':'none';
   }
 
@@ -709,63 +848,158 @@ function initFurniturePlacement(canvasId, savedLayout, onSave){
   },{passive:false});
   canvas.addEventListener('contextmenu',e=>e.preventDefault());
 
-  // ── Public API ──
-  function addFurniture(type,colorHex){
-    const cat=CATALOG.find(c=>c.id===type);
-    const color=colorHex||cat?.color||0x888888;
-    const mesh=buildFurniture(scene,type,color);
-    mesh.position.set((Math.random()-0.5)*3,0,(Math.random()-0.5)*3);
+  // ── Public API ──────────────────────────────────────────────
+
+  /**
+   * Add a furniture item to the center of the room.
+   * The item is immediately selected so the user can drag it.
+   * @param {string} type     - furniture type key
+   * @param {number} colorHex - optional color override
+   */
+  function addFurniture(type, colorHex) {
+    const cat   = CATALOG.find(c => c.id === type);
+    const color = colorHex || cat?.color || 0x888888;
+    const mesh  = buildFurniture(scene, type, color);
+
+    // Place near center with slight random offset to avoid stacking
+    mesh.position.set(
+      (Math.random() - 0.5) * 3,
+      0,
+      (Math.random() - 0.5) * 3
+    );
     scene.add(mesh);
-    const item={mesh,type,id:type+'_'+Date.now(),rotY:0};
+
+    const item = { mesh, type, id: type + '_' + Date.now(), rotY: 0 };
     placed.push(item);
     selectObj(item);
   }
 
-  function rotateSelected(deg){
-    if(!selected) return;
-    selected.rotY+=deg*Math.PI/180;
-    selected.mesh.rotation.y=selected.rotY;
+  /**
+   * Rotate the currently selected furniture item by the given degrees.
+   * @param {number} deg - degrees to rotate (positive = clockwise)
+   */
+  function rotateSelected(deg) {
+    if (!selected) return;
+    selected.rotY             += deg * Math.PI / 180;
+    selected.mesh.rotation.y  = selected.rotY;
   }
 
-  function deleteSelected(){
-    if(!selected) return;
+  /**
+   * Remove the currently selected item from the scene and placed list.
+   */
+  function deleteSelected() {
+    if (!selected) return;
     scene.remove(selected.mesh);
-    placed.splice(placed.indexOf(selected),1);
+    placed.splice(placed.indexOf(selected), 1);
     selectObj(null);
   }
 
-  function getLayout(){
-    const layout={};
-    placed.forEach(p=>{
-      if(!layout[p.type]) layout[p.type]=[];
+  /**
+   * Export the current layout as a plain JSON-serialisable object.
+   * Coordinates are rounded to 2 decimal places.
+   * @returns {Object} layout keyed by furniture type
+   */
+  function getLayout() {
+    const layout = {};
+    placed.forEach(p => {
+      if (!layout[p.type]) layout[p.type] = [];
       layout[p.type].push({
-        x:Math.round(p.mesh.position.x*100)/100,
-        z:Math.round(p.mesh.position.z*100)/100,
-        rotY:Math.round(p.rotY*100)/100,
-        visible:true
+        x:       Math.round(p.mesh.position.x * 100) / 100,
+        z:       Math.round(p.mesh.position.z * 100) / 100,
+        rotY:    Math.round(p.rotY             * 100) / 100,
+        visible: true,
       });
     });
     return layout;
   }
 
-  function animate(){
+  // ── Render loop ───────────────────────────────────────────────
+  function animate() {
     requestAnimationFrame(animate);
-    renderer.render(scene,camera);
+    renderer.render(scene, camera);
   }
   animate();
 
-  const ro=new ResizeObserver(()=>{
-    const w=canvas.clientWidth,h=canvas.clientHeight;
-    if(!w||!h) return;
-    renderer.setSize(w,h);
-    camera.aspect=w/h;
+  // ── Responsive resize ─────────────────────────────────────────
+  const ro = new ResizeObserver(() => {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
   });
   ro.observe(canvas);
 
-  _fScenes[canvasId]={renderer,scene,camera,placed,CATALOG,
-    addFurniture,rotateSelected,deleteSelected,getLayout,updateCamera};
+  // Store and return the scene reference
+  _fScenes[canvasId] = {
+    renderer, scene, camera, placed, CATALOG,
+    addFurniture, rotateSelected, deleteSelected, getLayout, updateCamera,
+  };
   return _fScenes[canvasId];
 }
 
-function getFurnitureScene(canvasId){return _fScenes[canvasId];}
+/** Get a previously initialised furniture scene by canvas ID */
+function getFurnitureScene(canvasId) { return _fScenes[canvasId]; }
+
+// ═══════════════════════════════════════════════════════════════
+//  Export helpers
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Download a PNG screenshot of the furniture layout.
+ * Triggers one extra render to ensure the frame is up-to-date
+ * before converting the canvas to a data URL.
+ *
+ * @param {string} canvasId - ID of the canvas to capture
+ * @param {string} filename - base filename (without extension)
+ */
+function downloadFurnitureScreenshot(canvasId, filename) {
+  const sc = _fScenes[canvasId];
+  if (!sc) return;
+
+  // Render one extra frame so the screenshot is current
+  sc.renderer.render(sc.scene, sc.camera);
+
+  const dataURL = sc.renderer.domElement.toDataURL('image/png');
+  const a       = document.createElement('a');
+  a.href         = dataURL;
+  a.download     = (filename || 'furniture-layout') + '.png';
+  a.click();
+}
+
+/**
+ * Download the current furniture layout as a JSON file.
+ * The JSON includes property name, role, timestamp, and item positions.
+ *
+ * @param {string} canvasId  - ID of the canvas whose layout to export
+ * @param {string} propTitle - property name to embed in the JSON
+ * @param {string} role      - 'landlord' | 'tenant' label for the file
+ */
+function downloadFurnitureJSON(canvasId, propTitle, role) {
+  const sc = _fScenes[canvasId];
+  if (!sc) return;
+
+  const layout = sc.getLayout();
+
+  const payload = {
+    property:  propTitle || 'Property',
+    role:      role      || 'layout',
+    savedAt:   new Date().toISOString(),
+    furniture: layout,
+  };
+
+  const blob = new Blob(
+    [JSON.stringify(payload, null, 2)],
+    { type: 'application/json' }
+  );
+
+  const safeTitle = (propTitle || 'furniture').replace(/\s+/g, '-').toLowerCase();
+  const safeRole  = role || 'layout';
+
+  const a   = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `${safeTitle}-${safeRole}.json`;
+  a.click();
+
+  URL.revokeObjectURL(a.href);
+}
