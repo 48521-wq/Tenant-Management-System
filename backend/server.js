@@ -22,6 +22,16 @@ const express   = require('express');
 const cors      = require('cors');
 const connectDB = require('./config/database');
 
+// ── Route modules ─────────────────────────────────────────────
+// Imported once here to keep the mount section clean and readable
+const authRoutes        = require('./routes/auth');
+const userRoutes        = require('./routes/users');
+const propertyRoutes    = require('./routes/properties');
+const complaintRoutes   = require('./routes/complaints');
+const maintenanceRoutes = require('./routes/maintenance');
+const paymentRoutes     = require('./routes/payments');
+const leaseRoutes       = require('./routes/leases');
+
 // ── Create Express application ────────────────────────────────
 const app = express();
 
@@ -58,13 +68,13 @@ app.use(express.urlencoded({ extended: true }));
 // Each route module is mounted under its own /api/* namespace.
 // All route files live in ./routes/ and export an Express router.
 
-app.use('/api/auth',        require('./routes/auth'));        // login, register, Google OAuth
-app.use('/api/users',       require('./routes/users'));       // admin user management
-app.use('/api/properties',  require('./routes/properties')); // property CRUD + 3D config
-app.use('/api/complaints',  require('./routes/complaints')); // tenant complaints
-app.use('/api/maintenance', require('./routes/maintenance')); // maintenance requests
-app.use('/api/payments',    require('./routes/payments'));    // rent payment records
-app.use('/api/leases',      require('./routes/leases'));      // lease agreements
+app.use('/api/auth',        authRoutes);        // login, register, Google OAuth
+app.use('/api/users',       userRoutes);        // admin user management
+app.use('/api/properties',  propertyRoutes);    // property CRUD + 3D config
+app.use('/api/complaints',  complaintRoutes);   // tenant complaints
+app.use('/api/maintenance', maintenanceRoutes); // maintenance requests
+app.use('/api/payments',    paymentRoutes);     // rent payment records
+app.use('/api/leases',      leaseRoutes);       // lease agreements
 
 // ── Health Check ──────────────────────────────────────────────
 // Quick endpoint to verify the server is up and responding.
@@ -100,12 +110,14 @@ app.use((err, req, res, next) => {
 
 // ── Start HTTP Server ─────────────────────────────────────────
 // Falls back to port 5000 if PORT is not set in .env
-const PORT = process.env.PORT || 5000;
+const PORT    = process.env.PORT || 5000;
+const BASE    = `http://localhost:${PORT}`;
+const ROUTES  = ['auth', 'users', 'properties', 'complaints', 'maintenance', 'payments', 'leases'];
 
 app.listen(PORT, () => {
-  console.log(`🚀 TMS Backend running on http://localhost:${PORT}`);
-  console.log(`📍 API Base:  http://localhost:${PORT}/api`);
-  console.log(`❤️  Health:   http://localhost:${PORT}/api/health`);
+  console.log(`🚀 TMS Backend running on ${BASE}`);
+  console.log(`📍 API Base:  ${BASE}/api`);
+  console.log(`❤️  Health:   ${BASE}/api/health`);
   console.log(`🔑 Admin:     ${process.env.ADMIN_EMAIL}`);
-  console.log(`✅ Routes:    auth, users, properties, complaints, maintenance, payments, leases`);
+  console.log(`✅ Routes:    ${ROUTES.join(', ')}`);
 });

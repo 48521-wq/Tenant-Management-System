@@ -14,14 +14,16 @@ const gClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ── Token helpers ────────────────────────────────────────────────
 
+// JWT validity window — after this the user must log in again
+const TOKEN_EXPIRY = '7d';
+
 /**
  * Sign a JWT with the application secret.
- * Tokens are valid for 7 days — after that the user must log in again.
  * @param {Object} payload - data to embed in the token (id, role, etc.)
  * @returns {string} signed JWT string
  */
 const genToken = (payload) =>
-  jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+  jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
 
 /**
  * Generate an admin-specific JWT.
@@ -34,19 +36,19 @@ const adminTok = () =>
 /**
  * Build the safe public user object that is returned in API responses.
  * Sensitive fields (hashed password, internal flags) are excluded.
- * @param {Object} user - Mongoose user document
+ * @param {Object} u - Mongoose user document
  * @returns {Object} plain serializable user object
  */
-const publicUser = (user) => ({
-  id:        user._id,
-  name:      user.name,
-  email:     user.email,
-  role:      user.role,
-  status:    user.status,
-  verified:  user.verified,
-  phone:     user.phone,
-  city:      user.city,
-  createdAt: user.createdAt,
+const publicUser = ({ _id, name, email, role, status, verified, phone, city, createdAt }) => ({
+  id: _id,
+  name,
+  email,
+  role,
+  status,
+  verified,
+  phone,
+  city,
+  createdAt,
 });
 
 /**
