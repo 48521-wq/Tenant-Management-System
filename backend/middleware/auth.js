@@ -51,7 +51,7 @@ const forbidden = (res, message = 'Access denied.') =>
  * @returns {string|null} raw JWT string, or null
  */
 function extractToken(req) {
-  const header = req.headers.authorization;
+  const { authorization: header } = req.headers;
   if (header && header.startsWith('Bearer ')) {
     return header.split(' ')[1];
   }
@@ -85,19 +85,15 @@ const protect = async (req, res, next) => {
 
     // ── Step 3: Admin shortcut ────────────────────────────────
     // Admin tokens carry isAdmin: true and an email claim.
-    // The admin account has no User document in MongoDB — it is
-    // managed entirely through ADMIN_EMAIL and ADMIN_PASSWORD in .env.
-    if (decoded.isAdmin) {
-      req.user = {
-        isAdmin: true,
-        email:   decoded.email,
-      };
+    const { isAdmin, email, id } = decoded;
+
+    if (isAdmin) {
+      req.user = { isAdmin: true, email };
       return next(); // skip DB lookup entirely
     }
 
     // ── Step 4: Regular user — look up in database ────────────
-    // decoded.id is the MongoDB ObjectId stored in the JWT payload
-    const user = await User.findById(decoded.id);
+    const user = await User.findById(id);
     if (!user) {
       // Token was valid but user was deleted from DB since it was issued
       return unauthorized(res, 'User not found.');

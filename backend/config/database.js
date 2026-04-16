@@ -28,15 +28,15 @@ const dns      = require('dns');
 // Works alongside the family: 4 option in MONGO_OPTIONS below.
 dns.setDefaultResultOrder('ipv4first');
 
+// ── Connection timeout constants ──────────────────────────────────
+// Extracted as named values so they are easy to tune in one place.
+const SERVER_SELECTION_TIMEOUT_MS = 15_000; // ms to find an available server
+const SOCKET_TIMEOUT_MS           = 45_000; // ms before an open socket times out
+
 // ── Mongoose connection options ───────────────────────────────────
 const MONGO_OPTIONS = {
-  // How long Mongoose will wait to find an available server
-  // before throwing a ServerSelectionTimeoutError (default is 30 000 ms)
-  serverSelectionTimeoutMS: 15000,
-
-  // How long Mongoose will wait for a response on an already-open
-  // TCP socket before timing out the operation (default is 0 — no limit)
-  socketTimeoutMS: 45000,
+  serverSelectionTimeoutMS: SERVER_SELECTION_TIMEOUT_MS,
+  socketTimeoutMS:          SOCKET_TIMEOUT_MS,
 
   // Force IPv4 TCP connections to the Atlas cluster
   // Paired with dns.setDefaultResultOrder('ipv4first') above
