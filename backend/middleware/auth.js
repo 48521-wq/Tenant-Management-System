@@ -1,137 +1,110 @@
-// ═══════════════════════════════════════════════════════════════
-//  Auth Middleware  —  middleware/auth.js
-//  Tenant Management System
-//
-//  Exports two Express middleware functions:
-//
-//    protect    — Verifies the JWT in the Authorization header.
-//                 Attaches the authenticated user to req.user.
-//                 Used on any route that requires a logged-in user.
-//
-//    adminOnly  — Restricts a route to admin users only.
-//                 Must be chained AFTER protect.
-//
-//  Usage example:
-//    router.get('/secure', protect, handler);
-//    router.delete('/admin-only', protect, adminOnly, handler);
-// ═══════════════════════════════════════════════════════════════
+/**
+ * @file auth.js
+ * @description JWT verification and role-based access control middleware.
+ *
+ * Exports:
+ *   protect   → Verifies Bearer JWT. Attaches authenticated user to req.user.
+ *   adminOnly → Restricts route to admin callers only. Must follow protect.
+ *
+ * Usage:
+ *   router.get('/secure',       protect,            handler);
+ *   router.delete('/admin/:id', protect, adminOnly, handler);
+ */
 
 const jwt  = require('jsonwebtoken');
 const User = require('../models/User');
 
-// ── Response helpers ──────────────────────────────────────────
-// Centralised so that status codes and message format stay consistent
-// across all authentication rejection points.
+// HTTP status codes as named constants
+const HTTP_UNAUTHORIZED = 401;
+const HTTP_FORBIDDEN    = 403;
+
+// ── Response helpers ───────────────────────────────────────────
+
+const rejectUnauthorized = (res, message = 'Not authorized.') =>
+  res.status(HTTP_UNAUTHORIZED).json({ success: false, message });
+
+const rejectForbidden = (res, message = 'Access denied.') =>
+  res.status(HTTP_FORBIDDEN).json({ success: false, message });
+
+// ── Token extraction ───────────────────────────────────────────
 
 /**
- * Send a 401 Unauthorized response.
- * @param {Object} res     - Express response object
- * @param {string} message - Human-readable reason
- */
-const unauthorized = (res, message = 'Not authorized.') =>
-  res.status(401).json({ success: false, message });
-
-/**
- * Send a 403 Forbidden response.
- * @param {Object} res     - Express response object
- * @param {string} message - Human-readable reason
- */
-const forbidden = (res, message = 'Access denied.') =>
-  res.status(403).json({ success: false, message });
-
-// ── Token extractor ───────────────────────────────────────────
-
-/**
- * Parse the Bearer token from the Authorization header.
+ * Extracts the raw JWT from the Authorization header.
  * Returns null if the header is missing or malformed.
  *
- * Expected format:  Authorization: Bearer <token>
- *
- * @param {Object} req - Express request object
- * @returns {string|null} raw JWT string, or null
+ * @param {import('express').Request} req
+ * @returns {string|null}
  */
-function extractToken(req) {
-  const { authorization: header } = req.headers;
-  if (header && header.startsWith('Bearer ')) {
-    return header.split(' ')[1];
+function extractBearerToken(req) {
+  const authHeader = req.headers.authorization;
+  const BEARER_PREFIX = 'Bearer ';
+
+  if (authHeader && authHeader.startsWith(BEARER_PREFIX)) {
+    return authHeader.slice(BEARER_PREFIX.length);
   }
   return null;
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  protect  —  JWT verification middleware
-//
-//  Flow:
-//    1. Extract Bearer token from Authorization header
-//    2. Verify token signature and expiry against JWT_SECRET
-//    3. If admin token  → attach { isAdmin: true } to req.user
-//    4. If user token   → look up user in MongoDB
-//    5. Check account is not blocked
-//    6. Attach full user document to req.user and call next()
-// ═══════════════════════════════════════════════════════════════
+// ── protect middleware ─────────────────────────────────────────
+
+/**
+ * Verifies the incoming JWT and attaches the caller's identity to req.user.
+ *
+ * Flow:
+ *   1. Extract Bearer token from Authorization header
+ *   2. Verify signature and expiry using JWT_SECRET
+ *   3. Admin token  → attach { isAdmin: true, email } — no DB lookup needed
+ *   4. Regular user → fetch User document from MongoDB
+ *   5. Reject if account is blocked
+ *   6. Attach user to req.user and call next()
+ *
+ * @type {import('express').RequestHandler}
+ */
 const protect = async (req, res, next) => {
   try {
-    // ── Step 1: Extract token ─────────────────────────────────
-    // Returns null if the Authorization header is absent or malformed
-    const token = extractToken(req);
+    const token = extractBearerToken(req);
     if (!token) {
-      return unauthorized(res, 'Not authorized. No token provided.');
+      return rejectUnauthorized(res, 'Not authorized. No token provided.');
     }
 
-    // ── Step 2: Verify JWT signature and expiry ───────────────
-    // jwt.verify() throws synchronously on invalid/expired tokens.
-    // We catch those in the catch block below.
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // ── Step 3: Admin shortcut ────────────────────────────────
-    // Admin tokens carry isAdmin: true and an email claim.
-    const { isAdmin, email, id } = decoded;
-
-    if (isAdmin) {
-      req.user = { isAdmin: true, email };
-      return next(); // skip DB lookup entirely
+    // Admin has no DB document — build stub directly from token payload
+    if (decoded.isAdmin) {
+      req.user = { isAdmin: true, email: decoded.email };
+      return next();
     }
 
-    // ── Step 4: Regular user — look up in database ────────────
-    const user = await User.findById(id);
+    // Fetch regular user by ID stored in the token
+    const user = await User.findById(decoded.id);
     if (!user) {
-      // Token was valid but user was deleted from DB since it was issued
-      return unauthorized(res, 'User not found.');
+      return rejectUnauthorized(res, 'User not found.');
     }
 
-    // ── Step 5: Check account status ─────────────────────────
-    // A blocked account cannot access any protected route,
-    // even with a valid token — until admin unblocks it.
+    // Block suspended accounts regardless of token validity
     if (user.status === 'blocked') {
-      return forbidden(res, 'Account suspended. Contact admin.');
+      return rejectForbidden(res, 'Account suspended. Contact admin.');
     }
 
-    // ── Step 6: Attach user document and proceed ─────────────
-    // Downstream route handlers access the user via req.user
     req.user = user;
     next();
 
   } catch (err) {
-    // jwt.verify() throws one of:
-    //   JsonWebTokenError  — malformed token or wrong secret
-    //   TokenExpiredError  — token exp claim is in the past
-    //   NotBeforeError     — token nbf claim is in the future
-    unauthorized(res, 'Invalid or expired token.');
+    rejectUnauthorized(res, 'Invalid or expired token.');
   }
 };
 
-// ═══════════════════════════════════════════════════════════════
-//  adminOnly  —  Role guard middleware
-//
-//  Restricts the route to admin users only.
-//  MUST be used after the protect middleware so that req.user
-//  is already populated before this check runs.
-//
-//  Usage:  router.delete('/:id', protect, adminOnly, handler);
-// ═══════════════════════════════════════════════════════════════
+// ── adminOnly middleware ───────────────────────────────────────
+
+/**
+ * Allows only admin callers through.
+ * Must be used after protect (req.user must already be set).
+ *
+ * @type {import('express').RequestHandler}
+ */
 const adminOnly = (req, res, next) => {
   if (req.user && req.user.isAdmin) return next();
-  forbidden(res, 'Admin access required.');
+  rejectForbidden(res, 'Admin access required.');
 };
 
 module.exports = { protect, adminOnly };

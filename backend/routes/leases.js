@@ -1,14 +1,17 @@
-// ═══════════════════════════════════════════════════════════════
-//  Lease Routes  —  /api/leases
-//  Tenants sign lease agreements; landlords and admin can view them.
-//
-//  Access is scoped by role:
-//    Tenant   → can sign new leases and view their own agreements
-//    Landlord → can view leases for their properties
-//    Admin    → can view all leases and delete any record
-//
-//  Base path: /api/leases
-// ═══════════════════════════════════════════════════════════════
+/**
+ * @file leases.js
+ * @route /api/leases
+ * @description Lease agreement management for tenants, landlords, and admin.
+ *
+ * Access is scoped by role:
+ *   Tenant   → sign new leases; view their own agreements
+ *   Landlord → view leases for their properties
+ *   Admin    → view all leases; delete any record
+ *
+ * A new lease is stamped 'active' and signedAt at creation time.
+ * Property and landlord details are cached on the lease so it remains
+ * readable even if those records are later removed from the database.
+ */
 
 const express = require('express');
 const Lease   = require('../models/Lease');
@@ -16,49 +19,74 @@ const { protect, adminOnly } = require('../middleware/auth');
 
 const router = express.Router();
 
-// ── Helper: build query filter based on user role ────────────────
-// Admin    → all leases (no filter)
-// Tenant   → only their own leases
-// Landlord → leases linked to their properties
-function buildLeaseFilter(user) {
+// ─────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────
+
+/**
+ * Builds a role-scoped MongoDB query filter for leases.
+ *
+ *   Admin    → all leases (no filter applied)
+ *   Tenant   → only leases they signed (tenantId)
+ *   Landlord → leases linked to their properties (landlordId)
+ *
+ * @param {Object} currentUser - req.user populated by protect middleware
+ * @returns {Object} Mongoose-compatible filter object
+ */
+function buildLeaseFilter(currentUser) {
   const filter = {};
 
-  if (user.isAdmin) {
-    // Admin sees everything — no filter needed
-  } else if (user.role === 'tenant') {
-    filter.tenantId = user._id;
-  } else if (user.role === 'landlord') {
-    filter.landlordId = user._id;
+  if (currentUser.isAdmin) {
+    // Admin sees everything — intentionally empty filter
+  } else if (currentUser.role === 'tenant') {
+    filter.tenantId = currentUser._id;
+  } else if (currentUser.role === 'landlord') {
+    filter.landlordId = currentUser._id;
   }
 
   return filter;
 }
 
-// ── GET /api/leases ──────────────────────────────────────────────
-// Retrieve lease agreements scoped to the requesting user's role.
-// Results are sorted newest first (most recently signed at top).
+// ─────────────────────────────────────────────────────────────────
+// GET /api/leases
+// ─────────────────────────────────────────────────────────────────
+/**
+ * Retrieves lease agreements scoped to the requesting user's role.
+ * Sorted newest first (most recently signed agreement at the top).
+ *
+ * @middleware protect - Valid JWT required
+ * @returns {200} { success, count, leases }
+ * @returns {500} Unexpected server error
+ */
 router.get('/', protect, async (req, res) => {
   try {
-    const filter = buildLeaseFilter(req.user);
-    const leases = await Lease.find(filter).sort({ createdAt: -1 });
+    const filter    = buildLeaseFilter(req.user);
+    const allLeases = await Lease.find(filter).sort({ createdAt: -1 });
 
-    res.json({ success: true, count: leases.length, leases });
+    res.json({ success: true, count: allLeases.length, leases: allLeases });
 
-  } catch (e) {
+  } catch (err) {
     res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
-// ── POST /api/leases ─────────────────────────────────────────────
-// Create and digitally sign a new lease agreement (tenants only).
-//
-// The lease is stamped with status 'active' and a signedAt timestamp
-// at the moment of creation. Property details and landlord info are
-// cached on the lease so the record remains readable even if the
-// property or landlord is later deleted.
+// ─────────────────────────────────────────────────────────────────
+// POST /api/leases
+// ─────────────────────────────────────────────────────────────────
+/**
+ * Creates and digitally signs a new lease agreement (tenants only).
+ * Tenant identity (tenantId, tenantName, tenantEmail) is taken from the
+ * verified JWT — it cannot be substituted by the client's request body.
+ * The lease is created with status 'active' and signedAt set to now.
+ *
+ * @middleware protect - Valid JWT required
+ * @returns {201} { success, lease }
+ * @returns {403} Admin cannot sign leases
+ * @returns {500} Unexpected server error
+ */
 router.post('/', protect, async (req, res) => {
   try {
-    // Admin should not sign leases — this is a tenant action
+    // Admin accounts should not sign leases — this is a tenant action
     if (req.user?.isAdmin)
       return res.status(403).json({ success: false, message: 'Admin cannot sign leases.' });
 
@@ -73,9 +101,8 @@ router.post('/', protect, async (req, res) => {
       terms,
     } = req.body;
 
-    // Tenant identity comes from the verified JWT — not from the request body
-    const lease = await Lease.create({
-      tenantId:        req.user._id,
+    const newLease = await Lease.create({
+      tenantId:        req.user._id,          // from JWT — cannot be spoofed
       tenantName:      req.user.name,
       tenantEmail:     req.user.email,
       landlordName:    landlordName    || '',
@@ -86,26 +113,35 @@ router.post('/', protect, async (req, res) => {
       endDate,
       duration,
       terms,
-      status:   'active',    // new leases are active immediately
-      signedAt: new Date(),  // timestamp when the tenant signed
+      status:   'active',   // new leases are active immediately upon signing
+      signedAt: new Date(), // timestamp of when the tenant signed
     });
 
-    res.status(201).json({ success: true, lease });
+    res.status(201).json({ success: true, lease: newLease });
 
-  } catch (e) {
+  } catch (err) {
     res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
-// ── DELETE /api/leases/:id ───────────────────────────────────────
-// Permanently remove a lease record from the database (admin only).
-// This is a hard delete — the agreement cannot be recovered.
+// ─────────────────────────────────────────────────────────────────
+// DELETE /api/leases/:id
+// ─────────────────────────────────────────────────────────────────
+/**
+ * Permanently removes a lease record from the database (admin only).
+ * Hard delete — the agreement cannot be recovered once removed.
+ *
+ * @middleware protect   - Valid JWT required
+ * @middleware adminOnly - Admin access required
+ * @returns {200} { success, message }
+ * @returns {500} Unexpected server error
+ */
 router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
     await Lease.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted.' });
 
-  } catch (e) {
+  } catch (err) {
     res.status(500).json({ success: false, message: 'Server error.' });
   }
 });

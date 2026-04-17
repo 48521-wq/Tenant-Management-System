@@ -102,19 +102,15 @@ const userSchema = new mongoose.Schema(
 // ── Pre-save hook: hash password before storing ──────────────────
 // Uses bcrypt with 10 salt rounds — runs only when password is changed.
 // Skips if password is missing (Google OAuth users have no password).
-const BCRYPT_SALT_ROUNDS = 10;
-
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password') || !this.password) return next();
-  this.password = await bcrypt.hash(this.password, BCRYPT_SALT_ROUNDS);
+  this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
-/**
- * Verify a plain-text password against the stored bcrypt hash.
- * @param {string} plainText - password entered by the user
- * @returns {Promise<boolean>} true if the password matches
- */
+// ── Instance method: verify a plain-text password ────────────────
+// Returns a Promise<boolean> — true if the password matches the hash.
+// Called in the login route after loading the user with .select('+password').
 userSchema.methods.comparePassword = function (plainText) {
   return bcrypt.compare(plainText, this.password);
 };

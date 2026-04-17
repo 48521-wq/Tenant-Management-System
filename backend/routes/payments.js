@@ -1,14 +1,16 @@
-// ═══════════════════════════════════════════════════════════════
-//  Payment Routes  —  /api/payments
-//  Handles rent payment records for tenants, landlords, and admin.
-//
-//  Access is scoped by role:
-//    Tenant   → can create payments and view their own records
-//    Landlord → can view payments received for their properties
-//    Admin    → can view all payments and delete any record
-//
-//  Base path: /api/payments
-// ═══════════════════════════════════════════════════════════════
+/**
+ * @file payments.js
+ * @route /api/payments
+ * @description Rent payment record management for tenants, landlords, and admin.
+ *
+ * Access is scoped by role:
+ *   Tenant   → record new payments; view their own records
+ *   Landlord → view payments received for their properties
+ *   Admin    → view all payments; delete any record
+ *
+ * When a tenant records a payment, status is set to 'paid'
+ * and paidAt is stamped automatically at creation time.
+ */
 
 const express  = require('express');
 const Payment  = require('../models/Payment');
@@ -16,88 +18,123 @@ const { protect, adminOnly } = require('../middleware/auth');
 
 const router = express.Router();
 
-// ── Helper: build query filter based on logged-in user role ──────
-// Admin → all payments (with optional status filter)
-// Tenant → only their own payments
-// Landlord → only payments made to them
-function buildPaymentFilter(user, query) {
+// ─────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────
+
+/**
+ * Builds a role-scoped MongoDB query filter for payment records.
+ *
+ *   Admin    → all payments; optional ?status narrowing
+ *   Tenant   → only their own payment records (tenantId)
+ *   Landlord → payments made to them (landlordId)
+ *
+ * @param {Object} currentUser - req.user populated by protect middleware
+ * @param {Object} queryParams - req.query from the incoming request
+ * @returns {Object} Mongoose-compatible filter object
+ */
+function buildPaymentFilter(currentUser, queryParams) {
   const filter = {};
 
-  if (user.isAdmin) {
+  if (currentUser.isAdmin) {
     // Admin can optionally filter by payment status
-    if (query.status) filter.status = query.status;
-  } else if (user.role === 'tenant') {
-    filter.tenantId = user._id;
-  } else if (user.role === 'landlord') {
-    filter.landlordId = user._id;
+    if (queryParams.status) filter.status = queryParams.status;
+  } else if (currentUser.role === 'tenant') {
+    filter.tenantId = currentUser._id;
+  } else if (currentUser.role === 'landlord') {
+    filter.landlordId = currentUser._id;
   }
 
   return filter;
 }
 
-// ── GET /api/payments ────────────────────────────────────────────
-// Retrieve payments scoped to the requesting user's role.
-// Sorted newest first so the most recent payment appears at the top.
+// ─────────────────────────────────────────────────────────────────
+// GET /api/payments
+// ─────────────────────────────────────────────────────────────────
+/**
+ * Retrieves payment records scoped to the requesting user's role.
+ * Sorted newest first so the most recent payment appears at the top.
+ *
+ * @middleware protect - Valid JWT required
+ * @returns {200} { success, count, payments }
+ * @returns {500} Unexpected server error
+ */
 router.get('/', protect, async (req, res) => {
   try {
-    const filter   = buildPaymentFilter(req.user, req.query);
-    const payments = await Payment.find(filter).sort({ createdAt: -1 });
+    const filter      = buildPaymentFilter(req.user, req.query);
+    const allPayments = await Payment.find(filter).sort({ createdAt: -1 });
 
-    res.json({ success: true, count: payments.length, payments });
+    res.json({ success: true, count: allPayments.length, payments: allPayments });
 
-  } catch (e) {
+  } catch (err) {
     res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
-// ── POST /api/payments ───────────────────────────────────────────
-// Create a new payment record (tenants only).
-//
-// When a tenant pays rent they record it here. The status is
-// automatically set to 'paid' and paidAt is stamped with the
-// current timestamp. Admin cannot create payments directly.
+// ─────────────────────────────────────────────────────────────────
+// POST /api/payments
+// ─────────────────────────────────────────────────────────────────
+/**
+ * Records a new rent payment (tenants only).
+ * status is set to 'paid' and paidAt is stamped automatically —
+ * the client does not need to supply these fields.
+ * Admin cannot create payment entries on behalf of tenants.
+ *
+ * @middleware protect - Valid JWT required
+ * @returns {201} { success, payment }
+ * @returns {400} Missing amount or month
+ * @returns {403} Admin cannot add payments
+ * @returns {500} Unexpected server error
+ */
 router.post('/', protect, async (req, res) => {
   try {
-    // Admin should not directly create payment entries on behalf of tenants
+    // Admin should not create payment records directly
     if (req.user?.isAdmin)
       return res.status(403).json({ success: false, message: 'Admin cannot add payments.' });
 
     const { amount, month, method, note, propertyTitle } = req.body;
 
-    // Both amount and month are required to create a meaningful record
+    // Both amount and month are required to create a meaningful payment record
     if (!amount || !month)
       return res.status(400).json({ success: false, message: 'Amount and month required.' });
 
-    // Create the record linked to the authenticated tenant
-    // status is set to 'paid' automatically at creation time
-    const payment = await Payment.create({
-      tenantId:      req.user._id,
+    const newPayment = await Payment.create({
+      tenantId:      req.user._id,   // from JWT — cannot be spoofed by the client
       tenantName:    req.user.name,
       amount,
       month,
       method,
       note,
       propertyTitle: propertyTitle || '',
-      status:        'paid',
-      paidAt:        new Date(),
+      status:        'paid',         // automatically set at creation time
+      paidAt:        new Date(),     // timestamp of when the payment was recorded
     });
 
-    res.status(201).json({ success: true, payment });
+    res.status(201).json({ success: true, payment: newPayment });
 
-  } catch (e) {
+  } catch (err) {
     res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
-// ── DELETE /api/payments/:id ─────────────────────────────────────
-// Permanently delete a payment record (admin only).
-// This is a hard delete — use with caution as it cannot be undone.
+// ─────────────────────────────────────────────────────────────────
+// DELETE /api/payments/:id
+// ─────────────────────────────────────────────────────────────────
+/**
+ * Permanently removes a payment record (admin only).
+ * Hard delete — use with caution as this cannot be undone.
+ *
+ * @middleware protect   - Valid JWT required
+ * @middleware adminOnly - Admin access required
+ * @returns {200} { success, message }
+ * @returns {500} Unexpected server error
+ */
 router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
     await Payment.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted.' });
 
-  } catch (e) {
+  } catch (err) {
     res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
