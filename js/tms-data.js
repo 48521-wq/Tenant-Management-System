@@ -7,157 +7,80 @@
 
 const TMS = {
 
-  // ── Storage Keys ─────────────────────────────────────
-  // Centralized key map — prevents typo bugs across files
+  // ── Keys ────────────────────────────────────────────
   KEYS: {
-    tenants:       'tms_tenants',
-    landlords:     'tms_landlords',
-    properties:    'tms_properties',
-    complaints:    'tms_complaints',
-    maintenance:   'tms_maintenance',
-    agreements:    'tms_agreements',
-    logs:          'tms_logs',
+    tenants: 'tms_tenants',
+    landlords: 'tms_landlords',
+    properties: 'tms_properties',
+    complaints: 'tms_complaints',
+    maintenance: 'tms_maintenance',
+    agreements: 'tms_agreements',
+    logs: 'tms_logs',
     notifications: 'tms_notifications',
-    users:         'tms_users',
+    users: 'tms_users',
   },
 
-  // ── Generic get/save ──────────────────────────────────
-
-  /**
-   * Read a JSON array from LocalStorage.
-   * Returns empty array if key is missing or JSON is invalid.
-   * @param {string} key - localStorage key
-   * @returns {Array}
-   */
+  // ── Generic get/save ────────────────────────────────
   get(key) {
-    try {
-      return JSON.parse(localStorage.getItem(key) || '[]');
-    } catch (e) {
-      return [];
-    }
+    try { return JSON.parse(localStorage.getItem(key) || '[]'); }
+    catch (e) { return []; }
   },
-
-  /**
-   * Persist a JSON array to LocalStorage.
-   * @param {string} key - localStorage key
-   * @param {Array}  arr - data to store
-   */
   save(key, arr) {
     localStorage.setItem(key, JSON.stringify(arr));
   },
 
-  // ── ID generator ──────────────────────────────────────
-
-  /**
-   * Generate a short unique ID with a readable prefix.
-   * Example: newId('T') → "T-LXYZ123"
-   * @param {string} prefix
-   * @returns {string}
-   */
+  // ── ID generator ────────────────────────────────────
   newId(prefix) {
     return prefix + '-' + Date.now().toString(36).toUpperCase();
   },
 
   // ─────────────────── TENANTS ───────────────────────
-
-  /** @returns {Array} all tenants from storage */
   getTenants() { return this.get(this.KEYS.tenants); },
-
-  /** @param {Array} d - tenant list to persist */
   saveTenants(d) { this.save(this.KEYS.tenants, d); },
 
-  /**
-   * Add a new tenant record to storage.
-   * Auto-assigns ID, default status, and join date.
-   * @param {Object} data - tenant fields
-   * @returns {Object} created tenant
-   */
   addTenant(data) {
     const list = this.getTenants();
-    const t = {
-      id:       this.newId('T'),
-      ...data,
-      status:   data.status || 'active',
-      joinedAt: new Date().toLocaleDateString('en-PK', { month: 'short', year: 'numeric' }),
-    };
+    const t = { id: this.newId('T'), ...data, status: data.status || 'active', joinedAt: new Date().toLocaleDateString('en-PK', { month: 'short', year: 'numeric' }) };
     list.push(t);
     this.saveTenants(list);
     this.addLog('success', `New tenant registered: ${t.name}`, 'admin');
     return t;
   },
 
-  /**
-   * Remove a tenant by ID.
-   * @param {string} id
-   */
   deleteTenant(id) {
     const list = this.getTenants().filter(t => t.id !== id);
     this.saveTenants(list);
     this.addLog('warn', `Tenant deleted: ${id}`, 'admin');
   },
 
-  /**
-   * Merge updated fields into an existing tenant record.
-   * @param {string} id
-   * @param {Object} data - fields to update
-   */
   updateTenant(id, data) {
     const list = this.getTenants().map(t => t.id === id ? { ...t, ...data } : t);
     this.saveTenants(list);
   },
 
   // ─────────────────── LANDLORDS ─────────────────────
-
-  /** @returns {Array} all landlords from storage */
   getLandlords() { return this.get(this.KEYS.landlords); },
-
-  /** @param {Array} d - landlord list to persist */
   saveLandlords(d) { this.save(this.KEYS.landlords, d); },
 
-  /**
-   * Add a new landlord record to storage.
-   * Default status is 'pending' until admin approves.
-   * @param {Object} data - landlord fields
-   * @returns {Object} created landlord
-   */
   addLandlord(data) {
     const list = this.getLandlords();
-    const l = {
-      id:       this.newId('L'),
-      ...data,
-      status:   data.status || 'pending',
-      joinedAt: new Date().toLocaleDateString('en-PK', { month: 'short', year: 'numeric' }),
-    };
+    const l = { id: this.newId('L'), ...data, status: data.status || 'pending', joinedAt: new Date().toLocaleDateString('en-PK', { month: 'short', year: 'numeric' }) };
     list.push(l);
     this.saveLandlords(list);
     this.addLog('info', `New landlord registered: ${l.name}`, 'system');
     return l;
   },
 
-  /**
-   * Remove a landlord by ID.
-   * @param {string} id
-   */
   deleteLandlord(id) {
     const list = this.getLandlords().filter(l => l.id !== id);
     this.saveLandlords(list);
   },
 
-  /**
-   * Merge updated fields into an existing landlord record.
-   * @param {string} id
-   * @param {Object} data - fields to update
-   */
   updateLandlord(id, data) {
     const list = this.getLandlords().map(l => l.id === id ? { ...l, ...data } : l);
     this.saveLandlords(list);
   },
 
-  /**
-   * Approve a landlord — sets status to 'approved' and
-   * fires a system notification.
-   * @param {string} id
-   */
   approveLandlord(id) {
     this.updateLandlord(id, { status: 'approved' });
     const l = this.getLandlords().find(l => l.id === id);
@@ -165,101 +88,51 @@ const TMS = {
     this.addNotif('Landlord Approved', `${l?.name || 'A landlord'} has been approved and can now list properties.`, 'green');
   },
 
-  /**
-   * Reject a landlord application — sets status to 'rejected'.
-   * @param {string} id
-   */
   rejectLandlord(id) {
     this.updateLandlord(id, { status: 'rejected' });
     this.addLog('warn', `Landlord rejected: ${id}`, 'admin');
   },
 
   // ─────────────────── PROPERTIES ────────────────────
-
-  /** @returns {Array} all properties from storage */
   getProperties() { return this.get(this.KEYS.properties); },
-
-  /** @param {Array} d - property list to persist */
   saveProperties(d) { this.save(this.KEYS.properties, d); },
 
-  /**
-   * Add a new property listing to storage.
-   * @param {Object} data - property fields
-   * @returns {Object} created property
-   */
   addProperty(data) {
     const list = this.getProperties();
-    const p = {
-      id:       this.newId('P'),
-      ...data,
-      status:   data.status || 'available',
-      listedAt: new Date().toLocaleDateString('en-PK', { month: 'short', year: 'numeric' }),
-    };
+    const p = { id: this.newId('P'), ...data, status: data.status || 'available', listedAt: new Date().toLocaleDateString('en-PK', { month: 'short', year: 'numeric' }) };
     list.push(p);
     this.saveProperties(list);
     this.addLog('success', `New property listed: ${p.title}`, 'landlord');
     return p;
   },
 
-  /**
-   * Remove a property by ID.
-   * @param {string} id
-   */
   deleteProperty(id) {
     const list = this.getProperties().filter(p => p.id !== id);
     this.saveProperties(list);
   },
 
-  /**
-   * Merge updated fields into an existing property record.
-   * @param {string} id
-   * @param {Object} data - fields to update
-   */
   updateProperty(id, data) {
     const list = this.getProperties().map(p => p.id === id ? { ...p, ...data } : p);
     this.saveProperties(list);
   },
 
-  /**
-   * Suspend a property — sets status to 'suspended'.
-   * @param {string} id
-   */
   suspendProperty(id) {
     this.updateProperty(id, { status: 'suspended' });
     this.addLog('warn', `Property suspended: ${id}`, 'admin');
   },
 
-  /**
-   * Restore a suspended property — sets status back to 'available'.
-   * @param {string} id
-   */
   restoreProperty(id) {
     this.updateProperty(id, { status: 'available' });
     this.addLog('info', `Property restored: ${id}`, 'admin');
   },
 
   // ─────────────────── COMPLAINTS ────────────────────
-
-  /** @returns {Array} all complaints from storage */
   getComplaints() { return this.get(this.KEYS.complaints); },
-
-  /** @param {Array} d - complaints list to persist */
   saveComplaints(d) { this.save(this.KEYS.complaints, d); },
 
-  /**
-   * File a new complaint and notify admin.
-   * Default status is 'open'.
-   * @param {Object} data - complaint fields (title, filedBy, etc.)
-   * @returns {Object} created complaint
-   */
   addComplaint(data) {
     const list = this.getComplaints();
-    const c = {
-      id:      this.newId('C'),
-      ...data,
-      status:  data.status || 'open',
-      filedAt: new Date().toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' }),
-    };
+    const c = { id: this.newId('C'), ...data, status: data.status || 'open', filedAt: new Date().toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' }) };
     list.push(c);
     this.saveComplaints(list);
     this.addLog('warn', `New complaint filed: ${c.title}`, data.filedBy || 'user');
@@ -267,85 +140,41 @@ const TMS = {
     return c;
   },
 
-  /**
-   * Mark a complaint as resolved.
-   * @param {string} id
-   */
   resolveComplaint(id) {
     this.updateComplaint(id, { status: 'resolved' });
     this.addLog('success', `Complaint resolved: ${id}`, 'admin');
   },
 
-  /**
-   * Merge updated fields into an existing complaint.
-   * @param {string} id
-   * @param {Object} data - fields to update
-   */
   updateComplaint(id, data) {
     const list = this.getComplaints().map(c => c.id === id ? { ...c, ...data } : c);
     this.saveComplaints(list);
   },
 
   // ─────────────────── MAINTENANCE ───────────────────
-
-  /** @returns {Array} all maintenance requests from storage */
   getMaintenance() { return this.get(this.KEYS.maintenance); },
-
-  /** @param {Array} d - maintenance list to persist */
   saveMaintenance(d) { this.save(this.KEYS.maintenance, d); },
 
-  /**
-   * Submit a new maintenance request.
-   * Default status is 'pending'.
-   * @param {Object} data - request fields (title, tenant, etc.)
-   * @returns {Object} created request
-   */
   addMaintenance(data) {
     const list = this.getMaintenance();
-    const m = {
-      id:      this.newId('M'),
-      ...data,
-      status:  data.status || 'pending',
-      filedAt: new Date().toLocaleDateString('en-PK', { day: '2-digit', month: 'short' }),
-    };
+    const m = { id: this.newId('M'), ...data, status: data.status || 'pending', filedAt: new Date().toLocaleDateString('en-PK', { day: '2-digit', month: 'short' }) };
     list.push(m);
     this.saveMaintenance(list);
     this.addLog('info', `Maintenance request: ${m.title}`, data.tenant || 'tenant');
     return m;
   },
 
-  /**
-   * Merge updated fields into an existing maintenance request.
-   * @param {string} id
-   * @param {Object} data - fields to update
-   */
   updateMaintenance(id, data) {
     const list = this.getMaintenance().map(m => m.id === id ? { ...m, ...data } : m);
     this.saveMaintenance(list);
   },
 
   // ─────────────────── AGREEMENTS ────────────────────
-
-  /** @returns {Array} all lease agreements from storage */
   getAgreements() { return this.get(this.KEYS.agreements); },
-
-  /** @param {Array} d - agreements list to persist */
   saveAgreements(d) { this.save(this.KEYS.agreements, d); },
 
-  /**
-   * Create a new lease agreement record.
-   * Default status is 'active'.
-   * @param {Object} data - agreement fields
-   * @returns {Object} created agreement
-   */
   addAgreement(data) {
     const list = this.getAgreements();
-    const a = {
-      id:        this.newId('AGR'),
-      ...data,
-      status:    data.status || 'active',
-      createdAt: new Date().toLocaleDateString('en-PK', { day: 'numeric', month: 'long', year: 'numeric' }),
-    };
+    const a = { id: this.newId('AGR'), ...data, status: data.status || 'active', createdAt: new Date().toLocaleDateString('en-PK', { day: 'numeric', month: 'long', year: 'numeric' }) };
     list.push(a);
     this.saveAgreements(list);
     this.addLog('success', `Lease agreement created: ${a.id}`, 'admin');
@@ -353,192 +182,121 @@ const TMS = {
   },
 
   // ─────────────────── LOGS ──────────────────────────
-
-  /** @returns {Array} activity log entries (most recent first) */
   getLogs() { return this.get(this.KEYS.logs); },
 
-  /**
-   * Prepend a new log entry. Keeps max 100 entries.
-   * @param {string} type - 'success' | 'warn' | 'info' | 'error'
-   * @param {string} msg  - human-readable log message
-   * @param {string} user - who triggered the action
-   */
   addLog(type, msg, user) {
     const logs = this.getLogs();
-    logs.unshift({
-      type,
-      msg,
-      user: user || 'system',
-      time: new Date().toLocaleString('en-PK', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
-    });
+    logs.unshift({ type, msg, user: user || 'system', time: new Date().toLocaleString('en-PK', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' }) });
     if (logs.length > 100) logs.pop();
     this.save(this.KEYS.logs, logs);
   },
 
   // ─────────────────── NOTIFICATIONS ─────────────────
-
-  /** @returns {Array} all notifications (most recent first) */
   getNotifs() { return this.get(this.KEYS.notifications); },
 
-  /**
-   * Prepend a notification and update badge counts in the UI.
-   * Keeps max 50 notifications.
-   * @param {string} title
-   * @param {string} msg
-   * @param {string} color - 'blue' | 'green' | 'red' | 'warn'
-   */
-  addNotif(title, msg, color) {
+  addNotif(title, msg, color, to = 'all', from = 'admin') {
     const notifs = this.getNotifs();
-    notifs.unshift({ title, msg, color: color || 'blue', read: false, time: 'just now' });
+    const toList = Array.isArray(to) ? to : [to || 'all'];
+    notifs.unshift({
+      title,
+      msg,
+      color: color || 'blue',
+      read: false,
+      time: new Date().toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' }),
+      to: toList,
+      from: from || 'admin',
+    });
     if (notifs.length > 50) notifs.pop();
     this.save(this.KEYS.notifications, notifs);
-    const unread = notifs.filter(n => !n.read).length;
-    document.querySelectorAll('.tn-badge, #notif-nb').forEach(el => el && (el.textContent = unread));
+    const unread = notifs.filter(n => !n.read && this._isNotifForUser(n)).length;
+    document.querySelectorAll('.tn-badge, #notif-nb, #nb, #nb2').forEach(el => el && (el.textContent = unread));
   },
 
-  /**
-   * Mark every notification as read and reset all badge counters to 0.
-   * Called when the user opens the notifications panel.
-   */
   markAllNotifsRead() {
     const notifs = this.getNotifs().map(n => ({ ...n, read: true }));
     this.save(this.KEYS.notifications, notifs);
-    // Reset all badge elements to 0 in the UI
-    document.querySelectorAll('.tn-badge, #notif-nb').forEach(el => el && (el.textContent = '0'));
+    document.querySelectorAll('.tn-badge, #notif-nb, #nb, #nb2').forEach(el => el && (el.textContent = '0'));
   },
 
   // ─────────────────── DASHBOARD STATS ───────────────
+  _isNotifForUser(notification) {
+    if (!notification) return false;
+    const current = this.getCurrentUser();
+    const recipients = Array.isArray(notification.to) ? notification.to : [notification.to || 'all'];
+    if (recipients.includes('all')) return true;
+    if (!current) return false;
+    if (current.role && recipients.includes(current.role)) return true;
+    if (current.email && recipients.includes(current.email)) return true;
+    return false;
+  },
 
-  /**
-   * Compute a summary stats object used to populate the admin dashboard.
-   * Reads all data collections from localStorage and derives counts.
-   *
-   * Returned keys:
-   *   totalUsers, tenants, landlords, properties, activeLeases,
-   *   openIssues, openComplaints, pendingLandlords, pendingMaintenance,
-   *   reportedProps, maintenance, complaints, unreadNotifs
-   *
-   * @returns {Object} flat stats object for dashboard rendering
-   */
   getStats() {
-    // Read all collections from localStorage
-    const tenants    = this.getTenants();
-    const landlords  = this.getLandlords();
+    const tenants = this.getTenants();
+    const landlords = this.getLandlords();
     const properties = this.getProperties();
     const complaints = this.getComplaints();
     const maintenance = this.getMaintenance();
     const agreements = this.getAgreements();
+    const users = (() => { try { return Object.keys(JSON.parse(localStorage.getItem('tms_users') || '{}')); } catch (e) { return []; } })();
 
-    // tms_users is an email-keyed object (separate from the tenants/landlords arrays)
-    const users = (() => {
-      try {
-        return Object.keys(JSON.parse(localStorage.getItem('tms_users') || '{}'));
-      } catch (e) {
-        return [];
-      }
-    })();
-
-    // Derive computed counts from the raw arrays
-    const openIssues       = complaints.filter(c => c.status === 'open').length
-                           + maintenance.filter(m => m.status === 'pending').length;
-    const activeLeases     = agreements.filter(a => a.status === 'active').length;
+    const openIssues = complaints.filter(c => c.status === 'open').length + maintenance.filter(m => m.status === 'pending').length;
+    const activeLeases = agreements.filter(a => a.status === 'active').length;
     const pendingLandlords = landlords.filter(l => l.status === 'pending').length;
-    const openComplaints   = complaints.filter(c => c.status === 'open').length;
-    const unreadNotifs     = this.getNotifs().filter(n => !n.read).length;
+    const openComplaints = complaints.filter(c => c.status === 'open').length;
+    const unreadNotifs = this.getNotifs().filter(n => !n.read && this._isNotifForUser(n)).length;
 
     return {
-      totalUsers:         users.length,
-      properties:         properties.length,
-      tenants:            tenants.length,
-      landlords:          landlords.length,
+      totalUsers: users.length,
+      properties: properties.length,
+      tenants: tenants.length,
+      landlords: landlords.length,
       activeLeases,
       openIssues,
       openComplaints,
       pendingLandlords,
       pendingMaintenance: maintenance.filter(m => m.status === 'pending').length,
-      reportedProps:      properties.filter(p => p.status === 'reported').length,
-      maintenance:        maintenance.length,
-      complaints:         complaints.length,
+      reportedProps: properties.filter(p => p.status === 'reported').length,
+      maintenance: maintenance.length,
+      complaints: complaints.length,
       unreadNotifs,
     };
   },
 
   // ─────────────────── CURRENT USER ──────────────────
-
-  /**
-   * Return the currently logged-in user's profile object.
-   * Checks localStorage for the active session email and looks
-   * up the matching user record.
-   *
-   * Returns null if no session is active or the user is not found.
-   * Admin is detected by comparing email against tms_admin_email.
-   *
-   * @returns {Object|null} user profile with name, role, email, initial
-   */
   getCurrentUser() {
     try {
-      const email = localStorage.getItem('tms_current_user');
+      let email = localStorage.getItem('tms_current_user');
+      if (!email) {
+        const currentUser = JSON.parse(localStorage.getItem('tms_user') || 'null');
+        email = currentUser?.email;
+      }
       if (!email) return null;
-
-      // Admin check — admin is not stored in tms_users object
       if (email === localStorage.getItem('tms_admin_email')) {
         return { name: 'Super Admin', role: 'admin', email, initial: 'A' };
       }
-
-      // Regular user — look up in the email-keyed users object
       const users = JSON.parse(localStorage.getItem('tms_users') || '{}');
-      const u = users[email];
+      const u = users[email] || JSON.parse(localStorage.getItem('tms_user') || 'null');
       if (!u) return null;
-
-      // Derive avatar initial from name, falling back to first char of email
       return { ...u, email, initial: (u.name || email)[0].toUpperCase() };
-
-    } catch (e) {
-      return null;
-    }
+    } catch (e) { return null; }
   },
 };
 
-// ══════════════════════════════════════════════════════════════
-//  Render Helpers — tms-data.js
-//  DOM update functions that read from TMS storage and
-//  write directly to the admin dashboard HTML elements.
-// ══════════════════════════════════════════════════════════════
+// ── Render helpers ──────────────────────────────────────
 
-/**
- * Refresh all stat counters, chart bars, sidebar badges, and
- * action counts across the admin dashboard in one call.
- *
- * Reads: TMS.getStats()
- * Writes to:
- *   [data-stat]       — any element with a matching stat key
- *   chart-*           — horizontal bar chart segments
- *   nb-*              — sidebar notification badges
- *   act-*             — action panel counters
- *   #notif-count      — notification bell badge
- */
 function tmsUpdateStats() {
   const stats = TMS.getStats();
-
-  // ── [data-stat] elements ──────────────────────────────────
-  // Any element with data-stat="key" gets its textContent updated
   document.querySelectorAll('[data-stat]').forEach(el => {
     const key = el.getAttribute('data-stat');
     if (stats[key] !== undefined) el.textContent = stats[key];
   });
 
-  // ── Chart bars ────────────────────────────────────────────
-  // Each bar's width is a percentage of the largest value in the set
-  const max = Math.max(
-    stats.tenants, stats.landlords, stats.properties,
-    stats.complaints, stats.maintenance,
-    1  // minimum of 1 to avoid division by zero
-  );
+  const max = Math.max(stats.tenants, stats.landlords, stats.properties, stats.complaints, stats.maintenance, 1);
   const bars = {
-    'chart-tenants':     stats.tenants,
-    'chart-landlords':   stats.landlords,
-    'chart-properties':  stats.properties,
-    'chart-complaints':  stats.complaints,
+    'chart-tenants': stats.tenants,
+    'chart-landlords': stats.landlords,
+    'chart-properties': stats.properties,
+    'chart-complaints': stats.complaints,
     'chart-maintenance': stats.maintenance,
   };
   Object.entries(bars).forEach(([id, val]) => {
@@ -550,29 +308,22 @@ function tmsUpdateStats() {
     }
   });
 
-  // ── Sidebar notification badges ───────────────────────────
-  // Badges are hidden (display:none) when their count is zero
   const badgeMap = {
-    'nb-reported':     stats.reportedProps,
-    'nb-complaints':   stats.openComplaints,
-    'nb-maintenance':  stats.pendingMaintenance,
+    'nb-reported': stats.reportedProps,
+    'nb-complaints': stats.openComplaints,
+    'nb-maintenance': stats.pendingMaintenance,
     'nb-verification': stats.pendingLandlords,
-    'nb-notifs':       stats.unreadNotifs,
+    'nb-notifs': stats.unreadNotifs,
   };
   Object.entries(badgeMap).forEach(([id, val]) => {
     const el = document.getElementById(id);
-    if (el) {
-      el.textContent   = val;
-      el.style.display = val > 0 ? '' : 'none';
-    }
+    if (el) { el.textContent = val; el.style.display = val > 0 ? '' : 'none'; }
   });
 
-  // ── Action panel counters ─────────────────────────────────
-  // Plain text counters shown in the quick-action cards
   const actMap = {
-    'act-pending-docs':    stats.pendingLandlords,
-    'act-new-reports':     stats.reportedProps,
-    'act-awaiting-appr':   stats.pendingLandlords,
+    'act-pending-docs': stats.pendingLandlords,
+    'act-new-reports': stats.reportedProps,
+    'act-awaiting-appr': stats.pendingLandlords,
     'act-open-complaints': stats.openComplaints,
   };
   Object.entries(actMap).forEach(([id, val]) => {
@@ -580,37 +331,23 @@ function tmsUpdateStats() {
     if (el) el.textContent = val;
   });
 
-  // ── Notification bell badge ───────────────────────────────
   const notifBadge = document.getElementById('notif-count');
   if (notifBadge) notifBadge.textContent = stats.unreadNotifs;
 }
 
-// ── Render Tenants Table ──────────────────────────────────────
-
-/**
- * Re-render the tenants table on the admin dashboard.
- * Optionally filters by name or email (case-insensitive).
- * @param {string} [filter] - search term to filter by
- */
+// ── Render Tenants Table ────────────────────────────────
 function tmsRenderTenants(filter) {
   const tbody = document.getElementById('tenants-tbody');
   if (!tbody) return;
-
   let list = TMS.getTenants();
-
-  // Apply search filter if provided
-  if (filter) {
-    list = list.filter(t =>
-      t.name?.toLowerCase().includes(filter.toLowerCase()) ||
-      t.email?.toLowerCase().includes(filter.toLowerCase())
-    );
-  }
-
+  if (filter) list = list.filter(t =>
+    t.name?.toLowerCase().includes(filter.toLowerCase()) ||
+    t.email?.toLowerCase().includes(filter.toLowerCase())
+  );
   if (!list.length) {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No tenants yet. Add one from the form below.</td></tr>`;
     return;
   }
-
   tbody.innerHTML = list.map((t, i) => `
     <tr>
       <td style="color:var(--muted)">${String(i + 1).padStart(2, '0')}</td>
@@ -627,48 +364,29 @@ function tmsRenderTenants(filter) {
     </tr>`).join('');
 }
 
-/** Toggle a tenant's status between active and blocked, then re-render. */
 function tmsBlockTenant(id) {
   const t = TMS.getTenants().find(t => t.id === id);
   TMS.updateTenant(id, { status: t?.status === 'blocked' ? 'active' : 'blocked' });
-  tmsRenderTenants();
-  tmsUpdateStats();
+  tmsRenderTenants(); tmsUpdateStats();
 }
-
-/** Confirm and permanently delete a tenant record, then re-render. */
 function tmsDeleteTenant(id) {
   if (!confirm('Delete this tenant?')) return;
-  TMS.deleteTenant(id);
-  tmsRenderTenants();
-  tmsUpdateStats();
+  TMS.deleteTenant(id); tmsRenderTenants(); tmsUpdateStats();
 }
 
-// ── Render Landlords Table ────────────────────────────────────
-
-/**
- * Re-render the landlords table on the admin dashboard.
- * Optionally filters by name or email (case-insensitive).
- * @param {string} [filter] - search term to filter by
- */
+// ── Render Landlords Table ──────────────────────────────
 function tmsRenderLandlords(filter) {
   const tbody = document.getElementById('landlords-tbody');
   if (!tbody) return;
-
   let list = TMS.getLandlords();
-
-  // Apply search filter if provided
-  if (filter) {
-    list = list.filter(l =>
-      l.name?.toLowerCase().includes(filter.toLowerCase()) ||
-      l.email?.toLowerCase().includes(filter.toLowerCase())
-    );
-  }
-
+  if (filter) list = list.filter(l =>
+    l.name?.toLowerCase().includes(filter.toLowerCase()) ||
+    l.email?.toLowerCase().includes(filter.toLowerCase())
+  );
   if (!list.length) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No landlords registered yet.</td></tr>`;
     return;
   }
-
   tbody.innerHTML = list.map((l, i) => `
     <tr>
       <td style="color:var(--muted)">${String(i + 1).padStart(2, '0')}</td>
@@ -684,62 +402,35 @@ function tmsRenderLandlords(filter) {
     </tr>`).join('');
 }
 
-/** Approve a pending landlord application, then re-render. */
 function tmsApproveLandlord(id) {
-  TMS.approveLandlord(id);
-  tmsRenderLandlords();
-  tmsUpdateStats();
+  TMS.approveLandlord(id); tmsRenderLandlords(); tmsUpdateStats();
 }
-
-/** Reject a pending landlord application, then re-render. */
 function tmsRejectLandlord(id) {
-  TMS.rejectLandlord(id);
-  tmsRenderLandlords();
-  tmsUpdateStats();
+  TMS.rejectLandlord(id); tmsRenderLandlords(); tmsUpdateStats();
 }
-
-/** Toggle a landlord between approved and blocked, then re-render. */
 function tmsBlockLandlord(id) {
   const l = TMS.getLandlords().find(l => l.id === id);
   TMS.updateLandlord(id, { status: l?.status === 'blocked' ? 'approved' : 'blocked' });
-  tmsRenderLandlords();
-  tmsUpdateStats();
+  tmsRenderLandlords(); tmsUpdateStats();
 }
-
-/** Confirm and permanently delete a landlord record, then re-render. */
 function tmsDeleteLandlord(id) {
   if (!confirm('Delete this landlord?')) return;
-  TMS.deleteLandlord(id);
-  tmsRenderLandlords();
-  tmsUpdateStats();
+  TMS.deleteLandlord(id); tmsRenderLandlords(); tmsUpdateStats();
 }
 
-// ── Render Properties Table ──────────────────────────────────────
-
-/**
- * Re-render the properties table on the admin dashboard.
- * Optionally filters by property title or city (case-insensitive).
- * @param {string} [filter] - search term to filter by
- */
+// ── Render Properties Table ─────────────────────────────
 function tmsRenderProperties(filter) {
   const tbody = document.getElementById('properties-tbody');
   if (!tbody) return;
-
   let list = TMS.getProperties();
-
-  // Apply search filter if provided
-  if (filter) {
-    list = list.filter(p =>
-      p.title?.toLowerCase().includes(filter.toLowerCase()) ||
-      p.city?.toLowerCase().includes(filter.toLowerCase())
-    );
-  }
-
+  if (filter) list = list.filter(p =>
+    p.title?.toLowerCase().includes(filter.toLowerCase()) ||
+    p.city?.toLowerCase().includes(filter.toLowerCase())
+  );
   if (!list.length) {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No properties listed yet.</td></tr>`;
     return;
   }
-
   tbody.innerHTML = list.map((p, i) => `
     <tr>
       <td style="color:var(--muted)">${p.id}</td>
@@ -756,41 +447,26 @@ function tmsRenderProperties(filter) {
     </tr>`).join('');
 }
 
-/** Toggle a property between suspended and available, then re-render. */
 function tmsSuspendProperty(id) {
   const p = TMS.getProperties().find(p => p.id === id);
-  // If already suspended, restore it; otherwise suspend it
   if (p?.status === 'suspended') TMS.restoreProperty(id);
   else TMS.suspendProperty(id);
-  tmsRenderProperties();
-  tmsUpdateStats();
+  tmsRenderProperties(); tmsUpdateStats();
 }
-
-/** Confirm and permanently delete a property listing, then re-render. */
 function tmsDeleteProperty(id) {
   if (!confirm('Delete this property?')) return;
-  TMS.deleteProperty(id);
-  tmsRenderProperties();
-  tmsUpdateStats();
+  TMS.deleteProperty(id); tmsRenderProperties(); tmsUpdateStats();
 }
 
-// ── Render Complaints List ────────────────────────────────────────
-
-/**
- * Re-render the complaints list on the admin dashboard.
- * Shows all complaints with status badges and resolve/delete actions.
- */
+// ── Render Complaints List ──────────────────────────────
 function tmsRenderComplaints() {
   const container = document.getElementById('complaints-list');
   if (!container) return;
-
   const list = TMS.getComplaints();
-
   if (!list.length) {
     container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">No complaints filed yet.</div>`;
     return;
   }
-
   container.innerHTML = list.map(c => `
     <div class="list-item">
       <div class="li-icon ci-red">📣</div>
@@ -809,38 +485,23 @@ function tmsRenderComplaints() {
     </div>`).join('');
 }
 
-/** Mark a complaint as resolved, then re-render the complaints list. */
 function tmsResolveComplaint(id) {
-  TMS.resolveComplaint(id);
-  tmsRenderComplaints();
-  tmsUpdateStats();
+  TMS.resolveComplaint(id); tmsRenderComplaints(); tmsUpdateStats();
 }
-
-/** Remove a complaint from storage, then re-render the complaints list. */
 function tmsDeleteComplaint(id) {
   const list = TMS.getComplaints().filter(c => c.id !== id);
-  TMS.saveComplaints(list);
-  tmsRenderComplaints();
-  tmsUpdateStats();
+  TMS.saveComplaints(list); tmsRenderComplaints(); tmsUpdateStats();
 }
 
-// ── Render Maintenance Table ──────────────────────────────────────
-
-/**
- * Re-render the maintenance requests table on the admin dashboard.
- * Shows all requests with priority and status badges.
- */
+// ── Render Maintenance Table ────────────────────────────
 function tmsRenderMaintenance() {
   const tbody = document.getElementById('maintenance-tbody');
   if (!tbody) return;
-
   const list = TMS.getMaintenance();
-
   if (!list.length) {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No maintenance requests yet.</td></tr>`;
     return;
   }
-
   tbody.innerHTML = list.map(m => `
     <tr>
       <td style="color:var(--muted)">${m.id}</td>
@@ -854,23 +515,15 @@ function tmsRenderMaintenance() {
     </tr>`).join('');
 }
 
-// ── Render Agreements ─────────────────────────────────────────────
-
-/**
- * Re-render the lease agreements list on the admin dashboard.
- * Shows full agreement details with terminate and delete actions.
- */
+// ── Render Agreements ───────────────────────────────────
 function tmsRenderAgreements() {
   const container = document.getElementById('agreements-list');
   if (!container) return;
-
   const list = TMS.getAgreements();
-
   if (!list.length) {
     container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">No lease agreements created yet.</div>`;
     return;
   }
-
   container.innerHTML = list.map(a => `
     <div class="agr-card">
       <div class="agr-top">
@@ -893,44 +546,26 @@ function tmsRenderAgreements() {
     </div>`).join('');
 }
 
-/** Set an agreement's status to 'terminated', then re-render. */
 function tmsTerminateAgreement(id) {
   const list = TMS.getAgreements().map(a => a.id === id ? { ...a, status: 'terminated' } : a);
-  TMS.saveAgreements(list);
-  tmsRenderAgreements();
-  tmsUpdateStats();
+  TMS.saveAgreements(list); tmsRenderAgreements(); tmsUpdateStats();
 }
-
-/** Confirm and permanently delete a lease agreement, then re-render. */
 function tmsDeleteAgreement(id) {
   if (!confirm('Delete this agreement?')) return;
   const list = TMS.getAgreements().filter(a => a.id !== id);
-  TMS.saveAgreements(list);
-  tmsRenderAgreements();
-  tmsUpdateStats();
+  TMS.saveAgreements(list); tmsRenderAgreements(); tmsUpdateStats();
 }
 
-// ── Render Activity Logs ──────────────────────────────────────────
-
-/**
- * Re-render the activity log panel on the admin dashboard.
- * Shows all log entries with type badge, message, user, and timestamp.
- * Log types: info | warn | error | success
- */
+// ── Render Logs ─────────────────────────────────────────
 function tmsRenderLogs() {
   const container = document.getElementById('logs-container');
   if (!container) return;
-
   const list = TMS.getLogs();
-
   if (!list.length) {
     container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">No activity recorded yet.</div>`;
     return;
   }
-
-  // Map log type to CSS class for colored badge
   const typeStyle = { info: 'info', warn: 'warn', error: 'error', success: 'success' };
-
   container.innerHTML = list.map(l => `
     <div class="log-item">
       <span class="log-type ${typeStyle[l.type] || 'info'}">${l.type?.toUpperCase() || 'INFO'}</span>
@@ -940,32 +575,31 @@ function tmsRenderLogs() {
     </div>`).join('');
 }
 
-// ── Render Notifications Panel ────────────────────────────────────
-
-/**
- * Re-render the notifications list in the admin panel.
- * Unread notifications get an 'unread' CSS class for highlighting.
- */
+// ── Render Notifications ────────────────────────────────
 function tmsRenderNotifs() {
   const container = document.getElementById('notifs-list');
   if (!container) return;
-
-  const list = TMS.getNotifs();
-
+  const current = TMS.getCurrentUser();
+  const list = TMS.getNotifs().filter(n => TMS._isNotifForUser(n));
   if (!list.length) {
     container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">No notifications yet.</div>`;
     return;
   }
-
-  container.innerHTML = list.map(n => `
-    <div class="notif-item ${n.read ? '' : 'unread'}">
-      <div class="ndot ${n.color || 'blue'}"></div>
-      <div class="n-body">
-        <div class="n-title">${n.title}</div>
-        <div class="n-msg">${n.msg}</div>
-      </div>
-      <span class="n-time">${n.time}</span>
-    </div>`).join('');
+  container.innerHTML = list.map(n => {
+    const recipients = Array.isArray(n.to) ? n.to.join(', ') : n.to || 'all';
+    const sender = n.from || 'admin';
+    const colorStyle = n.color && n.color.startsWith('#') ? n.color : `var(--${n.color || 'blue'})`;
+    return `
+      <div class="notif-item ${n.read ? '' : 'unread'}">
+        <div class="notif-dot" style="background:${colorStyle}"></div>
+        <div>
+          <div class="notif-text" style="font-weight:700">${n.title}</div>
+          <div class="notif-text" style="margin-top:4px">${n.msg}</div>
+          <div class="notif-time" style="margin-top:8px">From: ${sender} · To: ${recipients}</div>
+        </div>
+        <span class="notif-time">${n.time}</span>
+      </div>`;
+  }).join('');
 }
 
 // ── Pending Actions on Dashboard ────────────────────────
@@ -989,28 +623,16 @@ function tmsRenderPendingActions() {
     </div>`).join('');
 }
 
-// ── Recent Activity on Dashboard ─────────────────────────────────
-
-/**
- * Render the 6 most recent activity log entries on the main dashboard.
- * Uses a colour-coded dot to indicate the log type visually.
- * Shows a placeholder message when no activity has been recorded yet.
- */
+// ── Recent Activity on Dashboard ────────────────────────
 function tmsRenderRecentActivity() {
   const container = document.getElementById('activity-list');
   if (!container) return;
-
-  // Only show the 6 most recent entries to keep the widget compact
   const logs = TMS.getLogs().slice(0, 6);
-
   if (!logs.length) {
     container.innerHTML = `<div class="activity-item"><div class="act-dot blue"></div><div class="act-text" style="color:var(--muted)">No activity recorded yet. Start by adding tenants, landlords, or properties.</div><div class="act-time">now</div></div>`;
     return;
   }
-
-  // Map log type to the CSS dot colour class
   const dotColor = { success: 'green', warn: 'warn', error: 'red', info: 'blue' };
-
   container.innerHTML = logs.map(l => `
     <div class="activity-item">
       <div class="act-dot ${dotColor[l.type] || 'blue'}"></div>
@@ -1019,233 +641,142 @@ function tmsRenderRecentActivity() {
     </div>`).join('');
 }
 
-// ── Form handlers — Add Tenant ────────────────────────────────────
-
-/**
- * Handle submission of the "Add Tenant" form on the admin dashboard.
- * Validates required fields, creates the tenant, resets the form,
- * shows a success message, and refreshes the table and stats.
- */
+// ── Add Tenant Form Handler ──────────────────────────────
 function tmsSubmitAddTenant() {
-  // Read all form field values
-  const name     = document.getElementById('add-t-name')?.value.trim();
-  const email    = document.getElementById('add-t-email')?.value.trim();
-  const phone    = document.getElementById('add-t-phone')?.value.trim();
-  const cnic     = document.getElementById('add-t-cnic')?.value.trim();
+  const name = document.getElementById('add-t-name')?.value.trim();
+  const email = document.getElementById('add-t-email')?.value.trim();
+  const phone = document.getElementById('add-t-phone')?.value.trim();
+  const cnic = document.getElementById('add-t-cnic')?.value.trim();
   const property = document.getElementById('add-t-property')?.value.trim();
 
-  // Name and email are the only required fields
-  if (!name || !email) {
-    tmsShowFormMsg('add-tenant-msg', 'Name and email are required.', false);
-    return;
-  }
+  if (!name || !email) { tmsShowFormMsg('add-tenant-msg', 'Name and email are required.', false); return; }
 
   TMS.addTenant({ name, email, phone, cnic, property, status: 'active' });
   document.getElementById('add-tenant-form')?.reset();
   tmsShowFormMsg('add-tenant-msg', '✅ Tenant added successfully!', true);
-  tmsRenderTenants();
-  tmsUpdateStats();
+  tmsRenderTenants(); tmsUpdateStats();
 }
 
-// ── Form handlers — Add Landlord ──────────────────────────────────
-
-/**
- * Handle submission of the "Add Landlord" form on the admin dashboard.
- * New landlords start with status 'pending' until admin approves them.
- */
+// ── Add Landlord Form Handler ────────────────────────────
 function tmsSubmitAddLandlord() {
-  const name  = document.getElementById('add-l-name')?.value.trim();
+  const name = document.getElementById('add-l-name')?.value.trim();
   const email = document.getElementById('add-l-email')?.value.trim();
   const phone = document.getElementById('add-l-phone')?.value.trim();
-  const cnic  = document.getElementById('add-l-cnic')?.value.trim();
+  const cnic = document.getElementById('add-l-cnic')?.value.trim();
 
-  if (!name || !email) {
-    tmsShowFormMsg('add-landlord-msg', 'Name and email are required.', false);
-    return;
-  }
+  if (!name || !email) { tmsShowFormMsg('add-landlord-msg', 'Name and email are required.', false); return; }
 
-  // Landlords start as 'pending' — admin must approve before they can list properties
   TMS.addLandlord({ name, email, phone, cnic, status: 'pending' });
   document.getElementById('add-landlord-form')?.reset();
   tmsShowFormMsg('add-landlord-msg', '✅ Landlord added! Status: Pending approval.', true);
-  tmsRenderLandlords();
-  tmsUpdateStats();
+  tmsRenderLandlords(); tmsUpdateStats();
 }
 
-// ── Form handlers — Add Property ──────────────────────────────────
-
-/**
- * Handle submission of the "Add Property" form on the admin dashboard.
- * Requires title and city; other fields are optional.
- */
+// ── Add Property Form Handler ────────────────────────────
 function tmsSubmitAddProperty() {
-  const title    = document.getElementById('add-p-title')?.value.trim();
-  const address  = document.getElementById('add-p-address')?.value.trim();
-  const city     = document.getElementById('add-p-city')?.value.trim();
-  const type     = document.getElementById('add-p-type')?.value;
-  const rent     = document.getElementById('add-p-rent')?.value.trim();
-  const beds     = document.getElementById('add-p-beds')?.value.trim();
-  const baths    = document.getElementById('add-p-baths')?.value.trim();
+  const title = document.getElementById('add-p-title')?.value.trim();
+  const address = document.getElementById('add-p-address')?.value.trim();
+  const city = document.getElementById('add-p-city')?.value.trim();
+  const type = document.getElementById('add-p-type')?.value;
+  const rent = document.getElementById('add-p-rent')?.value.trim();
+  const beds = document.getElementById('add-p-beds')?.value.trim();
+  const baths = document.getElementById('add-p-baths')?.value.trim();
   const landlord = document.getElementById('add-p-landlord')?.value.trim();
 
-  if (!title || !city) {
-    tmsShowFormMsg('add-property-msg', 'Title and city are required.', false);
-    return;
-  }
+  if (!title || !city) { tmsShowFormMsg('add-property-msg', 'Title and city are required.', false); return; }
 
-  // Convert rent to number; new properties default to 'available' status
   TMS.addProperty({ title, address, city, type, rent: Number(rent), beds, baths, landlord, status: 'available' });
   document.getElementById('add-property-form')?.reset();
   tmsShowFormMsg('add-property-msg', '✅ Property added successfully!', true);
-  tmsRenderProperties();
-  tmsUpdateStats();
+  tmsRenderProperties(); tmsUpdateStats();
 }
 
-// ── Form handlers — Add Complaint ─────────────────────────────────
-
-/**
- * Handle submission of the "Add Complaint" form.
- * Title is the only required field; category and description are optional.
- */
+// ── Add Complaint Form Handler ───────────────────────────
 function tmsSubmitAddComplaint() {
-  const title       = document.getElementById('add-c-title')?.value.trim();
+  const title = document.getElementById('add-c-title')?.value.trim();
   const description = document.getElementById('add-c-desc')?.value.trim();
-  const category    = document.getElementById('add-c-category')?.value;
-  const filedBy     = document.getElementById('add-c-filedby')?.value.trim();
+  const category = document.getElementById('add-c-category')?.value;
+  const filedBy = document.getElementById('add-c-filedby')?.value.trim();
 
-  if (!title) {
-    tmsShowFormMsg('add-complaint-msg', 'Title is required.', false);
-    return;
-  }
+  if (!title) { tmsShowFormMsg('add-complaint-msg', 'Title is required.', false); return; }
 
   TMS.addComplaint({ title, description, category, filedBy, status: 'open' });
   document.getElementById('add-complaint-form')?.reset();
   tmsShowFormMsg('add-complaint-msg', '✅ Complaint filed successfully!', true);
-  tmsRenderComplaints();
-  tmsUpdateStats();
+  tmsRenderComplaints(); tmsUpdateStats();
 }
 
-// ── Form handlers — Add Maintenance ───────────────────────────────
-
-/**
- * Handle submission of the "Add Maintenance" form.
- * Title is the only required field; all other fields are optional.
- */
+// ── Add Maintenance Form Handler ─────────────────────────
 function tmsSubmitAddMaintenance() {
-  const title    = document.getElementById('add-m-title')?.value.trim();
-  const desc     = document.getElementById('add-m-desc')?.value.trim();
-  const tenant   = document.getElementById('add-m-tenant')?.value.trim();
+  const title = document.getElementById('add-m-title')?.value.trim();
+  const desc = document.getElementById('add-m-desc')?.value.trim();
+  const tenant = document.getElementById('add-m-tenant')?.value.trim();
   const property = document.getElementById('add-m-property')?.value.trim();
   const priority = document.getElementById('add-m-priority')?.value;
 
-  if (!title) {
-    tmsShowFormMsg('add-maint-msg', 'Title is required.', false);
-    return;
-  }
+  if (!title) { tmsShowFormMsg('add-maint-msg', 'Title is required.', false); return; }
 
   TMS.addMaintenance({ title, description: desc, tenant, property, priority, status: 'pending' });
   document.getElementById('add-maintenance-form')?.reset();
   tmsShowFormMsg('add-maint-msg', '✅ Maintenance request added!', true);
-  tmsRenderMaintenance();
-  tmsUpdateStats();
+  tmsRenderMaintenance(); tmsUpdateStats();
 }
 
-// ── Form handlers — Add Agreement ─────────────────────────────────
-
-/**
- * Handle submission of the "Add Agreement" form.
- * Tenant and landlord names are required; all other fields are optional.
- */
+// ── Add Agreement Form Handler ───────────────────────────
 function tmsSubmitAddAgreement() {
-  const tenant    = document.getElementById('add-a-tenant')?.value.trim();
-  const landlord  = document.getElementById('add-a-landlord')?.value.trim();
-  const property  = document.getElementById('add-a-property')?.value.trim();
-  const rent      = document.getElementById('add-a-rent')?.value.trim();
+  const tenant = document.getElementById('add-a-tenant')?.value.trim();
+  const landlord = document.getElementById('add-a-landlord')?.value.trim();
+  const property = document.getElementById('add-a-property')?.value.trim();
+  const rent = document.getElementById('add-a-rent')?.value.trim();
   const startDate = document.getElementById('add-a-start')?.value;
-  const endDate   = document.getElementById('add-a-end')?.value;
-  const duration  = document.getElementById('add-a-duration')?.value.trim();
+  const endDate = document.getElementById('add-a-end')?.value;
+  const duration = document.getElementById('add-a-duration')?.value.trim();
 
-  if (!tenant || !landlord) {
-    tmsShowFormMsg('add-agr-msg', 'Tenant and landlord are required.', false);
-    return;
-  }
+  if (!tenant || !landlord) { tmsShowFormMsg('add-agr-msg', 'Tenant and landlord are required.', false); return; }
 
   TMS.addAgreement({ tenant, landlord, property, rent: Number(rent), startDate, endDate, duration, status: 'active' });
   document.getElementById('add-agreement-form')?.reset();
   tmsShowFormMsg('add-agr-msg', '✅ Agreement created successfully!', true);
-  tmsRenderAgreements();
-  tmsUpdateStats();
+  tmsRenderAgreements(); tmsUpdateStats();
 }
 
-// ── Utility: Form feedback message ───────────────────────────────
-
-/**
- * Show a temporary success or error banner below a form.
- * The banner automatically hides after 3 seconds.
- *
- * @param {string}  elId    - ID of the message element
- * @param {string}  msg     - message text to display
- * @param {boolean} success - true = green success banner, false = red error banner
- */
+// ── Form message helper ──────────────────────────────────
 function tmsShowFormMsg(elId, msg, success) {
   const el = document.getElementById(elId);
   if (!el) return;
-  el.textContent  = msg;
-  el.className    = success ? 'ok-banner show' : 'err-banner show';
+  el.textContent = msg;
+  el.className = success ? 'ok-banner show' : 'err-banner show';
   el.style.display = 'flex';
-  // Auto-hide after 3 seconds
   setTimeout(() => { el.style.display = 'none'; }, 3000);
 }
 
-// ── Admin notification sender ─────────────────────────────────────
-
-/**
- * Read the notification form inputs and broadcast a new notification
- * to all users via TMS.addNotif(). Also logs the action.
- * Clears the form and shows a confirmation badge on success.
- */
+// ── Send Notification Handler ────────────────────────────
 function tmsSendNotification() {
   const title = document.getElementById('notif-title')?.value.trim();
-  const msg   = document.getElementById('notif-msg')?.value.trim();
-
+  const msg = document.getElementById('notif-msg')?.value.trim();
+  const to = document.getElementById('notif-to')?.value || 'all';
   if (!title || !msg) { alert('Title and message required.'); return; }
-
-  TMS.addNotif(title, msg, 'blue');
-  TMS.addLog('info', `Admin sent notification: "${title}"`, 'super_admin');
-
-  // Clear the form after sending
+  const current = TMS.getCurrentUser();
+  const sender = current?.role || 'admin';
+  TMS.addNotif(title, msg, 'blue', to, sender);
+  TMS.addLog('info', `${sender} sent notification to ${to}: "${title}"`, sender || 'system');
   document.getElementById('notif-title').value = '';
-  document.getElementById('notif-msg').value   = '';
-
-  tmsRenderNotifs();
-  tmsUpdateStats();
-
-  // Show a brief confirmation badge
+  document.getElementById('notif-msg').value = '';
+  if (document.getElementById('notif-to')) document.getElementById('notif-to').value = 'all';
+  tmsRenderNotifs(); tmsUpdateStats();
   const ok = document.getElementById('notif-ok');
-  if (ok) {
-    ok.classList.add('show');
-    setTimeout(() => ok.classList.remove('show'), 3000);
-  }
+  if (ok) { ok.classList.add('show'); setTimeout(() => ok.classList.remove('show'), 3000); }
 }
 
-// ── Verification page ─────────────────────────────────────────────
-
-/**
- * Render the landlord verification panel showing all pending applications.
- * Admin can approve or reject each landlord from this view.
- */
+// ── Verify Page: Render Pending Landlords ────────────────
 function tmsRenderVerification() {
   const container = document.getElementById('verification-pending');
   if (!container) return;
-
-  // Filter to only landlords awaiting approval
   const pending = TMS.getLandlords().filter(l => l.status === 'pending');
-
   if (!pending.length) {
     container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">✅ No pending verifications right now.</div>`;
     return;
   }
-
   container.innerHTML = pending.map(l => `
     <div class="verify-card">
       <div class="vc-av" style="background:linear-gradient(135deg,#4A9EFF,#7BBFFF)">${l.name[0].toUpperCase()}</div>
@@ -1264,14 +795,7 @@ function tmsRenderVerification() {
     </div>`).join('');
 }
 
-// ── Page render dispatcher ────────────────────────────────────────
-
-/**
- * Called whenever the admin navigates to a different dashboard section.
- * Triggers the appropriate render function for the active page.
- *
- * @param {string} pageId - the dashboard section identifier
- */
+// ── Page render dispatcher ───────────────────────────────
 function tmsOnPageChange(pageId) {
   switch (pageId) {
     case 'dashboard':
@@ -1279,21 +803,19 @@ function tmsOnPageChange(pageId) {
       tmsRenderPendingActions();
       tmsRenderRecentActivity();
       break;
-    case 'tenants':      tmsRenderTenants();      break;
-    case 'landlords':    tmsRenderLandlords();    break;
-    case 'properties':   tmsRenderProperties();   break;
-    case 'complaints':   tmsRenderComplaints();   break;
-    case 'maintenance':  tmsRenderMaintenance();  break;
-    case 'agreements':   tmsRenderAgreements();   break;
-    case 'logs':         tmsRenderLogs();         break;
-    case 'notifications':tmsRenderNotifs();       break;
+    case 'tenants': tmsRenderTenants(); break;
+    case 'landlords': tmsRenderLandlords(); break;
+    case 'properties': tmsRenderProperties(); break;
+    case 'complaints': tmsRenderComplaints(); break;
+    case 'maintenance': tmsRenderMaintenance(); break;
+    case 'agreements': tmsRenderAgreements(); break;
+    case 'logs': tmsRenderLogs(); break;
+    case 'notifications': tmsRenderNotifs(); break;
     case 'verification': tmsRenderVerification(); break;
   }
 }
 
-// ── Auto-init on page load ────────────────────────────────────────
-// Runs once when the DOM is ready — populates the main dashboard
-// with live stats and the latest activity feed.
+// Auto-init on page load
 document.addEventListener('DOMContentLoaded', () => {
   tmsUpdateStats();
   tmsRenderPendingActions();

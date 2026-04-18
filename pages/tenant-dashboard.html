@@ -8,28 +8,28 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 /* ═══ THEME ═══ */
 :root{
-  --blue:#4A9EFF;--blue-l:#7BBFFF;--green:#4ECDC4;--gold:#C9A96E;--error:#FF6B6B;--warn:#FFB347;
-  --bg:#07090D;--card:rgba(16,22,32,0.97);--border:rgba(74,158,255,0.13);
+  --blue:#C9A96E;--blue-l:#E8C97A;--green:#4ECDC4;--gold:#C9A96E;--error:#FF6B6B;--warn:#FFB347;
+  --bg:#07090D;--card:rgba(16,22,32,0.97);--border:rgba(201,169,110,0.14);
   --text:#E8EDF5;--muted:#566070;--sidebar-bg:rgba(10,14,22,0.98);--input-bg:rgba(255,255,255,0.04);
 }
 [data-theme="light"]{
-  --bg:#F0F4FA;--card:#FFFFFF;--border:rgba(74,158,255,0.18);
+  --bg:#F0F4FA;--card:#FFFFFF;--border:rgba(201,169,110,0.18);
   --text:#1A2332;--muted:#6B7C93;--sidebar-bg:#FFFFFF;--input-bg:#F5F8FF;
 }
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--blue);border-radius:10px}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;transition:background 0.3s,color 0.3s}
-.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 10% 15%,rgba(74,158,255,0.07) 0%,transparent 55%),radial-gradient(ellipse 60% 50% at 90% 80%,rgba(78,205,196,0.04) 0%,transparent 55%),linear-gradient(160deg,#07090D 0%,#0C1018 100%)}
-[data-theme="light"] .bg{background:radial-gradient(ellipse 80% 60% at 10% 15%,rgba(74,158,255,0.05) 0%,transparent 55%),linear-gradient(160deg,#EEF2FA 0%,#F5F8FF 100%)}
+.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 10% 15%,rgba(201,169,110,0.07) 0%,transparent 55%),radial-gradient(ellipse 60% 50% at 90% 80%,rgba(78,205,196,0.04) 0%,transparent 55%),linear-gradient(160deg,#07090D 0%,#0C1018 100%)}
+[data-theme="light"] .bg{background:radial-gradient(ellipse 80% 60% at 10% 15%,rgba(201,169,110,0.05) 0%,transparent 55%),linear-gradient(160deg,#EEF2FA 0%,#F5F8FF 100%)}
 /* TOPNAV */
 .topnav{position:sticky;top:0;z-index:200;background:var(--sidebar-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;height:62px;gap:12px}
 .topnav-logo{display:flex;align-items:center;gap:10px;margin-right:auto}
-.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--blue),var(--blue-l));border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(74,158,255,0.3)}
+.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--blue),var(--blue-l));border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(201,169,110,0.3)}
 .logo-icon svg{width:18px;height:18px;fill:#fff;stroke:none}
 .logo-text{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;background:linear-gradient(135deg,var(--blue),var(--blue-l));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .logo-sep{color:var(--muted);font-size:12px}
-.nav-pill{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:rgba(74,158,255,0.08);color:var(--blue);font-size:12px;font-weight:600}
+.nav-pill{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:rgba(201,169,110,0.08);color:var(--blue);font-size:12px;font-weight:600}
 .icon-btn{position:relative;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:var(--input-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.2s;flex-shrink:0;color:var(--text)}
-.icon-btn:hover{background:rgba(74,158,255,0.12);border-color:var(--blue)}
+.icon-btn:hover{background:rgba(201,169,110,0.12);border-color:var(--blue)}
 .notif-badge{position:absolute;top:-2px;right:-2px;width:17px;height:17px;border-radius:50%;background:var(--error);font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
 .logout-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:9px;background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.2);color:#FF6B6B;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
 .logout-btn:hover{background:rgba(255,107,107,0.15)}
@@ -42,8 +42,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .sidebar-label{font-size:10px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;padding:0 10px 8px}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.18s;margin-bottom:2px;border:none;background:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left}
 .nav-item svg{width:16px;height:16px;stroke:currentColor;fill:none;flex-shrink:0}
-.nav-item:hover{color:var(--text);background:rgba(74,158,255,0.07)}
-.nav-item.active{color:var(--blue);background:rgba(74,158,255,0.1);font-weight:600}
+.nav-item:hover{color:var(--text);background:rgba(201,169,110,0.07)}
+.nav-item.active{color:var(--blue);background:rgba(201,169,110,0.1);font-weight:600}
 .nb-pill{margin-left:auto;min-width:18px;height:18px;border-radius:9px;background:var(--error);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
 .sidebar-foot{margin-top:auto;padding:14px 12px;border-top:1px solid var(--border)}
 .user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--input-bg);border-radius:12px;border:1px solid var(--border)}
@@ -66,15 +66,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .flbl{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.4px;text-transform:uppercase}
 .fsel,.finp{background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;width:100%;-webkit-appearance:none;appearance:none}
 .fsel{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;background-color:var(--input-bg)}
-.fsel:focus,.finp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(74,158,255,0.08)}
+.fsel:focus,.finp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(201,169,110,0.08)}
 .fsel option{background:var(--bg);color:var(--text)}
-.search-btn{padding:9px 22px;border-radius:9px;border:none;background:linear-gradient(135deg,var(--blue),var(--blue-l));color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;height:40px;align-self:flex-end;box-shadow:0 4px 14px rgba(74,158,255,0.28);transition:all 0.2s}
-.search-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(74,158,255,0.38)}
+.search-btn{padding:9px 22px;border-radius:9px;border:none;background:linear-gradient(135deg,var(--blue),var(--blue-l));color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;height:40px;align-self:flex-end;box-shadow:0 4px 14px rgba(201,169,110,0.28);transition:all 0.2s}
+.search-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(201,169,110,0.38)}
 /* PROPS GRID */
 .props-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
 .pcard{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:transform 0.22s,box-shadow 0.22s,border-color 0.22s}
-.pcard:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(0,0,0,0.25);border-color:rgba(74,158,255,0.35)}
-.pcard-thumb{height:170px;background:linear-gradient(135deg,rgba(74,158,255,0.1),rgba(74,158,255,0.03));position:relative;display:flex;align-items:center;justify-content:center;font-size:56px}
+.pcard:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(0,0,0,0.25);border-color:rgba(201,169,110,0.35)}
+.pcard-thumb{height:170px;background:linear-gradient(135deg,rgba(201,169,110,0.1),rgba(201,169,110,0.03));position:relative;display:flex;align-items:center;justify-content:center;font-size:56px}
 .pcard-body{padding:14px 16px}
 .pcard-price{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--blue);margin-bottom:2px}
 .pcard-price span{font-size:11px;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:400}
@@ -82,20 +82,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .pcard-loc{font-size:12px;color:var(--muted);margin-bottom:8px}
 .pcard-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .ptag{padding:3px 9px;border-radius:7px;background:var(--input-bg);border:1px solid var(--border);font-size:11px;color:var(--muted)}
-.pcard-btn{width:100%;padding:9px;border-radius:9px;border:1px solid rgba(74,158,255,0.25);background:rgba(74,158,255,0.07);color:var(--blue);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s}
-.pcard-btn:hover{background:rgba(74,158,255,0.15)}
+.pcard-btn{width:100%;padding:9px;border-radius:9px;border:1px solid rgba(201,169,110,0.25);background:rgba(201,169,110,0.07);color:var(--blue);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.pcard-btn:hover{background:rgba(201,169,110,0.15)}
 /* FORM */
 .form-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
 .fg{display:flex;flex-direction:column;gap:5px}
 .fg.full{grid-column:1/-1}
 .fg label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px}
 .fg input,.fg select,.fg textarea{background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;padding:10px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:all 0.2s;width:100%;-webkit-appearance:none;appearance:none}
 .fg select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;background-color:var(--input-bg)}
 .fg select option{background:var(--bg);color:var(--text)}
-.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(74,158,255,0.07)}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(201,169,110,0.07)}
 .fg textarea{resize:vertical;min-height:90px}
-.submit-btn{padding:11px 28px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--blue),var(--blue-l));color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(74,158,255,0.28);transition:all 0.2s;margin-top:4px}
+.submit-btn{padding:11px 28px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--blue),var(--blue-l));color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(201,169,110,0.28);transition:all 0.2s;margin-top:4px}
 .submit-btn:hover{transform:translateY(-1px);}
 .submit-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
 /* SUCCESS TOAST */
@@ -104,14 +104,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 /* LIST ITEMS */
 .list-wrap{display:flex;flex-direction:column;gap:10px;margin-top:16px}
 .list-item{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;gap:12px;transition:border-color 0.2s}
-.list-item:hover{border-color:rgba(74,158,255,0.3)}
+.list-item:hover{border-color:rgba(201,169,110,0.3)}
 .li-title{font-size:13px;font-weight:600;color:var(--text)}
 .li-sub{font-size:11px;color:var(--muted);margin-top:2px}
 .badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
 .b-green{background:rgba(78,205,196,0.1);color:#4ECDC4;border:1px solid rgba(78,205,196,0.2)}
 .b-warn{background:rgba(255,179,71,0.1);color:#FFB347;border:1px solid rgba(255,179,71,0.2)}
 .b-red{background:rgba(255,107,107,0.1);color:#FF6B6B;border:1px solid rgba(255,107,107,0.2)}
-.b-blue{background:rgba(74,158,255,0.1);color:#4A9EFF;border:1px solid rgba(74,158,255,0.2)}
+.b-blue{background:rgba(201,169,110,0.1);color:#C9A96E;border:1px solid rgba(201,169,110,0.2)}
 .b-muted{background:var(--input-bg);color:var(--muted);border:1px solid var(--border)}
 /* PROFILE */
 .profile-header{display:flex;align-items:center;gap:18px;margin-bottom:22px;padding:22px;background:var(--card);border:1px solid var(--border);border-radius:16px}
@@ -119,11 +119,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .profile-av-info h3{font-size:17px;font-weight:700;color:var(--text)}.profile-av-info p{font-size:12px;color:var(--muted);margin-top:2px}
 /* NOTIF ITEMS */
 .notif-item{display:flex;gap:12px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px}
-.notif-item.unread{border-color:rgba(74,158,255,0.25);background:rgba(74,158,255,0.04)}
+.notif-item.unread{border-color:rgba(201,169,110,0.25);background:rgba(201,169,110,0.04)}
 .notif-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:5px}
 .notif-text{font-size:13px;color:var(--text)}.notif-time{font-size:11px;color:var(--muted);margin-top:3px}
 /* LEASE */
-.lease-box{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:28px;max-width:660px}
+.lease-box{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:28px}
 .lease-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;text-align:center;margin-bottom:4px;color:var(--text)}
 .lease-sub{font-size:12px;color:var(--muted);text-align:center;margin-bottom:22px}
 .lease-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
@@ -136,7 +136,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;padding:10px 14px;font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border)}
 td{padding:12px 14px;border-bottom:1px solid var(--border);color:var(--text)}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(74,158,255,0.03)}
+tr:hover td{background:rgba(201,169,110,0.03)}
 /* LOADING */
 .loading{text-align:center;padding:40px;color:var(--muted)}
 .spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 0.7s linear infinite;margin-right:8px;vertical-align:middle}
@@ -144,7 +144,7 @@ tr:hover td{background:rgba(74,158,255,0.03)}
 /* STAT CARDS */
 .stat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:22px}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;transition:border-color 0.2s}
-.stat-card:hover{border-color:rgba(74,158,255,0.3)}
+.stat-card:hover{border-color:rgba(201,169,110,0.3)}
 .stat-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--blue)}
 .stat-lbl{font-size:11px;color:var(--muted);margin-top:4px;font-weight:600}
 /* 3D MODAL */
@@ -168,12 +168,19 @@ canvas{border-radius:0 0 0 0;display:block}
 })();
 const API = 'http://localhost:5000/api';
 const tok = () => localStorage.getItem('tms_token');
+let agreementSyncTimer = null;
 
 async function tFetch(url, method='GET', body=null) {
+  const fullUrl = API + url;
   const opts = { method, headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+tok() } };
   if (body) opts.body = JSON.stringify(body);
-  const r = await fetch(API + url, opts);
-  return r.json();
+  const r = await fetch(fullUrl, opts);
+  const data = await r.json().catch(() => null);
+  if (!r.ok) {
+    const message = data?.message || r.statusText || 'Request failed';
+    throw new Error(`${r.status} ${message} (${fullUrl})`);
+  }
+  return data;
 }
 
 function tmsLogout() { localStorage.clear(); sessionStorage.clear(); window.location.replace('../index.html'); }
@@ -187,8 +194,9 @@ function toggleTheme() {
   localStorage.setItem('tms-theme', n);
 }
 (function(){
-  const s = localStorage.getItem('tms-theme')||'dark';
+  const s = 'dark';
   document.documentElement.setAttribute('data-theme', s);
+  localStorage.setItem('tms-theme', s);
 })();
 
 // ── NAV ───────────────────────────────────────────────
@@ -198,12 +206,31 @@ function sp(id, el) {
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if(el) el.classList.add('active');
   // Load data when page opens
-  if(id==='search')      loadProperties();
-  if(id==='maintenance') loadMaintenance();
-  if(id==='complaints')  loadComplaints();
-  if(id==='payments')    loadPayments();
-  if(id==='agreement')   loadLease();
-  if(id==='notifications') loadNotifications();
+  if(id==='search')            loadProperties();
+  if(id==='furniture')         loadFurniturePage();
+  if(id==='maintenance')       loadMaintenance();
+  if(id==='complaints')        loadComplaints();
+  if(id==='payments')          loadPayments();
+  if(id==='agreement') {       loadLease(); startAgreementSync(); }
+  else { stopAgreementSync(); }
+  if(id==='rental-requests')   loadRentalRequests();
+  if(id==='notifications')     loadNotifications();
+}
+
+function startAgreementSync() {
+  stopAgreementSync();
+  agreementSyncTimer = setInterval(() => {
+    if (document.getElementById('page-agreement')?.classList.contains('active')) {
+      loadLease();
+    }
+  }, 20000);
+}
+
+function stopAgreementSync() {
+  if (agreementSyncTimer) {
+    clearInterval(agreementSyncTimer);
+    agreementSyncTimer = null;
+  }
 }
 
 // ── DOMContentLoaded ──────────────────────────────────
@@ -214,9 +241,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const init  = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() || 'T';
 
   // Theme apply
-  const s = localStorage.getItem('tms-theme')||'dark';
+  const s = 'dark';
   document.documentElement.setAttribute('data-theme', s);
-  const tb = document.getElementById('theme-btn'); if(tb) tb.textContent = s==='dark'?'🌙':'☀️';
+  localStorage.setItem('tms-theme', s);
+  const tb = document.getElementById('theme-btn'); if(tb) tb.textContent = '🌙';
 
   // Set names
   ['pav','sav'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=init; });
@@ -244,15 +272,44 @@ async function loadProperties() {
   if (!grid) return;
   grid.innerHTML = '<div class="loading"><span class="spinner"></span>Loading properties…</div>';
   try {
-    const data = await tFetch('/properties?status=available');
-    allProps = data.properties || [];
-    renderProps(allProps);
+    const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
+    const userId = (user._id || user.id || '').toString();
+
+    // Load available properties
+    const availData = await tFetch('/properties?status=available');
+    const availProps = availData.properties || [];
+
+    // Load ALL properties to find rented ones assigned to this tenant
+    let rentedProps = [];
+    try {
+      const allData = await tFetch('/properties');
+      const allP = allData.properties || [];
+      rentedProps = allP.filter(p => {
+        const tid = (p.tenantId || p.tenant || '').toString();
+        return p.status === 'rented' && tid && tid === userId;
+      });
+    } catch(e2) { /* ignore if endpoint restricted */ }
+
+    // Combine: rented first (deduplicated)
+    const seen = new Set();
+    const combined = [];
+    [...rentedProps, ...availProps].forEach(p => {
+      if (!seen.has(p._id)) { seen.add(p._id); combined.push(p); }
+    });
+
+    allProps = combined;
+
+    // Update shared prop map
+    window._tenantPropMap = {};
+    allProps.forEach(p => { window._tenantPropMap[p._id] = p; });
+
+    renderProps(allProps, rentedProps.map(p => p._id));
     const rc = document.getElementById('rc'); if(rc) rc.textContent = allProps.length;
   } catch(e) {
     grid.innerHTML = '<div class="loading">⚠️ Backend not connected. Start the server first.</div>';
   }
 }
-function renderProps(list) {
+function renderProps(list, rentedIds) {
   const grid = document.getElementById('props-grid');
   const rc   = document.getElementById('rc');
   if (!grid) return;
@@ -262,19 +319,40 @@ function renderProps(list) {
     return;
   }
   // Store in map to avoid JSON-in-HTML attribute issues
-  window._tenantPropMap = {};
+  window._tenantPropMap = window._tenantPropMap || {};
   list.forEach(p => { window._tenantPropMap[p._id] = p; });
+  const myRented = new Set(rentedIds || []);
 
   const emojis = {House:'🏠',Flat:'🏢',Apartment:'🏙️',Villa:'🏡',Room:'🛏️'};
   grid.innerHTML = list.map(p => {
     const pid = p._id;
+    const isMine = myRented.has(pid);
+    const statusBadge = isMine
+      ? `<span style="position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:linear-gradient(135deg,#C9A96E,#e0c078);color:#1a0f00;pointer-events:none">🏠 MY RENTAL</span>`
+      : `<span style="position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:rgba(78,205,196,0.88);color:#041210;pointer-events:none">For Rent</span>`;
+    const cardBorder = isMine ? 'border:2px solid rgba(201,169,110,0.6);' : '';
+    const requestBtn = isMine
+      ? `<button class="pcard-btn" onclick="tenantOpenFurniture('${pid}')" style="flex:1;background:rgba(201,169,110,0.12);color:var(--gold);border-color:rgba(201,169,110,0.4)">🛋️ Furniture</button>`
+      : `<button class="pcard-btn" onclick="showRequestModal('${pid}')" style="flex:1;background:rgba(78,205,196,0.12);color:#4ECDC4;border-color:rgba(78,205,196,0.3)">🤝 Request</button>`;
     return `
-    <div class="pcard">
-      <div class="pcard-thumb">
-        <span style="font-size:56px">${emojis[p.type]||'🏠'}</span>
-        <span style="position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:rgba(78,205,196,0.88);color:#041210">For Rent</span>
-        <span onclick="tenantView3D('${pid}')" style="position:absolute;bottom:10px;right:10px;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--blue);border:1px solid rgba(74,158,255,0.3);cursor:pointer;backdrop-filter:blur(4px)">⬡ 3D View</span>
-        <span onclick="tenantOpenFurniture('${pid}')" style="position:absolute;bottom:10px;left:10px;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:#4ECDC4;border:1px solid rgba(78,205,196,0.3);cursor:pointer;backdrop-filter:blur(4px)">🛋️ Furnish</span>
+    <div class="pcard" style="${cardBorder}">
+      <div class="pcard-thumb" style="padding:0;overflow:hidden;cursor:pointer" onclick="tenantView3D('${pid}')">
+        <model-viewer
+          src="../models/interior-room.glb"
+          alt="Property Interior"
+          auto-rotate
+          auto-rotate-delay="0"
+          rotation-per-second="12deg"
+          shadow-intensity="0.8"
+          environment-image="neutral"
+          exposure="1.0"
+          camera-orbit="0deg 70deg 7m"
+          style="width:100%;height:100%;background:#111;"
+          loading="lazy"
+        ></model-viewer>
+        ${statusBadge}
+        <span style="position:absolute;bottom:10px;right:10px;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--blue);border:1px solid rgba(201,169,110,0.3);pointer-events:none">⬡ 3D View</span>
+        <span onclick="tenantOpenFurniture('${pid}')" style="position:absolute;bottom:10px;left:10px;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:#4ECDC4;border:1px solid rgba(78,205,196,0.3);cursor:pointer;backdrop-filter:blur(4px)">🛋️ ${Object.keys(p.tenantFurnitureLayout||{}).length>0?'✅ My Layout':'Furnish'}</span>
       </div>
       <div class="pcard-body">
         <div class="pcard-price">Rs. ${Number(p.rent||0).toLocaleString()} <span>/mo</span></div>
@@ -285,7 +363,10 @@ function renderProps(list) {
           <span class="ptag">🚿 ${p.baths||'?'} Baths</span>
           <span class="ptag">${p.type||'House'}</span>
         </div>
-        <button class="pcard-btn" onclick="tenantView3D('${pid}')">View 3D Model →</button>
+        <div style="display:flex;gap:8px">
+          <button class="pcard-btn" onclick="tenantView3D('${pid}')" style="flex:1">View 3D Model →</button>
+          ${requestBtn}
+        </div>
       </div>
     </div>
   `;
@@ -301,13 +382,92 @@ function applyFilters() {
   if(type) list = list.filter(p => p.type === type);
   if(beds) list = list.filter(p => Number(p.beds) >= Number(beds));
   if(rent) list = list.filter(p => Number(p.rent) <= Number(rent));
-  renderProps(list);
+  // keep rented highlighting when filtering
+  const myIds = Object.values(window._tenantPropMap||{}).filter(p=>p.status==='rented').map(p=>p._id);
+  renderProps(list, myIds);
+}
+
+// ═══════════════════════════════════════════════════════
+//  POPULATE PROPERTY DROPDOWNS
+// ═══════════════════════════════════════════════════════
+async function populatePropertyDropdowns() {
+  try {
+    // Load available properties and tenant's rented properties
+    const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
+    const userId = user._id || user.id || '';
+    
+    // Get available properties
+    const availData = await tFetch('/properties?status=available');
+    const availProps = availData.properties || [];
+    
+    // Get tenant's rented/assigned properties (use global allProps which already has them)
+    const globalProps = window._tenantPropMap ? Object.values(window._tenantPropMap) : [];
+    let rentedProps = globalProps.filter(p => {
+      const tid = (p.tenantId || p.tenant || '').toString();
+      return p.status === 'rented' && tid && tid === userId;
+    });
+    // Fallback: fetch all if globalProps empty
+    if (!rentedProps.length && userId) {
+      try {
+        const allPropsData = await tFetch('/properties');
+        const allPropsArr = allPropsData.properties || [];
+        rentedProps = allPropsArr.filter(p => {
+          const tid = (p.tenantId || p.tenant || '').toString();
+          return p.status === 'rented' && tid === userId;
+        });
+      } catch(e2) {}
+    }
+    
+    // Combine: rented properties first, then available
+    const combinedProps = [...rentedProps, ...availProps];
+    
+    // Remove duplicates based on ID
+    const uniqueProps = Array.from(new Map(combinedProps.map(p => [p._id, p])).values());
+    
+    const selects = ['pprop', 'mprop', 'cprop'];
+    selects.forEach(selectId => {
+      const el = document.getElementById(selectId);
+      if (el) {
+        const currentVal = el.value;
+        el.innerHTML = '<option value="">-- Select Property --</option>' + 
+          uniqueProps.map(p => {
+            const isMine = rentedProps.some(rp => rp._id === p._id);
+            const label = `${p.title} (${p.address})${isMine ? ' ✓ YOUR RENTAL' : ''}`;
+            return `<option value="${p._id}">${label}</option>`;
+          }).join('');
+        el.value = currentVal;
+        
+        // Auto-select first rented property if none selected
+        if (!currentVal && rentedProps.length > 0) {
+          el.value = rentedProps[0]._id;
+        }
+      }
+    });
+    
+    // Update tenant prop map with both types
+    window._tenantPropMap = {};
+    uniqueProps.forEach(p => { window._tenantPropMap[p._id] = p; });
+  } catch(e) {
+    console.error('populatePropertyDropdowns error:', e);
+  }
+}
+
+function updatePaymentPropertyInfo() {
+  const propId = document.getElementById('pprop')?.value;
+  if (propId && window._tenantPropMap) {
+    const prop = window._tenantPropMap[propId];
+    if (prop && prop.rent) {
+      const amtEl = document.getElementById('pamt');
+      if (amtEl && !amtEl.value) amtEl.value = prop.rent;
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════════════
 //  MAINTENANCE
 // ═══════════════════════════════════════════════════════
 async function loadMaintenance() {
+  populatePropertyDropdowns();
   const list = document.getElementById('maint-list');
   if (!list) return;
   list.innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>';
@@ -332,13 +492,29 @@ async function submitMaint() {
   const type = document.getElementById('mt')?.value;
   const prio = document.getElementById('mp')?.value;
   const desc = document.getElementById('md')?.value?.trim();
+  const propId = document.getElementById('mprop')?.value?.trim();
   if (!desc) { alert('Please describe the issue.'); return; }
   const btn = document.getElementById('msubmit-btn');
   if(btn){btn.disabled=true;btn.textContent='Submitting…';}
   try {
-    const r = await tFetch('/maintenance','POST',{type, priority:prio, description:desc});
+    let landlordId = '';
+    let landlordName = '';
+    let propertyId = propId || '';
+    let propertyTitle = '';
+    
+    // First try to get from selected property
+    if (propId && window._tenantPropMap) {
+      const selectedProp = window._tenantPropMap[propId];
+      if (selectedProp) {
+        landlordId = selectedProp.landlordId || '';
+        landlordName = selectedProp.landlordName || '';
+        propertyTitle = selectedProp.title || '';
+      }
+    }
+    
+    const r = await tFetch('/maintenance','POST',{type, priority:prio, description:desc, landlordId, landlordName, propertyId, propertyTitle});
     if (r.success) {
-      document.getElementById('md').value = '';
+      document.getElementById('md').value = ''; document.getElementById('mprop').value = '';
       const toast = document.getElementById('mok'); if(toast){toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),3000);}
       await loadMaintenance();
     } else alert(r.message||'Failed to submit.');
@@ -350,6 +526,7 @@ async function submitMaint() {
 //  COMPLAINTS
 // ═══════════════════════════════════════════════════════
 async function loadComplaints() {
+  populatePropertyDropdowns();
   const list = document.getElementById('comp-list');
   if (!list) return;
   list.innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>';
@@ -374,13 +551,27 @@ async function submitComp() {
   const cat  = document.getElementById('cc')?.value;
   const subj = document.getElementById('cs')?.value?.trim();
   const desc = document.getElementById('cd')?.value?.trim();
+  const propId = document.getElementById('cprop')?.value?.trim();
   if (!subj) { alert('Please enter a subject.'); return; }
   const btn = document.getElementById('csubmit-btn');
   if(btn){btn.disabled=true;btn.textContent='Submitting…';}
   try {
-    const r = await tFetch('/complaints','POST',{subject:subj, description:desc, category:cat});
+    let landlordId = '';
+    let landlordName = '';
+    let propertyId = propId || '';
+    
+    // First try to get from selected property
+    if (propId && window._tenantPropMap) {
+      const selectedProp = window._tenantPropMap[propId];
+      if (selectedProp) {
+        landlordId = selectedProp.landlordId || '';
+        landlordName = selectedProp.landlordName || '';
+      }
+    }
+    
+    const r = await tFetch('/complaints','POST',{subject:subj, description:desc, category:cat, landlordId, landlordName, propertyId});
     if (r.success) {
-      document.getElementById('cs').value = ''; document.getElementById('cd').value = '';
+      document.getElementById('cs').value = ''; document.getElementById('cd').value = ''; document.getElementById('cprop').value = '';
       const toast = document.getElementById('cok'); if(toast){toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),3000);}
       await loadComplaints();
     } else alert(r.message||'Failed.');
@@ -389,16 +580,164 @@ async function submitComp() {
 }
 
 // ═══════════════════════════════════════════════════════
+//  RENTAL REQUESTS
+// ═══════════════════════════════════════════════════════
+function showRequestModal(propertyId) {
+  const prop = window._tenantPropMap[propertyId];
+  if (!prop) { alert('Property not found'); return; }
+  
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(2px)';
+  modal.innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:400px;width:90%;max-height:80vh;overflow-y:auto">
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text)">${prop.title}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:24px">Request to rent this property</div>
+      
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--muted);font-size:12px">Monthly Rent:</span>
+          <span style="font-weight:600;color:var(--blue)">Rs. ${Number(prop.rent||0).toLocaleString()}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--muted);font-size:12px">Location:</span>
+          <span style="font-weight:600;color:var(--text)">${prop.address}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0">
+          <span style="color:var(--muted);font-size:12px">Type:</span>
+          <span style="font-weight:600;color:var(--text)">${prop.type} (${prop.beds} bed, ${prop.baths} bath)</span>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:16px">
+        <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px">Message (Optional)</label>
+        <textarea id="request-message" placeholder="Tell the landlord why you're interested..." style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:vertical;min-height:80px;width:100%;transition:border-color 0.2s" onFocus="this.style.borderColor='var(--blue)'" onBlur="this.style.borderColor='var(--border)'"></textarea>
+      </div>
+
+      <div style="display:flex;gap:10px">
+        <button onclick="this.parentElement.parentElement.parentElement.remove()" style="flex:1;padding:10px;border-radius:9px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Cancel</button>
+        <button onclick="submitRentalRequest('${propertyId}', this.parentElement.parentElement)" style="flex:1;padding:10px;border-radius:9px;border:none;background:linear-gradient(135deg,#4ECDC4,#45B7A8);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Send Request</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+async function submitRentalRequest(propertyId, modalEl) {
+  const message = document.getElementById('request-message')?.value?.trim() || '';
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  
+  try {
+    const r = await tFetch('/rental-requests/request', 'POST', { propertyId, message });
+    if (r.success) {
+      alert('✅ Request sent to landlord!');
+      // Close all request modals
+      document.querySelectorAll('[style*="position:fixed"]').forEach(el => {
+        if (el.textContent.includes('Send Request')) el.remove();
+      });
+      await loadRentalRequests();
+    } else {
+      alert('⚠️ ' + (r.message || 'Failed to send request'));
+      btn.disabled = false;
+      btn.textContent = 'Send Request';
+    }
+  } catch(e) {
+    alert('❌ Cannot connect to server');
+    btn.disabled = false;
+    btn.textContent = 'Send Request';
+  }
+}
+
+async function loadRentalRequests() {
+  const list = document.getElementById('rental-requests-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loading"><span class="spinner"></span>Loading your requests…</div>';
+  try {
+    const data = await tFetch('/rental-requests/my-requests');
+    const requests = data.requests || [];
+    
+    // Update badge
+    const badge = document.getElementById('rental-requests-badge');
+    const pendingCount = requests.filter(r => r.status === 'pending').length;
+    if (badge) {
+      badge.textContent = pendingCount;
+      badge.style.display = pendingCount > 0 ? 'flex' : 'none';
+    }
+    
+    if (!requests.length) {
+      list.innerHTML = '<div class="loading" style="padding:20px">No rental requests yet. Browse properties and send requests!</div>';
+      return;
+    }
+    
+    const statusBadges = {
+      pending: 'b-warn',
+      accepted: 'b-green',
+      rejected: 'b-red',
+      cancelled: 'b-muted'
+    };
+    
+    const statusEmoji = {
+      pending: '⏳',
+      accepted: '✅',
+      rejected: '❌',
+      cancelled: '🚫'
+    };
+    
+    list.innerHTML = requests.map(req => `
+      <div class="list-item" style="margin-bottom:10px;flex-direction:column;align-items:flex-start">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;width:100%;gap:10px">
+          <div style="flex:1">
+            <div class="li-title">${req.propertyTitle} - ${req.propertyAddress}</div>
+            <div class="li-sub">📍 Rent: Rs. ${Number(req.propertyRent||0).toLocaleString()}/month · Landlord: ${req.landlordName}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Requested: ${new Date(req.requestedAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>
+            ${req.message?`<div style="font-size:12px;color:var(--text);margin-top:6px;padding:8px;background:var(--input-bg);border-left:2px solid var(--blue);border-radius:4px">"${req.message}"</div>`:''}
+            ${req.respondedAt?`<div style="font-size:11px;color:var(--muted);margin-top:4px">Responded: ${new Date(req.respondedAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>`:''}
+          </div>
+          <span class="badge ${statusBadges[req.status]||'b-warn'}">${statusEmoji[req.status]||''} ${req.status}</span>
+        </div>
+        ${req.status === 'pending' ? `<div style="display:flex;gap:8px;margin-top:10px;width:100%">
+          <button onclick="cancelRentalRequest('${req._id}')" style="flex:1;padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Cancel Request</button>
+        </div>` : ''}
+      </div>
+    `).join('');
+  } catch(e) {
+    list.innerHTML = '<div class="loading">⚠️ Error loading requests.</div>';
+  }
+}
+
+async function cancelRentalRequest(requestId) {
+  if (!confirm('Are you sure you want to cancel this request?')) return;
+  try {
+    const r = await tFetch('/rental-requests/'+requestId+'/cancel', 'PUT', {});
+    if (r.success) {
+      alert('✅ Request cancelled');
+      await loadRentalRequests();
+    } else alert('❌ ' + (r.message || 'Failed'));
+  } catch { alert('❌ Cannot connect to server'); }
+}
+
+// ═══════════════════════════════════════════════════════
 //  PAYMENTS
 // ═══════════════════════════════════════════════════════
 async function loadPayments() {
+  populatePropertyDropdowns();
   const tbody = document.getElementById('pay-tbody');
   const stats = document.getElementById('pay-stats');
   if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="6" class="loading"><span class="spinner"></span>Loading…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="7" class="loading"><span class="spinner"></span>Loading…</td></tr>';
   try {
     const data = await tFetch('/payments');
-    const items = data.payments || [];
+    let items = data.payments || [];
+
+    const currentPropertyIds = Object.keys(window._tenantPropMap || {}).map(id => id.toString());
+    if (currentPropertyIds.length) {
+      items = items.filter(p => p.propertyId && currentPropertyIds.includes(p.propertyId.toString()));
+    } else {
+      // If tenant has no assigned properties, hide any orphan payments
+      items = items.filter(p => false);
+    }
+
     if (stats) {
       const total = items.reduce((a,p)=>a+(p.amount||0),0);
       const paid  = items.filter(p=>p.status==='paid').length;
@@ -408,33 +747,76 @@ async function loadPayments() {
         <div class="stat-card"><div class="stat-num" style="color:var(--gold)">Rs. ${total.toLocaleString()}</div><div class="stat-lbl">Total Paid</div></div>
       `;
     }
-    if (!items.length) { tbody.innerHTML = '<tr><td colspan="6" class="loading">No payment records yet.</td></tr>'; return; }
+    if (!items.length) { tbody.innerHTML = '<tr><td colspan="7" class="loading">No payment records yet.</td></tr>'; return; }
     tbody.innerHTML = items.map(p => `<tr>
       <td>${p.month||'—'}</td>
       <td style="color:var(--gold);font-weight:600">Rs. ${Number(p.amount||0).toLocaleString()}</td>
       <td>${p.method||'Cash'}</td>
       <td>${p.propertyTitle||'—'}</td>
+      <td>${p.screenshot ? `<a href="${p.screenshot}" target="_blank">View</a>` : '—'}</td>
       <td>${p.paidAt?new Date(p.paidAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'}):'—'}</td>
-      <td><span class="badge ${p.status==='paid'?'b-green':p.status==='overdue'?'b-red':'b-warn'}">${p.status||'paid'}</span></td>
+      <td><span class="badge ${p.status==='paid'?'b-green':p.status==='overdue'||p.status==='rejected'?'b-red':'b-warn'}">${p.status||'pending'}</span></td>
     </tr>`).join('');
-  } catch { tbody.innerHTML = '<tr><td colspan="6" class="loading">⚠️ Error loading.</td></tr>'; }
+  } catch { tbody.innerHTML = '<tr><td colspan="7" class="loading">⚠️ Error loading.</td></tr>'; }
 }
 async function submitPayment() {
   const amount = document.getElementById('pamt')?.value;
   const month  = document.getElementById('pmon')?.value?.trim();
   const method = document.getElementById('pmth')?.value;
   const note   = document.getElementById('pnot')?.value?.trim();
+  const propId = document.getElementById('pprop')?.value?.trim();
+  const screenshotInput = document.getElementById('pscreenshot');
   if (!amount || !month) { alert('Amount and month are required.'); return; }
   const btn = document.getElementById('psubmit-btn');
   if(btn){btn.disabled=true;btn.textContent='Saving…';}
   try {
-    const r = await tFetch('/payments','POST',{amount:Number(amount), month, method, note});
+    let landlordId = '';
+    let landlordName = '';
+    let propertyId = propId || '';
+    let propertyTitle = '';
+    
+    // First try to get from selected property
+    if (propId && window._tenantPropMap) {
+      const selectedProp = window._tenantPropMap[propId];
+      if (selectedProp) {
+        landlordId = selectedProp.landlordId || '';
+        landlordName = selectedProp.landlordName || '';
+        propertyTitle = selectedProp.title || '';
+      }
+    }
+    
+    // Fallback to lease data if no property selected or property not found
+    if (!landlordId || !landlordName) {
+      const leaseData = await tFetch('/leases');
+      const leases = leaseData.leases || [];
+      if (leases.length) {
+        if (!landlordId) landlordId = leases[0].landlordId || '';
+        if (!landlordName) landlordName = leases[0].landlordName || '';
+        if (!propertyId) propertyId = leases[0].propertyId || '';
+        if (!propertyTitle) propertyTitle = leases[0].propertyTitle || '';
+      }
+    }
+    
+    let screenshot = '';
+    if (screenshotInput?.files?.length) {
+      screenshot = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(screenshotInput.files[0]);
+      });
+    }
+    const r = await tFetch('/payments','POST',{amount:Number(amount), month, method, note, landlordId, landlordName, propertyId, propertyTitle, screenshot});
     if (r.success) {
-      document.getElementById('pamt').value = ''; document.getElementById('pmon').value = ''; document.getElementById('pnot').value = '';
+      document.getElementById('pamt').value = ''; document.getElementById('pmon').value = ''; document.getElementById('pnot').value = ''; document.getElementById('pprop').value = '';
+      if (screenshotInput) screenshotInput.value = '';
       const toast = document.getElementById('pok'); if(toast){toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),3000);}
       await loadPayments();
     } else alert(r.message||'Failed.');
-  } catch { alert('Cannot connect to server.'); }
+  } catch (err) {
+    console.error('submitPayment error', err);
+    alert('Cannot connect to server.');
+  }
   finally { if(btn){btn.disabled=false;btn.textContent='Record Payment';} }
 }
 
@@ -448,29 +830,55 @@ async function loadLease() {
   try {
     const data = await tFetch('/leases');
     const leases = data.leases || [];
-    if (leases.length) {
-      const l = leases[0]; // most recent
+    const activeLeases = leases.filter(x => x.status === 'active');
+    const pendingLeases = leases.filter(x => x.status === 'pending');
+    const l = activeLeases.length ? activeLeases[0] : pendingLeases.length ? pendingLeases[0] : null;
+
+    if (l) {
+      // Store current lease in window for editing
+      window._currentLease = l;
+      
       box.innerHTML = `
         <div class="lease-box">
           <div class="lease-title">🏛️ Lease Agreement</div>
           <div class="lease-sub">Tenant Rental Contract — TMS Platform</div>
-          <div class="lease-row"><span class="lease-key">Tenant</span><span class="lease-val">${l.tenantName||user.name||'—'}</span></div>
-          <div class="lease-row"><span class="lease-key">Property</span><span class="lease-val">${l.propertyTitle||'—'}</span></div>
-          <div class="lease-row"><span class="lease-key">Address</span><span class="lease-val">${l.propertyAddress||'—'}</span></div>
-          <div class="lease-row"><span class="lease-key">Landlord</span><span class="lease-val">${l.landlordName||'—'}</span></div>
-          <div class="lease-row"><span class="lease-key">Monthly Rent</span><span class="lease-val" style="color:var(--blue)">Rs. ${Number(l.rent||0).toLocaleString()}</span></div>
-          <div class="lease-row"><span class="lease-key">Duration</span><span class="lease-val">${l.duration||'12 months'}</span></div>
-          <div class="lease-row"><span class="lease-key">Start Date</span><span class="lease-val">${l.startDate||'—'}</span></div>
-          <div class="lease-row"><span class="lease-key">End Date</span><span class="lease-val">${l.endDate||'—'}</span></div>
-          <div class="lease-row"><span class="lease-key">Status</span><span class="lease-val"><span class="badge b-green">${l.status||'active'}</span></span></div>
-          <div class="lease-row"><span class="lease-key">Signed On</span><span class="lease-val">${new Date(l.signedAt||l.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'long',year:'numeric'})}</span></div>
+          <div id="lease-view-mode">
+            <div class="lease-row"><span class="lease-key">Tenant</span><span class="lease-val">${l.tenantName||user.name||'—'}</span></div>
+            <div class="lease-row"><span class="lease-key">Property</span><span class="lease-val">${l.propertyTitle||'—'}</span></div>
+            <div class="lease-row"><span class="lease-key">Address</span><span class="lease-val">${l.propertyAddress||'—'}</span></div>
+            <div class="lease-row"><span class="lease-key">Landlord</span><span class="lease-val">${l.landlordName||'—'}</span></div>
+            <div class="lease-row"><span class="lease-key">Monthly Rent</span><span class="lease-val" style="color:var(--blue)">Rs. <span id="lease-rent-display">${Number(l.rent||0).toLocaleString()}</span></span></div>
+            <div class="lease-row"><span class="lease-key">Duration</span><span class="lease-val" id="lease-duration-display">${l.duration||'12 months'}</span></div>
+            <div class="lease-row"><span class="lease-key">Start Date</span><span class="lease-val" id="lease-start-display">${l.startDate||'—'}</span></div>
+            <div class="lease-row"><span class="lease-key">End Date</span><span class="lease-val" id="lease-end-display">${l.endDate||'—'}</span></div>
+            <div class="lease-row"><span class="lease-key">Status</span><span class="lease-val"><span class="badge b-green">${l.status||'active'}</span></span></div>
+            <div class="lease-row"><span class="lease-key">Signed On</span><span class="lease-val">${new Date(l.signedAt||l.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'long',year:'numeric'})}</span></div>
+            <div style="display:flex;gap:10px;margin-top:20px;">
+              <button class="submit-btn" style="flex:1" onclick="toggleLeaseEdit()">✏️ Edit Lease</button>
+              <button class="submit-btn" style="flex:1;background:var(--gray)" onclick="viewLeaseTerms()">📄 View Terms</button>
+            </div>
+          </div>
+          <div id="lease-edit-mode" style="display:none;">
+            <h3 style="margin-bottom:15px;color:var(--text)">✏️ Edit Lease Details</h3>
+            <div class="form-grid">
+              <div class="fg"><label>Monthly Rent (Rs.)</label><input id="edit-rent" type="number" placeholder="25000" value="${l.rent||0}"></div>
+              <div class="fg"><label>Start Date</label><input id="edit-start" type="date" value="${l.startDate||''}"></div>
+              <div class="fg"><label>End Date</label><input id="edit-end" type="date" value="${l.endDate||''}"></div>
+              <div class="fg"><label>Duration</label><input id="edit-duration" type="text" placeholder="12 months" value="${l.duration||'12 months'}"></div>
+              <div class="fg full"><label>Terms & Conditions</label><textarea id="edit-terms" placeholder="Enter agreement terms..." style="min-height:100px;">${l.terms || getStandardLeaseTerms()}</textarea></div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:15px;">
+              <button class="submit-btn" style="flex:1" onclick="saveLeaseChanges()">💾 Save Changes</button>
+              <button class="submit-btn" style="flex:1;background:var(--gray)" onclick="toggleLeaseEdit()">❌ Cancel</button>
+            </div>
+          </div>
         </div>
       `;
     } else {
       // Show agreement form to sign new
       box.innerHTML = `
-        <div class="form-card" style="max-width:560px">
-          <h3 style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:16px">✍️ Sign New Lease Agreement</h3>
+        <div class="form-card">
+          <h3 style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:16px">✍️ Lease Agreement</h3>
           <div class="form-grid">
             <div class="fg"><label>Property Title</label><input id="la-title" placeholder="e.g. 2-Bed House DHA"></div>
             <div class="fg"><label>Property Address</label><input id="la-addr" placeholder="Full address"></div>
@@ -479,15 +887,79 @@ async function loadLease() {
             <div class="fg"><label>Start Date</label><input id="la-start" type="date"></div>
             <div class="fg"><label>End Date</label><input id="la-end" type="date"></div>
             <div class="fg full"><label>Duration</label><input id="la-dur" placeholder="12 months" value="12 months"></div>
-            <div class="fg full"><label>Terms & Conditions</label><textarea id="la-terms" placeholder="Enter agreement terms..."></textarea></div>
+            <div class="fg full"><label>Terms & Conditions</label><textarea id="la-terms" placeholder="Enter agreement terms...">${getStandardLeaseTerms()}</textarea></div>
           </div>
-          <button class="submit-btn" onclick="signLease()">✍️ Sign & Save Agreement</button>
+          <div style="font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6">
+            Agreement name: <strong>Lease Agreement</strong>. Signatures required from Tenant, Landlord and 2 witnesses (1 witness for landlord, 1 witness for tenant). Both parties should keep a scanned copy.
+          </div>
+          <button class="submit-btn" onclick="signLease()">✍️ Sign Agreement</button>
           <div id="lease-ok" class="toast">✅ Lease agreement saved successfully!</div>
         </div>
       `;
     }
   } catch { box.innerHTML = '<div class="loading">⚠️ Error loading lease.</div>'; }
 }
+
+function toggleLeaseEdit() {
+  const viewMode = document.getElementById('lease-view-mode');
+  const editMode = document.getElementById('lease-edit-mode');
+  if (viewMode && editMode) {
+    const isEditing = editMode.style.display !== 'none';
+    viewMode.style.display = isEditing ? 'block' : 'none';
+    editMode.style.display = isEditing ? 'none' : 'block';
+  }
+}
+
+async function saveLeaseChanges() {
+  const leaseId = window._currentLease?._id || window._currentLease?.id;
+  if (!leaseId) { alert('No lease found to update.'); return; }
+  
+  const rent = document.getElementById('edit-rent')?.value;
+  const startDate = document.getElementById('edit-start')?.value;
+  const endDate = document.getElementById('edit-end')?.value;
+  const duration = document.getElementById('edit-duration')?.value?.trim();
+  const terms = document.getElementById('edit-terms')?.value?.trim();
+  
+  if (!rent || !startDate || !endDate) {
+    alert('Please fill in all required fields (Rent, Start Date, End Date).');
+    return;
+  }
+
+  const existingLease = window._currentLease;
+  if (existingLease?.status === 'active') {
+    const currentEnd = new Date(existingLease.endDate || existingLease.startDate);
+    const newEnd = endDate ? new Date(endDate) : null;
+    if (!newEnd || newEnd <= currentEnd) {
+      alert('Active lease cannot be modified until it expires. To update rent or terms, extend the lease end date first.');
+      return;
+    }
+  }
+  
+  try {
+    const payload = { rent: Number(rent), startDate, endDate, duration, terms };
+    const r = await tFetch('/leases/' + encodeURIComponent(leaseId), 'PUT', payload);
+    if (r.success) {
+      alert('✅ Lease updated successfully!');
+      await loadLease();
+    } else {
+      alert(r.message || 'Failed to update lease.');
+    }
+  } catch (e) {
+    console.error(e);
+    alert(e.message || 'Cannot connect to server.');
+  }
+}
+
+function viewLeaseTerms() {
+  const lease = window._currentLease;
+  if (!lease) return;
+  const terms = lease.terms?.trim() || getStandardLeaseTerms();
+  alert(`Terms & Conditions:\n\n${terms}`);
+}
+function getStandardLeaseTerms() {
+  return `1. Rent Payment\nTenant shall pay rent on time each month, for example by the 5th of every month. Late payments may attract a penalty.\n\n2. Security Deposit\nTenant shall provide a security deposit at the start of the agreement (typically 2–3 months' rent). The deposit will be refunded at the end of the tenancy if there is no damage beyond normal wear and tear.\n\n3. Agreement Duration\nThis agreement shall remain valid for ___ months/years (commonly 11 months). It may be renewed on mutually agreed terms upon expiry.\n\n4. Rent Increase\nRent may be increased by up to ___% at each renewal (usually 5–10%).\n\n5. Utility Bills\nThe tenant is responsible for payment of electricity, gas, water and all other utility bills. Any outstanding utility bills must be cleared by the tenant.\n\n6. Use of Property\nThe property shall be used for residential purposes only. No illegal activity is permitted.\n\n7. Maintenance & Repairs\nMinor repairs are the responsibility of the tenant. Major structural repairs remain the responsibility of the landlord.\n\n8. Subletting\nThe tenant shall not sublet the property without the landlord’s written permission.\n\n9. Damage to Property\nThe tenant shall not damage the property. Any damage caused by the tenant shall be repaired at the tenant’s cost.\n\n10. Inspection Rights\nThe landlord may inspect the property after giving prior notice.\n\n11. Termination Clause\nEither party may terminate this agreement by giving ___ days' notice (usually 30 days).\n\n12. Eviction\nFailure to pay rent or violation of the agreement may result in legal eviction proceedings by the landlord.\n\n13. Handover Condition\nThe tenant shall return the property in the same condition as received, allowing for normal wear and tear.\n\n14. Governing Law\nThis agreement is governed by the relevant rental laws of Pakistan, including applicable provisions of the Punjab Rented Premises Act 2009.\n\n15. Signatures\nSignatures of the landlord and tenant, plus two witnesses (one witness for the landlord and one witness for the tenant), are required.`;
+}
+
 async function signLease() {
   const title = document.getElementById('la-title')?.value?.trim();
   const addr  = document.getElementById('la-addr')?.value?.trim();
@@ -497,9 +969,24 @@ async function signLease() {
   const end   = document.getElementById('la-end')?.value;
   const dur   = document.getElementById('la-dur')?.value?.trim();
   const terms = document.getElementById('la-terms')?.value?.trim();
-  if (!title || !rent) { alert('Property title and rent are required.'); return; }
+  if (!title || !rent || !terms) { alert('Property title, rent, and terms are required.'); return; }
   try {
-    const r = await tFetch('/leases','POST',{propertyTitle:title, propertyAddress:addr, landlordName:ll, rent:Number(rent), startDate:start, endDate:end, duration:dur, terms});
+    const payload = { propertyTitle:title, propertyAddress:addr, landlordName:ll, rent:Number(rent), startDate:start, endDate:end, duration:dur, terms };
+    const lookup = (v) => (v||'').trim().toLowerCase();
+    const normalizedTitle = lookup(title);
+    const normalizedAddr = lookup(addr);
+    const normalizedLandlord = lookup(ll);
+    const matched = Object.values(window._tenantPropMap || {}).find(p => {
+      const pTitle = lookup(p.title);
+      const pAddr  = lookup(p.address);
+      const pLand  = lookup(p.landlordName);
+      return pTitle === normalizedTitle || pAddr === normalizedAddr || p._id === title || p._id === addr || (normalizedLandlord && pLand === normalizedLandlord);
+    });
+    if (matched) {
+      payload.landlordId = matched.landlordId;
+      payload.propertyId = matched._id;
+    }
+    const r = await tFetch('/leases','POST', payload);
     if (r.success) {
       await loadLease();
     } else alert(r.message||'Failed.');
@@ -512,6 +999,14 @@ async function signLease() {
 function loadNotifications() {
   const nb = document.getElementById('nb'); if(nb) nb.style.display='none';
   const nb2 = document.getElementById('nb2'); if(nb2) nb2.style.display='none';
+  if (typeof tmsRenderNotifs === 'function') {
+    tmsRenderNotifs();
+  } else {
+    const container = document.getElementById('notifs-list');
+    if (container) {
+      container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">Notifications are unavailable right now.</div>`;
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -543,13 +1038,18 @@ async function saveProfile() {
 // ═══════════════════════════════════════════════════════
 function open3D(id, name, model3dOrJson, type) {
   document.getElementById('ov3d').classList.add('open');
-  document.getElementById('m3dn').textContent = name || '3D View';
+  document.getElementById('m3dn').textContent = (name || 'Property') + ' — Interior 3D';
   document.body.style.overflow = 'hidden';
-  const config = {};
-  if (model3dOrJson && typeof model3dOrJson === 'object') Object.assign(config, model3dOrJson);
-  else { try { Object.assign(config, JSON.parse(model3dOrJson||'{}')); } catch {} }
-  if (!config.houseType) config.houseType = type?.toLowerCase() || 'standard';
-  setTimeout(() => { if(typeof initHouse3D==='function') initHouse3D('c3main', config); }, 100);
+  const loadingEl = document.getElementById('c3main-loading');
+  if (loadingEl) loadingEl.style.display = 'flex';
+  const viewer = document.getElementById('c3main-viewer');
+  if (viewer) {
+    viewer.addEventListener('load', function onLoad() {
+      if (loadingEl) loadingEl.style.display = 'none';
+      viewer.removeEventListener('load', onLoad);
+    });
+    setTimeout(() => { if (loadingEl) loadingEl.style.display = 'none'; }, 5000);
+  }
 }
 function tenantView3D(propId) {
   const p = (window._tenantPropMap||{})[propId]; if(!p) return;
@@ -563,18 +1063,34 @@ function c3d() {
 // ═══════════════════════════════════════════════════════
 //  TENANT FURNITURE PLACEMENT
 // ═══════════════════════════════════════════════════════
-function tenantOpenFurniture(propId) {
+function tenantOpenFurniture(propId, showLandlord) {
   const p = (window._tenantPropMap||{})[propId]; if(!p) return;
-  window._tFurnPropId    = propId;
-  window._tFurnPropTitle = p.title || 'Property';
+  window._tFurnPropId      = propId;
+  window._tFurnPropTitle   = p.title || 'Property';
+  window._tFurnProp        = p;
+  window._tFurnShowingLandlord = !!showLandlord;
 
-  // Load tenant's own saved layout
-  const savedLayout = p.tenantFurnitureLayout || {};
-  const hasSaved = Object.keys(savedLayout).length > 0;
+  const tenantLayout   = p.tenantFurnitureLayout   || {};
+  const landlordLayout = p.landlordFurnitureLayout  || {};
+  const hasTenant   = Object.keys(tenantLayout).length   > 0;
+  const hasLandlord = Object.keys(landlordLayout).length > 0;
 
-  document.getElementById('ov-tfurn-title').textContent = '🛋️ ' + window._tFurnPropTitle + ' — My Furniture Plan';
+  const savedLayout = showLandlord ? landlordLayout : tenantLayout;
   const badge = document.getElementById('tfurn-saved-badge');
-  if (badge) badge.style.display = hasSaved ? 'flex' : 'none';
+  const toggleBtn = document.getElementById('tfurn-toggle-btn');
+  const saveBtnEl = document.getElementById('tfurn-save-btn');
+
+  if (showLandlord) {
+    document.getElementById('ov-tfurn-title').textContent = '🏠 ' + window._tFurnPropTitle + ' — Landlord Layout (View Only)';
+    if (badge) { badge.style.display = hasLandlord ? 'flex' : 'none'; badge.textContent = '✅ Landlord Layout'; }
+    if (saveBtnEl) saveBtnEl.style.display = 'none';
+    if (toggleBtn) { toggleBtn.style.display = hasTenant ? 'flex' : 'none'; toggleBtn.textContent = '🛋️ My Layout'; }
+  } else {
+    document.getElementById('ov-tfurn-title').textContent = '🛋️ ' + window._tFurnPropTitle + ' — My Furniture Plan';
+    if (badge) { badge.style.display = hasTenant ? 'flex' : 'none'; badge.textContent = '✅ Saved'; }
+    if (saveBtnEl) saveBtnEl.style.display = '';
+    if (toggleBtn) { toggleBtn.style.display = hasLandlord ? 'flex' : 'none'; toggleBtn.textContent = '🏠 Landlord Layout'; }
+  }
 
   document.getElementById('ov-tfurn').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -585,6 +1101,11 @@ function tenantOpenFurniture(propId) {
       window._tFurnScene = sc;
     }
   }, 150);
+}
+function tFurnToggleView() {
+  const pid = window._tFurnPropId;
+  const showing = window._tFurnShowingLandlord;
+  tenantOpenFurniture(pid, !showing);
 }
 function closeTFurnViewer() {
   document.getElementById('ov-tfurn')?.classList.remove('open');
@@ -618,7 +1139,7 @@ function tFurnRotate(deg) { const sc=window._tFurnScene; if(sc) sc.rotateSelecte
 function tFurnDelete()    { const sc=window._tFurnScene; if(sc) sc.deleteSelected(); }
 function tFurnDownloadPNG()  { if(typeof downloadFurnitureScreenshot==='function') downloadFurnitureScreenshot('c3d-tfurn', window._tFurnPropTitle+'-my-layout'); }
 function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') downloadFurnitureJSON('c3d-tfurn', window._tFurnPropTitle, 'tenant'); }
-
+</script>
 
 <div class="bg"></div>
 
@@ -650,6 +1171,9 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
   </div>
   <div class="sidebar-section">
     <div class="sidebar-label">Property</div>
+    <button class="nav-item" onclick="sp('furniture',this)">
+      <svg viewBox="0 0 24 24"><path d="M2 9V7a2 2 0 012-2h16a2 2 0 012 2v2"/><path d="M2 9h20v11H2z"/><line x1="6" y1="9" x2="6" y2="20"/><line x1="18" y1="9" x2="18" y2="20"/></svg>Furniture Placement
+    </button>
     <button class="nav-item" onclick="sp('agreement',this)">
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Lease Agreement
     </button>
@@ -664,6 +1188,10 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
     </button>
     <button class="nav-item" onclick="sp('complaints',this)">
       <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Complaints
+    </button>
+    <button class="nav-item" onclick="sp('rental-requests',this)">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/><polyline points="9 12 12 15 16 11"/></svg>Rental Requests
+      <span class="nb-pill" id="rental-requests-badge" style="display:none">0</span>
     </button>
     <button class="nav-item" onclick="sp('notifications',this)">
       <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>Notifications
@@ -721,7 +1249,7 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
   <!-- PROFILE -->
   <div class="page" id="page-profile">
     <div class="pg-head"><div><div class="pg-title">My Profile</div><div class="pg-sub">Manage your personal information</div></div></div>
-    <div style="max-width:560px">
+    <div>
       <div class="profile-header">
         <div class="profile-av" id="pav">T</div>
         <div class="profile-av-info">
@@ -747,6 +1275,58 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
     </div>
   </div>
 
+  <!-- FURNITURE PLACEMENT PAGE -->
+  <div class="page" id="page-furniture">
+    <div class="pg-head">
+      <div><div class="pg-title">🛋️ Furniture Placement</div><div class="pg-sub">Design your room layout — add, move and save furniture</div></div>
+    </div>
+
+    <!-- Property selector -->
+    <div style="margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <label style="font-size:13px;font-weight:600;color:var(--muted)">Select Property:</label>
+      <select id="furn-prop-select" onchange="loadFurnForProp(this.value)"
+        style="padding:9px 16px;border-radius:10px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;min-width:220px">
+        <option value="">— Select a property —</option>
+      </select>
+      <div id="furn-page-saved-badge" style="display:none;padding:4px 12px;border-radius:20px;background:rgba(78,205,196,0.12);border:1px solid rgba(78,205,196,0.4);color:#4ECDC4;font-size:11px;font-weight:700">✅ Layout Saved</div>
+      <button id="furn-page-toggle" onclick="furnPageToggleView()" style="display:none;padding:7px 16px;border-radius:9px;border:1px solid var(--gold);background:rgba(201,169,110,0.08);color:var(--gold);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600">🏠 View Landlord Layout</button>
+    </div>
+
+    <!-- 3D Canvas area -->
+    <div id="furn-page-placeholder" style="display:flex;align-items:center;justify-content:center;min-height:420px;border-radius:16px;border:1px dashed var(--border);background:var(--input-bg);color:var(--muted);font-size:14px;flex-direction:column;gap:10px">
+      <span style="font-size:48px">🛋️</span>
+      <span>Property select karein upar se</span>
+    </div>
+
+    <div id="furn-page-main" style="display:none;flex-direction:column;gap:12px">
+      <!-- Toolbar -->
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-right:4px">Add:</div>
+        <div id="furn-page-catalog" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <!-- Selected item controls -->
+      <div id="furn-page-controls" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-radius:10px;background:var(--input-bg);border:1px solid var(--border)">
+        <span style="font-size:12px;font-weight:600;color:var(--gold)">Selected:</span>
+        <button onclick="furnPageRotate(-45)" style="padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">↺ -45°</button>
+        <button onclick="furnPageRotate(45)"  style="padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">↻ +45°</button>
+        <button onclick="furnPageRotate(90)"  style="padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">↻ 90°</button>
+        <button onclick="furnPageDelete()"    style="padding:6px 12px;border-radius:7px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:#FF6B6B;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">🗑 Delete</button>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px">Right-drag: orbit · Scroll: zoom</span>
+      </div>
+      <!-- Canvas -->
+      <div style="position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--border)">
+        <div id="c3d-furnpage" style="width:100%;height:520px;background:#0d0a06;position:relative;overflow:hidden;border-radius:10px"></div>
+        <div id="furn-page-viewlabel" style="position:absolute;top:12px;left:14px;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.6);font-size:11px;font-weight:700;color:#4ECDC4;display:none"></div>
+      </div>
+      <!-- Action buttons -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button id="furn-page-save-btn" onclick="furnPageSave()" style="padding:10px 24px;border-radius:10px;background:linear-gradient(135deg,#4ECDC4,#2BB5AC);color:#fff;border:none;cursor:pointer;font-weight:600;font-family:'DM Sans',sans-serif;font-size:13px">💾 Save My Layout</button>
+        <button onclick="furnPageDownloadPNG()"  style="padding:10px 18px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px">📷 Download PNG</button>
+        <button onclick="furnPageDownloadJSON()" style="padding:10px 18px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px">⬇️ Download JSON</button>
+      </div>
+    </div>
+  </div>
+
   <!-- LEASE AGREEMENT -->
   <div class="page" id="page-agreement">
     <div class="pg-head"><div><div class="pg-title">Lease Agreement</div><div class="pg-sub">Your rental contract</div></div></div>
@@ -760,12 +1340,18 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
     <div class="card" style="margin-bottom:20px">
       <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;color:var(--text)">➕ Record New Payment</h3>
       <div class="form-grid">
+        <div class="fg full"><label>Select Property</label>
+          <select id="pprop" onchange="updatePaymentPropertyInfo()">
+            <option value="">-- Select Property --</option>
+          </select>
+        </div>
         <div class="fg"><label>Month</label><input id="pmon" placeholder="e.g. March 2026"></div>
         <div class="fg"><label>Amount (Rs.)</label><input id="pamt" type="number" placeholder="25000"></div>
         <div class="fg"><label>Payment Method</label>
           <select id="pmth"><option>Cash</option><option>Bank Transfer</option><option>JazzCash</option><option>EasyPaisa</option><option>Cheque</option><option>Other</option></select>
         </div>
         <div class="fg"><label>Note (optional)</label><input id="pnot" placeholder="e.g. Paid via bank"></div>
+        <div class="fg full"><label>Payment Screenshot</label><input type="file" id="pscreenshot" accept="image/*"></div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;margin-top:14px">
         <button class="submit-btn" id="psubmit-btn" onclick="submitPayment()">💳 Record Payment</button>
@@ -776,8 +1362,8 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
       <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;color:var(--text)">Payment History</h3>
       <div class="tbl-wrap">
         <table>
-          <thead><tr><th>Month</th><th>Amount</th><th>Method</th><th>Property</th><th>Date</th><th>Status</th></tr></thead>
-          <tbody id="pay-tbody"><tr><td colspan="6" class="loading">Loading…</td></tr></tbody>
+          <thead><tr><th>Month</th><th>Amount</th><th>Method</th><th>Property</th><th>Receipt</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="pay-tbody"><tr><td colspan="7" class="loading">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -786,9 +1372,12 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
   <!-- MAINTENANCE -->
   <div class="page" id="page-maintenance">
     <div class="pg-head"><div><div class="pg-title">Maintenance Requests</div><div class="pg-sub">Report and track repair requests</div></div></div>
-    <div class="form-card" style="max-width:560px;margin-bottom:20px">
+    <div class="form-card" style="margin-bottom:20px">
       <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;color:var(--text)">🔧 New Maintenance Request</h3>
       <div class="form-grid">
+        <div class="fg full"><label>Select Property</label>
+          <select id="mprop"><option value="">-- Select Property --</option></select>
+        </div>
         <div class="fg"><label>Issue Type</label>
           <select id="mt"><option>Plumbing</option><option>Electrical</option><option>Gas</option><option>AC / Cooling</option><option>Painting</option><option>Structural</option><option>Other</option></select>
         </div>
@@ -811,9 +1400,12 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
   <!-- COMPLAINTS -->
   <div class="page" id="page-complaints">
     <div class="pg-head"><div><div class="pg-title">Complaints</div><div class="pg-sub">File and track your complaints</div></div></div>
-    <div class="form-card" style="max-width:560px;margin-bottom:20px">
+    <div class="form-card" style="margin-bottom:20px">
       <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;color:var(--text)">📝 New Complaint</h3>
       <div class="form-grid">
+        <div class="fg full"><label>Select Property</label>
+          <select id="cprop"><option value="">-- Select Property --</option></select>
+        </div>
         <div class="fg"><label>Category</label>
           <select id="cc"><option>Noise</option><option>Water</option><option>Electricity</option><option>Neighbor</option><option>Rent</option><option>Security</option><option>Other</option></select>
         </div>
@@ -831,23 +1423,48 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
     </div>
   </div>
 
+  <!-- RENTAL REQUESTS -->
+  <div class="page" id="page-rental-requests">
+    <div class="pg-head"><div><div class="pg-title">🤝 Rental Requests</div><div class="pg-sub">Track your property rental requests</div></div></div>
+    <div class="card">
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:12px;color:var(--text)">My Requests</h3>
+      <div id="rental-requests-list"><div class="loading"><span class="spinner"></span>Loading your rental requests…</div></div>
+    </div>
+  </div>
+
   <!-- NOTIFICATIONS -->
   <div class="page" id="page-notifications">
     <div class="pg-head">
       <div><div class="pg-title">Notifications</div><div class="pg-sub">Your recent updates</div></div>
     </div>
-    <div class="notif-item unread">
-      <div class="notif-dot"></div>
-      <div><div class="notif-text">Welcome to TMS! Your tenant account is active.</div><div class="notif-time">Just now</div></div>
+    <div class="card" style="margin-bottom:18px;">
+      <div style="display:grid;gap:14px">
+        <div style="display:grid;grid-template-columns:1fr 160px;gap:14px;align-items:end">
+          <div class="fg" style="margin-bottom:0">
+            <label>Title</label>
+            <input id="notif-title" placeholder="Notification title" type="text">
+          </div>
+          <div class="fg" style="margin-bottom:0">
+            <label>Send to</label>
+            <select id="notif-to">
+              <option value="all">Everyone</option>
+              <option value="tenant">Tenants</option>
+              <option value="landlord">Landlords</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg full" style="margin-bottom:0">
+          <label>Message</label>
+          <textarea id="notif-msg" placeholder="Write your notification message..."></textarea>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap">
+          <button class="submit-btn" onclick="tmsSendNotification()">Send Notification</button>
+          <span id="notif-ok" class="toast">Notification sent!</span>
+        </div>
+      </div>
     </div>
-    <div class="notif-item unread">
-      <div class="notif-dot"></div>
-      <div><div class="notif-text">You can now browse properties and submit maintenance requests.</div><div class="notif-time">Today</div></div>
-    </div>
-    <div class="notif-item">
-      <div class="notif-dot" style="background:var(--muted)"></div>
-      <div><div class="notif-text">TMS platform is fully operational. Backend connected.</div><div class="notif-time">System</div></div>
-    </div>
+    <div id="notifs-list"></div>
   </div>
 
 </main>
@@ -858,15 +1475,30 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
     <div class="ov-head">
       <span class="ov-title" id="m3dn">3D View</span>
       <div style="display:flex;gap:6px;align-items:center">
-        <button style="padding:4px 10px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="h3d_front('c3main')">Front</button>
-        <button style="padding:4px 10px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="h3d_top('c3main')">Top</button>
-        <button style="padding:4px 10px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="h3d_night('c3main')">🌙</button>
-        <button style="padding:4px 10px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="h3d_reset('c3main')">↺</button>
         <button class="close-btn" onclick="c3d()">✕</button>
       </div>
     </div>
-    <canvas id="c3main" style="width:100%;height:460px;display:block;background:#080B12"></canvas>
-    <div style="padding:8px 16px;font-size:11px;color:var(--muted);text-align:center;border-top:1px solid var(--border)">Drag to rotate · Scroll to zoom</div>
+    <div style="width:100%;height:480px;background:#0a0d16;position:relative">
+      <model-viewer
+        id="c3main-viewer"
+        src="../models/interior-room.glb"
+        alt="Property 3D Interior"
+        camera-controls
+        auto-rotate
+        auto-rotate-delay="1000"
+        rotation-per-second="15deg"
+        shadow-intensity="1"
+        environment-image="neutral"
+        exposure="0.8"
+        style="width:100%;height:100%;background:#0a0d16"
+        loading="eager"
+      ></model-viewer>
+      <div id="c3main-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0a0d16;flex-direction:column;gap:10px;pointer-events:none">
+        <div style="width:36px;height:36px;border:3px solid rgba(201,169,110,0.3);border-top-color:#C9A96E;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+        <span style="color:#C9A96E;font-size:12px;font-weight:600">Loading 3D Model…</span>
+      </div>
+    </div>
+    <div style="padding:8px 16px;font-size:11px;color:var(--muted);text-align:center;border-top:1px solid var(--border)">🖱️ Drag to rotate · Scroll to zoom · Two fingers to pan</div>
   </div>
 </div>
 
@@ -882,6 +1514,7 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
       </div>
       <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;flex-wrap:wrap">
         <div id="tfurn-saved-toast" style="display:none;align-items:center;gap:6px;padding:5px 12px;border-radius:8px;background:rgba(78,205,196,0.15);border:1px solid #4ECDC4;color:#4ECDC4;font-size:12px;font-weight:700">✅ Saved!</div>
+        <button id="tfurn-toggle-btn" onclick="tFurnToggleView()" style="display:none;padding:7px 14px;border-radius:9px;border:1px solid var(--gold);background:rgba(201,169,110,0.1);color:var(--gold);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600">🏠 Landlord Layout</button>
         <button onclick="tFurnDownloadPNG()"  style="padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">📷 PNG</button>
         <button onclick="tFurnDownloadJSON()" style="padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">⬇️ JSON</button>
         <button id="tfurn-save-btn" class="btn" onclick="saveTenantFurnitureLayout()" style="padding:8px 18px;font-size:13px;background:linear-gradient(135deg,#4ECDC4,#2BB5AC);color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:600;font-family:'DM Sans',sans-serif">💾 Save Layout</button>
@@ -909,8 +1542,8 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
         </div>
       </div>
       <!-- Canvas -->
-      <div style="flex:1;position:relative;background:#1A1A2E">
-        <canvas id="c3d-tfurn" style="width:100%;height:100%;display:block;min-height:520px"></canvas>
+      <div style="flex:1;position:relative;background:transparent">
+        <div id="c3d-tfurn" style="width:100%;height:100%;min-height:520px;background:#0d0a06;position:relative;overflow:hidden"></div>
         <div style="position:absolute;bottom:10px;right:14px;font-size:10px;color:rgba(255,255,255,0.3)">Right-drag orbit · Scroll zoom</div>
       </div>
     </div>
@@ -918,6 +1551,8 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+<script src="../js/tms-data.js"></script>
 <script src="../js/house3d.js"></script>
 <script src="../js/furniture3d.js"></script>
 <script>
@@ -952,6 +1587,180 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
     container.appendChild(btn);
   });
 })();
+
+// ── Furniture Page (dedicated page) ──────────────────────────
+const FURN_CATALOG = [
+  {type:'sofa',         label:'Sofa',         color:'#5D5A7E', icon:'🛋️'},
+  {type:'armchair',     label:'Armchair',     color:'#7B4F3A', icon:'🪑'},
+  {type:'bed_double',   label:'Double Bed',   color:'#7B4F2A', icon:'🛏️'},
+  {type:'bed_single',   label:'Single Bed',   color:'#7A8B6E', icon:'🛏️'},
+  {type:'dining_table', label:'Dining Table', color:'#A0734A', icon:'🍽️'},
+  {type:'dining_chair', label:'Din. Chair',   color:'#A0734A', icon:'🪑'},
+  {type:'chair',        label:'Chair',        color:'#8B6040', icon:'🪑'},
+  {type:'wardrobe',     label:'Wardrobe',     color:'#9B7B5A', icon:'🚪'},
+  {type:'tv_unit',      label:'TV Unit',      color:'#4A3A2A', icon:'📺'},
+  {type:'bookshelf',    label:'Bookshelf',    color:'#8B6A3A', icon:'📚'},
+  {type:'coffee_table', label:'Coffee Table', color:'#A08060', icon:'☕'},
+  {type:'lamp',         label:'Floor Lamp',   color:'#C0A060', icon:'💡'},
+  {type:'plant',        label:'Plant',        color:'#3A6A40', icon:'🪴'},
+  {type:'mirror',       label:'Mirror',       color:'#C8A060', icon:'🪞'},
+  {type:'desk',         label:'Desk',         color:'#9B7A4A', icon:'🖥️'},
+];
+
+let _furnPagePropId = null;
+let _furnPageShowingLandlord = false;
+
+function loadFurniturePage() {
+  // Populate property dropdown
+  const sel = document.getElementById('furn-prop-select');
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— Select a property —</option>';
+  (allProps||[]).forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p._id;
+    const isRented = p.status === 'rented';
+    opt.textContent = (p.title || 'Property') + (isRented ? ' ✓ My Rental' : '');
+    if (isRented) opt.style.color = '#C9A96E';
+    sel.appendChild(opt);
+  });
+  // Auto-select rented property if none selected
+  if (!sel.value) {
+    const rented = (allProps||[]).find(p => p.status === 'rented');
+    if (rented) { sel.value = rented._id; loadFurnForProp(rented._id); }
+  }
+  if (current) sel.value = current;
+
+  // Build catalog buttons once
+  const cat = document.getElementById('furn-page-catalog');
+  if (cat && !cat.hasChildNodes()) {
+    FURN_CATALOG.forEach(item => {
+      const btn = document.createElement('button');
+      btn.style.cssText = 'padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:DM Sans,sans-serif;font-size:11.5px;display:flex;align-items:center;gap:5px;transition:background 0.12s';
+      btn.innerHTML = `<span>${item.icon}</span><span>${item.label}</span>`;
+      btn.onmouseenter = () => btn.style.background = 'var(--input-bg)';
+      btn.onmouseleave = () => btn.style.background = 'var(--card)';
+      btn.onclick = () => {
+        const sc = getFurnitureScene('c3d-furnpage');
+        if (sc) sc.addFurniture(item.type, parseInt(item.color.replace('#',''),16));
+      };
+      cat.appendChild(btn);
+    });
+  }
+
+  // furn-page-controls is now directly managed by furniture3d.js via getActionPanelId()
+  // No MutationObserver needed — c3d-furnpage maps to furn-page-controls directly
+}
+
+function loadFurnForProp(propId) {
+  _furnPagePropId = propId;
+  _furnPageShowingLandlord = false;
+  const placeholder = document.getElementById('furn-page-placeholder');
+  const main = document.getElementById('furn-page-main');
+  const badge = document.getElementById('furn-page-saved-badge');
+  const toggleBtn = document.getElementById('furn-page-toggle');
+  const saveBtn = document.getElementById('furn-page-save-btn');
+  const label = document.getElementById('furn-page-viewlabel');
+
+  if (!propId) {
+    if (placeholder) placeholder.style.display = 'flex';
+    if (main) main.style.display = 'none';
+    return;
+  }
+
+  const p = (window._tenantPropMap||{})[propId];
+  if (!p) return;
+
+  const tenantLayout   = p.tenantFurnitureLayout  || {};
+  const landlordLayout = p.landlordFurnitureLayout || {};
+  const hasTenant   = Object.keys(tenantLayout).length > 0;
+  const hasLandlord = Object.keys(landlordLayout).length > 0;
+
+  if (placeholder) placeholder.style.display = 'none';
+  if (main) { main.style.display = 'flex'; }
+
+  if (badge) { badge.style.display = hasTenant ? 'flex' : 'none'; }
+  if (toggleBtn) {
+    toggleBtn.style.display = hasLandlord ? 'inline-flex' : 'none';
+    toggleBtn.textContent = '🏠 View Landlord Layout';
+  }
+  if (saveBtn) saveBtn.style.display = '';
+  if (label) label.style.display = 'none';
+
+  setTimeout(() => {
+    if (typeof initFurniturePlacement === 'function') {
+      window._furnPageScene = initFurniturePlacement('c3d-furnpage', tenantLayout, null);
+    }
+  }, 100);
+}
+
+function furnPageToggleView() {
+  const propId = _furnPagePropId;
+  if (!propId) return;
+  const p = (window._tenantPropMap||{})[propId];
+  if (!p) return;
+
+  _furnPageShowingLandlord = !_furnPageShowingLandlord;
+  const isLandlord = _furnPageShowingLandlord;
+  const layout = isLandlord ? (p.landlordFurnitureLayout||{}) : (p.tenantFurnitureLayout||{});
+
+  const toggleBtn = document.getElementById('furn-page-toggle');
+  const saveBtn   = document.getElementById('furn-page-save-btn');
+  const label     = document.getElementById('furn-page-viewlabel');
+  const badge     = document.getElementById('furn-page-saved-badge');
+
+  if (toggleBtn) toggleBtn.textContent = isLandlord ? '🛋️ Back to My Layout' : '🏠 View Landlord Layout';
+  if (saveBtn)   saveBtn.style.display = isLandlord ? 'none' : '';
+  if (label)     { label.style.display = isLandlord ? 'block' : 'none'; label.textContent = '🏠 Landlord Layout (View Only)'; }
+  if (badge)     {
+    const hasTenant = Object.keys(p.tenantFurnitureLayout||{}).length > 0;
+    badge.style.display = isLandlord ? 'none' : (hasTenant ? 'flex' : 'none');
+  }
+
+  setTimeout(() => {
+    if (typeof initFurniturePlacement === 'function') {
+      window._furnPageScene = initFurniturePlacement('c3d-furnpage', layout, null);
+    }
+  }, 80);
+}
+
+async function furnPageSave() {
+  if (_furnPageShowingLandlord) { alert('Landlord layout sirf view mode mein hai.'); return; }
+  const sc = window._furnPageScene;
+  if (!sc || !_furnPagePropId) return;
+  const layout = sc.getLayout();
+  const btn = document.getElementById('furn-page-save-btn');
+  if (btn) { btn.disabled=true; btn.textContent='Saving…'; }
+  try {
+    await tFetch('/properties/'+_furnPagePropId+'/furniture/tenant','PUT',layout);
+    const badge = document.getElementById('furn-page-saved-badge');
+    if (badge) badge.style.display = 'flex';
+    // Refresh allProps map
+    const data = await tFetch('/properties?status=available');
+    allProps = data.properties||[];
+    window._tenantPropMap = {};
+    allProps.forEach(p => { window._tenantPropMap[p._id] = p; });
+    // Check if landlord has layout now — show toggle
+    const updatedProp = (window._tenantPropMap||{})[_furnPagePropId];
+    const hasLandlord = Object.keys((updatedProp||{}).landlordFurnitureLayout||{}).length > 0;
+    const toggleBtn = document.getElementById('furn-page-toggle');
+    if (toggleBtn) toggleBtn.style.display = hasLandlord ? 'inline-flex' : 'none';
+    // Flash success
+    if (btn) { btn.textContent='✅ Saved!'; setTimeout(()=>btn.textContent='💾 Save My Layout',2000); }
+  } catch(e) { alert('Save nahi hua. Backend check karein.'); }
+  finally { if(btn) btn.disabled=false; }
+}
+
+function furnPageRotate(deg) { const sc=window._furnPageScene; if(sc) sc.rotateSelected(deg); }
+function furnPageDelete()    { const sc=window._furnPageScene; if(sc) sc.deleteSelected(); }
+function furnPageDownloadPNG()  {
+  const p = (window._tenantPropMap||{})[_furnPagePropId];
+  if(typeof downloadFurnitureScreenshot==='function') downloadFurnitureScreenshot('c3d-furnpage', (p?.title||'property')+'-my-layout');
+}
+function furnPageDownloadJSON() {
+  const p = (window._tenantPropMap||{})[_furnPagePropId];
+  if(typeof downloadFurnitureJSON==='function') downloadFurnitureJSON('c3d-furnpage', p?.title||'property', 'tenant');
+}
 </script>
 </body>
 </html>

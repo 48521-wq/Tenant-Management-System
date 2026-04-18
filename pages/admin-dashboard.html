@@ -181,20 +181,22 @@ async function loadDashboardStats() {
 
     const tenants   = users.filter(u=>u.role==='tenant');
     const landlords = users.filter(u=>u.role==='landlord');
-    const pending   = users.filter(u=>!u.verified);
-    const openComps = comps.filter(c=>c.status==='open');
+    const uniqueTenants = tenants.filter((u,i,self)=> self.findIndex(x=>x.email===u.email)===i);
+    const uniqueLandlords = landlords.filter((u,i,self)=> self.findIndex(x=>x.email===u.email)===i);
+    const verifiedTenants = uniqueTenants; // tenants are counted as active users by default
+    const verifiedLandlords = uniqueLandlords.filter(u=>u.verified);
     const pendMaint = maint.filter(m=>m.status==='pending');
 
     const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-    set('d-tenants',tenants.length); set('d-landlords',landlords.length);
-    set('d-props',props.length); set('d-users',users.length);
+    set('d-tenants',uniqueTenants.length); set('d-landlords',uniqueLandlords.length);
+    set('d-props',props.length); set('d-users',uniqueTenants.length);
     set('d-avail',props.filter(p=>p.status==='available').length);
     set('d-maint',maint.length); set('d-comps',comps.length);
     set('d-payments',payments.length);
 
     // Pending actions
-    set('pa-verif', pending.length);
-    set('pa-comps', openComps.length);
+    set('pa-verif', verifiedLandlords.length);
+    set('pa-comps', verifiedTenants.length);
     set('pa-maint', pendMaint.length);
 
     // Style counts
@@ -204,9 +206,10 @@ async function loadDashboardStats() {
     });
 
     // Bar chart
-    const max=Math.max(tenants.length,landlords.length,props.length,1);
+    const max=Math.max(uniqueTenants.length,uniqueLandlords.length,props.length,1);
     const bar=(id,v)=>{const el=document.getElementById(id);if(el){el.style.width=Math.min((v/max)*100,100).toFixed(1)+'%';const sp=el.querySelector('span');if(sp)sp.textContent=v;}};
-    bar('bar-tenants',tenants.length);bar('bar-landlords',landlords.length);bar('bar-props',props.length);
+    bar('bar-tenants',uniqueTenants.length);bar('bar-landlords',uniqueLandlords.length);bar('bar-props',props.length);
+    set('bar-ll-cnt',uniqueLandlords.length);
 
   } catch(e) { console.log('Stats error:',e); }
 }
@@ -220,6 +223,7 @@ async function loadTenants(filter) {
   try {
     const data=await aFetch('/users?role=tenant');
     let list=data.users||[];
+    list = list.filter((u,i,self)=> self.findIndex(x=>x.email===u.email)===i);
     if(filter) list=list.filter(u=>u.name?.toLowerCase().includes(filter.toLowerCase())||u.email?.toLowerCase().includes(filter.toLowerCase()));
     set_count('tenants-count',list.length);
     if(!list.length){tbody.innerHTML='<tr><td colspan="7" class="loading">No tenants registered yet. They will appear here after sign-up.</td></tr>';return;}
@@ -566,11 +570,11 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
       <div class="card">
         <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px">⚡ Pending Actions</h3>
         <div class="action-item">
-          <div><div class="action-label">Unverified Landlords</div><div class="action-sub">Awaiting manual approval</div></div>
+          <div><div class="action-label">Verified Landlords</div><div class="action-sub">Approved landlords</div></div>
           <span class="action-count count-zero" id="pa-verif">0</span>
         </div>
         <div class="action-item">
-          <div><div class="action-label">Open Complaints</div><div class="action-sub">Need resolution</div></div>
+          <div><div class="action-label">Verified Tenants</div><div class="action-sub">Approved tenants</div></div>
           <span class="action-count count-zero" id="pa-comps">0</span>
         </div>
         <div class="action-item">
