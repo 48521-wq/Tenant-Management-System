@@ -1,103 +1,132 @@
-// ═══════════════════════════════════════════════════════════════
-//  Payment Routes  —  /api/payments
-//  Handles rent payment records for tenants, landlords, and admin.
-//
-//  Access is scoped by role:
-//    Tenant   → can create payments and view their own records
-//    Landlord → can view payments received for their properties
-//    Admin    → can view all payments and delete any record
-//
-//  Base path: /api/payments
-// ═══════════════════════════════════════════════════════════════
-
-const express  = require('express');
-const Payment  = require('../models/Payment');
+const express = require('express');
+const mongoose = require('mongoose');
+const Payment = require('../models/Payment');
 const { protect, adminOnly } = require('../middleware/auth');
-
 const router = express.Router();
 
-// ── Helper: build query filter based on logged-in user role ──────
-// Admin → all payments (with optional status filter)
-// Tenant → only their own payments
-// Landlord → only payments made to them
-function buildPaymentFilter(user, query) {
-  const filter = {};
-
-  if (user.isAdmin) {
-    // Admin can optionally filter by payment status
-    if (query.status) filter.status = query.status;
-  } else if (user.role === 'tenant') {
-    filter.tenantId = user._id;
-  } else if (user.role === 'landlord') {
-    filter.landlordId = user._id;
-  }
-
-  return filter;
-}
-
-// ── GET /api/payments ────────────────────────────────────────────
-// Retrieve payments scoped to the requesting user's role.
-// Sorted newest first so the most recent payment appears at the top.
+// GET payments
 router.get('/', protect, async (req, res) => {
   try {
-    const filter   = buildPaymentFilter(req.user, req.query);
+    let filter = {};
+    if (req.user?.isAdmin) {
+      filter.propertyId = { $ne: null };
+      if (req.query.status) filter.status = req.query.status;
+    } else if (req.user.role === 'tenant') {
+      filter.tenantId = req.user._id;
+    } else if (req.user.role === 'landlord') {
+      const Property = require('../models/Property');
+      const props = await Property.find({ landlordId: req.user._id }).select('_id title');
+      const propIds = props.map(p => p._id);
+      const propTitles = props.map(p => p.title).filter(Boolean);
+      const escapedName = (req.user.name || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const nameRegex = new RegExp(`^${escapedName}$`, 'i');
+      const titleRegexes = propTitles.map(t => new RegExp(`^${t.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}$`, 'i'));
+      filter = {
+        $or: [
+          { landlordId: req.user._id },
+          { propertyId: { $in: propIds } },
+          { landlordName: nameRegex },
+          ...(titleRegexes.length ? [{ propertyTitle: { $in: titleRegexes } }] : []),
+        ]
+      };
+    }
     const payments = await Payment.find(filter).sort({ createdAt: -1 });
-
     res.json({ success: true, count: payments.length, payments });
-
   } catch (e) {
+    console.error('GET /payments error', e);
     res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
-// ── POST /api/payments ───────────────────────────────────────────
-// Create a new payment record (tenants only).
-//
-// When a tenant pays rent they record it here. The status is
-// automatically set to 'paid' and paidAt is stamped with the
-// current timestamp. Admin cannot create payments directly.
+// POST create payment record (tenant)
 router.post('/', protect, async (req, res) => {
   try {
-    // Admin should not directly create payment entries on behalf of tenants
-    if (req.user?.isAdmin)
-      return res.status(403).json({ success: false, message: 'Admin cannot add payments.' });
+    if (req.user?.isAdmin) return res.status(403).json({ success: false, message: 'Admin cannot add payments.' });
+    const { amount, month, method, note, propertyTitle, landlordId, landlordName, propertyId, screenshot } = req.body;
+    if (!amount || !month) return res.status(400).json({ success: false, message: 'Amount and month required.' });
 
-    const { amount, month, method, note, propertyTitle } = req.body;
-
-    // Both amount and month are required to create a meaningful record
-    if (!amount || !month)
-      return res.status(400).json({ success: false, message: 'Amount and month required.' });
-
-    // Create the record linked to the authenticated tenant
-    // status is set to 'paid' automatically at creation time
-    const payment = await Payment.create({
-      tenantId:      req.user._id,
-      tenantName:    req.user.name,
+    const paymentData = {
+      tenantId: req.user._id,
+      tenantName: req.user.name,
       amount,
       month,
       method,
       note,
       propertyTitle: propertyTitle || '',
-      status:        'paid',
-      paidAt:        new Date(),
-    });
+      screenshot: screenshot || '',
+      status: 'pending',
+      paidAt: null,
+    };
+    if (landlordName) paymentData.landlordName = landlordName;
 
+    if (landlordId && mongoose.Types.ObjectId.isValid(landlordId)) {
+      paymentData.landlordId = landlordId;
+    }
+    if (propertyId && mongoose.Types.ObjectId.isValid(propertyId)) {
+      paymentData.propertyId = propertyId;
+    }
+
+    const payment = await Payment.create(paymentData);
     res.status(201).json({ success: true, payment });
-
   } catch (e) {
+    console.error('POST /payments error', e);
+    res.status(500).json({ success: false, message: e.message || 'Server error.' });
+  }
+});
+
+// PUT approve payment (landlord)
+router.put('/:id/approve', protect, async (req, res) => {
+  try {
+    const payment = await Payment.findById(req.params.id);
+    if (!payment) return res.status(404).json({ success: false, message: 'Payment not found.' });
+    if (req.user.role === 'landlord') {
+      if (payment.landlordId && payment.landlordId.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ success: false, message: 'Not authorized to approve this payment.' });
+      }
+      if (!payment.landlordId && payment.landlordName !== req.user.name) {
+        return res.status(403).json({ success: false, message: 'Not authorized to approve this payment.' });
+      }
+    }
+    payment.status = 'paid';
+    payment.paidAt = new Date();
+    await payment.save();
+    res.json({ success: true, payment });
+  } catch (e) {
+    console.error('PUT /payments/:id/approve error', e);
     res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
-// ── DELETE /api/payments/:id ─────────────────────────────────────
-// Permanently delete a payment record (admin only).
-// This is a hard delete — use with caution as it cannot be undone.
+// PUT reject payment (landlord)
+router.put('/:id/reject', protect, async (req, res) => {
+  try {
+    const payment = await Payment.findById(req.params.id);
+    if (!payment) return res.status(404).json({ success: false, message: 'Payment not found.' });
+    if (req.user.role === 'landlord') {
+      if (payment.landlordId && payment.landlordId.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ success: false, message: 'Not authorized to reject this payment.' });
+      }
+      if (!payment.landlordId && payment.landlordName !== req.user.name) {
+        return res.status(403).json({ success: false, message: 'Not authorized to reject this payment.' });
+      }
+    }
+    payment.status = 'rejected';
+    payment.paidAt = null;
+    await payment.save();
+    res.json({ success: true, payment });
+  } catch (e) {
+    console.error('PUT /payments/:id/reject error', e);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+});
+
+// DELETE (admin)
 router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
     await Payment.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted.' });
-
   } catch (e) {
+    console.error('DELETE /payments/:id error', e);
     res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
