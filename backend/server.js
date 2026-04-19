@@ -22,10 +22,11 @@ const express   = require('express');
 const cors      = require('cors');
 const connectDB = require('./config/database');
 
-// Application constants
+// ── Application constants ──────────────────────────────────────
 const DEFAULT_PORT        = 5000;
 const JSON_PAYLOAD_LIMIT  = '10mb';
 const API_BASE_PATH       = '/api';
+const HEALTH_CHECK_PATH   = `${API_BASE_PATH}/health`;
 
 const app = express();
 
@@ -62,10 +63,11 @@ const routes = [
 routes.forEach(({ path, handler }) => app.use(path, handler));
 
 // ── Health Check ───────────────────────────────────────────────
-app.get(`${API_BASE_PATH}/health`, (req, res) => {
+app.get(HEALTH_CHECK_PATH, (req, res) => {
   res.json({
-    status: 'OK',
-    time:   new Date().toISOString(),
+    status:  'OK',
+    time:    new Date().toISOString(),
+    uptime:  `${Math.floor(process.uptime())}s`,
   });
 });
 
@@ -89,11 +91,12 @@ app.use((err, req, res, next) => {
 
 // ── Start Server ───────────────────────────────────────────────
 const SERVER_PORT = process.env.PORT || DEFAULT_PORT;
+const BASE_URL    = `http://localhost:${SERVER_PORT}`;
 
 app.listen(SERVER_PORT, () => {
-  console.log(`🚀 TMS Backend running on http://localhost:${SERVER_PORT}`);
-  console.log(`📍 API Base:  http://localhost:${SERVER_PORT}${API_BASE_PATH}`);
-  console.log(`❤️  Health:   http://localhost:${SERVER_PORT}${API_BASE_PATH}/health`);
+  console.log(`\n🚀 TMS Backend running on ${BASE_URL}`);
+  console.log(`📍 API Base:  ${BASE_URL}${API_BASE_PATH}`);
+  console.log(`❤️  Health:   ${BASE_URL}${HEALTH_CHECK_PATH}`);
   console.log(`🔑 Admin:     ${process.env.ADMIN_EMAIL}`);
-  console.log(`✅ Routes:    auth, users, properties, complaints, maintenance, payments, leases`);
+  console.log(`✅ Routes:    auth, users, properties, complaints, maintenance, payments, leases\n`);
 });

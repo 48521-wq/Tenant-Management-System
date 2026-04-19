@@ -17,6 +17,13 @@ const router       = express.Router();
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ─────────────────────────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────────────────────────
+const TOKEN_EXPIRY   = '7d';
+const ALLOWED_ROLES  = ['tenant', 'landlord'];
+const ADMIN_ROLE     = 'admin';
+
+// ─────────────────────────────────────────────────────────────────
 // Token helpers
 // ─────────────────────────────────────────────────────────────────
 
@@ -24,11 +31,11 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
  * Signs a JWT with the application secret.
  * All tokens expire after 7 days — after that the user must re-authenticate.
  *
- * @param {Object} tokenPayload - Claims to embed (e.g. { id, role } or { isAdmin })
+ * @param {Object} tokenPayload - Claims to embed (e.g. { id, role } or { isAdmin })\
  * @returns {string} Signed JWT string
  */
 const signToken = (tokenPayload) =>
-  jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '7d' });
+  jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
 
 /**
  * Generates an admin-specific JWT.
@@ -68,7 +75,7 @@ const buildAdminUser = () => ({
   id:      'admin',
   name:    'Super Admin',
   email:   process.env.ADMIN_EMAIL,
-  role:    'admin',
+  role:    ADMIN_ROLE,
   isAdmin: true,
 });
 
@@ -82,8 +89,7 @@ const buildAdminUser = () => ({
 const isAdminEmail = (emailAddress) =>
   emailAddress.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase();
 
-/** Roles a user is permitted to self-register with */
-const ALLOWED_ROLES = ['tenant', 'landlord'];
+
 
 // ─────────────────────────────────────────────────────────────────
 // POST /api/auth/register

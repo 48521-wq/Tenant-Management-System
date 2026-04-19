@@ -18,6 +18,15 @@ const { protect, adminOnly } = require('../middleware/auth');
 
 const router = express.Router();
 
+// HTTP status codes
+const HTTP_CREATED      = 201;
+const HTTP_BAD_REQUEST  = 400;
+const HTTP_FORBIDDEN    = 403;
+const HTTP_SERVER_ERROR = 500;
+
+// Default payment status when a tenant records a new payment
+const DEFAULT_PAYMENT_STATUS = 'paid';
+
 // ─────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────
@@ -67,7 +76,7 @@ router.get('/', protect, async (req, res) => {
     res.json({ success: true, count: allPayments.length, payments: allPayments });
 
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+    res.status(HTTP_SERVER_ERROR).json({ success: false, message: 'Server error.' });
   }
 });
 
@@ -90,30 +99,29 @@ router.post('/', protect, async (req, res) => {
   try {
     // Admin should not create payment records directly
     if (req.user?.isAdmin)
-      return res.status(403).json({ success: false, message: 'Admin cannot add payments.' });
+      return res.status(HTTP_FORBIDDEN).json({ success: false, message: 'Admin cannot add payments.' });
 
     const { amount, month, method, note, propertyTitle } = req.body;
 
-    // Both amount and month are required to create a meaningful payment record
     if (!amount || !month)
-      return res.status(400).json({ success: false, message: 'Amount and month required.' });
+      return res.status(HTTP_BAD_REQUEST).json({ success: false, message: 'Amount and month required.' });
 
     const newPayment = await Payment.create({
-      tenantId:      req.user._id,   // from JWT — cannot be spoofed by the client
+      tenantId:      req.user._id,
       tenantName:    req.user.name,
       amount,
       month,
       method,
       note,
       propertyTitle: propertyTitle || '',
-      status:        'paid',         // automatically set at creation time
-      paidAt:        new Date(),     // timestamp of when the payment was recorded
+      status:        DEFAULT_PAYMENT_STATUS,
+      paidAt:        new Date(),
     });
 
-    res.status(201).json({ success: true, payment: newPayment });
+    res.status(HTTP_CREATED).json({ success: true, payment: newPayment });
 
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+    res.status(HTTP_SERVER_ERROR).json({ success: false, message: 'Server error.' });
   }
 });
 
@@ -135,7 +143,7 @@ router.delete('/:id', protect, adminOnly, async (req, res) => {
     res.json({ success: true, message: 'Deleted.' });
 
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+    res.status(HTTP_SERVER_ERROR).json({ success: false, message: 'Server error.' });
   }
 });
 

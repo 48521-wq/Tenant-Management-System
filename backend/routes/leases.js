@@ -19,6 +19,14 @@ const { protect, adminOnly } = require('../middleware/auth');
 
 const router = express.Router();
 
+// HTTP status codes
+const HTTP_CREATED      = 201;
+const HTTP_FORBIDDEN    = 403;
+const HTTP_SERVER_ERROR = 500;
+
+// New leases are always created in active status
+const DEFAULT_LEASE_STATUS = 'active';
+
 // ─────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────
@@ -66,7 +74,7 @@ router.get('/', protect, async (req, res) => {
     res.json({ success: true, count: allLeases.length, leases: allLeases });
 
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+    res.status(HTTP_SERVER_ERROR).json({ success: false, message: 'Server error.' });
   }
 });
 
@@ -88,7 +96,7 @@ router.post('/', protect, async (req, res) => {
   try {
     // Admin accounts should not sign leases — this is a tenant action
     if (req.user?.isAdmin)
-      return res.status(403).json({ success: false, message: 'Admin cannot sign leases.' });
+      return res.status(HTTP_FORBIDDEN).json({ success: false, message: 'Admin cannot sign leases.' });
 
     const {
       propertyTitle,
@@ -102,7 +110,7 @@ router.post('/', protect, async (req, res) => {
     } = req.body;
 
     const newLease = await Lease.create({
-      tenantId:        req.user._id,          // from JWT — cannot be spoofed
+      tenantId:        req.user._id,
       tenantName:      req.user.name,
       tenantEmail:     req.user.email,
       landlordName:    landlordName    || '',
@@ -113,14 +121,14 @@ router.post('/', protect, async (req, res) => {
       endDate,
       duration,
       terms,
-      status:   'active',   // new leases are active immediately upon signing
-      signedAt: new Date(), // timestamp of when the tenant signed
+      status:   DEFAULT_LEASE_STATUS,
+      signedAt: new Date(),
     });
 
-    res.status(201).json({ success: true, lease: newLease });
+    res.status(HTTP_CREATED).json({ success: true, lease: newLease });
 
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+    res.status(HTTP_SERVER_ERROR).json({ success: false, message: 'Server error.' });
   }
 });
 
@@ -142,7 +150,7 @@ router.delete('/:id', protect, adminOnly, async (req, res) => {
     res.json({ success: true, message: 'Deleted.' });
 
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+    res.status(HTTP_SERVER_ERROR).json({ success: false, message: 'Server error.' });
   }
 });
 

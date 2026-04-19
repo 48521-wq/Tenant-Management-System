@@ -24,6 +24,8 @@
 const mongoose = require('mongoose');
 const bcrypt   = require('bcryptjs');
 
+const BCRYPT_SALT_ROUNDS = 10;
+
 // ── Schema definition ────────────────────────────────────────────
 const userSchema = new mongoose.Schema(
   {
@@ -100,11 +102,12 @@ const userSchema = new mongoose.Schema(
 );
 
 // ── Pre-save hook: hash password before storing ──────────────────
-// Uses bcrypt with 10 salt rounds — runs only when password is changed.
-// Skips if password is missing (Google OAuth users have no password).
+// Only runs when the password field is modified.
+// Skips entirely for Google OAuth users (they have no password).
+// Salt rounds = 10 — good balance of security vs. hashing time.
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password') || !this.password) return next();
-  this.password = await bcrypt.hash(this.password, 10);
+  this.password = await bcrypt.hash(this.password, BCRYPT_SALT_ROUNDS);
   next();
 });
 
