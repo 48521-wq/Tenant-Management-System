@@ -1,102 +1,41 @@
-/**
- * @file server.js
- * @description TMS Backend entry point — Node.js + Express + MongoDB Atlas.
- *
- * Responsibilities:
- *   - Load environment variables from .env
- *   - Bootstrap the Express application
- *   - Connect to MongoDB Atlas via Mongoose
- *   - Configure CORS, JSON body parsing, and request size limits
- *   - Mount all API route handlers under /api/*
- *   - Provide health-check, 404, and global error-handler endpoints
- *   - Start the HTTP server on the configured PORT
- *
- * Start:
- *   node server.js
- *   npm start
- */
-
+// TMS Backend Entry Point
 require('dotenv').config();
-
 const express   = require('express');
 const cors      = require('cors');
 const connectDB = require('./config/database');
 
-// ── Application constants ──────────────────────────────────────
-const DEFAULT_PORT        = 5000;
-const JSON_PAYLOAD_LIMIT  = '10mb';
-const API_BASE_PATH       = '/api';
-const HEALTH_CHECK_PATH   = `${API_BASE_PATH}/health`;
-
-const app = express();
-
-// Initialise database connection
+const server = express();
 connectDB();
 
-// ── CORS Configuration ─────────────────────────────────────────
-// ⚠️  Production: restrict origin to your actual domain.
-const corsOptions = {
-  origin: function (requestOrigin, callback) {
-    // Allow requests with no Origin header (Postman, curl, mobile apps)
-    if (!requestOrigin) return callback(null, true);
-    callback(null, true);
+// Allow all origins in development
+server.use(cors({
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true);
+    callback(null, true); // Allow all in dev
   },
-  credentials: true,
-};
-app.use(cors(corsOptions));
+  credentials: true
+}));
+server.use(express.json({ limit: '10mb' }));
+server.use(express.urlencoded({ extended: true }));
 
-// ── Body Parsers ───────────────────────────────────────────────
-app.use(express.json({ limit: JSON_PAYLOAD_LIMIT }));
-app.use(express.urlencoded({ extended: true }));
+// API Route Handlers
+server.use('/api/auth',        require('./routes/auth'));
+server.use('/api/users',       require('./routes/users'));
+server.use('/api/properties',  require('./routes/properties'));
+server.use('/api/complaints',  require('./routes/complaints'));
+server.use('/api/maintenance', require('./routes/maintenance'));
+server.use('/api/payments',    require('./routes/payments'));
+server.use('/api/leases',      require('./routes/leases'));
 
-// ── Route Registration ─────────────────────────────────────────
-const routes = [
-  { path: `${API_BASE_PATH}/auth`,        handler: require('./routes/auth')        },
-  { path: `${API_BASE_PATH}/users`,       handler: require('./routes/users')       },
-  { path: `${API_BASE_PATH}/properties`,  handler: require('./routes/properties')  },
-  { path: `${API_BASE_PATH}/complaints`,  handler: require('./routes/complaints')  },
-  { path: `${API_BASE_PATH}/maintenance`, handler: require('./routes/maintenance') },
-  { path: `${API_BASE_PATH}/payments`,    handler: require('./routes/payments')    },
-  { path: `${API_BASE_PATH}/leases`,      handler: require('./routes/leases')      },
-];
+// Health check & error handlers
+server.get('/api/health', (req, res) => res.json({ status: 'OK', time: new Date().toISOString() }));
+server.use((req, res) => res.status(404).json({ success: false, message: 'Route not found.' }));
+server.use((err, req, res, next) => res.status(500).json({ success: false, message: 'Server error.' }));
 
-routes.forEach(({ path, handler }) => app.use(path, handler));
-
-// ── Health Check ───────────────────────────────────────────────
-app.get(HEALTH_CHECK_PATH, (req, res) => {
-  res.json({
-    status:  'OK',
-    time:    new Date().toISOString(),
-    uptime:  `${Math.floor(process.uptime())}s`,
-  });
-});
-
-// ── 404 Handler ────────────────────────────────────────────────
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found.',
-  });
-});
-
-// ── Global Error Handler ───────────────────────────────────────
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err.message || err);
-  res.status(500).json({
-    success: false,
-    message: 'Server error.',
-  });
-});
-
-// ── Start Server ───────────────────────────────────────────────
-const SERVER_PORT = process.env.PORT || DEFAULT_PORT;
-const BASE_URL    = `http://localhost:${SERVER_PORT}`;
-
-app.listen(SERVER_PORT, () => {
-  console.log(`\n🚀 TMS Backend running on ${BASE_URL}`);
-  console.log(`📍 API Base:  ${BASE_URL}${API_BASE_PATH}`);
-  console.log(`❤️  Health:   ${BASE_URL}${HEALTH_CHECK_PATH}`);
-  console.log(`🔑 Admin:     ${process.env.ADMIN_EMAIL}`);
-  console.log(`✅ Routes:    auth, users, properties, complaints, maintenance, payments, leases\n`);
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+  console.log(`🚀 TMS Backend running on http://localhost:${PORT}`);
+  console.log(`📍 API: http://localhost:${PORT}/api`);
+  console.log(`🔑 Admin: ${process.env.ADMIN_EMAIL}`);
+  console.log(`✅ Routes: auth, users, properties, complaints, maintenance, payments, leases`);
 });
