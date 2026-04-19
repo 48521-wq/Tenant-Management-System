@@ -18,6 +18,9 @@ const User = require('../models/User');
 const HTTP_UNAUTHORIZED = 401;
 const HTTP_FORBIDDEN    = 403;
 
+// Authorization header prefix
+const BEARER_PREFIX = 'Bearer ';
+
 // ── Response helpers ───────────────────────────────────────────
 
 const rejectUnauthorized = (res, message = 'Not authorized.') =>
@@ -37,7 +40,6 @@ const rejectForbidden = (res, message = 'Access denied.') =>
  */
 function extractBearerToken(req) {
   const authHeader = req.headers.authorization;
-  const BEARER_PREFIX = 'Bearer ';
 
   if (authHeader && authHeader.startsWith(BEARER_PREFIX)) {
     return authHeader.slice(BEARER_PREFIX.length);

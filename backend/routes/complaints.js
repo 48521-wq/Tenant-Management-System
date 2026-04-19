@@ -17,6 +17,13 @@ const { protect, adminOnly } = require('../middleware/auth');
 
 const router = express.Router();
 
+// HTTP status codes
+const HTTP_CREATED      = 201;
+const HTTP_BAD_REQUEST  = 400;
+const HTTP_FORBIDDEN    = 403;
+const HTTP_NOT_FOUND    = 404;
+const HTTP_SERVER_ERROR = 500;
+
 // ─────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────
@@ -66,7 +73,7 @@ router.get('/', protect, async (req, res) => {
     res.json({ success: true, count: allComplaints.length, complaints: allComplaints });
 
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+    res.status(HTTP_SERVER_ERROR).json({ success: false, message: 'Server error.' });
   }
 });
 
@@ -89,27 +96,26 @@ router.post('/', protect, async (req, res) => {
   try {
     // Admin accounts cannot file complaints — this is a tenant action
     if (req.user?.isAdmin)
-      return res.status(403).json({ success: false, message: 'Admin cannot file complaints.' });
+      return res.status(HTTP_FORBIDDEN).json({ success: false, message: 'Admin cannot file complaints.' });
 
     const { subject, description, category, priority } = req.body;
 
-    // subject is the minimum required field
     if (!subject)
-      return res.status(400).json({ success: false, message: 'Subject is required.' });
+      return res.status(HTTP_BAD_REQUEST).json({ success: false, message: 'Subject is required.' });
 
     const newComplaint = await Complaint.create({
-      tenantId:   req.user._id,   // from JWT — cannot be spoofed by the client
-      tenantName: req.user.name,  // cached for display without an extra DB join
+      tenantId:   req.user._id,
+      tenantName: req.user.name,
       subject,
       description,
       category,
       priority,
     });
 
-    res.status(201).json({ success: true, complaint: newComplaint });
+    res.status(HTTP_CREATED).json({ success: true, complaint: newComplaint });
 
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+    res.status(HTTP_SERVER_ERROR).json({ success: false, message: 'Server error.' });
   }
 });
 
@@ -144,12 +150,12 @@ router.put('/:id/status', protect, adminOnly, async (req, res) => {
     );
 
     if (!updatedComplaint)
-      return res.status(404).json({ success: false, message: 'Not found.' });
+      return res.status(HTTP_NOT_FOUND).json({ success: false, message: 'Not found.' });
 
     res.json({ success: true, complaint: updatedComplaint });
 
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+    res.status(HTTP_SERVER_ERROR).json({ success: false, message: 'Server error.' });
   }
 });
 
@@ -171,7 +177,7 @@ router.delete('/:id', protect, adminOnly, async (req, res) => {
     res.json({ success: true, message: 'Complaint deleted.' });
 
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+    res.status(HTTP_SERVER_ERROR).json({ success: false, message: 'Server error.' });
   }
 });
 

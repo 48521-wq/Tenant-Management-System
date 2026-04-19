@@ -20,6 +20,11 @@ const { protect, adminOnly } = require('../middleware/auth');
 
 const router = express.Router();
 
+// HTTP status codes
+const HTTP_OK      = 200;
+const HTTP_NOT_FOUND = 404;
+const HTTP_SERVER_ERROR = 500;
+
 // ─────────────────────────────────────────────────────────────────
 // GET /api/users
 // ─────────────────────────────────────────────────────────────────
@@ -49,7 +54,7 @@ router.get('/', protect, adminOnly, async (req, res) => {
     res.json({ success: true, count: allUsers.length, users: allUsers });
 
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+    res.status(HTTP_SERVER_ERROR).json({ success: false, message: 'Server error.' });
   }
 });
 
@@ -73,13 +78,12 @@ router.put('/:id/block', protect, adminOnly, async (req, res) => {
     const targetUser = await User.findById(req.params.id);
 
     if (!targetUser)
-      return res.status(404).json({ success: false, message: 'User not found.' });
+      return res.status(HTTP_NOT_FOUND).json({ success: false, message: 'User not found.' });
 
     // Toggle: blocked → active; active → blocked
     targetUser.status = targetUser.status === 'blocked' ? 'active' : 'blocked';
     await targetUser.save();
 
-    // Response message reflects the new status ("User active." / "User blocked.")
     res.json({
       success: true,
       message: `User ${targetUser.status}.`,
@@ -87,7 +91,7 @@ router.put('/:id/block', protect, adminOnly, async (req, res) => {
     });
 
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+    res.status(HTTP_SERVER_ERROR).json({ success: false, message: 'Server error.' });
   }
 });
 
@@ -116,12 +120,12 @@ router.put('/:id/verify', protect, adminOnly, async (req, res) => {
     );
 
     if (!verifiedUser)
-      return res.status(404).json({ success: false, message: 'User not found.' });
+      return res.status(HTTP_NOT_FOUND).json({ success: false, message: 'User not found.' });
 
     res.json({ success: true, message: 'User verified.', user: verifiedUser });
 
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+    res.status(HTTP_SERVER_ERROR).json({ success: false, message: 'Server error.' });
   }
 });
 
@@ -145,7 +149,7 @@ router.delete('/:id', protect, adminOnly, async (req, res) => {
     res.json({ success: true, message: 'User deleted.' });
 
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+    res.status(HTTP_SERVER_ERROR).json({ success: false, message: 'Server error.' });
   }
 });
 

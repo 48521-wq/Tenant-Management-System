@@ -20,9 +20,9 @@ const dns      = require('dns');
 dns.setDefaultResultOrder('ipv4first');
 
 // Connection configuration constants
-const DB_SERVER_SELECTION_TIMEOUT = 15000;
-const DB_SOCKET_TIMEOUT           = 45000;
-const DB_IP_FAMILY                = 4;
+const DB_SERVER_SELECTION_TIMEOUT = 15000;  // ms — how long to wait for a server
+const DB_SOCKET_TIMEOUT           = 45000;  // ms — how long to wait for a response
+const DB_IP_FAMILY                = 4;      // force IPv4
 
 const DB_OPTIONS = {
   serverSelectionTimeoutMS: DB_SERVER_SELECTION_TIMEOUT,
@@ -40,8 +40,9 @@ const connectDB = async () => {
   try {
     const connection = await mongoose.connect(process.env.MONGODB_URI, DB_OPTIONS);
 
-    console.log(`✅ MongoDB Atlas Connected: ${connection.connection.host}`);
-    console.log(`📦 Database: ${connection.connection.name}`);
+    const { host, name } = connection.connection;
+    console.log(`✅ MongoDB Atlas Connected: ${host}`);
+    console.log(`📦 Database: ${name}`);
 
   } catch (err) {
     console.error('❌ MongoDB connection error:', err.message);
