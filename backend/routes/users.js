@@ -1,46 +1,58 @@
+// ============================================================
+// TMS User Management Routes (Admin Only)
+// ============================================================
 const express = require('express');
 const User    = require('../models/User');
 const { protect, adminOnly } = require('../middleware/auth');
 
-// Router instance for user management endpoints
-const userRouter = express.Router();
+const uRouter = express.Router();
 
-// GET all users (admin only)
-userRouter.get('/', protect, adminOnly, async (req, res) => {
+// ─── GET / — list all users with optional role filter ────────
+uRouter.get('/', protect, adminOnly, async (req, res) => {
   try {
-    const queryFilter = {};
-    if (req.query.role) queryFilter.role = req.query.role;
-    const allUsers = await User.find(queryFilter).sort({ createdAt: -1 });
-    res.json({ success: true, count: allUsers.length, users: allUsers });
-  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
+    const roleFilter = {};
+    if (req.query.role) roleFilter.role = req.query.role;
+    const userList = await User.find(roleFilter).sort({ createdAt: -1 });
+    res.json({ success: true, count: userList.length, users: userList });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
 });
 
-// PUT block/unblock user (admin only)
-userRouter.put('/:id/block', protect, adminOnly, async (req, res) => {
+// ─── PUT /:id/block — toggle block/active status ─────────────
+uRouter.put('/:id/block', protect, adminOnly, async (req, res) => {
   try {
-    const targetUser = await User.findById(req.params.id);
-    if (!targetUser) return res.status(404).json({ success: false, message: 'User not found.' });
-    targetUser.status = targetUser.status === 'blocked' ? 'active' : 'blocked';
-    await targetUser.save();
-    res.json({ success: true, message: `User ${targetUser.status}.`, user: targetUser });
-  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
+    const pickedUser = await User.findById(req.params.id);
+    if (!pickedUser)
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    pickedUser.status = pickedUser.status === 'blocked' ? 'active' : 'blocked';
+    await pickedUser.save();
+    res.json({ success: true, message: `User ${pickedUser.status}.`, user: pickedUser });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
 });
 
-// PUT verify user (admin only)
-userRouter.put('/:id/verify', protect, adminOnly, async (req, res) => {
+// ─── PUT /:id/verify — mark user as verified ─────────────────
+uRouter.put('/:id/verify', protect, adminOnly, async (req, res) => {
   try {
-    const verifiedUser = await User.findByIdAndUpdate(req.params.id, { verified: true }, { new: true });
-    if (!verifiedUser) return res.status(404).json({ success: false, message: 'User not found.' });
-    res.json({ success: true, message: 'User verified.', user: verifiedUser });
-  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
+    const markedUser = await User.findByIdAndUpdate(req.params.id, { verified: true }, { new: true });
+    if (!markedUser)
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    res.json({ success: true, message: 'User verified.', user: markedUser });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
 });
 
-// DELETE user (admin only)
-userRouter.delete('/:id', protect, adminOnly, async (req, res) => {
+// ─── DELETE /:id — permanently remove a user ─────────────────
+uRouter.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'User deleted.' });
-  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
 });
 
-module.exports = userRouter;
+module.exports = uRouter;
