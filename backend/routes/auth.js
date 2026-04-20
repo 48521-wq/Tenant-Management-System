@@ -1,18 +1,19 @@
+// Auth routes — register, login, Google OAuth, profile
 const express = require('express');
 const jwt     = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 const User    = require('../models/User');
 const { protect } = require('../middleware/auth');
 
-const router      = express.Router();
-const googleOAuth = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const authRouter    = express.Router();
+const oauthClient   = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// Helper: generate a signed JWT token valid for 7 days
-const createToken  = (payload) => jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
-const createAdminToken = () => createToken({ isAdmin: true, email: process.env.ADMIN_EMAIL });
+// Build a signed JWT that expires in 7 days
+const buildToken      = (payload) => jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+const buildAdminToken = () => buildToken({ isAdmin: true, email: process.env.ADMIN_EMAIL });
 
 // POST /api/auth/register
-router.post('/register', async (req, res) => {
+authRouter.post('/register', async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
     if (!name || !email || !password || !role)
@@ -24,15 +25,15 @@ router.post('/register', async (req, res) => {
     if (email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase())
       return res.status(400).json({ success: false, message: 'This email cannot be registered.' });
 
-    const exists = await User.findOne({ email: email.toLowerCase() });
-    if (exists) return res.status(400).json({ success: false, message: 'Account already exists. Please sign in.' });
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) return res.status(400).json({ success: false, message: 'Account already exists. Please sign in.' });
 
-    const user = await User.create({ name: name.trim(), email: email.toLowerCase(), password, role, authProvider: 'email' });
-    const token = createToken({ id: user._id, role: user.role });
+    const newUser  = await User.create({ name: name.trim(), email: email.toLowerCase(), password, role, authProvider: 'email' });
+    const jwtToken = buildToken({ id: newUser._id, role: newUser.role });
     res.status(201).json({
       success: true,
-      token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role, status: user.status, verified: user.verified, createdAt: user.createdAt }
+      token: jwtToken,
+      user: { id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role, status: newUser.status, verified: newUser.verified, createdAt: newUser.createdAt }
     });
   } catch (e) {
     if (e.code === 11000) return res.status(400).json({ success: false, message: 'Email already registered.' });
@@ -42,107 +43,107 @@ router.post('/register', async (req, res) => {
 });
 
 // POST /api/auth/login
-router.post('/login', async (req, res) => {
+authRouter.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ success: false, message: 'Enter email and password.' });
-    const lEmail = email.toLowerCase().trim();
+    const normalizedEmail = email.toLowerCase().trim();
 
-    // Admin
-    if (lEmail === process.env.ADMIN_EMAIL.toLowerCase()) {
+    // Check for admin credentials first
+    if (normalizedEmail === process.env.ADMIN_EMAIL.toLowerCase()) {
       if (password !== process.env.ADMIN_PASSWORD)
         return res.status(401).json({ success: false, message: 'Incorrect password.' });
-      return res.json({ success: true, token: createAdminToken(), user: { id:'admin', name:'Super Admin', email: process.env.ADMIN_EMAIL, role:'admin', isAdmin:true } });
+      return res.json({ success: true, token: buildAdminToken(), user: { id:'admin', name:'Super Admin', email: process.env.ADMIN_EMAIL, role:'admin', isAdmin:true } });
     }
 
-    const user = await User.findOne({ email: lEmail }).select('+password');
-    if (!user) return res.status(401).json({ success: false, message: 'No account found. Please sign up first.' });
-    if (user.authProvider === 'google' && !user.password)
+    const foundUser = await User.findOne({ email: normalizedEmail }).select('+password');
+    if (!foundUser) return res.status(401).json({ success: false, message: 'No account found. Please sign up first.' });
+    if (foundUser.authProvider === 'google' && !foundUser.password)
       return res.status(400).json({ success: false, message: 'This account uses Google Sign-In.' });
-    if (!(await user.comparePassword(password)))
+    if (!(await foundUser.comparePassword(password)))
       return res.status(401).json({ success: false, message: 'Incorrect password.' });
-    if (user.status === 'blocked')
+    if (foundUser.status === 'blocked')
       return res.status(403).json({ success: false, message: 'Account suspended. Contact admin.' });
 
-    const token = createToken({ id: user._id, role: user.role });
-    res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, role: user.role, status: user.status, verified: user.verified, phone: user.phone, city: user.city } });
+    const jwtToken = buildToken({ id: foundUser._id, role: foundUser.role });
+    res.json({ success: true, token: jwtToken, user: { id: foundUser._id, name: foundUser.name, email: foundUser.email, role: foundUser.role, status: foundUser.status, verified: foundUser.verified, phone: foundUser.phone, city: foundUser.city } });
   } catch (e) { console.error('Login:', e); res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
 // POST /api/auth/google
-router.post('/google', async (req, res) => {
+authRouter.post('/google', async (req, res) => {
   try {
     const { credential, role, mode } = req.body;
     if (!credential) return res.status(400).json({ success: false, message: 'Google credential required.' });
 
-    let payload;
+    let googlePayload;
     try {
-      const ticket = await googleOAuth.verifyIdToken({ idToken: credential, audience: process.env.GOOGLE_CLIENT_ID });
-      payload = ticket.getPayload();
+      const verifiedTicket = await oauthClient.verifyIdToken({ idToken: credential, audience: process.env.GOOGLE_CLIENT_ID });
+      googlePayload = verifiedTicket.getPayload();
     } catch { return res.status(401).json({ success: false, message: 'Invalid Google token.' }); }
 
-    const { email, name, sub: googleId } = payload;
-    const lEmail = email.toLowerCase();
+    const { email, name, sub: googleId } = googlePayload;
+    const normalizedEmail = email.toLowerCase();
 
-    if (lEmail === process.env.ADMIN_EMAIL.toLowerCase())
-      return res.json({ success: true, token: createAdminToken(), user: { id:'admin', name:'Super Admin', email: process.env.ADMIN_EMAIL, role:'admin', isAdmin:true } });
+    if (normalizedEmail === process.env.ADMIN_EMAIL.toLowerCase())
+      return res.json({ success: true, token: buildAdminToken(), user: { id:'admin', name:'Super Admin', email: process.env.ADMIN_EMAIL, role:'admin', isAdmin:true } });
 
-    let user = await User.findOne({ email: lEmail });
+    let matchedUser = await User.findOne({ email: normalizedEmail });
 
     if (mode === 'signin') {
-      if (!user) return res.status(401).json({ success: false, message: 'No account for ' + email + '. Please sign up.' });
-      if (user.status === 'blocked') return res.status(403).json({ success: false, message: 'Account suspended.' });
-      if (!user.googleId) { user.googleId = googleId; user.authProvider = 'google'; await user.save(); }
+      if (!matchedUser) return res.status(401).json({ success: false, message: 'No account for ' + email + '. Please sign up.' });
+      if (matchedUser.status === 'blocked') return res.status(403).json({ success: false, message: 'Account suspended.' });
+      if (!matchedUser.googleId) { matchedUser.googleId = googleId; matchedUser.authProvider = 'google'; await matchedUser.save(); }
     } else {
-      if (user) return res.status(400).json({ success: false, message: 'Account already exists. Please sign in.' });
+      if (matchedUser) return res.status(400).json({ success: false, message: 'Account already exists. Please sign in.' });
       if (!role || !['tenant','landlord'].includes(role))
         return res.status(400).json({ success: false, message: 'Select Tenant or Landlord first.' });
-      user = await User.create({ name: name || lEmail.split('@')[0], email: lEmail, role, authProvider: 'google', googleId });
+      matchedUser = await User.create({ name: name || normalizedEmail.split('@')[0], email: normalizedEmail, role, authProvider: 'google', googleId });
     }
 
-    const token = createToken({ id: user._id, role: user.role });
-    res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, role: user.role, status: user.status, verified: user.verified, phone: user.phone, city: user.city } });
+    const jwtToken = buildToken({ id: matchedUser._id, role: matchedUser.role });
+    res.json({ success: true, token: jwtToken, user: { id: matchedUser._id, name: matchedUser.name, email: matchedUser.email, role: matchedUser.role, status: matchedUser.status, verified: matchedUser.verified, phone: matchedUser.phone, city: matchedUser.city } });
   } catch (e) { console.error('Google:', e); res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
 // POST /api/auth/google-fallback (dev mode)
-router.post('/google-fallback', async (req, res) => {
+authRouter.post('/google-fallback', async (req, res) => {
   try {
     const { email, role, mode } = req.body;
     if (!email) return res.status(400).json({ success: false, message: 'Email required.' });
-    const lEmail = email.toLowerCase().trim();
-    if (lEmail === process.env.ADMIN_EMAIL.toLowerCase())
-      return res.json({ success: true, token: createAdminToken(), user: { id:'admin', name:'Super Admin', email: process.env.ADMIN_EMAIL, role:'admin', isAdmin:true } });
+    const normalizedEmail = email.toLowerCase().trim();
+    if (normalizedEmail === process.env.ADMIN_EMAIL.toLowerCase())
+      return res.json({ success: true, token: buildAdminToken(), user: { id:'admin', name:'Super Admin', email: process.env.ADMIN_EMAIL, role:'admin', isAdmin:true } });
 
-    let user = await User.findOne({ email: lEmail });
+    let matchedUser = await User.findOne({ email: normalizedEmail });
     if (mode === 'signin') {
-      if (!user) return res.status(401).json({ success: false, message: 'No account for ' + email + '.' });
-      if (user.status === 'blocked') return res.status(403).json({ success: false, message: 'Account suspended.' });
+      if (!matchedUser) return res.status(401).json({ success: false, message: 'No account for ' + email + '.' });
+      if (matchedUser.status === 'blocked') return res.status(403).json({ success: false, message: 'Account suspended.' });
     } else {
-      if (user) return res.status(400).json({ success: false, message: 'Account already exists.' });
+      if (matchedUser) return res.status(400).json({ success: false, message: 'Account already exists.' });
       if (!role) return res.status(400).json({ success: false, message: 'Select role first.' });
-      user = await User.create({ name: lEmail.split('@')[0], email: lEmail, role, authProvider: 'google' });
+      matchedUser = await User.create({ name: normalizedEmail.split('@')[0], email: normalizedEmail, role, authProvider: 'google' });
     }
-    const token = createToken({ id: user._id, role: user.role });
-    res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, role: user.role, status: user.status, verified: user.verified } });
+    const jwtToken = buildToken({ id: matchedUser._id, role: matchedUser.role });
+    res.json({ success: true, token: jwtToken, user: { id: matchedUser._id, name: matchedUser.name, email: matchedUser.email, role: matchedUser.role, status: matchedUser.status, verified: matchedUser.verified } });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
 // GET /api/auth/me
-router.get('/me', protect, (req, res) => {
+authRouter.get('/me', protect, (req, res) => {
   if (req.user?.isAdmin)
     return res.json({ success: true, user: { id:'admin', name:'Super Admin', email: process.env.ADMIN_EMAIL, role:'admin', isAdmin:true } });
   res.json({ success: true, user: req.user });
 });
 
 // PUT /api/auth/profile — update logged-in user profile
-router.put('/profile', protect, async (req, res) => {
+authRouter.put('/profile', protect, async (req, res) => {
   try {
     if (req.user?.isAdmin) return res.json({ success: true, message: 'Admin profile updated.' });
     const { name, phone, cnic, city, address } = req.body;
-    const user = await User.findByIdAndUpdate(req.user._id, { name, phone, cnic, city, address }, { new: true });
-    res.json({ success: true, user });
+    const updatedUser = await User.findByIdAndUpdate(req.user._id, { name, phone, cnic, city, address }, { new: true });
+    res.json({ success: true, user: updatedUser });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
-module.exports = router;
+module.exports = authRouter;
