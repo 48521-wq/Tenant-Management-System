@@ -1,32 +1,45 @@
-// Authentication middleware for TMS routes
-const jwt  = require('jsonwebtoken');
-const User = require('../models/User');
+// ============================================================
+// TMS Authentication Middleware
+// ============================================================
+const jwt      = require('jsonwebtoken');
+const User     = require('../models/User');
 
-// Middleware: verify JWT and attach user to request
+// ─── protect — verify JWT token and load user ───────────────
 const protect = async (req, res, next) => {
   try {
-    let token;
+    let bearerToken;
+
+    // Extract token from Authorization header
     if (req.headers.authorization?.startsWith('Bearer'))
-      token = req.headers.authorization.split(' ')[1];
-    if (!token) return res.status(401).json({ success: false, message: 'Not authorized.' });
+      bearerToken = req.headers.authorization.split(' ')[1];
 
-    const decodedPayload = jwt.verify(token, process.env.JWT_SECRET);
+    if (!bearerToken)
+      return res.status(401).json({ success: false, message: 'Not authorized.' });
 
-    // Admin token has isAdmin flag — no DB lookup needed
-    if (decodedPayload.isAdmin) {
-      req.user = { isAdmin: true, email: decodedPayload.email };
+    // Verify and decode the token
+    const tokenData = jwt.verify(bearerToken, process.env.JWT_SECRET);
+
+    // Admin token carries isAdmin flag — skip DB lookup
+    if (tokenData.isAdmin) {
+      req.user = { isAdmin: true, email: tokenData.email };
       return next();
     }
 
-    const foundUser = await User.findById(decodedPayload.id);
-    if (!foundUser) return res.status(401).json({ success: false, message: 'User not found.' });
-    if (foundUser.status === 'blocked') return res.status(403).json({ success: false, message: 'Account suspended.' });
-    req.user = foundUser;
+    // Load regular user from database
+    const dbUser = await User.findById(tokenData.id);
+    if (!dbUser)
+      return res.status(401).json({ success: false, message: 'User not found.' });
+    if (dbUser.status === 'blocked')
+      return res.status(403).json({ success: false, message: 'Account suspended.' });
+
+    req.user = dbUser;
     next();
-  } catch (e) { res.status(401).json({ success: false, message: 'Invalid token.' }); }
+  } catch (err) {
+    res.status(401).json({ success: false, message: 'Invalid token.' });
+  }
 };
 
-// Middleware: restrict route to admin only
+// ─── adminOnly — restrict access to admin users only ────────
 const adminOnly = (req, res, next) => {
   if (req.user?.isAdmin) return next();
   res.status(403).json({ success: false, message: 'Admin access required.' });
