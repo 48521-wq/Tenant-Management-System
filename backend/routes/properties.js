@@ -1,131 +1,131 @@
 const express  = require('express');
 const Property = require('../models/Property');
 const { protect, adminOnly } = require('../middleware/auth');
-const router = express.Router();
+
+// Router instance for property endpoints
+const propertyRouter = express.Router();
 
 // GET landlord's OWN properties (uses JWT — no ID needed in URL)
-router.get('/my', protect, async (req, res) => {
+propertyRouter.get('/my', protect, async (req, res) => {
   try {
-    const props = await Property.find({ landlordId: req.user._id }).sort({ createdAt: -1 });
-    res.json({ success: true, count: props.length, properties: props });
+    const ownProperties = await Property.find({ landlordId: req.user._id }).sort({ createdAt: -1 });
+    res.json({ success: true, count: ownProperties.length, properties: ownProperties });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
 // GET all properties (public / admin)
-router.get('/', async (req, res) => {
+propertyRouter.get('/', async (req, res) => {
   try {
-    const filter = {};
-    if (req.query.status)     filter.status = req.query.status;
-    if (req.query.area)       filter.area   = req.query.area;
-    if (req.query.type)       filter.type   = req.query.type;
-    if (req.query.beds)       filter.beds   = { $gte: Number(req.query.beds) };
-    if (req.query.maxRent)    filter.rent   = { $lte: Number(req.query.maxRent) };
+    const queryFilter = {};
+    if (req.query.status)     queryFilter.status = req.query.status;
+    if (req.query.area)       queryFilter.area   = req.query.area;
+    if (req.query.type)       queryFilter.type   = req.query.type;
+    if (req.query.beds)       queryFilter.beds   = { $gte: Number(req.query.beds) };
+    if (req.query.maxRent)    queryFilter.rent   = { $lte: Number(req.query.maxRent) };
     if (req.query.landlordId) {
-      // MongoDB stores landlordId as ObjectId — use string comparison via regex or cast
       const mongoose = require('mongoose');
       try {
-        filter.landlordId = new mongoose.Types.ObjectId(req.query.landlordId);
+        queryFilter.landlordId = new mongoose.Types.ObjectId(req.query.landlordId);
       } catch {
-        filter.landlordId = req.query.landlordId; // fallback if not valid ObjectId
+        queryFilter.landlordId = req.query.landlordId;
       }
     }
-    const props = await Property.find(filter).sort({ createdAt: -1 });
-    res.json({ success: true, count: props.length, properties: props });
+    const allProperties = await Property.find(queryFilter).sort({ createdAt: -1 });
+    res.json({ success: true, count: allProperties.length, properties: allProperties });
   } catch (e) { console.error(e); res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
-// GET single property
-router.get('/:id', async (req, res) => {
+// GET single property by ID
+propertyRouter.get('/:id', async (req, res) => {
   try {
-    const prop = await Property.findById(req.params.id);
-    if (!prop) return res.status(404).json({ success: false, message: 'Property not found.' });
-    res.json({ success: true, property: prop });
+    const singleProperty = await Property.findById(req.params.id);
+    if (!singleProperty) return res.status(404).json({ success: false, message: 'Property not found.' });
+    res.json({ success: true, property: singleProperty });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
-// POST create property (landlord)
-router.post('/', protect, async (req, res) => {
+// POST create property (landlord only)
+propertyRouter.post('/', protect, async (req, res) => {
   try {
     if (req.user?.isAdmin) return res.status(403).json({ success: false, message: 'Admin cannot add properties.' });
     if (req.user.role !== 'landlord') return res.status(403).json({ success: false, message: 'Only landlords can add properties.' });
-
-    const prop = await Property.create({
+    const createdProperty = await Property.create({
       ...req.body,
       landlordId:   req.user._id,
       landlordName: req.user.name,
     });
-    res.status(201).json({ success: true, property: prop });
+    res.status(201).json({ success: true, property: createdProperty });
   } catch (e) { console.error(e); res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
 // PUT update property
-router.put('/:id', protect, async (req, res) => {
+propertyRouter.put('/:id', protect, async (req, res) => {
   try {
-    const prop = await Property.findById(req.params.id);
-    if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
-    if (!req.user?.isAdmin && prop.landlordId.toString() !== req.user._id.toString())
+    const foundProperty = await Property.findById(req.params.id);
+    if (!foundProperty) return res.status(404).json({ success: false, message: 'Not found.' });
+    if (!req.user?.isAdmin && foundProperty.landlordId.toString() !== req.user._id.toString())
       return res.status(403).json({ success: false, message: 'Not authorized.' });
-    const updated = await Property.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json({ success: true, property: updated });
+    const updatedProperty = await Property.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json({ success: true, property: updatedProperty });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
 // PUT save 3D model config
-router.put('/:id/model3d', protect, async (req, res) => {
+propertyRouter.put('/:id/model3d', protect, async (req, res) => {
   try {
-    const prop = await Property.findByIdAndUpdate(
+    const updatedModel = await Property.findByIdAndUpdate(
       req.params.id, { model3d: req.body }, { new: true }
     );
-    res.json({ success: true, property: prop });
+    res.json({ success: true, property: updatedModel });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
 // PUT save landlord furniture layout
-router.put('/:id/furniture/landlord', protect, async (req, res) => {
+propertyRouter.put('/:id/furniture/landlord', protect, async (req, res) => {
   try {
-    const prop = await Property.findById(req.params.id);
-    if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
-    prop.landlordFurnitureLayout = req.body;
-    prop.markModified('landlordFurnitureLayout');
-    await prop.save();
-    res.json({ success: true, property: prop });
+    const propRecord = await Property.findById(req.params.id);
+    if (!propRecord) return res.status(404).json({ success: false, message: 'Not found.' });
+    propRecord.landlordFurnitureLayout = req.body;
+    propRecord.markModified('landlordFurnitureLayout');
+    await propRecord.save();
+    res.json({ success: true, property: propRecord });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
 // PUT save tenant furniture layout
-router.put('/:id/furniture/tenant', protect, async (req, res) => {
+propertyRouter.put('/:id/furniture/tenant', protect, async (req, res) => {
   try {
-    const prop = await Property.findById(req.params.id);
-    if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
-    prop.tenantFurnitureLayout = req.body;
-    prop.markModified('tenantFurnitureLayout');
-    await prop.save();
-    res.json({ success: true, property: prop });
+    const propRecord = await Property.findById(req.params.id);
+    if (!propRecord) return res.status(404).json({ success: false, message: 'Not found.' });
+    propRecord.tenantFurnitureLayout = req.body;
+    propRecord.markModified('tenantFurnitureLayout');
+    await propRecord.save();
+    res.json({ success: true, property: propRecord });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
-// PUT save furniture layout (legacy)
-router.put('/:id/furniture', protect, async (req, res) => {
+// PUT save furniture layout (legacy support)
+propertyRouter.put('/:id/furniture', protect, async (req, res) => {
   try {
-    const prop = await Property.findById(req.params.id);
-    if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
-    prop.furnitureLayout = req.body;
-    prop.markModified('furnitureLayout');
-    await prop.save();
-    res.json({ success: true, property: prop });
+    const propRecord = await Property.findById(req.params.id);
+    if (!propRecord) return res.status(404).json({ success: false, message: 'Not found.' });
+    propRecord.furnitureLayout = req.body;
+    propRecord.markModified('furnitureLayout');
+    await propRecord.save();
+    res.json({ success: true, property: propRecord });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
 // DELETE property
-router.delete('/:id', protect, async (req, res) => {
+propertyRouter.delete('/:id', protect, async (req, res) => {
   try {
-    const prop = await Property.findById(req.params.id);
-    if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
-    if (!req.user?.isAdmin && prop.landlordId.toString() !== req.user._id.toString())
+    const propToDelete = await Property.findById(req.params.id);
+    if (!propToDelete) return res.status(404).json({ success: false, message: 'Not found.' });
+    if (!req.user?.isAdmin && propToDelete.landlordId.toString() !== req.user._id.toString())
       return res.status(403).json({ success: false, message: 'Not authorized.' });
     await Property.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Property deleted.' });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
-module.exports = router;
+module.exports = propertyRouter;
