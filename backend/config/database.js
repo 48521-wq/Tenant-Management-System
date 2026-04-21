@@ -1,26 +1,32 @@
 // ============================================================
-// TMS Database — MongoDB Atlas connection via Mongoose
+// TMS — MongoDB Atlas Database Connector
 // ============================================================
+'use strict';
+
 const mongoose = require('mongoose');
 const dns      = require('dns');
 
-// Prefer IPv4 to avoid Atlas resolution issues
+// Use IPv4 first to prevent Atlas connection issues
 dns.setDefaultResultOrder('ipv4first');
 
-// Connection options
-const mongoOptions = {
-  serverSelectionTimeoutMS: 15000,
-  socketTimeoutMS:          45000,
-  family:                   4, // IPv4 only
+// Timeout and network settings for Atlas
+const DB_OPTIONS = {
+  serverSelectionTimeoutMS : 15000,
+  socketTimeoutMS          : 45000,
+  family                   : 4,
 };
 
+/**
+ * connectDB — opens a Mongoose connection to MongoDB Atlas.
+ * Exits the process if the connection fails.
+ */
 const connectDB = async () => {
   try {
-    const connection = await mongoose.connect(process.env.MONGODB_URI, mongoOptions);
-    console.log(`✅ MongoDB Atlas Connected: ${connection.connection.host}`);
-    console.log(`📦 Database: ${connection.connection.name}`);
-  } catch (err) {
-    console.error('❌ MongoDB connection error:', err.message);
+    const result = await mongoose.connect(process.env.MONGODB_URI, DB_OPTIONS);
+    console.log(`✅ MongoDB Atlas Connected: ${result.connection.host}`);
+    console.log(`📦 Database: ${result.connection.name}`);
+  } catch (connectionErr) {
+    console.error('❌ MongoDB connection error:', connectionErr.message);
     process.exit(1);
   }
 };
