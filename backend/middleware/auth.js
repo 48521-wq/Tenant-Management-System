@@ -1,47 +1,62 @@
 // ============================================================
-// TMS Authentication Middleware
+// TMS — Authentication & Authorisation Middleware
 // ============================================================
+'use strict';
+
 const jwt      = require('jsonwebtoken');
 const User     = require('../models/User');
 
-// ─── protect — verify JWT token and load user ───────────────
+// ─────────────────────────────────────────────────────────────
+// protect
+// Reads the Bearer token from the Authorization header,
+// verifies it with JWT_SECRET, then attaches the user
+// (or admin stub) to req.user before calling next().
+// ─────────────────────────────────────────────────────────────
 const protect = async (req, res, next) => {
   try {
-    let bearerToken;
+    // 1. Extract raw token string
+    let rawToken = null;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer')) {
+      rawToken = authHeader.split(' ')[1];
+    }
 
-    // Extract token from Authorization header
-    if (req.headers.authorization?.startsWith('Bearer'))
-      bearerToken = req.headers.authorization.split(' ')[1];
-
-    if (!bearerToken)
+    if (!rawToken) {
       return res.status(401).json({ success: false, message: 'Not authorized.' });
+    }
 
-    // Verify and decode the token
-    const tokenData = jwt.verify(bearerToken, process.env.JWT_SECRET);
+    // 2. Verify signature and decode payload
+    const claims = jwt.verify(rawToken, process.env.JWT_SECRET);
 
-    // Admin token carries isAdmin flag — skip DB lookup
-    if (tokenData.isAdmin) {
-      req.user = { isAdmin: true, email: tokenData.email };
+    // 3a. Admin path — no DB call needed
+    if (claims.isAdmin) {
+      req.user = { isAdmin: true, email: claims.email };
       return next();
     }
 
-    // Load regular user from database
-    const dbUser = await User.findById(tokenData.id);
-    if (!dbUser)
+    // 3b. Regular user — fetch from DB
+    const requestUser = await User.findById(claims.id);
+    if (!requestUser) {
       return res.status(401).json({ success: false, message: 'User not found.' });
-    if (dbUser.status === 'blocked')
+    }
+    if (requestUser.status === 'blocked') {
       return res.status(403).json({ success: false, message: 'Account suspended.' });
+    }
 
-    req.user = dbUser;
+    req.user = requestUser;
     next();
-  } catch (err) {
+  } catch (jwtErr) {
     res.status(401).json({ success: false, message: 'Invalid token.' });
   }
 };
 
-// ─── adminOnly — restrict access to admin users only ────────
+// ─────────────────────────────────────────────────────────────
+// adminOnly
+// Must be used after protect.
+// Rejects non-admin callers with 403.
+// ─────────────────────────────────────────────────────────────
 const adminOnly = (req, res, next) => {
-  if (req.user?.isAdmin) return next();
+  if (req.user && req.user.isAdmin) return next();
   res.status(403).json({ success: false, message: 'Admin access required.' });
 };
 

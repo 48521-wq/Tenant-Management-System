@@ -1,52 +1,61 @@
 // ============================================================
-// TMS Backend — Main Server Entry Point
+// TMS Backend — Express Server Bootstrap
 // ============================================================
-require('dotenv').config();
-const express      = require('express');
-const cors         = require('cors');
-const connectDB    = require('./config/database');
+'use strict';
 
-// Initialize express app and connect to MongoDB
+require('dotenv').config();
+
+const express   = require('express');
+const cors      = require('cors');
+const connectDB = require('./config/database');
+
+// ── App Setup ────────────────────────────────────────────────
 const app = express();
+
+// Connect to MongoDB before anything else
 connectDB();
 
-// ─── CORS — allow all origins in development ────────────────
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    callback(null, true);
+// ── CORS ─────────────────────────────────────────────────────
+// Allow all origins in development mode
+const corsConfig = {
+  origin: function allowAll(origin, cb) {
+    // Permit requests with no origin (e.g. curl, mobile)
+    if (!origin) return cb(null, true);
+    cb(null, true);
   },
   credentials: true,
 };
-app.use(cors(corsOptions));
+app.use(cors(corsConfig));
 
-// ─── Body Parsers ───────────────────────────────────────────
+// ── Body Parsing ─────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// ─── API Routes ─────────────────────────────────────────────
-app.use('/api/auth',        require('./routes/auth'));
-app.use('/api/users',       require('./routes/users'));
-app.use('/api/properties',  require('./routes/properties'));
-app.use('/api/complaints',  require('./routes/complaints'));
-app.use('/api/maintenance', require('./routes/maintenance'));
-app.use('/api/payments',    require('./routes/payments'));
-app.use('/api/leases',      require('./routes/leases'));
+// ── Route Mounting ───────────────────────────────────────────
+const mountRoute = (path, file) => app.use(path, require(file));
 
-// ─── Health Check ───────────────────────────────────────────
-app.get('/api/health', (req, res) =>
-  res.json({ status: 'OK', time: new Date().toISOString() })
-);
+mountRoute('/api/auth',        './routes/auth');
+mountRoute('/api/users',       './routes/users');
+mountRoute('/api/properties',  './routes/properties');
+mountRoute('/api/complaints',  './routes/complaints');
+mountRoute('/api/maintenance', './routes/maintenance');
+mountRoute('/api/payments',    './routes/payments');
+mountRoute('/api/leases',      './routes/leases');
 
-// ─── 404 & Global Error Handlers ────────────────────────────
-app.use((req, res) =>
-  res.status(404).json({ success: false, message: 'Route not found.' })
-);
-app.use((err, req, res, next) =>
-  res.status(500).json({ success: false, message: 'Server error.' })
-);
+// ── Utility Endpoints ────────────────────────────────────────
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'OK', time: new Date().toISOString() });
+});
 
-// ─── Start Server ────────────────────────────────────────────
+// ── Error Handlers ───────────────────────────────────────────
+app.use((_req, res) => {
+  res.status(404).json({ success: false, message: 'Route not found.' });
+});
+app.use((serverErr, _req, res, _next) => {
+  res.status(500).json({ success: false, message: 'Server error.' });
+});
+
+// ── Start Listening ──────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 TMS Backend running on http://localhost:${PORT}`);
