@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // ============================================================
 // TMS Maintenance Model
 // Repair and service requests submitted by tenants
@@ -22,5 +23,23 @@ const maintenanceSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+=======
+const mongoose = require('mongoose');
+
+const maintenanceSchema = new mongoose.Schema({
+  tenantId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  tenantName:  { type: String, default: '' },
+  landlordId:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  landlordName:{ type: String, default: '' },
+  propertyId:  { type: mongoose.Schema.Types.ObjectId, ref: 'Property', default: null },
+  propertyTitle:{ type: String, default: '' },
+  type:        { type: String, enum: ['Plumbing','Electrical','Gas','AC / Cooling','Painting','Structural','Other'], default: 'Other' },
+  priority:    { type: String, enum: ['low','medium','high','urgent'], default: 'medium' },
+  description: { type: String, required: true },
+  status:      { type: String, enum: ['pending','in_progress','resolved','cancelled'], default: 'pending' },
+  adminNote:   { type: String, default: '' },
+  resolvedAt:  { type: Date, default: null },
+}, { timestamps: true });
+>>>>>>> 17a4da6032e965253aaaaa7e291f867a3df0f14b
 
 module.exports = mongoose.model('Maintenance', maintenanceSchema);
