@@ -194,61 +194,22 @@ const TMS = {
   // ─────────────────── NOTIFICATIONS ─────────────────
   getNotifs() { return this.get(this.KEYS.notifications); },
 
-<<<<<<< HEAD
   addNotif(title, msg, color) {
-=======
-  addNotif(title, msg, color, to = 'all', from = 'admin') {
->>>>>>> 17a4da6032e965253aaaaa7e291f867a3df0f14b
     const notifs = this.getNotifs();
-    const toList = Array.isArray(to) ? to : [to || 'all'];
-    notifs.unshift({
-      title,
-      msg,
-      color: color || 'blue',
-      read: false,
-      time: new Date().toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' }),
-      to: toList,
-      from: from || 'admin',
-    });
+    notifs.unshift({ title, msg, color: color || 'blue', read: false, time: 'just now' });
     if (notifs.length > 50) notifs.pop();
     this.save(this.KEYS.notifications, notifs);
-    const unread = notifs.filter(n => !n.read && this._isNotifForUser(n)).length;
-    document.querySelectorAll('.tn-badge, #notif-nb, #nb, #nb2, #nb-notifs-admin').forEach(el => {
-      if (!el) return;
-      el.textContent = unread;
-      el.style.display = unread > 0 ? 'flex' : 'none';
-    });
+    const unread = notifs.filter(n => !n.read).length;
+    document.querySelectorAll('.tn-badge, #notif-nb').forEach(el => el && (el.textContent = unread));
   },
 
   markAllNotifsRead() {
     const notifs = this.getNotifs().map(n => ({ ...n, read: true }));
     this.save(this.KEYS.notifications, notifs);
-<<<<<<< HEAD
     document.querySelectorAll('.tn-badge, #notif-nb').forEach(el => el && (el.textContent = '0'));
   },
 
   // ─────────────────── DASHBOARD STATS ───────────────
-=======
-    document.querySelectorAll('.tn-badge, #notif-nb, #nb, #nb2, #nb-notifs-admin').forEach(el => {
-      if (!el) return;
-      el.textContent = '0';
-      el.style.display = 'none';
-    });
-  },
-
-  // ─────────────────── DASHBOARD STATS ───────────────
-  _isNotifForUser(notification) {
-    if (!notification) return false;
-    const current = this.getCurrentUser();
-    const recipients = Array.isArray(notification.to) ? notification.to : [notification.to || 'all'];
-    if (recipients.includes('all')) return true;
-    if (!current) return false;
-    if (current.role && recipients.includes(current.role)) return true;
-    if (current.email && recipients.includes(current.email)) return true;
-    return false;
-  },
-
->>>>>>> 17a4da6032e965253aaaaa7e291f867a3df0f14b
   getStats() {
     const tenants = this.getTenants();
     const landlords = this.getLandlords();
@@ -262,11 +223,7 @@ const TMS = {
     const activeLeases = agreements.filter(a => a.status === 'active').length;
     const pendingLandlords = landlords.filter(l => l.status === 'pending').length;
     const openComplaints = complaints.filter(c => c.status === 'open').length;
-<<<<<<< HEAD
     const unreadNotifs = this.getNotifs().filter(n => !n.read).length;
-=======
-    const unreadNotifs = this.getNotifs().filter(n => !n.read && this._isNotifForUser(n)).length;
->>>>>>> 17a4da6032e965253aaaaa7e291f867a3df0f14b
 
     return {
       totalUsers: users.length,
@@ -288,17 +245,13 @@ const TMS = {
   // ─────────────────── CURRENT USER ──────────────────
   getCurrentUser() {
     try {
-      let email = localStorage.getItem('tms_current_user');
-      if (!email) {
-        const currentUser = JSON.parse(localStorage.getItem('tms_user') || 'null');
-        email = currentUser?.email;
-      }
+      const email = localStorage.getItem('tms_current_user');
       if (!email) return null;
       if (email === localStorage.getItem('tms_admin_email')) {
         return { name: 'Super Admin', role: 'admin', email, initial: 'A' };
       }
       const users = JSON.parse(localStorage.getItem('tms_users') || '{}');
-      const u = users[email] || JSON.parse(localStorage.getItem('tms_user') || 'null');
+      const u = users[email];
       if (!u) return null;
       return { ...u, email, initial: (u.name || email)[0].toUpperCase() };
     } catch (e) { return null; }
@@ -602,17 +555,11 @@ function tmsRenderLogs() {
 function tmsRenderNotifs() {
   const container = document.getElementById('notifs-list');
   if (!container) return;
-<<<<<<< HEAD
   const list = TMS.getNotifs();
-=======
-  const current = TMS.getCurrentUser();
-  const list = TMS.getNotifs().filter(n => TMS._isNotifForUser(n));
->>>>>>> 17a4da6032e965253aaaaa7e291f867a3df0f14b
   if (!list.length) {
     container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">No notifications yet.</div>`;
     return;
   }
-<<<<<<< HEAD
   container.innerHTML = list.map(n => `
     <div class="notif-item ${n.read ? '' : 'unread'}">
       <div class="ndot ${n.color || 'blue'}"></div>
@@ -622,23 +569,6 @@ function tmsRenderNotifs() {
       </div>
       <span class="n-time">${n.time}</span>
     </div>`).join('');
-=======
-  container.innerHTML = list.map(n => {
-    const recipients = Array.isArray(n.to) ? n.to.join(', ') : n.to || 'all';
-    const sender = n.from || 'admin';
-    const colorStyle = n.color && n.color.startsWith('#') ? n.color : `var(--${n.color || 'blue'})`;
-    return `
-      <div class="notif-item ${n.read ? '' : 'unread'}">
-        <div class="notif-dot" style="background:${colorStyle}"></div>
-        <div>
-          <div class="notif-text" style="font-weight:700">${n.title}</div>
-          <div class="notif-text" style="margin-top:4px">${n.msg}</div>
-          <div class="notif-time" style="margin-top:8px">From: ${sender} · To: ${recipients}</div>
-        </div>
-        <span class="notif-time">${n.time}</span>
-      </div>`;
-  }).join('');
->>>>>>> 17a4da6032e965253aaaaa7e291f867a3df0f14b
 }
 
 // ── Pending Actions on Dashboard ────────────────────────
@@ -793,23 +723,11 @@ function tmsShowFormMsg(elId, msg, success) {
 function tmsSendNotification() {
   const title = document.getElementById('notif-title')?.value.trim();
   const msg = document.getElementById('notif-msg')?.value.trim();
-<<<<<<< HEAD
   if (!title || !msg) { alert('Title and message required.'); return; }
   TMS.addNotif(title, msg, 'blue');
   TMS.addLog('info', `Admin sent notification: "${title}"`, 'super_admin');
   document.getElementById('notif-title').value = '';
   document.getElementById('notif-msg').value = '';
-=======
-  const to = document.getElementById('notif-to')?.value || 'all';
-  if (!title || !msg) { alert('Title and message required.'); return; }
-  const current = TMS.getCurrentUser();
-  const sender = current?.role || 'admin';
-  TMS.addNotif(title, msg, 'blue', to, sender);
-  TMS.addLog('info', `${sender} sent notification to ${to}: "${title}"`, sender || 'system');
-  document.getElementById('notif-title').value = '';
-  document.getElementById('notif-msg').value = '';
-  if (document.getElementById('notif-to')) document.getElementById('notif-to').value = 'all';
->>>>>>> 17a4da6032e965253aaaaa7e291f867a3df0f14b
   tmsRenderNotifs(); tmsUpdateStats();
   const ok = document.getElementById('notif-ok');
   if (ok) { ok.classList.add('show'); setTimeout(() => ok.classList.remove('show'), 3000); }
