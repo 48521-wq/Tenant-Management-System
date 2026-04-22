@@ -457,11 +457,36 @@ body {
    GLOBAL FIXES
 ═══════════════════════════════════════════════════ */
 
-/* Fix dropdown text color */
-select { color: #EDE9E0; background: #12151C; }
-select option { background: #12151C; color: #EDE9E0; }
-[data-theme="light"] select { color: #1A1E26; background: #fff; }
-[data-theme="light"] select option { background: #fff; color: #1A1E26; }
+/* Fix dropdown text color - dark theme forced */
+select {
+  color: #EDE9E0 !important;
+  background-color: #12151C !important;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+  border: 1.5px solid rgba(201,169,110,0.18);
+  border-radius: 9px;
+  padding-left: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+}
+select option { background-color: #12151C !important; color: #EDE9E0 !important; }
+select option:hover, select option:focus, select option:checked {
+  background-color: #1E2535 !important;
+  color: #C9A96E !important;
+}
+[data-theme="light"] select {
+  color: #1A1E26 !important;
+  background-color: #fff !important;
+  border-color: rgba(0,0,0,0.12);
+}
+[data-theme="light"] select option {
+  background-color: #ffffff !important;
+  color: #1A1E26 !important;
+}
 
 /* Role card selected — bright visible highlight */
 .role-card-inline.tenant.selected {

@@ -209,13 +209,21 @@ const TMS = {
     if (notifs.length > 50) notifs.pop();
     this.save(this.KEYS.notifications, notifs);
     const unread = notifs.filter(n => !n.read && this._isNotifForUser(n)).length;
-    document.querySelectorAll('.tn-badge, #notif-nb, #nb, #nb2').forEach(el => el && (el.textContent = unread));
+    document.querySelectorAll('.tn-badge, #notif-nb, #nb, #nb2, #nb-notifs-admin').forEach(el => {
+      if (!el) return;
+      el.textContent = unread;
+      el.style.display = unread > 0 ? 'flex' : 'none';
+    });
   },
 
   markAllNotifsRead() {
     const notifs = this.getNotifs().map(n => ({ ...n, read: true }));
     this.save(this.KEYS.notifications, notifs);
-    document.querySelectorAll('.tn-badge, #notif-nb, #nb, #nb2').forEach(el => el && (el.textContent = '0'));
+    document.querySelectorAll('.tn-badge, #notif-nb, #nb, #nb2, #nb-notifs-admin').forEach(el => {
+      if (!el) return;
+      el.textContent = '0';
+      el.style.display = 'none';
+    });
   },
 
   // ─────────────────── DASHBOARD STATS ───────────────
