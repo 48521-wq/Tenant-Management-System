@@ -70,8 +70,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
 .card+.card{margin-top:16px}
 /* STATS */
-.stats-row{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:16px;margin-bottom:20px;width:100%}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:13px;transition:all 0.2s;min-width:0;width:100%}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:13px;transition:all 0.2s}
 .stat-card:hover{border-color:rgba(201,169,110,0.28);transform:translateY(-2px)}
 .stat-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .stat-val{font-size:22px;font-weight:700;font-family:'Playfair Display',serif;line-height:1;color:var(--text)}
@@ -86,7 +86,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .b-muted{background:var(--input-bg);color:var(--muted);border:1px solid var(--border)}
 /* FORM */
 .form-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px}
-.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .fg{display:flex;flex-direction:column;gap:5px}
 .fg.full{grid-column:1/-1}
 .fg label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px}
@@ -101,11 +101,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 /* TOAST */
 .toast{display:none;align-items:center;gap:8px;padding:10px 16px;background:rgba(78,205,196,0.1);border:1px solid rgba(78,205,196,0.25);border-radius:10px;color:var(--green);font-size:13px;font-weight:600;margin-top:12px}
 .toast.show{display:flex}
-.notif-item{display:flex;gap:12px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;align-items:flex-start}
-.notif-item.unread{border-color:rgba(201,169,110,0.25);background:rgba(201,169,110,0.04)}
-.notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;background:var(--gold)}
-.notif-text{font-size:13px;color:var(--text)}
-.notif-time{font-size:11px;color:var(--muted);margin-top:3px}
 /* LIST */
 .list-item{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;gap:12px;transition:border-color 0.2s;margin-bottom:8px}
 .list-item:hover{border-color:rgba(201,169,110,0.3)}
@@ -144,23 +139,6 @@ tr:hover td{background:rgba(201,169,110,0.03)}
 .ov-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--text)}
 .close-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--input-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--muted);transition:all 0.2s}
 .close-btn:hover{background:rgba(255,107,107,0.1);color:var(--error)}
-/* Dark theme native select fix */
-select, select option {
-  background-color: #12151C !important;
-  color: #E8E4DC !important;
-}
-[data-theme="light"] select, [data-theme="light"] select option {
-  background-color: #ffffff !important;
-  color: #1A1E26 !important;
-}
-select {
-  -webkit-appearance: none;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  padding-right: 30px !important;
-}
 </style>
 </head>
 <body>
@@ -203,43 +181,19 @@ function toggleTheme() {
 })();
 
 // NAV
-let landlordLeaseSyncTimer = null;
 function sp(id, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+id)?.classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if(el) el.classList.add('active');
-  if(id==='dashboard')           loadMyProperties();
-  if(id==='properties')          loadMyProperties();
-  if(id==='lfurniture')          loadLFurniturePage();
-  if(id==='maintenance')         loadLandlordMaintenance();
-  if(id==='complaints')          loadLandlordComplaints();
-  if(id==='payments')            loadLandlordPayments();
-  if(id==='leases')              { loadLandlordLeases(); startLandlordLeaseSync(); }
-  else { stopLandlordLeaseSync(); }
-  if(id==='rental-requests')     loadLandlordRentalRequests();
-  if(id==='notifications')       loadNotifications();
-}
-
-function startLandlordLeaseSync() {
-  stopLandlordLeaseSync();
-  landlordLeaseSyncTimer = setInterval(() => {
-    if (document.getElementById('page-leases')?.classList.contains('active')) {
-      loadLandlordLeases();
-    }
-  }, 20000);
-}
-
-function stopLandlordLeaseSync() {
-  if (landlordLeaseSyncTimer) {
-    clearInterval(landlordLeaseSyncTimer);
-    landlordLeaseSyncTimer = null;
-  }
+  if(id==='dashboard')   loadMyProperties();
+  if(id==='properties')  loadMyProperties();
+  if(id==='maintenance') loadLandlordMaintenance();
+  if(id==='complaints')  loadLandlordComplaints();
+  if(id==='payments')    loadLandlordPayments();
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Refresh notification badge every 5 seconds
-  setTimeout(() => setInterval(() => { if (typeof tmsUpdateStats === 'function') tmsUpdateStats(); }, 5000), 1000);
   const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
   const name  = user.name  || 'Landlord';
   const email = user.email || '';
@@ -264,7 +218,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 // PROPERTIES
 // ══════════════════════════════════════
 let myProps = [];
-let leaseItems = [];
 async function loadMyProperties() {
   const grid  = document.getElementById('prop-grid');
   const grid2 = document.getElementById('prop-grid-2');
@@ -296,16 +249,6 @@ function updateStats() {
   set('st-total',total);set('st-avail',avail);set('st-rented',rented);
   set('st-rev','Rs. '+rev.toLocaleString());
 }
-function modelGlbPath(name) {
-  const base = window.location.pathname.includes('/pages/') ? '../models/' : './models/';
-  return base + name;
-}
-function getPropertyGlbPath(p) {
-  if (p && p.model3d && p.model3d.customGlb) return modelGlbPath(p.model3d.customGlb);
-  if (p && typeof p.title === 'string' && /agral/i.test(p.title)) return modelGlbPath('agral-new.glb');
-  return modelGlbPath('interior-room.glb');
-}
-
 function renderMyProperties() {
   const grid  = document.getElementById('prop-grid');
   const grid2 = document.getElementById('prop-grid-2');
@@ -325,26 +268,12 @@ function renderMyProperties() {
   const statusColors={available:'rgba(78,205,196,0.9)',rented:'rgba(255,179,71,0.9)',suspended:'rgba(255,107,107,0.9)'};
   const html = myProps.map(p => {
     const id = p._id;
-    // Custom GLB support: agar model3d.customGlb set hai to woh file use karo
-    const glbFile = getPropertyGlbPath(p);
     return `
     <div class="pcard">
-      <div class="pcard-thumb" style="padding:0;overflow:hidden;cursor:pointer" onclick="quickView3D('${id}')">
-        <model-viewer
-          src="${glbFile}"
-          alt="Property Interior"
-          auto-rotate
-          auto-rotate-delay="0"
-          rotation-per-second="12deg"
-          shadow-intensity="0.8"
-          environment-image="neutral"
-          exposure="1.0"
-          camera-orbit="0deg 70deg 7m"
-          style="width:100%;height:100%;background:#111;"
-          loading="lazy"
-        ></model-viewer>
-        <span style="position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:${statusColors[p.status]||statusColors.available};color:#fff;pointer-events:none">${p.status||'available'}</span>
-        <span style="position:absolute;bottom:10px;right:10px;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--gold);border:1px solid rgba(201,169,110,0.3);pointer-events:none">⬡ 3D</span>
+      <div class="pcard-thumb">
+        <span style="font-size:54px">${emojis[p.type]||'🏠'}</span>
+        <span style="position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:${statusColors[p.status]||statusColors.available};color:#fff">${p.status||'available'}</span>
+        <span onclick="quickView3D('${id}')" style="position:absolute;bottom:10px;right:10px;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--gold);border:1px solid rgba(201,169,110,0.3);cursor:pointer">⬡ 3D</span>
       </div>
       <div class="pcard-body">
         <div class="pcard-title">${p.title||'Untitled'}</div>
@@ -355,7 +284,7 @@ function renderMyProperties() {
         <div class="pcard-price">Rs. ${Number(p.rent||0).toLocaleString()} <span>/mo</span></div>
         <div class="pcard-actions" style="flex-wrap:wrap;gap:6px">
           <button class="btn btn-gold btn-sm" style="flex:1" onclick="edit3DByPropId('${id}')">🏗️ Edit 3D</button>
-          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="furnViewByPropId('${id}')">${Object.keys((window._propMap&&window._propMap[id]&&window._propMap[id].landlordFurnitureLayout)||{}).length>0?'✅ My Layout':'🛋️ Interior'}</button>
+          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="furnViewByPropId('${id}')">🛋️ Interior</button>
           <button class="btn btn-danger btn-sm" onclick="deleteProp('${id}')">🗑</button>
         </div>
       </div>
@@ -457,37 +386,22 @@ async function save3DModel() {
 // ══════════════════════════════════════
 // FURNITURE VIEWER
 // ══════════════════════════════════════
-function openFurnitureViewer(propId, propTitle, propObj, showTenant) {
+function openFurnitureViewer(propId, propTitle, propObj) {
   let prop = {};
   if (propObj && typeof propObj === 'object') prop = propObj;
   else { try { prop = propObj ? JSON.parse(propObj) : {}; } catch {} }
 
-  window._furnPropId     = propId;
-  window._furnPropTitle  = propTitle || 'Property';
-  window._furnProp       = prop;
-  window._furnShowingTenant = !!showTenant;
+  window._furnPropId    = propId;
+  window._furnPropTitle = propTitle || 'Property';
+  window._furnRole      = 'landlord';
 
-  const landlordLayout = prop.landlordFurnitureLayout || prop.furnitureLayout || {};
-  const tenantLayout   = prop.tenantFurnitureLayout || {};
-  const hasTenant   = Object.keys(tenantLayout).length > 0;
-  const hasLandlord = Object.keys(landlordLayout).length > 0;
+  document.getElementById('ov-furn-title').textContent = '🏠 ' + window._furnPropTitle + ' — My Furniture Layout';
 
-  const savedLayout = showTenant ? tenantLayout : landlordLayout;
-  const badge    = document.getElementById('furn-saved-badge');
-  const toggleBtn = document.getElementById('furn-toggle-btn');
-  const saveBtnEl = document.getElementById('furn-save-btn');
-
-  if (showTenant) {
-    document.getElementById('ov-furn-title').textContent = '🛋️ ' + window._furnPropTitle + ' — Tenant Layout (View Only)';
-    if (badge) { badge.style.display = hasTenant ? 'flex' : 'none'; badge.textContent = '✅ Tenant Saved'; }
-    if (saveBtnEl) saveBtnEl.style.display = 'none';
-    if (toggleBtn) { toggleBtn.style.display = 'flex'; toggleBtn.textContent = '🏠 My Layout'; }
-  } else {
-    document.getElementById('ov-furn-title').textContent = '🏠 ' + window._furnPropTitle + ' — My Furniture Layout';
-    if (badge) { badge.style.display = hasLandlord ? 'flex' : 'none'; badge.textContent = '✅ Layout Saved'; }
-    if (saveBtnEl) saveBtnEl.style.display = '';
-    if (toggleBtn) { toggleBtn.style.display = hasTenant ? 'flex' : 'none'; toggleBtn.textContent = '🛋️ Tenant Layout'; }
-  }
+  // Show saved badge if layout exists
+  const savedLayout = prop.landlordFurnitureLayout || prop.furnitureLayout || {};
+  const hasSaved = Object.keys(savedLayout).length > 0;
+  const badge = document.getElementById('furn-saved-badge');
+  if (badge) badge.style.display = hasSaved ? 'flex' : 'none';
 
   document.getElementById('ov-furn').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -497,39 +411,24 @@ function openFurnitureViewer(propId, propTitle, propObj, showTenant) {
     window._furnScene = sc;
   }, 150);
 }
-function furnToggleView() {
-  const pid  = window._furnPropId;
-  const prop = window._furnProp;
-  const title = window._furnPropTitle;
-  openFurnitureViewer(pid, title, prop, !window._furnShowingTenant);
-}
 function closeFurnViewer() {
   document.getElementById('ov-furn')?.classList.remove('open');
   document.body.style.overflow = '';
 }
 async function saveFurnitureLayout() {
-  if (window._furnShowingTenant) { alert('Tenant layout sirf view kiya ja sakta hai, save nahi.'); return; }
   const sc = window._furnScene;
   if (!sc) return;
   const layout = sc.getLayout();
   const btn = document.getElementById('furn-save-btn');
   if (btn) { btn.disabled=true; btn.textContent='Saving…'; }
   try {
-    await lFetch('/properties/'+window._furnPropId+'/furniture/landlord', 'PUT', layout);
+    const role = window._furnRole || 'landlord';
+    await lFetch('/properties/'+window._furnPropId+'/furniture/'+role, 'PUT', layout);
     const toast = document.getElementById('furn-saved-toast');
     if (toast) { toast.style.display='flex'; setTimeout(()=>toast.style.display='none',2500); }
     const badge = document.getElementById('furn-saved-badge');
-    if (badge) { badge.style.display='flex'; badge.textContent='✅ Layout Saved'; }
-    // Show tenant toggle if tenant has layout
+    if (badge) badge.style.display = 'flex';
     await loadMyProperties();
-    // Re-check if tenant has layout now
-    const updatedProp = (window._propMap||{})[window._furnPropId];
-    if (updatedProp) window._furnProp = updatedProp;
-    const toggleBtn = document.getElementById('furn-toggle-btn');
-    if (toggleBtn) {
-      const hasTenant = Object.keys((updatedProp||{}).tenantFurnitureLayout||{}).length > 0;
-      toggleBtn.style.display = hasTenant ? 'flex' : 'none';
-    }
   } catch(e) { alert('Layout save nahi ho saki. Server check karein.'); }
   finally { if(btn){btn.disabled=false;btn.textContent='💾 Save Layout';} }
 }
@@ -571,43 +470,14 @@ async function loadLandlordMaintenance() {
     if(!items.length){list.innerHTML='<div class="loading" style="padding:20px">No maintenance requests received yet.</div>';return;}
     const statusMap={pending:'b-warn',in_progress:'b-blue',resolved:'b-green',cancelled:'b-muted'};
     list.innerHTML=items.map(r=>`
-      <div class="list-item" style="align-items:flex-start;flex-direction:column;gap:10px">
-        <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
-          <div style="flex:1">
-            <div class="li-title">${r.type||'Request'} — ${r.tenantName||'Tenant'}</div>
-            <div class="li-sub">${r.description?.slice(0,100)}${r.description?.length>100?'…':''} · ${new Date(r.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>
-            ${r.propertyTitle ? `<div class="li-sub" style="margin-top:2px">🏠 ${r.propertyTitle}</div>` : ''}
-            <div class="li-sub" style="margin-top:2px">Priority: <strong>${r.priority||'normal'}</strong></div>
-          </div>
-          <span class="badge ${statusMap[r.status]||'b-muted'}" style="margin-left:10px">${r.status?.replace('_',' ')||'pending'}</span>
+      <div class="list-item">
+        <div style="flex:1">
+          <div class="li-title">${r.type||'Request'} — ${r.tenantName||'Tenant'}</div>
+          <div class="li-sub">${r.description?.slice(0,80)}${r.description?.length>80?'…':''} · ${new Date(r.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          ${r.status==='pending' ? `<button class="submit-btn" style="padding:6px 14px;font-size:12px" onclick="approveMaintenance('${r._id}',this)">✅ Approve</button>` : ''}
-          ${r.status==='in_progress' ? `<button class="submit-btn" style="padding:6px 14px;font-size:12px;background:rgba(78,205,196,0.15);color:var(--green)" onclick="doneMaintenance('${r._id}',this)">✔ Mark Done</button>` : ''}
-          ${r.status==='resolved' ? `<span style="font-size:12px;color:var(--green)">✅ Completed ${r.resolvedAt ? new Date(r.resolvedAt).toLocaleDateString('en-PK') : ''}</span>` : ''}
-        </div>
+        <span class="badge ${statusMap[r.status]||'b-muted'}">${r.status?.replace('_',' ')||'pending'}</span>
       </div>`).join('');
   } catch{list.innerHTML='<div class="loading">⚠️ Error loading.</div>';}
-}
-
-async function approveMaintenance(id, btn) {
-  if (!confirm('Approve this maintenance request and mark it In Progress?')) return;
-  btn.disabled=true; btn.textContent='Approving…';
-  try {
-    const r = await lFetch('/maintenance/'+id+'/approve','PUT',{});
-    if(r.success) { await loadLandlordMaintenance(); }
-    else { alert(r.message||'Failed.'); btn.disabled=false; btn.textContent='✅ Approve'; }
-  } catch { alert('Cannot connect to server.'); btn.disabled=false; btn.textContent='✅ Approve'; }
-}
-
-async function doneMaintenance(id, btn) {
-  if (!confirm('Mark this maintenance request as Done/Resolved?')) return;
-  btn.disabled=true; btn.textContent='Saving…';
-  try {
-    const r = await lFetch('/maintenance/'+id+'/done','PUT',{});
-    if(r.success) { await loadLandlordMaintenance(); }
-    else { alert(r.message||'Failed.'); btn.disabled=false; btn.textContent='✔ Mark Done'; }
-  } catch { alert('Cannot connect to server.'); btn.disabled=false; btn.textContent='✔ Mark Done'; }
 }
 
 // ══════════════════════════════════════
@@ -620,174 +490,16 @@ async function loadLandlordComplaints() {
     const data = await lFetch('/complaints');
     const items = data.complaints||[];
     if(!items.length){list.innerHTML='<div class="loading" style="padding:20px">No complaints received yet.</div>';return;}
-    const statusMap={open:'b-warn',pending:'b-warn',in_progress:'b-blue',resolved:'b-green',closed:'b-muted'};
+    const statusMap={open:'b-warn',in_progress:'b-blue',resolved:'b-green',closed:'b-muted'};
     list.innerHTML=items.map(c=>`
-      <div class="list-item" style="align-items:flex-start;flex-direction:column;gap:10px">
-        <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
-          <div style="flex:1">
-            <div class="li-title">${c.subject} — ${c.tenantName||'Tenant'}</div>
-            <div class="li-sub">${c.category||'—'} · ${new Date(c.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>
-            ${c.description ? `<div class="li-sub" style="margin-top:2px">${c.description.slice(0,100)}${c.description.length>100?'…':''}</div>` : ''}
-            ${c.priority ? `<div class="li-sub" style="margin-top:2px">Priority: <strong>${c.priority}</strong></div>` : ''}
-          </div>
-          <span class="badge ${statusMap[c.status]||'b-warn'}" style="margin-left:10px">${c.status?.replace('_',' ')||'open'}</span>
+      <div class="list-item">
+        <div style="flex:1">
+          <div class="li-title">${c.subject} — ${c.tenantName||'Tenant'}</div>
+          <div class="li-sub">${c.category||'—'} · ${new Date(c.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          ${(c.status==='open'||c.status==='pending') ? `<button class="submit-btn" style="padding:6px 14px;font-size:12px" onclick="approveComplaint('${c._id}',this)">✅ Approve</button>` : ''}
-          ${c.status==='in_progress' ? `<button class="submit-btn" style="padding:6px 14px;font-size:12px;background:rgba(78,205,196,0.15);color:var(--green)" onclick="resolveComplaint('${c._id}',this)">✔ Mark Resolved</button>` : ''}
-          ${c.status==='resolved' ? `<span style="font-size:12px;color:var(--green)">✅ Resolved ${c.resolvedAt ? new Date(c.resolvedAt).toLocaleDateString('en-PK') : ''}</span>` : ''}
-        </div>
+        <span class="badge ${statusMap[c.status]||'b-warn'}">${c.status?.replace('_',' ')||'open'}</span>
       </div>`).join('');
   } catch{list.innerHTML='<div class="loading">⚠️ Error loading.</div>';}
-}
-
-async function approveComplaint(id, btn) {
-  if (!confirm('Approve this complaint and mark it In Progress?')) return;
-  btn.disabled=true; btn.textContent='Approving…';
-  try {
-    const r = await lFetch('/complaints/'+id+'/approve','PUT',{});
-    if(r.success) { await loadLandlordComplaints(); }
-    else { alert(r.message||'Failed.'); btn.disabled=false; btn.textContent='✅ Approve'; }
-  } catch { alert('Cannot connect to server.'); btn.disabled=false; btn.textContent='✅ Approve'; }
-}
-
-async function resolveComplaint(id, btn) {
-  if (!confirm('Mark this complaint as Resolved?')) return;
-  btn.disabled=true; btn.textContent='Saving…';
-  try {
-    const r = await lFetch('/complaints/'+id+'/resolve','PUT',{});
-    if(r.success) { await loadLandlordComplaints(); }
-    else { alert(r.message||'Failed.'); btn.disabled=false; btn.textContent='✔ Mark Resolved'; }
-  } catch { alert('Cannot connect to server.'); btn.disabled=false; btn.textContent='✔ Mark Resolved'; }
-}
-// ══════════════════════════════════════
-// LANDLORD — RENTAL REQUESTS
-// ══════════════════════════════════════
-async function loadLandlordRentalRequests() {
-  const list=document.getElementById('ll-rental-requests-list'); if(!list)return;
-  list.innerHTML='<div class="loading"><span class="spinner"></span>Loading rental requests…</div>';
-  try {
-    const data = await lFetch('/rental-requests/received');
-    const requests = data.requests||[];
-    
-    // Update badge
-    const badge = document.getElementById('rental-requests-badge-ll');
-    const pendingCount = requests.filter(r => r.status === 'pending').length;
-    if (badge) {
-      badge.textContent = pendingCount;
-      badge.style.display = pendingCount > 0 ? 'flex' : 'none';
-    }
-    
-    if(!requests.length){list.innerHTML='<div class="loading" style="padding:20px">No rental requests yet.</div>';return;}
-    
-    const statusBadges = {pending:'b-warn',accepted:'b-green',rejected:'b-red',cancelled:'b-muted'};
-    const statusEmoji = {pending:'⏳',accepted:'✅',rejected:'❌',cancelled:'🚫'};
-    
-    // Group by status
-    const byStatus = {};
-    requests.forEach(r => {
-      if (!byStatus[r.status]) byStatus[r.status] = [];
-      byStatus[r.status].push(r);
-    });
-    
-    const sortedStatuses = ['pending', 'accepted', 'rejected', 'cancelled'];
-    let html = '';
-    
-    sortedStatuses.forEach(status => {
-      const items = byStatus[status] || [];
-      if (items.length === 0) return;
-      
-      const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
-      html += `<div style="margin-bottom:20px;border-top:1px solid var(--border);padding-top:14px">
-        <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">${statusEmoji[status]} ${statusLabel} Requests (${items.length})</div>`;
-      
-      items.forEach(req => {
-        html += `
-        <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px">
-            <div style="flex:1">
-              <div style="font-size:13px;font-weight:600;color:var(--text)">${req.propertyTitle}</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px">📍 ${req.propertyAddress} · 💰 Rs. ${Number(req.propertyRent||0).toLocaleString()}/month</div>
-            </div>
-            <span class="badge ${statusBadges[req.status]||'b-warn'}">${statusEmoji[req.status]||''} ${req.status}</span>
-          </div>
-          
-          <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
-            <div>
-              <div style="font-size:11px;color:var(--muted)">Tenant</div>
-              <div style="font-size:12px;font-weight:600;color:var(--text)">${req.tenantName}</div>
-              <div style="font-size:11px;color:var(--muted)">${req.tenantEmail}</div>
-            </div>
-            <div>
-              <div style="font-size:11px;color:var(--muted)">Requested</div>
-              <div style="font-size:12px;font-weight:600;color:var(--text)">${new Date(req.requestedAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>
-            </div>
-          </div>
-          
-          ${req.message ? `<div style="margin:10px 0;padding:8px;background:rgba(74,158,255,0.08);border-left:2px solid var(--blue);border-radius:4px;font-size:12px;color:var(--text)">"${req.message}"</div>` : ''}
-          
-          ${req.status === 'pending' ? `<div style="display:flex;gap:8px;margin-top:10px">
-            <button onclick="acceptRentalRequest('${req._id}')" style="flex:1;padding:8px 12px;border-radius:9px;border:none;background:rgba(78,205,196,0.12);color:var(--green);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;transition:all 0.2s" onMouseOver="this.style.background='rgba(78,205,196,0.2)'" onMouseOut="this.style.background='rgba(78,205,196,0.12)'">✅ Accept</button>
-            <button onclick="rejectRentalRequest('${req._id}')" style="flex:1;padding:8px 12px;border-radius:9px;border:none;background:rgba(255,107,107,0.12);color:var(--error);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;transition:all 0.2s" onMouseOver="this.style.background='rgba(255,107,107,0.2)'" onMouseOut="this.style.background='rgba(255,107,107,0.12)'">❌ Reject</button>
-          </div>` : ''}
-        </div>`;
-      });
-      
-      html += '</div>';
-    });
-    
-    list.innerHTML = html;
-  } catch{list.innerHTML='<div class="loading">⚠️ Error loading.</div>';}
-}
-
-async function acceptRentalRequest(requestId) {
-  if (!confirm('This will assign the property to the tenant and reject all other pending requests. Continue?')) return;
-  
-  const btn = event.target;
-  const originalText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = '⏳ Processing…';
-  
-  try {
-    const r = await lFetch('/rental-requests/'+requestId+'/accept', 'PUT', {});
-    if (r.success) {
-      alert('✅ Request accepted! Property assigned to tenant.');
-      await loadLandlordRentalRequests();
-    } else {
-      alert('⚠️ ' + (r.message || 'Failed'));
-      btn.disabled = false;
-      btn.textContent = originalText;
-    }
-  } catch {
-    alert('❌ Cannot connect to server');
-    btn.disabled = false;
-    btn.textContent = originalText;
-  }
-}
-
-async function rejectRentalRequest(requestId) {
-  if (!confirm('Reject this rental request?')) return;
-  
-  const btn = event.target;
-  const originalText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = '⏳ Processing…';
-  
-  try {
-    const r = await lFetch('/rental-requests/'+requestId+'/reject', 'PUT', {});
-    if (r.success) {
-      alert('✅ Request rejected.');
-      await loadLandlordRentalRequests();
-    } else {
-      alert('⚠️ ' + (r.message || 'Failed'));
-      btn.disabled = false;
-      btn.textContent = originalText;
-    }
-  } catch {
-    alert('❌ Cannot connect to server');
-    btn.disabled = false;
-    btn.textContent = originalText;
-  }
 }
 
 // ══════════════════════════════════════
@@ -795,11 +507,11 @@ async function rejectRentalRequest(requestId) {
 // ══════════════════════════════════════
 async function loadLandlordPayments() {
   const tbody=document.getElementById('pay-tbody'); if(!tbody)return;
-  tbody.innerHTML='<tr><td colspan="7" class="loading"><span class="spinner"></span>Loading…</td></tr>';
+  tbody.innerHTML='<tr><td colspan="5" class="loading"><span class="spinner"></span>Loading…</td></tr>';
   try {
     const data = await lFetch('/payments');
     const items = data.payments||[];
-    if(!items.length){tbody.innerHTML='<tr><td colspan="7" class="loading">No payment records yet.</td></tr>';return;}
+    if(!items.length){tbody.innerHTML='<tr><td colspan="5" class="loading">No payment records yet.</td></tr>';return;}
     const total=items.reduce((a,p)=>a+(p.amount||0),0);
     const stats=document.getElementById('pay-stats');
     if(stats) stats.innerHTML=`
@@ -811,193 +523,9 @@ async function loadLandlordPayments() {
       <td>${p.month||'—'}</td>
       <td style="color:var(--gold);font-weight:600">Rs. ${Number(p.amount||0).toLocaleString()}</td>
       <td>${p.method||'Cash'}</td>
-      <td>${p.screenshot ? `<a href="${p.screenshot}" target="_blank">View</a>` : '—'}</td>
-      <td><span class="badge ${p.status==='paid'?'b-green':p.status==='overdue'||p.status==='rejected'?'b-red':'b-warn'}">${p.status||'pending'}</span></td>
-      <td>${p.status==='pending' ? `<button class="submit-btn" style="padding:6px 10px;font-size:12px;margin-right:6px" onclick="approvePayment('${p._id}', this)">Approve</button><button class="submit-btn muted" style="padding:6px 10px;font-size:12px" onclick="rejectPayment('${p._id}', this)">Reject</button>` : '—'}</td>
+      <td><span class="badge ${p.status==='paid'?'b-green':'b-warn'}">${p.status||'paid'}</span></td>
     </tr>`).join('');
-  } catch{tbody.innerHTML='<tr><td colspan="6" class="loading">⚠️ Error loading.</td></tr>';}
-}
-
-async function approvePayment(paymentId, btn) {
-  if (!confirm('Approve this payment and mark it as paid?')) return;
-  btn.disabled = true;
-  const originalText = btn.textContent;
-  btn.textContent = 'Approving…';
-  try {
-    const r = await lFetch('/payments/'+paymentId+'/approve', 'PUT', {});
-    if (r.success) {
-      await loadLandlordPayments();
-    } else {
-      alert(r.message || 'Failed to approve payment.');
-      btn.disabled = false;
-      btn.textContent = originalText;
-    }
-  } catch (err) {
-    console.error('approvePayment error', err);
-    alert('Cannot connect to server.');
-    btn.disabled = false;
-    btn.textContent = originalText;
-  }
-}
-
-async function rejectPayment(paymentId, btn) {
-  if (!confirm('Reject this payment request?')) return;
-  btn.disabled = true;
-  const originalText = btn.textContent;
-  btn.textContent = 'Rejecting…';
-  try {
-    const r = await lFetch('/payments/'+paymentId+'/reject', 'PUT', {});
-    if (r.success) {
-      await loadLandlordPayments();
-    } else {
-      alert(r.message || 'Failed to reject payment.');
-      btn.disabled = false;
-      btn.textContent = originalText;
-    }
-  } catch (err) {
-    console.error('rejectPayment error', err);
-    alert('Cannot connect to server.');
-    btn.disabled = false;
-    btn.textContent = originalText;
-  }
-}
-
-async function loadLandlordLeases() {
-  const tbody = document.getElementById('lease-tbody'); if(!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="6" class="loading"><span class="spinner"></span>Loading…</td></tr>';
-  try {
-    const data = await lFetch('/leases');
-    const items = data.leases || [];
-    leaseItems = items;
-    if (!items.length) { tbody.innerHTML = '<tr><td colspan="6" class="loading">No lease agreements found.</td></tr>'; return; }
-    tbody.innerHTML = items.map(l => `<tr>
-      <td>${l.tenantName||'—'}</td>
-      <td>${l.propertyTitle||'—'}</td>
-      <td style="color:var(--gold);font-weight:600">Rs. ${Number(l.rent||0).toLocaleString()}</td>
-      <td>${l.startDate||'—'} → ${l.endDate||'—'}</td>
-      <td><span class="badge ${l.status==='active'?'b-green':l.status==='pending'?'b-warn':l.status==='rejected'?'b-red':'b-muted'}">${l.status||'pending'}</span></td>
-      <td style="white-space:nowrap">
-        <button class="submit-btn" style="padding:6px 10px;font-size:12px;margin-right:6px" onclick="openLeaseModal('${l._id}')">👁 View</button>
-        ${l.status==='pending' ? `<button class="submit-btn" style="padding:6px 10px;font-size:12px;margin-right:6px" onclick="acceptLease('${l._id}', this)">✅ Accept</button><button class="submit-btn" style="padding:6px 10px;font-size:12px;background:rgba(255,107,107,0.12);color:var(--error)" onclick="rejectLease('${l._id}', this)">❌ Reject</button>` : ''}
-      </td>
-    </tr>`).join('');
-  } catch (err) {
-    console.error('loadLandlordLeases error', err);
-    tbody.innerHTML = '<tr><td colspan="6" class="loading">⚠️ Error loading leases.</td></tr>';
-  }
-}
-
-async function acceptLease(leaseId, btn) {
-  if (!confirm('Accept this lease agreement?')) return;
-  btn.disabled = true;
-  const originalText = btn.textContent;
-  btn.textContent = 'Accepting…';
-  try {
-    const r = await lFetch('/leases/'+leaseId+'/accept', 'PUT', {});
-    if (r.success) {
-      await loadLandlordLeases();
-    } else {
-      alert(r.message || 'Failed to accept lease.');
-      btn.disabled = false;
-      btn.textContent = originalText;
-    }
-  } catch (err) {
-    console.error('acceptLease error', err);
-    alert('Cannot connect to server.');
-    btn.disabled = false;
-    btn.textContent = originalText;
-  }
-}
-
-async function rejectLease(leaseId, btn) {
-  if (!confirm('Reject this lease agreement?')) return;
-  btn.disabled = true;
-  const originalText = btn.textContent;
-  btn.textContent = 'Rejecting…';
-  try {
-    const r = await lFetch('/leases/'+leaseId+'/reject', 'PUT', {});
-    if (r.success) {
-      await loadLandlordLeases();
-    } else {
-      alert(r.message || 'Failed to reject lease.');
-      btn.disabled = false;
-      btn.textContent = originalText;
-    }
-  } catch (err) {
-    console.error('rejectLease error', err);
-    alert('Cannot connect to server.');
-    btn.disabled = false;
-    btn.textContent = originalText;
-  }
-}
-
-function closeLeaseModal() {
-  document.getElementById('lease-ov')?.classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function openLeaseModal(leaseId) {
-  const lease = leaseItems.find(l => l._id === leaseId);
-  if (!lease) return;
-  const modal = document.getElementById('lease-ov');
-  if (!modal) return;
-  document.getElementById('lease-tenant') .textContent = lease.tenantName || '—';
-  document.getElementById('lease-property').textContent = lease.propertyTitle || '—';
-  document.getElementById('lease-status').textContent = lease.status || 'pending';
-  document.getElementById('lease-rent').value = lease.rent || 0;
-  document.getElementById('lease-start').value = lease.startDate || '';
-  document.getElementById('lease-end').value = lease.endDate || '';
-  document.getElementById('lease-duration').value = lease.duration || '';
-  document.getElementById('lease-terms').value = lease.terms || '';
-  document.getElementById('lease-save-btn').dataset.leaseId = leaseId;
-  document.getElementById('lease-raw').textContent = lease.terms || 'No lease terms provided yet.';
-  document.body.style.overflow = 'hidden';
-  modal.classList.add('open');
-}
-
-async function saveLeaseEdits(btn) {
-  const leaseId = btn.dataset.leaseId;
-  if (!leaseId) return;
-  btn.disabled = true;
-  const originalText = btn.textContent;
-  btn.textContent = 'Saving…';
-
-  const payload = {
-    rent: Number(document.getElementById('lease-rent').value) || 0,
-    startDate: document.getElementById('lease-start').value,
-    endDate: document.getElementById('lease-end').value,
-    duration: document.getElementById('lease-duration').value,
-    terms: document.getElementById('lease-terms').value,
-  };
-
-  const lease = leaseItems.find(l => l._id === leaseId);
-  if (lease?.status === 'active') {
-    const currentEnd = new Date(lease.endDate || lease.startDate);
-    const newEnd = payload.endDate ? new Date(payload.endDate) : null;
-    if (!newEnd || newEnd <= currentEnd) {
-      alert('Active lease cannot be modified until it expires. To update rent or terms, extend the lease end date first.');
-      btn.disabled = false;
-      btn.textContent = originalText;
-      return;
-    }
-  }
-
-  try {
-    const res = await lFetch('/leases/'+leaseId, 'PUT', payload);
-    if (res.success) {
-      await loadLandlordLeases();
-      openLeaseModal(leaseId);
-      alert('Lease updated successfully.');
-    } else {
-      alert(res.message || 'Unable to save lease edits.');
-    }
-  } catch (err) {
-    console.error('saveLeaseEdits error', err);
-    alert('Cannot connect to server.');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = originalText;
-  }
+  } catch{tbody.innerHTML='<tr><td colspan="5" class="loading">⚠️ Error loading.</td></tr>';}
 }
 
 // ══════════════════════════════════════
@@ -1044,28 +572,14 @@ function furnViewByPropId(propId) {
 let curr3DId = null;
 function open3D(propId, name, model3dOrJson, type) {
   curr3DId = propId;
+  let cfg = {};
+  if (model3dOrJson && typeof model3dOrJson === 'object') cfg = model3dOrJson;
+  else { try { cfg = JSON.parse(model3dOrJson||'{}'); } catch {} }
+  cfg.houseType = cfg.houseType || type?.toLowerCase() || 'standard';
   document.getElementById('ov3d').classList.add('open');
-  document.getElementById('m3dn').textContent = (name || 'Property') + ' — Interior 3D';
-  document.body.style.overflow = 'hidden';
-  // Custom GLB support: agar model3d mein customGlb field hai to woh use karo
-  let model3dObj = model3dOrJson;
-  if (typeof model3dOrJson === 'string') {
-    try { model3dObj = JSON.parse(model3dOrJson); } catch { model3dObj = {}; }
-  }
-  const glbFile = getPropertyGlbPath({ title: name, model3d: model3dObj });
-  // Show loading overlay, hide when model-viewer loads
-  const loadingEl = document.getElementById('c3main-loading');
-  if (loadingEl) loadingEl.style.display = 'flex';
-  const viewer = document.getElementById('c3main-viewer');
-  if (viewer) {
-    viewer.setAttribute('src', glbFile);
-    viewer.addEventListener('load', function onLoad() {
-      if (loadingEl) loadingEl.style.display = 'none';
-      viewer.removeEventListener('load', onLoad);
-    });
-    // Fallback: hide loading after 5s
-    setTimeout(() => { if (loadingEl) loadingEl.style.display = 'none'; }, 5000);
-  }
+  document.getElementById('m3dn').textContent = name || '3D View';
+  document.body.style.overflow='hidden';
+  setTimeout(()=>{ initHouse3D('c3main', cfg); }, 100);
 }
 function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); document.body.style.overflow=''; }
 </script>
@@ -1106,14 +620,8 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
     <button class="nav-item" onclick="sp('add-property',this)">
       <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Property
     </button>
-    <button class="nav-item" onclick="sp('lfurniture',this)">
-      <svg viewBox="0 0 24 24"><path d="M2 9V7a2 2 0 012-2h16a2 2 0 012 2v2"/><path d="M2 9h20v11H2z"/><line x1="6" y1="9" x2="6" y2="20"/><line x1="18" y1="9" x2="18" y2="20"/></svg>Furniture Placement
-    </button>
     <button class="nav-item" onclick="sp('payments',this)">
       <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Rent Payments
-    </button>
-    <button class="nav-item" onclick="sp('leases',this)">
-      <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Lease Agreements
     </button>
   </div>
   <div class="sb-sec">
@@ -1123,10 +631,6 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
     </button>
     <button class="nav-item" onclick="sp('complaints',this)">
       <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Complaints
-    </button>
-    <button class="nav-item" onclick="sp('rental-requests',this)">
-      <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/><polyline points="9 12 12 15 16 11"/></svg>Rental Requests
-      <span class="nb-pill" id="rental-requests-badge-ll" style="display:none">0</span>
     </button>
     <button class="nav-item" onclick="sp('notifications',this)">
       <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>Notifications
@@ -1160,48 +664,6 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
     </div>
   </div>
 
-  <!-- FURNITURE PLACEMENT PAGE -->
-  <div class="page" id="page-lfurniture">
-    <div class="pg-head">
-      <div><div class="pg-title">🛋️ Furniture Placement</div><div class="pg-sub">Design room layouts for your properties — tenants can also save their own</div></div>
-    </div>
-    <div style="margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-      <label style="font-size:13px;font-weight:600;color:var(--muted)">Select Property:</label>
-      <select id="lfurn-prop-select" onchange="loadLFurnForProp(this.value)"
-        style="padding:9px 16px;border-radius:10px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;min-width:220px">
-        <option value="">— Select a property —</option>
-      </select>
-      <div id="lfurn-saved-badge" style="display:none;padding:4px 12px;border-radius:20px;background:rgba(201,169,110,0.12);border:1px solid rgba(201,169,110,0.4);color:var(--gold);font-size:11px;font-weight:700">✅ My Layout Saved</div>
-      <button id="lfurn-toggle-btn" onclick="lFurnToggleView()" style="display:none;padding:7px 16px;border-radius:9px;border:1px solid #4ECDC4;background:rgba(78,205,196,0.08);color:#4ECDC4;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600">🛋️ View Tenant Layout</button>
-    </div>
-    <div id="lfurn-placeholder" style="display:flex;align-items:center;justify-content:center;min-height:420px;border-radius:16px;border:1px dashed var(--border);background:var(--input-bg);color:var(--muted);font-size:14px;flex-direction:column;gap:10px">
-      <span style="font-size:48px">🏠</span><span>Property select karein upar se</span>
-    </div>
-    <div id="lfurn-main" style="display:none;flex-direction:column;gap:12px">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-right:4px">Add:</div>
-        <div id="lfurn-catalog" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-      </div>
-      <div id="lfurn-controls" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-radius:10px;background:var(--input-bg);border:1px solid var(--border)">
-        <span style="font-size:12px;font-weight:600;color:var(--gold)">Selected:</span>
-        <button onclick="lFurnRotate(-45)" style="padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">↺ -45°</button>
-        <button onclick="lFurnRotate(45)"  style="padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">↻ +45°</button>
-        <button onclick="lFurnRotate(90)"  style="padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">↻ 90°</button>
-        <button onclick="lFurnDelete()"    style="padding:6px 12px;border-radius:7px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:#FF6B6B;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">🗑 Delete</button>
-        <span style="font-size:11px;color:var(--muted);margin-left:8px">Right-drag: orbit · Scroll: zoom</span>
-      </div>
-      <div style="position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--border)">
-        <canvas id="c3d-lfurnpage" style="width:100%;height:520px;display:block;background:#1A1A2E;border-radius:10px"></canvas>
-        <div id="lfurn-viewlabel" style="display:none;position:absolute;top:12px;left:14px;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.6);font-size:11px;font-weight:700;color:#4ECDC4"></div>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button id="lfurn-save-btn" onclick="lFurnSave()" style="padding:10px 24px;border-radius:10px;background:var(--gold-grad,linear-gradient(135deg,#C9A96E,#B8954A));color:#fff;border:none;cursor:pointer;font-weight:600;font-family:'DM Sans',sans-serif;font-size:13px;background:linear-gradient(135deg,#C9A96E,#B8954A)">💾 Save My Layout</button>
-        <button onclick="lFurnDownloadPNG()"  style="padding:10px 18px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px">📷 Download PNG</button>
-        <button onclick="lFurnDownloadJSON()" style="padding:10px 18px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px">⬇️ Download JSON</button>
-      </div>
-    </div>
-  </div>
-
   <!-- MY PROPERTIES -->
   <div class="page" id="page-properties">
     <div class="pg-head">
@@ -1216,7 +678,7 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
   <!-- ADD PROPERTY -->
   <div class="page" id="page-add-property">
     <div class="pg-head"><div><div class="pg-title">Add New Property</div><div class="pg-sub">List a property for rent</div></div></div>
-    <div class="form-card">
+    <div class="form-card" style="max-width:600px">
       <div class="form-grid">
         <div class="fg full"><label>Property Title *</label><input id="ap-title" placeholder="e.g. Modern 3-Bed House in DHA"></div>
         <div class="fg"><label>Type</label>
@@ -1257,22 +719,8 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
       <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;color:var(--text)">Payment History</h3>
       <div class="tbl-wrap">
         <table>
-          <thead><tr><th>Tenant</th><th>Month</th><th>Amount</th><th>Method</th><th>Receipt</th><th>Status</th><th>Action</th></tr></thead>
-          <tbody id="pay-tbody"><tr><td colspan="7" class="loading">Loading…</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- LEASE AGREEMENTS -->
-  <div class="page" id="page-leases">
-    <div class="pg-head"><div><div class="pg-title">Lease Agreements</div><div class="pg-sub">Tenant lease agreements and approval</div></div></div>
-    <div class="card">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:12px;color:var(--text)">Lease Requests</h3>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>Tenant</th><th>Property</th><th>Rent</th><th>Period</th><th>Status</th><th>Action</th></tr></thead>
-          <tbody id="lease-tbody"><tr><td colspan="6" class="loading">Loading…</td></tr></tbody>
+          <thead><tr><th>Tenant</th><th>Month</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
+          <tbody id="pay-tbody"><tr><td colspan="5" class="loading">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -1297,7 +745,7 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
   <!-- PROFILE -->
   <div class="page" id="page-profile">
     <div class="pg-head"><div><div class="pg-title">My Profile</div><div class="pg-sub">Manage your account information</div></div></div>
-    <div>
+    <div style="max-width:560px">
       <div class="prof-header">
         <div class="prof-av" id="prof-av">L</div>
         <div>
@@ -1322,81 +770,16 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
     </div>
   </div>
 
-  <!-- RENTAL REQUESTS -->
-  <div class="page" id="page-rental-requests">
-    <div class="pg-head"><div><div class="pg-title">🤝 Rental Requests</div><div class="pg-sub">Manage tenant requests for your properties</div></div></div>
-    <div class="card">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:12px;color:var(--text)">Pending & Received Requests</h3>
-      <div id="ll-rental-requests-list"><div class="loading"><span class="spinner"></span>Loading rental requests…</div></div>
-    </div>
-  </div>
-
   <!-- NOTIFICATIONS -->
   <div class="page" id="page-notifications">
     <div class="pg-head"><div><div class="pg-title">Notifications</div><div class="pg-sub">Latest updates</div></div></div>
-    <div class="card" style="margin-bottom:18px;">
-      <div style="display:grid;gap:14px">
-        <div style="display:grid;grid-template-columns:1fr 180px;gap:14px;align-items:end">
-          <div class="fg" style="margin-bottom:0">
-            <label>Title</label>
-            <input id="notif-title" placeholder="Notification title" type="text">
-          </div>
-          <div class="fg" style="margin-bottom:0">
-            <label>Send to</label>
-            <select id="notif-to">
-              <option value="all">Everyone</option>
-              <option value="tenant">Tenants</option>
-              <option value="landlord">Landlords</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-        </div>
-        <div class="fg full" style="margin-bottom:0">
-          <label>Message</label>
-          <textarea id="notif-msg" placeholder="Write your notification message..."></textarea>
-        </div>
-        <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap">
-          <button class="submit-btn" onclick="tmsSendNotification()">Send Notification</button>
-          <span id="notif-ok" class="toast">Notification sent!</span>
-        </div>
-      </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px;display:flex;gap:12px">
+      <div style="width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:5px"></div>
+      <div><div style="font-size:13px;color:var(--text)">Welcome to TMS Landlord Portal! List your properties to get started.</div><div style="font-size:11px;color:var(--muted);margin-top:3px">Today</div></div>
     </div>
-    <div id="notifs-list"></div>
   </div>
 
 </main>
-</div>
-
-<!-- LEASE DETAIL MODAL -->
-<div class="ov" id="lease-ov">
-  <div class="ov-box" style="width:min(760px,96vw);max-height:92vh;overflow:auto">
-    <div class="ov-head">
-      <span class="ov-title">Lease Details</span>
-      <button class="close-btn" onclick="closeLeaseModal()">✕</button>
-    </div>
-    <div style="padding:18px;display:flex;flex-direction:column;gap:16px">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div style="font-size:13px;color:var(--muted)"><strong>Tenant:</strong> <span id="lease-tenant">—</span></div>
-        <div style="font-size:13px;color:var(--muted)"><strong>Property:</strong> <span id="lease-property">—</span></div>
-        <div style="font-size:13px;color:var(--muted)"><strong>Status:</strong> <span id="lease-status">—</span></div>
-        <div style="font-size:13px;color:var(--muted)"><strong>Rent:</strong> Rs. <input id="lease-rent" type="number" style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;padding:10px;color:var(--text)"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div class="fg"><label>Start Date</label><input id="lease-start" type="date"></div>
-        <div class="fg"><label>End Date</label><input id="lease-end" type="date"></div>
-      </div>
-      <div class="fg"><label>Duration</label><input id="lease-duration" placeholder="12 months"></div>
-      <div class="fg full"><label>Terms & Conditions</label><textarea id="lease-terms" rows="8" placeholder="Lease terms, obligations, payment schedule..." oninput="document.getElementById('lease-raw').textContent = this.value"></textarea></div>
-      <div class="card" style="background:rgba(255,255,255,0.04);border-color:rgba(201,169,110,0.14)">
-        <div style="font-size:13px;font-weight:700;margin-bottom:10px">Agreement Preview</div>
-        <div id="lease-raw" style="white-space:pre-wrap;font-size:13px;line-height:1.6;color:var(--text);min-height:120px;padding:12px;background:rgba(0,0,0,0.03);border-radius:12px">No lease terms provided yet.</div>
-      </div>
-      <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap">
-        <button class="btn btn-ghost" onclick="closeLeaseModal()">Close</button>
-        <button class="submit-btn" id="lease-save-btn" data-lease-id="" onclick="saveLeaseEdits(this)">Save Changes</button>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- 3D VIEW MODAL (read-only quick view) -->
@@ -1405,30 +788,15 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
     <div class="ov-head">
       <span class="ov-title" id="m3dn">3D View</span>
       <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn btn-ghost btn-sm" onclick="h3d_front('c3main')">Front</button>
+        <button class="btn btn-ghost btn-sm" onclick="h3d_top('c3main')">Top</button>
+        <button class="btn btn-ghost btn-sm" onclick="h3d_night('c3main')">🌙</button>
+        <button class="btn btn-ghost btn-sm" onclick="h3d_reset('c3main')">↺</button>
         <button class="close-btn" onclick="c3d()">✕</button>
       </div>
     </div>
-    <div style="width:100%;height:480px;background:#0a0d16;position:relative">
-      <model-viewer
-        id="c3main-viewer"
-        src="../models/interior-room.glb"
-        alt="Property 3D Interior"
-        camera-controls
-        auto-rotate
-        auto-rotate-delay="1000"
-        rotation-per-second="15deg"
-        shadow-intensity="1"
-        environment-image="neutral"
-        exposure="0.8"
-        style="width:100%;height:100%;background:#0a0d16"
-        loading="eager"
-      ></model-viewer>
-      <div id="c3main-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0a0d16;flex-direction:column;gap:10px;pointer-events:none">
-        <div style="width:36px;height:36px;border:3px solid rgba(201,169,110,0.3);border-top-color:#C9A96E;border-radius:50%;animation:spin 0.8s linear infinite"></div>
-        <span style="color:#C9A96E;font-size:12px;font-weight:600">Loading 3D Model…</span>
-      </div>
-    </div>
-    <div style="padding:10px 16px;font-size:11px;color:var(--muted);text-align:center;border-top:1px solid var(--border)">🖱️ Drag to rotate · Scroll to zoom · Two fingers to pan</div>
+    <canvas id="c3main" style="width:100%;height:460px;display:block"></canvas>
+    <div style="padding:10px 16px;font-size:11px;color:var(--muted);text-align:center;border-top:1px solid var(--border)">Drag to rotate · Scroll to zoom</div>
   </div>
 </div>
 
@@ -1521,7 +889,6 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
       </div>
       <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;flex-wrap:wrap">
         <div id="furn-saved-toast" style="display:none;align-items:center;gap:6px;padding:5px 12px;border-radius:8px;background:rgba(78,205,196,0.15);border:1px solid #4ECDC4;color:#4ECDC4;font-size:12px;font-weight:700">✅ Saved!</div>
-        <button id="furn-toggle-btn" onclick="furnToggleView()" style="display:none;padding:7px 14px;border-radius:9px;border:1px solid #4ECDC4;background:rgba(78,205,196,0.1);color:#4ECDC4;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600">🛋️ Tenant Layout</button>
         <button onclick="furnDownloadPNG()" style="padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;display:flex;align-items:center;gap:5px">📷 PNG</button>
         <button onclick="furnDownloadJSON()" style="padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;display:flex;align-items:center;gap:5px">⬇️ JSON</button>
         <button id="furn-save-btn" class="submit-btn" onclick="saveFurnitureLayout()" style="padding:8px 18px;font-size:13px">💾 Save Layout</button>
@@ -1550,8 +917,9 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
         </div>
       </div>
       <!-- Canvas -->
-      <div style="flex:1;position:relative;background:transparent">
+      <div style="flex:1;position:relative;background:#1A1A2E">
         <canvas id="c3d-furn" style="width:100%;height:100%;display:block;min-height:520px"></canvas>
+        <div style="position:absolute;bottom:10px;right:14px;font-size:10px;color:rgba(255,255,255,0.3)">Right-drag orbit · Scroll zoom</div>
       </div>
     </div>
   </div>
@@ -1588,174 +956,10 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
     container.appendChild(btn);
   });
 })();
-
-function loadNotifications() {
-  if (typeof tmsRenderNotifs === 'function') {
-    tmsRenderNotifs();
-  } else {
-    const container = document.getElementById('notifs-list');
-    if (container) {
-      container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">Notifications are unavailable right now.</div>`;
-    }
-  }
-  if (typeof TMS !== 'undefined') {
-    TMS.markAllNotifsRead();
-    const nb = document.getElementById('nb'); if(nb) nb.style.display='none';
-    const nb2 = document.getElementById('nb2'); if(nb2) nb2.style.display='none';
-  }
-}
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
-<script src="../js/tms-data.js"></script>
 <script src="../js/house3d.js"></script>
 <script src="../js/furniture3d.js"></script>
-<script>
-// ── Landlord Furniture Placement Page ──────────────────────
-const LFURN_CATALOG = [
-  {type:'sofa',         label:'Sofa',         color:'#5D5A7E', icon:'🛋️'},
-  {type:'armchair',     label:'Armchair',     color:'#7B4F3A', icon:'🪑'},
-  {type:'bed_double',   label:'Double Bed',   color:'#7B4F2A', icon:'🛏️'},
-  {type:'bed_single',   label:'Single Bed',   color:'#7A8B6E', icon:'🛏️'},
-  {type:'dining_table', label:'Dining Table', color:'#A0734A', icon:'🍽️'},
-  {type:'dining_chair', label:'Din. Chair',   color:'#A0734A', icon:'🪑'},
-  {type:'chair',        label:'Chair',        color:'#8B6040', icon:'🪑'},
-  {type:'wardrobe',     label:'Wardrobe',     color:'#9B7B5A', icon:'🚪'},
-  {type:'tv_unit',      label:'TV Unit',      color:'#4A3A2A', icon:'📺'},
-  {type:'bookshelf',    label:'Bookshelf',    color:'#8B6A3A', icon:'📚'},
-  {type:'coffee_table', label:'Coffee Table', color:'#A08060', icon:'☕'},
-  {type:'lamp',         label:'Floor Lamp',   color:'#C0A060', icon:'💡'},
-  {type:'plant',        label:'Plant',        color:'#3A6A40', icon:'🪴'},
-  {type:'mirror',       label:'Mirror',       color:'#C8A060', icon:'🪞'},
-  {type:'desk',         label:'Desk',         color:'#9B7A4A', icon:'🖥️'},
-];
-
-let _lFurnPropId = null;
-let _lFurnShowingTenant = false;
-
-function loadLFurniturePage() {
-  const sel = document.getElementById('lfurn-prop-select');
-  if (!sel) return;
-  const current = sel.value;
-  sel.innerHTML = '<option value="">— Select a property —</option>';
-  myProps.forEach(p => {
-    const opt = document.createElement('option');
-    opt.value = p._id; opt.textContent = p.title || 'Property';
-    sel.appendChild(opt);
-  });
-  if (current) sel.value = current;
-
-  const cat = document.getElementById('lfurn-catalog');
-  if (cat && !cat.hasChildNodes()) {
-    LFURN_CATALOG.forEach(item => {
-      const btn = document.createElement('button');
-      btn.style.cssText = 'padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:DM Sans,sans-serif;font-size:11.5px;display:flex;align-items:center;gap:5px;transition:background 0.12s';
-      btn.innerHTML = `<span>${item.icon}</span><span>${item.label}</span>`;
-      btn.onmouseenter = () => btn.style.background = 'var(--input-bg)';
-      btn.onmouseleave = () => btn.style.background = 'var(--card)';
-      btn.onclick = () => { const sc=getFurnitureScene('c3d-lfurnpage'); if(sc) sc.addFurniture(item.type, parseInt(item.color.replace('#',''),16)); };
-      cat.appendChild(btn);
-    });
-  }
-
-  // Wire controls panel
-  const actionPanel = document.getElementById('furn-action-panel');
-  if (actionPanel && !actionPanel._lfObserved) {
-    actionPanel._lfObserved = true;
-    new MutationObserver(() => {
-      const ctrl = document.getElementById('lfurn-controls');
-      if (ctrl) ctrl.style.display = actionPanel.style.display === 'flex' ? 'flex' : 'none';
-    }).observe(actionPanel, { attributes: true, attributeFilter: ['style'] });
-  }
-}
-
-function loadLFurnForProp(propId) {
-  _lFurnPropId = propId;
-  _lFurnShowingTenant = false;
-  const placeholder = document.getElementById('lfurn-placeholder');
-  const main = document.getElementById('lfurn-main');
-  const badge = document.getElementById('lfurn-saved-badge');
-  const toggleBtn = document.getElementById('lfurn-toggle-btn');
-  const saveBtn = document.getElementById('lfurn-save-btn');
-  const label = document.getElementById('lfurn-viewlabel');
-
-  if (!propId) {
-    if (placeholder) placeholder.style.display = 'flex';
-    if (main) main.style.display = 'none';
-    return;
-  }
-
-  const p = (window._propMap||{})[propId];
-  if (!p) return;
-
-  const landlordLayout = p.landlordFurnitureLayout || p.furnitureLayout || {};
-  const tenantLayout   = p.tenantFurnitureLayout   || {};
-  const hasLandlord = Object.keys(landlordLayout).length > 0;
-  const hasTenant   = Object.keys(tenantLayout).length > 0;
-
-  if (placeholder) placeholder.style.display = 'none';
-  if (main) main.style.display = 'flex';
-  if (badge) badge.style.display = hasLandlord ? 'flex' : 'none';
-  if (toggleBtn) { toggleBtn.style.display = hasTenant ? 'inline-flex' : 'none'; toggleBtn.textContent = '🛋️ View Tenant Layout'; }
-  if (saveBtn) saveBtn.style.display = '';
-  if (label) label.style.display = 'none';
-
-  setTimeout(() => {
-    if (typeof initFurniturePlacement === 'function') {
-      window._lFurnScene = initFurniturePlacement('c3d-lfurnpage', landlordLayout, null);
-    }
-  }, 100);
-}
-
-function lFurnToggleView() {
-  const propId = _lFurnPropId; if (!propId) return;
-  const p = (window._propMap||{})[propId]; if (!p) return;
-  _lFurnShowingTenant = !_lFurnShowingTenant;
-  const isTenant = _lFurnShowingTenant;
-  const layout = isTenant ? (p.tenantFurnitureLayout||{}) : (p.landlordFurnitureLayout||p.furnitureLayout||{});
-  const toggleBtn = document.getElementById('lfurn-toggle-btn');
-  const saveBtn   = document.getElementById('lfurn-save-btn');
-  const label     = document.getElementById('lfurn-viewlabel');
-  const badge     = document.getElementById('lfurn-saved-badge');
-  if (toggleBtn) toggleBtn.textContent = isTenant ? '🏠 Back to My Layout' : '🛋️ View Tenant Layout';
-  if (saveBtn)   saveBtn.style.display = isTenant ? 'none' : '';
-  if (label)     { label.style.display = isTenant ? 'block' : 'none'; label.textContent = '🛋️ Tenant Layout (View Only)'; }
-  if (badge)     { const hasL = Object.keys(p.landlordFurnitureLayout||p.furnitureLayout||{}).length>0; badge.style.display = isTenant ? 'none' : (hasL?'flex':'none'); }
-  setTimeout(() => { if(typeof initFurniturePlacement==='function') window._lFurnScene = initFurniturePlacement('c3d-lfurnpage', layout, null); }, 80);
-}
-
-async function lFurnSave() {
-  if (_lFurnShowingTenant) { alert('Tenant layout sirf view mode mein hai.'); return; }
-  const sc = window._lFurnScene; if (!sc || !_lFurnPropId) return;
-  const layout = sc.getLayout();
-  const btn = document.getElementById('lfurn-save-btn');
-  if (btn) { btn.disabled=true; btn.textContent='Saving…'; }
-  try {
-    await lFetch('/properties/'+_lFurnPropId+'/furniture/landlord','PUT',layout);
-    const badge = document.getElementById('lfurn-saved-badge');
-    if (badge) badge.style.display = 'flex';
-    await loadMyProperties();
-    const updated = (window._propMap||{})[_lFurnPropId];
-    const hasTenant = Object.keys((updated||{}).tenantFurnitureLayout||{}).length > 0;
-    const toggleBtn = document.getElementById('lfurn-toggle-btn');
-    if (toggleBtn) toggleBtn.style.display = hasTenant ? 'inline-flex' : 'none';
-    if (btn) { btn.textContent='✅ Saved!'; setTimeout(()=>btn.textContent='💾 Save My Layout',2000); }
-  } catch(e) { alert('Save nahi hua.'); }
-  finally { if(btn) btn.disabled=false; }
-}
-
-function lFurnRotate(deg) { const sc=window._lFurnScene; if(sc) sc.rotateSelected(deg); }
-function lFurnDelete()    { const sc=window._lFurnScene; if(sc) sc.deleteSelected(); }
-function lFurnDownloadPNG() {
-  const p=(window._propMap||{})[_lFurnPropId];
-  if(typeof downloadFurnitureScreenshot==='function') downloadFurnitureScreenshot('c3d-lfurnpage',(p?.title||'property')+'-landlord-layout');
-}
-function lFurnDownloadJSON() {
-  const p=(window._propMap||{})[_lFurnPropId];
-  if(typeof downloadFurnitureJSON==='function') downloadFurnitureJSON('c3d-lfurnpage',p?.title||'property','landlord');
-}
-</script>
 </body>
 </html>

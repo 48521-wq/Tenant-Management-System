@@ -1,51 +1,40 @@
-<<<<<<< HEAD
 // ============================================================
-// TMS — MongoDB Atlas Database Connector
+// TMS — Database Connection (MongoDB Atlas via Mongoose)
 // ============================================================
 'use strict';
 
-const mongoose = require('mongoose');
-const dns      = require('dns');
+const mg  = require('mongoose');
+const dns = require('dns');
 
-// Use IPv4 first to prevent Atlas connection issues
+// Force IPv4 — prevents DNS resolution issues with Atlas
 dns.setDefaultResultOrder('ipv4first');
 
-// Timeout and network settings for Atlas
-const DB_OPTIONS = {
+/**
+ * Mongoose connection options.
+ * family:4 ensures IPv4-only socket connections.
+ */
+const CONNECT_OPTS = {
   serverSelectionTimeoutMS : 15000,
   socketTimeoutMS          : 45000,
   family                   : 4,
 };
 
 /**
- * connectDB — opens a Mongoose connection to MongoDB Atlas.
- * Exits the process if the connection fails.
+ * connectDB
+ * Opens the Mongoose connection to MongoDB Atlas.
+ * Terminates the process on failure.
+ *
+ * @returns {Promise<void>}
  */
 const connectDB = async () => {
   try {
-    const result = await mongoose.connect(process.env.MONGODB_URI, DB_OPTIONS);
-    console.log(`✅ MongoDB Atlas Connected: ${result.connection.host}`);
-    console.log(`📦 Database: ${result.connection.name}`);
-  } catch (connectionErr) {
-    console.error('❌ MongoDB connection error:', connectionErr.message);
-=======
-const mongoose = require('mongoose');
-const dns = require('dns');
-dns.setDefaultResultOrder('ipv4first');
-
-const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 15000,
-      socketTimeoutMS: 45000,
-      family: 4,
-    });
-    console.log(`✅ MongoDB Atlas Connected: ${conn.connection.host}`);
-    console.log(`📦 Database: ${conn.connection.name}`);
-  } catch (error) {
-    console.error('❌ MongoDB connection error:', error.message);
->>>>>>> 17a4da6032e965253aaaaa7e291f867a3df0f14b
+    const session = await mg.connect(process.env.MONGODB_URI, CONNECT_OPTS);
+    console.log(`✅ MongoDB Atlas Connected: ${session.connection.host}`);
+    console.log(`📦 Database: ${session.connection.name}`);
+  } catch (dbErr) {
+    console.error('❌ MongoDB connection error:', dbErr.message);
     process.exit(1);
   }
 };
+
 module.exports = connectDB;

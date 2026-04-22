@@ -1,89 +1,66 @@
-<<<<<<< HEAD
 // ============================================================
-// TMS — Authentication & Authorisation Middleware
+// TMS — Auth & Authorisation Middleware
 // ============================================================
 'use strict';
 
-const jwt      = require('jsonwebtoken');
-const User     = require('../models/User');
+const jwtLib   = require('jsonwebtoken');
+const UserModel = require('../models/User');
+
+const BEARER_PREFIX = 'Bearer';
 
 // ─────────────────────────────────────────────────────────────
 // protect
-// Reads the Bearer token from the Authorization header,
-// verifies it with JWT_SECRET, then attaches the user
-// (or admin stub) to req.user before calling next().
+// Extracts the Bearer JWT, verifies it, loads the matching
+// user from MongoDB (or short-circuits for admin tokens),
+// and attaches the result to req.user.
 // ─────────────────────────────────────────────────────────────
 const protect = async (req, res, next) => {
   try {
-    // 1. Extract raw token string
-    let rawToken = null;
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer')) {
-      rawToken = authHeader.split(' ')[1];
+    // Step 1 — pull token out of Authorization header
+    let extractedToken = null;
+    const headerValue  = req.headers.authorization;
+
+    if (headerValue && headerValue.startsWith(BEARER_PREFIX)) {
+      extractedToken = headerValue.split(' ')[1];
     }
 
-    if (!rawToken) {
+    if (!extractedToken) {
       return res.status(401).json({ success: false, message: 'Not authorized.' });
     }
 
-    // 2. Verify signature and decode payload
-    const claims = jwt.verify(rawToken, process.env.JWT_SECRET);
+    // Step 2 — verify and decode
+    const decoded = jwtLib.verify(extractedToken, process.env.JWT_SECRET);
 
-    // 3a. Admin path — no DB call needed
-    if (claims.isAdmin) {
-      req.user = { isAdmin: true, email: claims.email };
+    // Step 3a — admin tokens have isAdmin flag; skip DB entirely
+    if (decoded.isAdmin) {
+      req.user = { isAdmin: true, email: decoded.email };
       return next();
     }
 
-    // 3b. Regular user — fetch from DB
-    const requestUser = await User.findById(claims.id);
-    if (!requestUser) {
+    // Step 3b — load regular user record
+    const loadedUser = await UserModel.findById(decoded.id);
+    if (!loadedUser) {
       return res.status(401).json({ success: false, message: 'User not found.' });
     }
-    if (requestUser.status === 'blocked') {
+    if (loadedUser.status === 'blocked') {
       return res.status(403).json({ success: false, message: 'Account suspended.' });
     }
 
-    req.user = requestUser;
+    req.user = loadedUser;
     next();
-  } catch (jwtErr) {
-    res.status(401).json({ success: false, message: 'Invalid token.' });
+  } catch (tokenErr) {
+    return res.status(401).json({ success: false, message: 'Invalid token.' });
   }
 };
 
 // ─────────────────────────────────────────────────────────────
 // adminOnly
-// Must be used after protect.
-// Rejects non-admin callers with 403.
+// Gate middleware — call after protect.
+// Returns 403 for any non-admin caller.
 // ─────────────────────────────────────────────────────────────
 const adminOnly = (req, res, next) => {
   if (req.user && req.user.isAdmin) return next();
-=======
-const jwt  = require('jsonwebtoken');
-const User = require('../models/User');
-
-const protect = async (req, res, next) => {
-  try {
-    let token;
-    if (req.headers.authorization?.startsWith('Bearer'))
-      token = req.headers.authorization.split(' ')[1];
-    if (!token) return res.status(401).json({ success: false, message: 'Not authorized.' });
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.isAdmin) { req.user = { isAdmin: true, email: decoded.email }; return next(); }
-
-    const user = await User.findById(decoded.id);
-    if (!user) return res.status(401).json({ success: false, message: 'User not found.' });
-    if (user.status === 'blocked') return res.status(403).json({ success: false, message: 'Account suspended.' });
-    req.user = user;
-    next();
-  } catch (e) { res.status(401).json({ success: false, message: 'Invalid token.' }); }
-};
-
-const adminOnly = (req, res, next) => {
-  if (req.user?.isAdmin) return next();
->>>>>>> 17a4da6032e965253aaaaa7e291f867a3df0f14b
-  res.status(403).json({ success: false, message: 'Admin access required.' });
+  return res.status(403).json({ success: false, message: 'Admin access required.' });
 };
 
 module.exports = { protect, adminOnly };

@@ -1,45 +1,32 @@
-<<<<<<< HEAD
 // ============================================================
-// TMS Maintenance Model
-// Repair and service requests submitted by tenants
+// TMS — Maintenance Schema
+// Repair/service requests raised by tenants
 // ============================================================
-const mongoose = require('mongoose');
+'use strict';
 
-const ObjId = mongoose.Schema.Types.ObjectId;
+const mg = require('mongoose');
 
-const maintenanceSchema = new mongoose.Schema(
+const Ref = mg.Schema.Types.ObjectId;
+
+const MAINT_TYPES      = ['Plumbing','Electrical','Gas','AC / Cooling','Painting','Structural','Other'];
+const MAINT_PRIORITIES = ['low','medium','high','urgent'];
+const MAINT_STATUSES   = ['pending','in_progress','resolved','cancelled'];
+
+const tmsMaintenanceSchema = new mg.Schema(
   {
-    tenantId:      { type: ObjId,  ref: 'User',     required: true },
+    tenantId:      { type: Ref,    ref: 'User',     required: true },
     tenantName:    { type: String, default: '' },
-    landlordId:    { type: ObjId,  ref: 'User',     default: null },
-    propertyId:    { type: ObjId,  ref: 'Property', default: null },
+    landlordId:    { type: Ref,    ref: 'User',     default: null },
+    propertyId:    { type: Ref,    ref: 'Property', default: null },
     propertyTitle: { type: String, default: '' },
-    type:          { type: String, default: 'Other', enum: ['Plumbing','Electrical','Gas','AC / Cooling','Painting','Structural','Other'] },
-    priority:      { type: String, default: 'medium', enum: ['low','medium','high','urgent'] },
+    type:          { type: String, default: 'Other',   enum: MAINT_TYPES },
+    priority:      { type: String, default: 'medium',  enum: MAINT_PRIORITIES },
     description:   { type: String, required: true },
-    status:        { type: String, default: 'pending', enum: ['pending','in_progress','resolved','cancelled'] },
+    status:        { type: String, default: 'pending', enum: MAINT_STATUSES },
     adminNote:     { type: String, default: '' },
     resolvedAt:    { type: Date,   default: null },
   },
   { timestamps: true }
 );
-=======
-const mongoose = require('mongoose');
 
-const maintenanceSchema = new mongoose.Schema({
-  tenantId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  tenantName:  { type: String, default: '' },
-  landlordId:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
-  landlordName:{ type: String, default: '' },
-  propertyId:  { type: mongoose.Schema.Types.ObjectId, ref: 'Property', default: null },
-  propertyTitle:{ type: String, default: '' },
-  type:        { type: String, enum: ['Plumbing','Electrical','Gas','AC / Cooling','Painting','Structural','Other'], default: 'Other' },
-  priority:    { type: String, enum: ['low','medium','high','urgent'], default: 'medium' },
-  description: { type: String, required: true },
-  status:      { type: String, enum: ['pending','in_progress','resolved','cancelled'], default: 'pending' },
-  adminNote:   { type: String, default: '' },
-  resolvedAt:  { type: Date, default: null },
-}, { timestamps: true });
->>>>>>> 17a4da6032e965253aaaaa7e291f867a3df0f14b
-
-module.exports = mongoose.model('Maintenance', maintenanceSchema);
+module.exports = mg.model('Maintenance', tmsMaintenanceSchema);

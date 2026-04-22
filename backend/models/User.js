@@ -1,68 +1,53 @@
-<<<<<<< HEAD
 // ============================================================
-// TMS User Model
-// Supports email/password login and Google OAuth
+// TMS — User Schema
+// Login: email/password  |  OAuth: Google
 // ============================================================
-const mongoose  = require('mongoose');
-const bcryptLib = require('bcryptjs');
+'use strict';
 
-const SALT_ROUNDS = 10;
+const mg      = require('mongoose');
+const bcrypt  = require('bcryptjs');
 
-const userSchema = new mongoose.Schema(
+/** Number of bcrypt salt rounds */
+const HASH_ROUNDS = 10;
+
+/** Allowed login providers */
+const AUTH_PROVIDERS = ['email', 'google'];
+
+/** Allowed user roles */
+const USER_ROLES = ['tenant', 'landlord'];
+
+/** Allowed account statuses */
+const ACCOUNT_STATUS = ['active', 'blocked'];
+
+const tmsUserSchema = new mg.Schema(
   {
-    name:         { type: String, required: true,  trim: true },
-    email:        { type: String, required: true,  unique: true, lowercase: true, trim: true },
-    password:     { type: String, minlength: 6,    select: false },
-    role:         { type: String, required: true,  enum: ['tenant', 'landlord'] },
-    authProvider: { type: String, default: 'email', enum: ['email', 'google'] },
-    googleId:     { type: String, default: null },
-    status:       { type: String, default: 'active', enum: ['active', 'blocked'] },
+    name:         { type: String,  required: true,  trim: true },
+    email:        { type: String,  required: true,  unique: true, lowercase: true, trim: true },
+    password:     { type: String,  minlength: 6,    select: false },
+    role:         { type: String,  required: true,  enum: USER_ROLES },
+    authProvider: { type: String,  default: 'email', enum: AUTH_PROVIDERS },
+    googleId:     { type: String,  default: null },
+    status:       { type: String,  default: 'active', enum: ACCOUNT_STATUS },
     verified:     { type: Boolean, default: false },
-    phone:        { type: String, default: '' },
-    cnic:         { type: String, default: '' },
-    city:         { type: String, default: '' },
-    address:      { type: String, default: '' },
-    avatar:       { type: String, default: '' },
+    phone:        { type: String,  default: '' },
+    cnic:         { type: String,  default: '' },
+    city:         { type: String,  default: '' },
+    address:      { type: String,  default: '' },
+    avatar:       { type: String,  default: '' },
   },
   { timestamps: true }
 );
 
-// Auto-hash password whenever it is set or changed
-userSchema.pre('save', async function (next) {
-=======
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-
-const userSchema = new mongoose.Schema({
-  name:         { type: String, required: true, trim: true },
-  email:        { type: String, required: true, unique: true, lowercase: true, trim: true },
-  password:     { type: String, minlength: 6, select: false },
-  role:         { type: String, enum: ['tenant','landlord'], required: true },
-  authProvider: { type: String, enum: ['email','google'], default: 'email' },
-  googleId:     { type: String, default: null },
-  status:       { type: String, enum: ['active','blocked'], default: 'active' },
-  verified:     { type: Boolean, default: false },
-  phone:        { type: String, default: '' },
-  cnic:         { type: String, default: '' },
-  city:         { type: String, default: '' },
-  address:      { type: String, default: '' },
-  avatar:       { type: String, default: '' },
-}, { timestamps: true });
-
-userSchema.pre('save', async function(next) {
->>>>>>> 17a4da6032e965253aaaaa7e291f867a3df0f14b
+// Hash password on create or update
+tmsUserSchema.pre('save', async function hashBeforeSave(next) {
   if (!this.isModified('password') || !this.password) return next();
-  this.password = await bcryptLib.hash(this.password, SALT_ROUNDS);
+  this.password = await bcrypt.hash(this.password, HASH_ROUNDS);
   next();
 });
-<<<<<<< HEAD
 
-// Instance method — compare plain password against stored hash
-userSchema.methods.comparePassword = function (plainPwd) {
-  return require('bcryptjs').compare(plainPwd, this.password);
+// Compare a plain-text password with the stored hash
+tmsUserSchema.methods.comparePassword = function checkPassword(inputPwd) {
+  return require('bcryptjs').compare(inputPwd, this.password);
 };
-=======
-userSchema.methods.comparePassword = function(p) { return require('bcryptjs').compare(p, this.password); };
->>>>>>> 17a4da6032e965253aaaaa7e291f867a3df0f14b
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mg.model('User', tmsUserSchema);
