@@ -156,6 +156,23 @@ tr:hover td{background:rgba(201,169,110,0.03)}
 .close-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--input-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--muted);transition:all 0.2s}
 .close-btn:hover{background:rgba(255,107,107,0.1);color:var(--error);border-color:var(--error)}
 canvas{border-radius:0 0 0 0;display:block}
+/* Dark theme native select fix */
+select, select option {
+  background-color: #12151C !important;
+  color: #E8E4DC !important;
+}
+[data-theme="light"] select, [data-theme="light"] select option {
+  background-color: #ffffff !important;
+  color: #1A1E26 !important;
+}
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px !important;
+}
 </style>
 </head>
 <body>
@@ -261,6 +278,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const pcn=document.getElementById('pcn'); if(pcn) pcn.value=user.cnic||'';
 
   await loadProperties();
+  // Update notification badges on load
+  if (typeof tmsUpdateStats === 'function') tmsUpdateStats();
+  // Refresh notification badge every 5 seconds (for same-browser multi-tab)
+  setInterval(() => { if (typeof tmsUpdateStats === 'function') tmsUpdateStats(); }, 5000);
 });
 
 // ═══════════════════════════════════════════════════════
@@ -309,6 +330,16 @@ async function loadProperties() {
     grid.innerHTML = '<div class="loading">⚠️ Backend not connected. Start the server first.</div>';
   }
 }
+function modelGlbPath(name) {
+  const base = window.location.pathname.includes('/pages/') ? '../models/' : './models/';
+  return base + name;
+}
+function getPropertyGlbPath(p) {
+  if (p && p.model3d && p.model3d.customGlb) return modelGlbPath(p.model3d.customGlb);
+  if (p && typeof p.title === 'string' && /agral/i.test(p.title)) return modelGlbPath('agral-new.glb');
+  return modelGlbPath('interior-room.glb');
+}
+
 function renderProps(list, rentedIds) {
   const grid = document.getElementById('props-grid');
   const rc   = document.getElementById('rc');
@@ -327,6 +358,8 @@ function renderProps(list, rentedIds) {
   grid.innerHTML = list.map(p => {
     const pid = p._id;
     const isMine = myRented.has(pid);
+    // Custom GLB: agar property ka apna model hai to woh use karo
+    const glbFile = getPropertyGlbPath(p);
     const statusBadge = isMine
       ? `<span style="position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:linear-gradient(135deg,#C9A96E,#e0c078);color:#1a0f00;pointer-events:none">🏠 MY RENTAL</span>`
       : `<span style="position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:rgba(78,205,196,0.88);color:#041210;pointer-events:none">For Rent</span>`;
@@ -338,7 +371,7 @@ function renderProps(list, rentedIds) {
     <div class="pcard" style="${cardBorder}">
       <div class="pcard-thumb" style="padding:0;overflow:hidden;cursor:pointer" onclick="tenantView3D('${pid}')">
         <model-viewer
-          src="../models/interior-room.glb"
+          src="${glbFile}"
           alt="Property Interior"
           auto-rotate
           auto-rotate-delay="0"
@@ -997,8 +1030,6 @@ async function signLease() {
 //  NOTIFICATIONS (static for now — can be extended)
 // ═══════════════════════════════════════════════════════
 function loadNotifications() {
-  const nb = document.getElementById('nb'); if(nb) nb.style.display='none';
-  const nb2 = document.getElementById('nb2'); if(nb2) nb2.style.display='none';
   if (typeof tmsRenderNotifs === 'function') {
     tmsRenderNotifs();
   } else {
@@ -1006,6 +1037,12 @@ function loadNotifications() {
     if (container) {
       container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">Notifications are unavailable right now.</div>`;
     }
+  }
+  // Mark all read and hide badge
+  if (typeof TMS !== 'undefined') {
+    TMS.markAllNotifsRead();
+    const nb = document.getElementById('nb'); if(nb) nb.style.display='none';
+    const nb2 = document.getElementById('nb2'); if(nb2) nb2.style.display='none';
   }
 }
 
@@ -1040,10 +1077,17 @@ function open3D(id, name, model3dOrJson, type) {
   document.getElementById('ov3d').classList.add('open');
   document.getElementById('m3dn').textContent = (name || 'Property') + ' — Interior 3D';
   document.body.style.overflow = 'hidden';
+  // Custom GLB support
+  let model3dObj = model3dOrJson;
+  if (typeof model3dOrJson === 'string') {
+    try { model3dObj = JSON.parse(model3dOrJson); } catch { model3dObj = {}; }
+  }
+  const glbFile = getPropertyGlbPath({ title: name, model3d: model3dObj });
   const loadingEl = document.getElementById('c3main-loading');
   if (loadingEl) loadingEl.style.display = 'flex';
   const viewer = document.getElementById('c3main-viewer');
   if (viewer) {
+    viewer.setAttribute('src', glbFile);
     viewer.addEventListener('load', function onLoad() {
       if (loadingEl) loadingEl.style.display = 'none';
       viewer.removeEventListener('load', onLoad);
@@ -1150,7 +1194,7 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
     <span class="logo-text">TMS</span><span class="logo-sep" style="margin:0 4px">/</span><span style="font-size:12px;color:var(--muted)">Tenant</span>
   </div>
   <span class="nav-pill">🏠 Tenant Portal</span>
-  <button class="icon-btn" onclick="sp('notifications',null)" title="Notifications">🔔<span class="notif-badge" id="nb" style="display:none">3</span></button>
+  <button class="icon-btn" onclick="sp('notifications',null)" title="Notifications">🔔<span class="notif-badge" id="nb" style="display:none">0</span></button>
   <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
   <button class="logout-btn" onclick="tmsLogout()">
     <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout
@@ -1195,7 +1239,7 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
     </button>
     <button class="nav-item" onclick="sp('notifications',this)">
       <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>Notifications
-      <span class="nb-pill" id="nb2" style="display:none">3</span>
+      <span class="nb-pill" id="nb2" style="display:none">0</span>
     </button>
   </div>
   <div class="sidebar-foot">
@@ -1315,7 +1359,7 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
       </div>
       <!-- Canvas -->
       <div style="position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--border)">
-        <div id="c3d-furnpage" style="width:100%;height:520px;background:#0d0a06;position:relative;overflow:hidden;border-radius:10px"></div>
+        <canvas id="c3d-furnpage" style="width:100%;height:520px;display:block;background:#1A1A2E;border-radius:10px"></canvas>
         <div id="furn-page-viewlabel" style="position:absolute;top:12px;left:14px;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.6);font-size:11px;font-weight:700;color:#4ECDC4;display:none"></div>
       </div>
       <!-- Action buttons -->
@@ -1543,7 +1587,7 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
       </div>
       <!-- Canvas -->
       <div style="flex:1;position:relative;background:transparent">
-        <div id="c3d-tfurn" style="width:100%;height:100%;min-height:520px;background:#0d0a06;position:relative;overflow:hidden"></div>
+        <canvas id="c3d-tfurn" style="width:100%;height:100%;display:block;min-height:520px"></canvas>
         <div style="position:absolute;bottom:10px;right:14px;font-size:10px;color:rgba(255,255,255,0.3)">Right-drag orbit · Scroll zoom</div>
       </div>
     </div>
@@ -1551,6 +1595,7 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 <script src="../js/tms-data.js"></script>
 <script src="../js/house3d.js"></script>

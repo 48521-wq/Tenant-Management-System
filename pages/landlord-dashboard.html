@@ -144,6 +144,23 @@ tr:hover td{background:rgba(201,169,110,0.03)}
 .ov-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--text)}
 .close-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--input-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--muted);transition:all 0.2s}
 .close-btn:hover{background:rgba(255,107,107,0.1);color:var(--error)}
+/* Dark theme native select fix */
+select, select option {
+  background-color: #12151C !important;
+  color: #E8E4DC !important;
+}
+[data-theme="light"] select, [data-theme="light"] select option {
+  background-color: #ffffff !important;
+  color: #1A1E26 !important;
+}
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px !important;
+}
 </style>
 </head>
 <body>
@@ -221,6 +238,8 @@ function stopLandlordLeaseSync() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Refresh notification badge every 5 seconds
+  setTimeout(() => setInterval(() => { if (typeof tmsUpdateStats === 'function') tmsUpdateStats(); }, 5000), 1000);
   const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
   const name  = user.name  || 'Landlord';
   const email = user.email || '';
@@ -277,6 +296,16 @@ function updateStats() {
   set('st-total',total);set('st-avail',avail);set('st-rented',rented);
   set('st-rev','Rs. '+rev.toLocaleString());
 }
+function modelGlbPath(name) {
+  const base = window.location.pathname.includes('/pages/') ? '../models/' : './models/';
+  return base + name;
+}
+function getPropertyGlbPath(p) {
+  if (p && p.model3d && p.model3d.customGlb) return modelGlbPath(p.model3d.customGlb);
+  if (p && typeof p.title === 'string' && /agral/i.test(p.title)) return modelGlbPath('agral-new.glb');
+  return modelGlbPath('interior-room.glb');
+}
+
 function renderMyProperties() {
   const grid  = document.getElementById('prop-grid');
   const grid2 = document.getElementById('prop-grid-2');
@@ -296,11 +325,13 @@ function renderMyProperties() {
   const statusColors={available:'rgba(78,205,196,0.9)',rented:'rgba(255,179,71,0.9)',suspended:'rgba(255,107,107,0.9)'};
   const html = myProps.map(p => {
     const id = p._id;
+    // Custom GLB support: agar model3d.customGlb set hai to woh file use karo
+    const glbFile = getPropertyGlbPath(p);
     return `
     <div class="pcard">
       <div class="pcard-thumb" style="padding:0;overflow:hidden;cursor:pointer" onclick="quickView3D('${id}')">
         <model-viewer
-          src="../models/interior-room.glb"
+          src="${glbFile}"
           alt="Property Interior"
           auto-rotate
           auto-rotate-delay="0"
@@ -1016,11 +1047,18 @@ function open3D(propId, name, model3dOrJson, type) {
   document.getElementById('ov3d').classList.add('open');
   document.getElementById('m3dn').textContent = (name || 'Property') + ' — Interior 3D';
   document.body.style.overflow = 'hidden';
+  // Custom GLB support: agar model3d mein customGlb field hai to woh use karo
+  let model3dObj = model3dOrJson;
+  if (typeof model3dOrJson === 'string') {
+    try { model3dObj = JSON.parse(model3dOrJson); } catch { model3dObj = {}; }
+  }
+  const glbFile = getPropertyGlbPath({ title: name, model3d: model3dObj });
   // Show loading overlay, hide when model-viewer loads
   const loadingEl = document.getElementById('c3main-loading');
   if (loadingEl) loadingEl.style.display = 'flex';
   const viewer = document.getElementById('c3main-viewer');
   if (viewer) {
+    viewer.setAttribute('src', glbFile);
     viewer.addEventListener('load', function onLoad() {
       if (loadingEl) loadingEl.style.display = 'none';
       viewer.removeEventListener('load', onLoad);
@@ -1153,7 +1191,7 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
         <span style="font-size:11px;color:var(--muted);margin-left:8px">Right-drag: orbit · Scroll: zoom</span>
       </div>
       <div style="position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--border)">
-        <div id="c3d-lfurnpage" style="width:100%;height:520px;background:#0d0a06;position:relative;overflow:hidden;border-radius:10px"></div>
+        <canvas id="c3d-lfurnpage" style="width:100%;height:520px;display:block;background:#1A1A2E;border-radius:10px"></canvas>
         <div id="lfurn-viewlabel" style="display:none;position:absolute;top:12px;left:14px;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.6);font-size:11px;font-weight:700;color:#4ECDC4"></div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -1513,7 +1551,7 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
       </div>
       <!-- Canvas -->
       <div style="flex:1;position:relative;background:transparent">
-        <div id="c3d-furn" style="width:100%;height:100%;min-height:520px;background:transparent;position:relative;overflow:hidden"></div>
+        <canvas id="c3d-furn" style="width:100%;height:100%;display:block;min-height:520px"></canvas>
       </div>
     </div>
   </div>
@@ -1552,8 +1590,6 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
 })();
 
 function loadNotifications() {
-  const nb = document.getElementById('nb'); if(nb) nb.style.display='none';
-  const nb2 = document.getElementById('nb2'); if(nb2) nb2.style.display='none';
   if (typeof tmsRenderNotifs === 'function') {
     tmsRenderNotifs();
   } else {
@@ -1562,10 +1598,16 @@ function loadNotifications() {
       container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">Notifications are unavailable right now.</div>`;
     }
   }
+  if (typeof TMS !== 'undefined') {
+    TMS.markAllNotifsRead();
+    const nb = document.getElementById('nb'); if(nb) nb.style.display='none';
+    const nb2 = document.getElementById('nb2'); if(nb2) nb2.style.display='none';
+  }
 }
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 <script src="../js/tms-data.js"></script>
 <script src="../js/house3d.js"></script>
