@@ -110,6 +110,28 @@ tr:hover td{background:rgba(255,107,107,0.02)}
 .sel-status{background:var(--input-bg);border:1.5px solid var(--border);border-radius:8px;padding:5px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer}
 .sel-status:focus{border-color:var(--red)}
 .sel-status option{background:var(--bg);color:var(--text)}
+/* Dark theme native select fix */
+select, select option {
+  background-color: #12151C !important;
+  color: #EDF0F7 !important;
+}
+[data-theme="light"] select, [data-theme="light"] select option {
+  background-color: #ffffff !important;
+  color: #1A1D28 !important;
+}
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2352607A' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px !important;
+}
+.notif-item{display:flex;gap:12px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;align-items:flex-start}
+.notif-item.unread{border-color:rgba(255,107,107,0.25);background:rgba(255,107,107,0.04)}
+.notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;background:var(--red)}
+.notif-text{font-size:13px;color:var(--text)}
+.notif-time{font-size:11px;color:var(--muted);margin-top:3px}
 </style>
 </head>
 <body>
@@ -181,20 +203,22 @@ async function loadDashboardStats() {
 
     const tenants   = users.filter(u=>u.role==='tenant');
     const landlords = users.filter(u=>u.role==='landlord');
-    const pending   = users.filter(u=>!u.verified);
-    const openComps = comps.filter(c=>c.status==='open');
+    const uniqueTenants = tenants.filter((u,i,self)=> self.findIndex(x=>x.email===u.email)===i);
+    const uniqueLandlords = landlords.filter((u,i,self)=> self.findIndex(x=>x.email===u.email)===i);
+    const verifiedTenants = uniqueTenants; // tenants are counted as active users by default
+    const verifiedLandlords = uniqueLandlords.filter(u=>u.verified);
     const pendMaint = maint.filter(m=>m.status==='pending');
 
     const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-    set('d-tenants',tenants.length); set('d-landlords',landlords.length);
-    set('d-props',props.length); set('d-users',users.length);
+    set('d-tenants',uniqueTenants.length); set('d-landlords',uniqueLandlords.length);
+    set('d-props',props.length); set('d-users',uniqueTenants.length);
     set('d-avail',props.filter(p=>p.status==='available').length);
     set('d-maint',maint.length); set('d-comps',comps.length);
     set('d-payments',payments.length);
 
     // Pending actions
-    set('pa-verif', pending.length);
-    set('pa-comps', openComps.length);
+    set('pa-verif', verifiedLandlords.length);
+    set('pa-comps', verifiedTenants.length);
     set('pa-maint', pendMaint.length);
 
     // Style counts
@@ -204,9 +228,10 @@ async function loadDashboardStats() {
     });
 
     // Bar chart
-    const max=Math.max(tenants.length,landlords.length,props.length,1);
+    const max=Math.max(uniqueTenants.length,uniqueLandlords.length,props.length,1);
     const bar=(id,v)=>{const el=document.getElementById(id);if(el){el.style.width=Math.min((v/max)*100,100).toFixed(1)+'%';const sp=el.querySelector('span');if(sp)sp.textContent=v;}};
-    bar('bar-tenants',tenants.length);bar('bar-landlords',landlords.length);bar('bar-props',props.length);
+    bar('bar-tenants',uniqueTenants.length);bar('bar-landlords',uniqueLandlords.length);bar('bar-props',props.length);
+    set('bar-ll-cnt',uniqueLandlords.length);
 
   } catch(e) { console.log('Stats error:',e); }
 }
@@ -220,6 +245,7 @@ async function loadTenants(filter) {
   try {
     const data=await aFetch('/users?role=tenant');
     let list=data.users||[];
+    list = list.filter((u,i,self)=> self.findIndex(x=>x.email===u.email)===i);
     if(filter) list=list.filter(u=>u.name?.toLowerCase().includes(filter.toLowerCase())||u.email?.toLowerCase().includes(filter.toLowerCase()));
     set_count('tenants-count',list.length);
     if(!list.length){tbody.innerHTML='<tr><td colspan="7" class="loading">No tenants registered yet. They will appear here after sign-up.</td></tr>';return;}
@@ -495,6 +521,13 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
       <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Complaints
     </button>
   </div>
+  <div class="sb-sec">
+    <span class="sb-lbl">System</span>
+    <button class="nav-item" onclick="sp('notifications',this)">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>Notifications
+      <span class="nb-pill" id="nb-notifs-admin" style="display:none">0</span>
+    </button>
+  </div>
   <div class="sb-foot">
     <div class="sb-user">
       <div class="sb-av">A</div>
@@ -566,11 +599,11 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
       <div class="card">
         <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px">⚡ Pending Actions</h3>
         <div class="action-item">
-          <div><div class="action-label">Unverified Landlords</div><div class="action-sub">Awaiting manual approval</div></div>
+          <div><div class="action-label">Verified Landlords</div><div class="action-sub">Approved landlords</div></div>
           <span class="action-count count-zero" id="pa-verif">0</span>
         </div>
         <div class="action-item">
-          <div><div class="action-label">Open Complaints</div><div class="action-sub">Need resolution</div></div>
+          <div><div class="action-label">Verified Tenants</div><div class="action-sub">Approved tenants</div></div>
           <span class="action-count count-zero" id="pa-comps">0</span>
         </div>
         <div class="action-item">
@@ -690,6 +723,42 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
     </div>
   </div>
 
+  <div class="page" id="page-notifications">
+    <div style="margin-bottom:24px">
+      <div style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px">🔔 Notifications</div>
+      <div style="font-size:13px;color:var(--muted)">System-wide notifications from landlords and admin</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px">
+      <div style="display:grid;gap:14px">
+        <div style="display:grid;grid-template-columns:1fr 180px;gap:14px;align-items:end">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Title</label>
+            <input id="notif-title" placeholder="Notification title" type="text" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Send To</label>
+            <select id="notif-to" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
+              <option value="all">Everyone</option>
+              <option value="tenant">Tenants</option>
+              <option value="landlord">Landlords</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Message</label>
+          <textarea id="notif-msg" placeholder="Write your notification message..." rows="3" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:vertical"></textarea>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;align-items:center">
+          <span id="notif-ok" style="font-size:12px;color:var(--green);font-weight:600;opacity:0;transition:opacity 0.3s">✅ Notification sent!</span>
+          <button onclick="adminSendNotification()" style="padding:9px 22px;border-radius:9px;border:none;background:var(--red);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Send Notification</button>
+        </div>
+      </div>
+    </div>
+    <div id="notifs-list"></div>
+  </div>
+
+
 </main>
 </div>
 
@@ -712,11 +781,63 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
   </div>
 </div>
 
+<script src="../js/tms-data.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="../js/house3d.js"></script>
 <script>
 // Fix admin 3D modal - use propMap to avoid JSON-in-HTML issues
 document.getElementById('ov-admin3d').style.display = 'none';
+
+// Admin notifications
+window.adminSendNotification = function() {
+  const title = document.getElementById('notif-title')?.value.trim();
+  const msg   = document.getElementById('notif-msg')?.value.trim();
+  const to    = document.getElementById('notif-to')?.value || 'all';
+  if (!title || !msg) { alert('Title and message required.'); return; }
+  if (typeof TMS === 'undefined') { alert('Notification system not loaded.'); return; }
+  TMS.addNotif(title, msg, 'red', to, 'admin');
+  document.getElementById('notif-title').value = '';
+  document.getElementById('notif-msg').value   = '';
+  document.getElementById('notif-to').value    = 'all';
+  if (typeof tmsRenderNotifs === 'function') tmsRenderNotifs();
+  const ok = document.getElementById('notif-ok');
+  if (ok) { ok.style.opacity='1'; setTimeout(()=>ok.style.opacity='0',3000); }
+};
+
+// Add notifications page to sp handler
+const _origSp = window.sp;
+if (typeof _origSp === 'function') {
+  window.sp = function(id, el) {
+    _origSp(id, el);
+    if (id === 'notifications') {
+      if (typeof tmsRenderNotifs === 'function') tmsRenderNotifs();
+      if (typeof TMS !== 'undefined') {
+        TMS.markAllNotifsRead();
+        const nb = document.getElementById('nb-notifs-admin');
+        if (nb) nb.style.display = 'none';
+      }
+    }
+  };
+}
+// Update notification badge on load
+setTimeout(() => {
+  if (typeof tmsUpdateStats === 'function') tmsUpdateStats();
+  setInterval(() => { if (typeof tmsUpdateStats === 'function') tmsUpdateStats(); }, 5000);
+  // Update admin-specific badge
+  function updateAdminNotifBadge() {
+    if (typeof TMS === 'undefined') return;
+    const notifs = TMS.getNotifs ? TMS.getNotifs() : [];
+    const unread = notifs.filter(n => {
+      const r = Array.isArray(n.to) ? n.to : [n.to||'all'];
+      return !n.read && (r.includes('all') || r.includes('admin'));
+    }).length;
+    const nb = document.getElementById('nb-notifs-admin');
+    if (nb) { nb.textContent = unread; nb.style.display = unread > 0 ? 'flex' : 'none'; }
+  }
+  updateAdminNotifBadge();
+  setInterval(updateAdminNotifBadge, 5000);
+}, 500);
+
 
 window.adminView3DById = function(propId) {
   const p = (window._adminPropMap||{})[propId]; if(!p) return;
@@ -730,6 +851,57 @@ window.adminView3DById = function(propId) {
 
 window.closeAdmin3D = function() {
   document.getElementById('ov-admin3d').style.display = 'none';
+
+// Admin notifications
+window.adminSendNotification = function() {
+  const title = document.getElementById('notif-title')?.value.trim();
+  const msg   = document.getElementById('notif-msg')?.value.trim();
+  const to    = document.getElementById('notif-to')?.value || 'all';
+  if (!title || !msg) { alert('Title and message required.'); return; }
+  if (typeof TMS === 'undefined') { alert('Notification system not loaded.'); return; }
+  TMS.addNotif(title, msg, 'red', to, 'admin');
+  document.getElementById('notif-title').value = '';
+  document.getElementById('notif-msg').value   = '';
+  document.getElementById('notif-to').value    = 'all';
+  if (typeof tmsRenderNotifs === 'function') tmsRenderNotifs();
+  const ok = document.getElementById('notif-ok');
+  if (ok) { ok.style.opacity='1'; setTimeout(()=>ok.style.opacity='0',3000); }
+};
+
+// Add notifications page to sp handler
+const _origSp = window.sp;
+if (typeof _origSp === 'function') {
+  window.sp = function(id, el) {
+    _origSp(id, el);
+    if (id === 'notifications') {
+      if (typeof tmsRenderNotifs === 'function') tmsRenderNotifs();
+      if (typeof TMS !== 'undefined') {
+        TMS.markAllNotifsRead();
+        const nb = document.getElementById('nb-notifs-admin');
+        if (nb) nb.style.display = 'none';
+      }
+    }
+  };
+}
+// Update notification badge on load
+setTimeout(() => {
+  if (typeof tmsUpdateStats === 'function') tmsUpdateStats();
+  setInterval(() => { if (typeof tmsUpdateStats === 'function') tmsUpdateStats(); }, 5000);
+  // Update admin-specific badge
+  function updateAdminNotifBadge() {
+    if (typeof TMS === 'undefined') return;
+    const notifs = TMS.getNotifs ? TMS.getNotifs() : [];
+    const unread = notifs.filter(n => {
+      const r = Array.isArray(n.to) ? n.to : [n.to||'all'];
+      return !n.read && (r.includes('all') || r.includes('admin'));
+    }).length;
+    const nb = document.getElementById('nb-notifs-admin');
+    if (nb) { nb.textContent = unread; nb.style.display = unread > 0 ? 'flex' : 'none'; }
+  }
+  updateAdminNotifBadge();
+  setInterval(updateAdminNotifBadge, 5000);
+}, 500);
+
   document.body.style.overflow = '';
 };
 // Close on backdrop click
