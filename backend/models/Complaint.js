@@ -1,32 +1,35 @@
 // ============================================================
 // TMS — Complaint Schema
-// Tenant-raised issues escalated to admin
+// Tenant-raised issues escalated to admin for resolution
 // ============================================================
 'use strict';
 
-const mg = require('mongoose');
+const mongoose = require('mongoose');
 
-const Ref = mg.Schema.Types.ObjectId;
+const ObjRef = mongoose.Schema.Types.ObjectId;
 
-const COMPLAINT_CATEGORIES = ['Noise','Water','Electricity','Neighbor','Rent','Security','Other'];
-const COMPLAINT_STATUSES   = ['open','in_progress','resolved','closed'];
-const COMPLAINT_PRIORITIES = ['low','medium','high'];
+/** Valid complaint categories */
+const CAT_LIST   = ['Noise','Water','Electricity','Neighbor','Rent','Security','Other'];
+/** Valid complaint statuses */
+const STATUS_LIST = ['open','in_progress','resolved','closed'];
+/** Valid complaint priorities */
+const PRIO_LIST   = ['low','medium','high'];
 
-const tmsComplaintSchema = new mg.Schema(
+const ComplaintSchema = new mongoose.Schema(
   {
-    tenantId:    { type: Ref,    ref: 'User',     required: true },
-    tenantName:  { type: String, default: '' },
-    landlordId:  { type: Ref,    ref: 'User',     default: null },
-    propertyId:  { type: Ref,    ref: 'Property', default: null },
-    subject:     { type: String, required: true,  trim: true },
-    description: { type: String, default: '' },
-    category:    { type: String, default: 'Other',  enum: COMPLAINT_CATEGORIES },
-    status:      { type: String, default: 'open',   enum: COMPLAINT_STATUSES },
-    priority:    { type: String, default: 'medium', enum: COMPLAINT_PRIORITIES },
-    adminNote:   { type: String, default: '' },
-    resolvedAt:  { type: Date,   default: null },
+    tenantId:    { type: ObjRef,  ref: 'User',     required: true },
+    tenantName:  { type: String,  default: '' },
+    landlordId:  { type: ObjRef,  ref: 'User',     default: null },
+    propertyId:  { type: ObjRef,  ref: 'Property', default: null },
+    subject:     { type: String,  required: true,  trim: true },
+    description: { type: String,  default: '' },
+    category:    { type: String,  default: 'Other',  enum: CAT_LIST },
+    status:      { type: String,  default: 'open',   enum: STATUS_LIST },
+    priority:    { type: String,  default: 'medium', enum: PRIO_LIST },
+    adminNote:   { type: String,  default: '' },
+    resolvedAt:  { type: Date,    default: null },
   },
   { timestamps: true }
 );
 
-module.exports = mg.model('Complaint', tmsComplaintSchema);
+module.exports = mongoose.model('Complaint', ComplaintSchema);

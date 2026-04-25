@@ -1,33 +1,33 @@
 // ============================================================
 // TMS — User Schema
-// Login: email/password  |  OAuth: Google
+// Supports: email/password login and Google OAuth sign-in
 // ============================================================
 'use strict';
 
-const mg      = require('mongoose');
-const bcrypt  = require('bcryptjs');
+const mongoose = require('mongoose');
+const bcryptjs = require('bcryptjs');
 
-/** Number of bcrypt salt rounds */
-const HASH_ROUNDS = 10;
+/** bcrypt cost factor */
+const BCRYPT_ROUNDS = 10;
 
-/** Allowed login providers */
-const AUTH_PROVIDERS = ['email', 'google'];
+/** Valid login providers */
+const VALID_PROVIDERS = ['email', 'google'];
 
-/** Allowed user roles */
-const USER_ROLES = ['tenant', 'landlord'];
+/** Valid user roles in the system */
+const VALID_ROLES = ['tenant', 'landlord'];
 
-/** Allowed account statuses */
-const ACCOUNT_STATUS = ['active', 'blocked'];
+/** Valid account states */
+const VALID_STATUSES = ['active', 'blocked'];
 
-const tmsUserSchema = new mg.Schema(
+const UserSchema = new mongoose.Schema(
   {
     name:         { type: String,  required: true,  trim: true },
     email:        { type: String,  required: true,  unique: true, lowercase: true, trim: true },
     password:     { type: String,  minlength: 6,    select: false },
-    role:         { type: String,  required: true,  enum: USER_ROLES },
-    authProvider: { type: String,  default: 'email', enum: AUTH_PROVIDERS },
+    role:         { type: String,  required: true,  enum: VALID_ROLES },
+    authProvider: { type: String,  default: 'email', enum: VALID_PROVIDERS },
     googleId:     { type: String,  default: null },
-    status:       { type: String,  default: 'active', enum: ACCOUNT_STATUS },
+    status:       { type: String,  default: 'active', enum: VALID_STATUSES },
     verified:     { type: Boolean, default: false },
     phone:        { type: String,  default: '' },
     cnic:         { type: String,  default: '' },
@@ -38,16 +38,16 @@ const tmsUserSchema = new mg.Schema(
   { timestamps: true }
 );
 
-// Hash password on create or update
-tmsUserSchema.pre('save', async function hashBeforeSave(next) {
+// Auto-hash password before saving if modified
+UserSchema.pre('save', async function runHashMiddleware(next) {
   if (!this.isModified('password') || !this.password) return next();
-  this.password = await bcrypt.hash(this.password, HASH_ROUNDS);
+  this.password = await bcryptjs.hash(this.password, BCRYPT_ROUNDS);
   next();
 });
 
-// Compare a plain-text password with the stored hash
-tmsUserSchema.methods.comparePassword = function checkPassword(inputPwd) {
-  return require('bcryptjs').compare(inputPwd, this.password);
+// Check a plain password against the stored bcrypt hash
+UserSchema.methods.comparePassword = function verifyPassword(rawInput) {
+  return require('bcryptjs').compare(rawInput, this.password);
 };
 
-module.exports = mg.model('User', tmsUserSchema);
+module.exports = mongoose.model('User', UserSchema);
