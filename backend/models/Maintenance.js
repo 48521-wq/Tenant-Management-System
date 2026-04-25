@@ -1,32 +1,35 @@
 // ============================================================
 // TMS — Maintenance Schema
-// Repair/service requests raised by tenants
+// Repair and service requests submitted by tenants
 // ============================================================
 'use strict';
 
-const mg = require('mongoose');
+const mongoose = require('mongoose');
 
-const Ref = mg.Schema.Types.ObjectId;
+const ObjRef = mongoose.Schema.Types.ObjectId;
 
-const MAINT_TYPES      = ['Plumbing','Electrical','Gas','AC / Cooling','Painting','Structural','Other'];
-const MAINT_PRIORITIES = ['low','medium','high','urgent'];
-const MAINT_STATUSES   = ['pending','in_progress','resolved','cancelled'];
+/** Accepted maintenance request types */
+const TYPE_LIST   = ['Plumbing','Electrical','Gas','AC / Cooling','Painting','Structural','Other'];
+/** Accepted priority levels */
+const PRIO_LIST   = ['low','medium','high','urgent'];
+/** Accepted request statuses */
+const STATUS_LIST = ['pending','in_progress','resolved','cancelled'];
 
-const tmsMaintenanceSchema = new mg.Schema(
+const MaintenanceSchema = new mongoose.Schema(
   {
-    tenantId:      { type: Ref,    ref: 'User',     required: true },
-    tenantName:    { type: String, default: '' },
-    landlordId:    { type: Ref,    ref: 'User',     default: null },
-    propertyId:    { type: Ref,    ref: 'Property', default: null },
-    propertyTitle: { type: String, default: '' },
-    type:          { type: String, default: 'Other',   enum: MAINT_TYPES },
-    priority:      { type: String, default: 'medium',  enum: MAINT_PRIORITIES },
-    description:   { type: String, required: true },
-    status:        { type: String, default: 'pending', enum: MAINT_STATUSES },
-    adminNote:     { type: String, default: '' },
-    resolvedAt:    { type: Date,   default: null },
+    tenantId:      { type: ObjRef,  ref: 'User',     required: true },
+    tenantName:    { type: String,  default: '' },
+    landlordId:    { type: ObjRef,  ref: 'User',     default: null },
+    propertyId:    { type: ObjRef,  ref: 'Property', default: null },
+    propertyTitle: { type: String,  default: '' },
+    type:          { type: String,  default: 'Other',   enum: TYPE_LIST },
+    priority:      { type: String,  default: 'medium',  enum: PRIO_LIST },
+    description:   { type: String,  required: true },
+    status:        { type: String,  default: 'pending', enum: STATUS_LIST },
+    adminNote:     { type: String,  default: '' },
+    resolvedAt:    { type: Date,    default: null },
   },
   { timestamps: true }
 );
 
-module.exports = mg.model('Maintenance', tmsMaintenanceSchema);
+module.exports = mongoose.model('Maintenance', MaintenanceSchema);
