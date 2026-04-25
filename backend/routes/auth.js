@@ -1,36 +1,36 @@
 // ============================================================
 // TMS Auth Routes
-// Handles: register, login, Google OAuth, profile update
+// register | login | Google OAuth | google-fallback | profile
 // ============================================================
 'use strict';
 
-const express          = require('express');
-const jwt              = require('jsonwebtoken');
+const router           = require('express').Router();
+const jwtPkg           = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
-const User             = require('../models/User');
+const UserModel        = require('../models/User');
 const { protect }      = require('../middleware/auth');
 
-const authRouter  = express.Router();
-const gClient     = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const googleVerifier = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// ── Helpers ──────────────────────────────────────────────────
+// ── JWT helpers ───────────────────────────────────────────────
+const signToken      = (data) => jwtPkg.sign(data, process.env.JWT_SECRET, { expiresIn: '7d' });
+const signAdminToken = ()     => signToken({ isAdmin: true, email: process.env.ADMIN_EMAIL });
 
-/** Create a signed JWT valid for 7 days */
-const makeJwt = (payload) =>
-  jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
-
-/** Create an admin-scoped JWT */
-const makeAdminJwt = () =>
-  makeJwt({ isAdmin: true, email: process.env.ADMIN_EMAIL });
-
-/** Standard admin user object returned in responses */
-const ADMIN_USER = {
+// ── Reusable admin response object ───────────────────────────
+const ADMIN_RESP = {
   id: 'admin', name: 'Super Admin',
   email: process.env.ADMIN_EMAIL, role: 'admin', isAdmin: true,
 };
 
+// ── Utility: build user response shape ───────────────────────
+const userShape = (u) => ({
+  id: u._id, name: u.name, email: u.email,
+  role: u.role, status: u.status, verified: u.verified,
+  phone: u.phone, city: u.city,
+});
+
 // ─── POST /api/auth/register ─────────────────────────────────
-authRouter.post('/register', async (req, res) => {
+router.post('/register', async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
@@ -43,194 +43,145 @@ authRouter.post('/register', async (req, res) => {
     if (email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase())
       return res.status(400).json({ success: false, message: 'This email cannot be registered.' });
 
-    const alreadyExists = await User.findOne({ email: email.toLowerCase() });
-    if (alreadyExists)
+    const duplicate = await UserModel.findOne({ email: email.toLowerCase() });
+    if (duplicate)
       return res.status(400).json({ success: false, message: 'Account already exists. Please sign in.' });
 
-    const createdUser = await User.create({
-      name: name.trim(), email: email.toLowerCase(),
-      password, role, authProvider: 'email',
-    });
-    const tok = makeJwt({ id: createdUser._id, role: createdUser.role });
+    const saved  = await UserModel.create({ name: name.trim(), email: email.toLowerCase(), password, role, authProvider: 'email' });
+    const jwtTok = signToken({ id: saved._id, role: saved.role });
     return res.status(201).json({
-      success: true, token: tok,
-      user: {
-        id: createdUser._id, name: createdUser.name, email: createdUser.email,
-        role: createdUser.role, status: createdUser.status,
-        verified: createdUser.verified, createdAt: createdUser.createdAt,
-      },
+      success: true,
+      token: jwtTok,
+      user: { id: saved._id, name: saved.name, email: saved.email, role: saved.role, status: saved.status, verified: saved.verified, createdAt: saved.createdAt },
     });
-  } catch (regErr) {
-    if (regErr.code === 11000)
-      return res.status(400).json({ success: false, message: 'Email already registered.' });
-    console.error('Register:', regErr);
+  } catch (e) {
+    if (e.code === 11000) return res.status(400).json({ success: false, message: 'Email already registered.' });
+    console.error('Register error:', e);
     return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
 // ─── POST /api/auth/login ────────────────────────────────────
-authRouter.post('/login', async (req, res) => {
+router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password)
       return res.status(400).json({ success: false, message: 'Enter email and password.' });
 
-    const lEmail = email.toLowerCase().trim();
+    const normalized = email.toLowerCase().trim();
 
-    // Admin shortcut
-    if (lEmail === process.env.ADMIN_EMAIL.toLowerCase()) {
+    // Admin check first
+    if (normalized === process.env.ADMIN_EMAIL.toLowerCase()) {
       if (password !== process.env.ADMIN_PASSWORD)
         return res.status(401).json({ success: false, message: 'Incorrect password.' });
-      return res.json({ success: true, token: makeAdminJwt(), user: ADMIN_USER });
+      return res.json({ success: true, token: signAdminToken(), user: ADMIN_RESP });
     }
 
-    const authUser = await User.findOne({ email: lEmail }).select('+password');
-    if (!authUser)
+    const found = await UserModel.findOne({ email: normalized }).select('+password');
+    if (!found)
       return res.status(401).json({ success: false, message: 'No account found. Please sign up first.' });
-    if (authUser.authProvider === 'google' && !authUser.password)
+    if (found.authProvider === 'google' && !found.password)
       return res.status(400).json({ success: false, message: 'This account uses Google Sign-In.' });
-    if (!(await authUser.comparePassword(password)))
+    if (!(await found.comparePassword(password)))
       return res.status(401).json({ success: false, message: 'Incorrect password.' });
-    if (authUser.status === 'blocked')
+    if (found.status === 'blocked')
       return res.status(403).json({ success: false, message: 'Account suspended. Contact admin.' });
 
-    const tok = makeJwt({ id: authUser._id, role: authUser.role });
-    return res.json({
-      success: true, token: tok,
-      user: {
-        id: authUser._id, name: authUser.name, email: authUser.email,
-        role: authUser.role, status: authUser.status, verified: authUser.verified,
-        phone: authUser.phone, city: authUser.city,
-      },
-    });
-  } catch (loginErr) {
-    console.error('Login:', loginErr);
+    const jwtTok = signToken({ id: found._id, role: found.role });
+    return res.json({ success: true, token: jwtTok, user: userShape(found) });
+  } catch (e) {
+    console.error('Login error:', e);
     return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
 // ─── POST /api/auth/google ───────────────────────────────────
-authRouter.post('/google', async (req, res) => {
+router.post('/google', async (req, res) => {
   try {
     const { credential, role, mode } = req.body;
     if (!credential)
       return res.status(400).json({ success: false, message: 'Google credential required.' });
 
-    let tokenPayload;
+    let gData;
     try {
-      const ticket = await gClient.verifyIdToken({
-        idToken: credential, audience: process.env.GOOGLE_CLIENT_ID,
-      });
-      tokenPayload = ticket.getPayload();
+      const verified = await googleVerifier.verifyIdToken({ idToken: credential, audience: process.env.GOOGLE_CLIENT_ID });
+      gData = verified.getPayload();
     } catch {
       return res.status(401).json({ success: false, message: 'Invalid Google token.' });
     }
 
-    const { email, name, sub: googleSub } = tokenPayload;
-    const lEmail = email.toLowerCase();
+    const { email, name, sub: gSub } = gData;
+    const normalized = email.toLowerCase();
 
-    if (lEmail === process.env.ADMIN_EMAIL.toLowerCase())
-      return res.json({ success: true, token: makeAdminJwt(), user: ADMIN_USER });
+    if (normalized === process.env.ADMIN_EMAIL.toLowerCase())
+      return res.json({ success: true, token: signAdminToken(), user: ADMIN_RESP });
 
-    let oauthUser = await User.findOne({ email: lEmail });
+    let gUser = await UserModel.findOne({ email: normalized });
 
     if (mode === 'signin') {
-      if (!oauthUser)
+      if (!gUser)
         return res.status(401).json({ success: false, message: 'No account for ' + email + '. Please sign up.' });
-      if (oauthUser.status === 'blocked')
+      if (gUser.status === 'blocked')
         return res.status(403).json({ success: false, message: 'Account suspended.' });
-      if (!oauthUser.googleId) {
-        oauthUser.googleId     = googleSub;
-        oauthUser.authProvider = 'google';
-        await oauthUser.save();
-      }
+      if (!gUser.googleId) { gUser.googleId = gSub; gUser.authProvider = 'google'; await gUser.save(); }
     } else {
-      if (oauthUser)
+      if (gUser)
         return res.status(400).json({ success: false, message: 'Account already exists. Please sign in.' });
       if (!role || !['tenant', 'landlord'].includes(role))
         return res.status(400).json({ success: false, message: 'Select Tenant or Landlord first.' });
-      oauthUser = await User.create({
-        name: name || lEmail.split('@')[0], email: lEmail,
-        role, authProvider: 'google', googleId: googleSub,
-      });
+      gUser = await UserModel.create({ name: name || normalized.split('@')[0], email: normalized, role, authProvider: 'google', googleId: gSub });
     }
 
-    const tok = makeJwt({ id: oauthUser._id, role: oauthUser.role });
-    return res.json({
-      success: true, token: tok,
-      user: {
-        id: oauthUser._id, name: oauthUser.name, email: oauthUser.email,
-        role: oauthUser.role, status: oauthUser.status, verified: oauthUser.verified,
-        phone: oauthUser.phone, city: oauthUser.city,
-      },
-    });
-  } catch (oauthErr) {
-    console.error('Google:', oauthErr);
+    const jwtTok = signToken({ id: gUser._id, role: gUser.role });
+    return res.json({ success: true, token: jwtTok, user: userShape(gUser) });
+  } catch (e) {
+    console.error('Google error:', e);
     return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
-// ─── POST /api/auth/google-fallback (dev) ────────────────────
-authRouter.post('/google-fallback', async (req, res) => {
+// ─── POST /api/auth/google-fallback ──────────────────────────
+router.post('/google-fallback', async (req, res) => {
   try {
     const { email, role, mode } = req.body;
-    if (!email)
-      return res.status(400).json({ success: false, message: 'Email required.' });
+    if (!email) return res.status(400).json({ success: false, message: 'Email required.' });
 
-    const lEmail = email.toLowerCase().trim();
-    if (lEmail === process.env.ADMIN_EMAIL.toLowerCase())
-      return res.json({ success: true, token: makeAdminJwt(), user: ADMIN_USER });
+    const normalized = email.toLowerCase().trim();
+    if (normalized === process.env.ADMIN_EMAIL.toLowerCase())
+      return res.json({ success: true, token: signAdminToken(), user: ADMIN_RESP });
 
-    let fallbackUser = await User.findOne({ email: lEmail });
+    let fbU = await UserModel.findOne({ email: normalized });
     if (mode === 'signin') {
-      if (!fallbackUser)
-        return res.status(401).json({ success: false, message: 'No account for ' + email + '.' });
-      if (fallbackUser.status === 'blocked')
-        return res.status(403).json({ success: false, message: 'Account suspended.' });
+      if (!fbU)  return res.status(401).json({ success: false, message: 'No account for ' + email + '.' });
+      if (fbU.status === 'blocked') return res.status(403).json({ success: false, message: 'Account suspended.' });
     } else {
-      if (fallbackUser)
-        return res.status(400).json({ success: false, message: 'Account already exists.' });
-      if (!role)
-        return res.status(400).json({ success: false, message: 'Select role first.' });
-      fallbackUser = await User.create({
-        name: lEmail.split('@')[0], email: lEmail, role, authProvider: 'google',
-      });
+      if (fbU)   return res.status(400).json({ success: false, message: 'Account already exists.' });
+      if (!role) return res.status(400).json({ success: false, message: 'Select role first.' });
+      fbU = await UserModel.create({ name: normalized.split('@')[0], email: normalized, role, authProvider: 'google' });
     }
-    const tok = makeJwt({ id: fallbackUser._id, role: fallbackUser.role });
-    return res.json({
-      success: true, token: tok,
-      user: {
-        id: fallbackUser._id, name: fallbackUser.name, email: fallbackUser.email,
-        role: fallbackUser.role, status: fallbackUser.status, verified: fallbackUser.verified,
-      },
-    });
-  } catch (fbErr) {
+    const jwtTok = signToken({ id: fbU._id, role: fbU.role });
+    return res.json({ success: true, token: jwtTok, user: { id: fbU._id, name: fbU.name, email: fbU.email, role: fbU.role, status: fbU.status, verified: fbU.verified } });
+  } catch (e) {
     return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
 // ─── GET /api/auth/me ────────────────────────────────────────
-authRouter.get('/me', protect, (req, res) => {
-  if (req.user?.isAdmin)
-    return res.json({ success: true, user: ADMIN_USER });
+router.get('/me', protect, (req, res) => {
+  if (req.user?.isAdmin) return res.json({ success: true, user: ADMIN_RESP });
   return res.json({ success: true, user: req.user });
 });
 
 // ─── PUT /api/auth/profile ───────────────────────────────────
-authRouter.put('/profile', protect, async (req, res) => {
+router.put('/profile', protect, async (req, res) => {
   try {
-    if (req.user?.isAdmin)
-      return res.json({ success: true, message: 'Admin profile updated.' });
+    if (req.user?.isAdmin) return res.json({ success: true, message: 'Admin profile updated.' });
     const { name, phone, cnic, city, address } = req.body;
-    const refreshedUser = await User.findByIdAndUpdate(
-      req.user._id,
-      { name, phone, cnic, city, address },
-      { new: true }
-    );
-    return res.json({ success: true, user: refreshedUser });
-  } catch (profileErr) {
+    const updated = await UserModel.findByIdAndUpdate(req.user._id, { name, phone, cnic, city, address }, { new: true });
+    return res.json({ success: true, user: updated });
+  } catch (e) {
     return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
-module.exports = authRouter;
+module.exports = router;
