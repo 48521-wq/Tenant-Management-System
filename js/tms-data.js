@@ -7,6 +7,17 @@
 
 const TMS = {
 
+  // ── Limits ────────────────────────────────────────────
+  // Maximum number of entries kept in memory for logs and notifications.
+  // Older entries are dropped (pop) when the limit is exceeded.
+  MAX_LOGS:   100,
+  MAX_NOTIFS:  50,
+
+  // ── Date formatting ───────────────────────────────────
+  // Locale string used for all date display across the data layer.
+  // Centralised here so switching locale (e.g. en-US) requires one change.
+  DATE_LOCALE: 'en-PK',
+
   // ── Storage Keys ─────────────────────────────────────
   // Centralized key map — prevents typo bugs across files
   KEYS: {
@@ -78,7 +89,7 @@ const TMS = {
       id:       this.newId('T'),
       ...data,
       status:   data.status || 'active',
-      joinedAt: new Date().toLocaleDateString('en-PK', { month: 'short', year: 'numeric' }),
+      joinedAt: new Date().toLocaleDateString(this.DATE_LOCALE, { month: 'short', year: 'numeric' }),
     };
     list.push(t);
     this.saveTenants(list);
@@ -126,7 +137,7 @@ const TMS = {
       id:       this.newId('L'),
       ...data,
       status:   data.status || 'pending',
-      joinedAt: new Date().toLocaleDateString('en-PK', { month: 'short', year: 'numeric' }),
+      joinedAt: new Date().toLocaleDateString(this.DATE_LOCALE, { month: 'short', year: 'numeric' }),
     };
     list.push(l);
     this.saveLandlords(list);
@@ -193,7 +204,7 @@ const TMS = {
       id:       this.newId('P'),
       ...data,
       status:   data.status || 'available',
-      listedAt: new Date().toLocaleDateString('en-PK', { month: 'short', year: 'numeric' }),
+      listedAt: new Date().toLocaleDateString(this.DATE_LOCALE, { month: 'short', year: 'numeric' }),
     };
     list.push(p);
     this.saveProperties(list);
@@ -258,7 +269,7 @@ const TMS = {
       id:      this.newId('C'),
       ...data,
       status:  data.status || 'open',
-      filedAt: new Date().toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' }),
+      filedAt: new Date().toLocaleDateString(this.DATE_LOCALE, { day: '2-digit', month: 'short', year: 'numeric' }),
     };
     list.push(c);
     this.saveComplaints(list);
@@ -306,7 +317,7 @@ const TMS = {
       id:      this.newId('M'),
       ...data,
       status:  data.status || 'pending',
-      filedAt: new Date().toLocaleDateString('en-PK', { day: '2-digit', month: 'short' }),
+      filedAt: new Date().toLocaleDateString(this.DATE_LOCALE, { day: '2-digit', month: 'short' }),
     };
     list.push(m);
     this.saveMaintenance(list);
@@ -344,7 +355,7 @@ const TMS = {
       id:        this.newId('AGR'),
       ...data,
       status:    data.status || 'active',
-      createdAt: new Date().toLocaleDateString('en-PK', { day: 'numeric', month: 'long', year: 'numeric' }),
+      createdAt: new Date().toLocaleDateString(this.DATE_LOCALE, { day: 'numeric', month: 'long', year: 'numeric' }),
     };
     list.push(a);
     this.saveAgreements(list);
@@ -369,9 +380,9 @@ const TMS = {
       type,
       msg,
       user: user || 'system',
-      time: new Date().toLocaleString('en-PK', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+      time: new Date().toLocaleString(this.DATE_LOCALE, { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
     });
-    if (logs.length > 100) logs.pop();
+    if (logs.length > this.MAX_LOGS) logs.pop();
     this.save(this.KEYS.logs, logs);
   },
 
@@ -390,7 +401,7 @@ const TMS = {
   addNotif(title, msg, color) {
     const notifs = this.getNotifs();
     notifs.unshift({ title, msg, color: color || 'blue', read: false, time: 'just now' });
-    if (notifs.length > 50) notifs.pop();
+    if (notifs.length > this.MAX_NOTIFS) notifs.pop();
     this.save(this.KEYS.notifications, notifs);
     const unread = notifs.filter(n => !n.read).length;
     document.querySelectorAll('.tn-badge, #notif-nb').forEach(el => el && (el.textContent = unread));

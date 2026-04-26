@@ -27,6 +27,16 @@
 
 const mongoose = require('mongoose');
 
+// ── Schema constants ─────────────────────────────────────────────
+// Allowed property types — used in enum validation and UI dropdowns
+const PROPERTY_TYPES = ['House', 'Flat', 'Apartment', 'Villa', 'Room'];
+
+// Allowed status values for a property listing
+const PROPERTY_STATUSES = ['available', 'rented', 'suspended'];
+
+// Default 3D model house types
+const MODEL3D_TYPES = ['standard', 'villa', 'apartment', 'bungalow'];
+
 // ── Schema definition ────────────────────────────────────────────
 const propertySchema = new mongoose.Schema(
   {
@@ -40,7 +50,7 @@ const propertySchema = new mongoose.Schema(
     // Property category — used for filtering in the public listing
     type: {
       type:    String,
-      enum:    ['House', 'Flat', 'Apartment', 'Villa', 'Room'],
+      enum:    PROPERTY_TYPES,
       default: 'House',
     },
     area:    { type: String, required: true },   // neighbourhood / sector
@@ -58,7 +68,7 @@ const propertySchema = new mongoose.Schema(
     // Availability status — controls visibility in tenant search
     status: {
       type:    String,
-      enum:    ['available', 'rented', 'suspended'],
+      enum:    PROPERTY_STATUSES,
       default: 'available',
     },
 
@@ -81,7 +91,7 @@ const propertySchema = new mongoose.Schema(
     // Stored as a nested sub-document — always fetched with the property.
     // Saved via PUT /api/properties/:id/model3d (replaces whole object).
     model3d: {
-      houseType:  { type: String, enum: ['standard', 'villa', 'apartment', 'bungalow'], default: 'standard' },
+      houseType:  { type: String, enum: MODEL3D_TYPES, default: 'standard' },
       wallColor:  { type: String, default: '#8B7355' },  // hex color string
       roofColor:  { type: String, default: '#5C3A1E' },
       floorColor: { type: String, default: '#D2B48C' },

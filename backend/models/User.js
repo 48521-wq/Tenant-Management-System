@@ -1,53 +1,131 @@
-// ============================================================
-// TMS — User Schema
-// Supports: email/password login and Google OAuth sign-in
-// ============================================================
-'use strict';
+// ═══════════════════════════════════════════════════════════════
+//  User Model  —  TMS
+//  Represents both tenants and landlords registered in the system.
+//
+//  Important: The admin account is NOT stored in this collection.
+//  Admin identity is managed entirely through environment variables
+//  (ADMIN_EMAIL, ADMIN_PASSWORD) and is verified in the auth routes.
+//
+//  Authentication methods supported:
+//    email  — traditional email + password (bcrypt hashed)
+//    google — Google OAuth 2.0 via GSI (no password stored)
+//
+//  Key design decisions:
+//    - password has select: false so it is never returned in queries
+//      unless explicitly requested with .select('+password').
+//    - email is stored lowercase (Mongoose auto-converts) and is
+//      unique across the collection — used as the login identifier.
+//    - googleId stores the Google subject ID ('sub') from the token
+//      payload, used to link returning Google OAuth users.
+//    - verified and status are separate concerns: verified means the
+//      admin has checked documents; status means the account is active.
+// ═══════════════════════════════════════════════════════════════
 
 const mongoose = require('mongoose');
-const bcryptjs = require('bcryptjs');
+const bcrypt   = require('bcryptjs');
 
-/** bcrypt cost factor */
-const BCRYPT_ROUNDS = 10;
+// ── Schema constants ─────────────────────────────────────────────
+// Number of bcrypt salt rounds — higher = more secure but slower to hash
+const BCRYPT_SALT_ROUNDS = 10;
 
-/** Valid login providers */
-const VALID_PROVIDERS = ['email', 'google'];
+// Supported authentication providers
+const AUTH_PROVIDERS = ['email', 'google'];
 
-/** Valid user roles in the system */
-const VALID_ROLES = ['tenant', 'landlord'];
+// Roles a user can hold — admin is NOT stored here (managed via env vars)
+const USER_ROLES = ['tenant', 'landlord'];
 
-/** Valid account states */
-const VALID_STATUSES = ['active', 'blocked'];
+// Account status values — blocked accounts get 403 on all protected routes
+const USER_STATUSES = ['active', 'blocked'];
 
-const UserSchema = new mongoose.Schema(
+// ── Schema definition ────────────────────────────────────────────
+const userSchema = new mongoose.Schema(
   {
-    name:         { type: String,  required: true,  trim: true },
-    email:        { type: String,  required: true,  unique: true, lowercase: true, trim: true },
-    password:     { type: String,  minlength: 6,    select: false },
-    role:         { type: String,  required: true,  enum: VALID_ROLES },
-    authProvider: { type: String,  default: 'email', enum: VALID_PROVIDERS },
-    googleId:     { type: String,  default: null },
-    status:       { type: String,  default: 'active', enum: VALID_STATUSES },
-    verified:     { type: Boolean, default: false },
-    phone:        { type: String,  default: '' },
-    cnic:         { type: String,  default: '' },
-    city:         { type: String,  default: '' },
-    address:      { type: String,  default: '' },
-    avatar:       { type: String,  default: '' },
+    // ── Identity fields ──────────────────────────────────────────
+    // name is trimmed to remove accidental leading/trailing spaces
+    name: {
+      type:     String,
+      required: true,
+      trim:     true,
+    },
+    // email is the primary login identifier — must be unique
+    // Mongoose lowercases it automatically before saving
+    email: {
+      type:      String,
+      required:  true,
+      unique:    true,
+      lowercase: true,
+      trim:      true,
+    },
+
+    // ── Authentication fields ────────────────────────────────────
+    // password is excluded from all queries by default (select: false)
+    // Use .select('+password') when you need it (e.g. login route)
+    password: {
+      type:      String,
+      minlength: 6,
+      select:    false,
+    },
+    // Which provider was used to create this account
+    authProvider: {
+      type:    String,
+      enum:    AUTH_PROVIDERS,
+      default: 'email',
+    },
+    // Google subject ID from the JWT payload — stored at first Google login
+    // null for email/password accounts
+    googleId: {
+      type:    String,
+      default: null,
+    },
+
+    // ── Role & account status ────────────────────────────────────
+    // role determines which dashboard the user sees after login
+    role: {
+      type:     String,
+      enum:     USER_ROLES,
+      required: true,
+    },
+    // blocked accounts receive 403 Forbidden on all protected routes
+    status: {
+      type:    String,
+      enum:    USER_STATUSES,
+      default: 'active',
+    },
+    // verified is set to true by admin after checking documents
+    // Does not affect login — only affects trust level in dashboards
+    verified: {
+      type:    Boolean,
+      default: false,
+    },
+
+    // ── Optional profile fields ──────────────────────────────────
+    // All empty by default — user can fill them from the profile page
+    phone:   { type: String, default: '' },
+    cnic:    { type: String, default: '' },  // national ID number
+    city:    { type: String, default: '' },
+    address: { type: String, default: '' },
+    avatar:  { type: String, default: '' },  // URL to profile image
   },
-  { timestamps: true }
+  {
+    // Mongoose auto-manages createdAt and updatedAt timestamps
+    timestamps: true,
+  }
 );
 
-// Auto-hash password before saving if modified
-UserSchema.pre('save', async function runHashMiddleware(next) {
+// ── Pre-save hook: hash password before storing ──────────────────
+// Uses bcrypt with 10 salt rounds — runs only when password is changed.
+// Skips if password is missing (Google OAuth users have no password).
+userSchema.pre('save', async function (next) {
   if (!this.isModified('password') || !this.password) return next();
-  this.password = await bcryptjs.hash(this.password, BCRYPT_ROUNDS);
+  this.password = await bcrypt.hash(this.password, BCRYPT_SALT_ROUNDS);
   next();
 });
 
-// Check a plain password against the stored bcrypt hash
-UserSchema.methods.comparePassword = function verifyPassword(rawInput) {
-  return require('bcryptjs').compare(rawInput, this.password);
+// ── Instance method: verify a plain-text password ────────────────
+// Returns a Promise<boolean> — true if the password matches the hash.
+// Called in the login route after loading the user with .select('+password').
+userSchema.methods.comparePassword = function (plainText) {
+  return bcrypt.compare(plainText, this.password);
 };
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('User', userSchema);

@@ -24,6 +24,10 @@
 
 const mongoose = require('mongoose');
 
+// ── Schema constants ─────────────────────────────────────────────
+// Status lifecycle: draft → active → expired | terminated
+const LEASE_STATUSES = ['draft', 'active', 'expired', 'terminated'];
+
 const leaseSchema = new mongoose.Schema(
   {
     // ── Tenant details ───────────────────────────────────────────
@@ -58,7 +62,7 @@ const leaseSchema = new mongoose.Schema(
     // ── Status ───────────────────────────────────────────────────
     status: {
       type:    String,
-      enum:    ['draft', 'active', 'expired', 'terminated'],
+      enum:    LEASE_STATUSES,
       default: 'active',
     },
 
