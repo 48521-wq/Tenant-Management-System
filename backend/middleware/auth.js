@@ -11,23 +11,23 @@
  *   router.delete('/admin/:id', protect, adminOnly, handler);
  */
 
-const jwt  = require('jsonwebtoken');
-const User = require('../models/User');
+const jwtLib   = require('jsonwebtoken');
+const UserDoc  = require('../models/User');
 
 // HTTP status codes as named constants
-const HTTP_UNAUTHORIZED = 401;
-const HTTP_FORBIDDEN    = 403;
+const STATUS_UNAUTH    = 401;
+const STATUS_FORBIDDEN = 403;
 
 // Authorization header prefix used in Bearer token scheme
-const BEARER_PREFIX = 'Bearer ';
+const TOKEN_PREFIX = 'Bearer ';
 
 // ── Response helpers ───────────────────────────────────────────
 
-const rejectUnauthorized = (res, message = 'Not authorized.') =>
-  res.status(HTTP_UNAUTHORIZED).json({ success: false, message });
+const sendUnauthorized = (res, msg = 'Not authorized.') =>
+  res.status(STATUS_UNAUTH).json({ success: false, message: msg });
 
-const rejectForbidden = (res, message = 'Access denied.') =>
-  res.status(HTTP_FORBIDDEN).json({ success: false, message });
+const sendForbidden = (res, msg = 'Access denied.') =>
+  res.status(STATUS_FORBIDDEN).json({ success: false, message: msg });
 
 // ── Token extraction ───────────────────────────────────────────
 
@@ -38,11 +38,11 @@ const rejectForbidden = (res, message = 'Access denied.') =>
  * @param {import('express').Request} req
  * @returns {string|null}
  */
-function extractBearerToken(req) {
-  const authHeader = req.headers.authorization;
+function pullBearerToken(req) {
+  const headerVal = req.headers.authorization;
 
-  if (authHeader && authHeader.startsWith(BEARER_PREFIX)) {
-    return authHeader.slice(BEARER_PREFIX.length);
+  if (headerVal && headerVal.startsWith(TOKEN_PREFIX)) {
+    return headerVal.slice(TOKEN_PREFIX.length);
   }
   return null;
 }
@@ -64,35 +64,35 @@ function extractBearerToken(req) {
  */
 const protect = async (req, res, next) => {
   try {
-    const token = extractBearerToken(req);
-    if (!token) {
-      return rejectUnauthorized(res, 'Not authorized. No token provided.');
+    const rawToken = pullBearerToken(req);
+    if (!rawToken) {
+      return sendUnauthorized(res, 'Not authorized. No token provided.');
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = jwtLib.verify(rawToken, process.env.JWT_SECRET);
 
     // Admin has no DB document — build stub directly from token payload
-    if (decoded.isAdmin) {
-      req.user = { isAdmin: true, email: decoded.email };
+    if (payload.isAdmin) {
+      req.user = { isAdmin: true, email: payload.email };
       return next();
     }
 
     // Fetch regular user by ID stored in the token
-    const user = await User.findById(decoded.id);
-    if (!user) {
-      return rejectUnauthorized(res, 'User not found.');
+    const foundUser = await UserDoc.findById(payload.id);
+    if (!foundUser) {
+      return sendUnauthorized(res, 'User not found.');
     }
 
     // Block suspended accounts regardless of token validity
-    if (user.status === 'blocked') {
-      return rejectForbidden(res, 'Account suspended. Contact admin.');
+    if (foundUser.status === 'blocked') {
+      return sendForbidden(res, 'Account suspended. Contact admin.');
     }
 
-    req.user = user;
+    req.user = foundUser;
     next();
 
-  } catch (err) {
-    rejectUnauthorized(res, 'Invalid or expired token.');
+  } catch (verifyErr) {
+    sendUnauthorized(res, 'Invalid or expired token.');
   }
 };
 
@@ -106,7 +106,7 @@ const protect = async (req, res, next) => {
  */
 const adminOnly = (req, res, next) => {
   if (req.user && req.user.isAdmin) return next();
-  rejectForbidden(res, 'Admin access required.');
+  sendForbidden(res, 'Admin access required.');
 };
 
 module.exports = { protect, adminOnly };
