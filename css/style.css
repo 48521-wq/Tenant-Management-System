@@ -1,8 +1,12 @@
 /* ============================================================
    Tenant Management System — Main Stylesheet
-   File: css/style.css
-   Covers: scrollbar, reset, variables, layout, components,
-           forms, buttons, role cards, animations, admin styles
+   File:    css/style.css
+   Version: 2.0
+   Covers:  scrollbar, reset, CSS variables (design tokens),
+            layout, components, forms, buttons, role cards,
+            animations, keyframes, admin styles
+   Note:    All colours reference CSS variables from :root —
+            never use raw hex values outside the token block.
    ============================================================ */
 
 /* ── Custom Scrollbar ──────────────────────────────────────── */
@@ -29,28 +33,32 @@
   padding:    0;
 }
 
-/* ── CSS Variables ─────────────────────────────────────────── */
-/* Design tokens used throughout the stylesheet */
+/* ── CSS Variables (Design Tokens) ─────────────────────────── */
+/*
+   All design values are defined here as CSS custom properties.
+   To retheme the app, only this block needs to change —
+   no raw hex values should appear outside of :root.
+*/
 :root {
-  /* Brand gold */
+  /* Brand gold — primary accent colour throughout the UI */
   --gold:       #C9A96E;
   --gold-light: #E8C97A;
 
-  /* Dark backgrounds */
-  --dark:   #0A0C0F;
-  --dark2:  #111418;
-  --card:   #14181F;
+  /* Dark backgrounds — three levels of depth */
+  --dark:   #0A0C0F;  /* page background */
+  --dark2:  #111418;  /* slightly lighter (scrollbar track, inputs) */
+  --card:   #14181F;  /* card / panel surfaces */
 
   /* Borders and text */
-  --border: rgba(201, 169, 110, 0.18);
-  --text:   #E8E4DC;
-  --muted:  #6B7280;
+  --border: rgba(201, 169, 110, 0.18);  /* gold-tinted border */
+  --text:   #E8E4DC;                    /* primary text */
+  --muted:  #6B7280;                    /* secondary / placeholder text */
 
-  /* Role accent colors */
+  /* Role accent colors — used to distinguish tenant vs landlord UI */
   --tenant:   #4A9EFF;
   --landlord: #C9A96E;
 
-  /* Status colors */
+  /* Status feedback colors */
   --error:   #FF6B6B;
   --success: #4ECDC4;
 }
@@ -115,7 +123,7 @@ body {
   animation: float2 10s ease-in-out infinite;
 }
 
-/* ── Animations ────────────────────────────────────────────── */
+/* ── Keyframe Animations ───────────────────────────────────── */
 
 /* Orb1 gentle float */
 @keyframes float1 {

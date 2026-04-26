@@ -1,186 +1,429 @@
-// ============================================================
-// TMS Auth Routes
-// register | login | Google OAuth | google-fallback | profile
-// ============================================================
-'use strict';
+/**
+ * @file auth.js
+ * @route /api/auth
+ * @description Authentication routes — handles sign-up, sign-in,
+ *              Google OAuth (GSI + dev fallback), profile read/write.
+ * @access Public  → register, login, google, google-fallback
+ *         Private → me, profile  (requires valid JWT via protect middleware)
+ */
 
-const router           = require('express').Router();
-const jwtPkg           = require('jsonwebtoken');
+const express          = require('express');
+const jwt              = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
-const UserModel        = require('../models/User');
+const User             = require('../models/User');
 const { protect }      = require('../middleware/auth');
 
-const googleVerifier = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const router       = express.Router();
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// ── JWT helpers ───────────────────────────────────────────────
-const signToken      = (data) => jwtPkg.sign(data, process.env.JWT_SECRET, { expiresIn: '7d' });
-const signAdminToken = ()     => signToken({ isAdmin: true, email: process.env.ADMIN_EMAIL });
+// ─────────────────────────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────────────────────────
+const TOKEN_EXPIRY  = '7d';                       // JWT lifetime — re-auth required after this
+const ADMIN_ROLE    = 'admin';                    // admin role string used in identity objects
+const ALLOWED_ROLES = ['tenant', 'landlord'];     // roles a user may self-register with
 
-// ── Reusable admin response object ───────────────────────────
-const ADMIN_RESP = {
-  id: 'admin', name: 'Super Admin',
-  email: process.env.ADMIN_EMAIL, role: 'admin', isAdmin: true,
-};
+// ─────────────────────────────────────────────────────────────────
+// Token helpers
+// ─────────────────────────────────────────────────────────────────
 
-// ── Utility: build user response shape ───────────────────────
-const userShape = (u) => ({
-  id: u._id, name: u.name, email: u.email,
-  role: u.role, status: u.status, verified: u.verified,
-  phone: u.phone, city: u.city,
+/**
+ * Signs a JWT with the application secret.
+ * All tokens expire after 7 days — after that the user must re-authenticate.
+ *
+ * @param {Object} tokenPayload - Claims to embed (e.g. { id, role } or { isAdmin })
+ * @returns {string} Signed JWT string
+ */
+const signToken = (tokenPayload) =>
+  jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
+
+/**
+ * Generates an admin-specific JWT.
+ * Admin has no MongoDB document — identity lives entirely in the token.
+ *
+ * @returns {string} Signed admin JWT
+ */
+const buildAdminToken = () =>
+  signToken({ isAdmin: true, email: process.env.ADMIN_EMAIL });
+
+/**
+ * Builds the safe, serialisable user object returned in every API response.
+ * Sensitive fields (hashed password, internal flags) are deliberately excluded.
+ *
+ * @param {import('mongoose').Document} userDoc - Mongoose User document
+ * @returns {Object} Plain user object safe to send over the wire
+ */
+const toPublicUser = (userDoc) => ({
+  id:        userDoc._id,
+  name:      userDoc.name,
+  email:     userDoc.email,
+  role:      userDoc.role,
+  status:    userDoc.status,
+  verified:  userDoc.verified,
+  phone:     userDoc.phone,
+  city:      userDoc.city,
+  createdAt: userDoc.createdAt,
 });
 
-// ─── POST /api/auth/register ─────────────────────────────────
+/**
+ * Builds the admin identity object returned on admin login.
+ * Constructed from env vars because admin has no User document in MongoDB.
+ *
+ * @returns {Object} Admin identity object
+ */
+const buildAdminUser = () => ({
+  id:      'admin',
+  name:    'Super Admin',
+  email:   process.env.ADMIN_EMAIL,
+  role:    ADMIN_ROLE,
+  isAdmin: true,
+});
+
+/**
+ * Checks whether the provided email belongs to the admin account.
+ * Comparison is case-insensitive to handle mixed-case user input.
+ *
+ * @param {string} emailAddress - Email to check
+ * @returns {boolean} True if it matches ADMIN_EMAIL env var
+ */
+const isAdminEmail = (emailAddress) =>
+  emailAddress.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase();
+
+
+
+// ─────────────────────────────────────────────────────────────────
+// POST /api/auth/register
+// ─────────────────────────────────────────────────────────────────
+/**
+ * Creates a new tenant or landlord account using email + password.
+ *
+ * Validation order:
+ *   1. Required fields present
+ *   2. Role is in the allowed list
+ *   3. Password meets minimum length
+ *   4. Email is not the reserved admin address
+ *   5. Email not already registered
+ *   6. Create user + issue JWT
+ *
+ * @returns {201} { success, token, user }
+ * @returns {400} Validation failure or duplicate email
+ * @returns {500} Unexpected server error
+ */
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
+    // 1. All four fields are required — reject early if any are missing
     if (!name || !email || !password || !role)
       return res.status(400).json({ success: false, message: 'Please fill all fields.' });
-    if (!['tenant', 'landlord'].includes(role))
+
+    // 2. Only tenant and landlord roles can self-register
+    if (!ALLOWED_ROLES.includes(role))
       return res.status(400).json({ success: false, message: 'Invalid role.' });
+
+    // 3. Enforce minimum password length before hashing
     if (password.length < 6)
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
-    if (email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase())
+
+    // 4. Prevent admin email from being used to create a regular account
+    if (isAdminEmail(email))
       return res.status(400).json({ success: false, message: 'This email cannot be registered.' });
 
-    const duplicate = await UserModel.findOne({ email: email.toLowerCase() });
-    if (duplicate)
+    // 5. Guard against duplicate accounts (case-insensitive check)
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser)
       return res.status(400).json({ success: false, message: 'Account already exists. Please sign in.' });
 
-    const saved  = await UserModel.create({ name: name.trim(), email: email.toLowerCase(), password, role, authProvider: 'email' });
-    const jwtTok = signToken({ id: saved._id, role: saved.role });
-    return res.status(201).json({
-      success: true,
-      token: jwtTok,
-      user: { id: saved._id, name: saved.name, email: saved.email, role: saved.role, status: saved.status, verified: saved.verified, createdAt: saved.createdAt },
+    // 6. Persist the new user; bcrypt hashing happens in the pre-save hook
+    const newUser = await User.create({
+      name:         name.trim(),
+      email:        email.toLowerCase(),
+      password,
+      role,
+      authProvider: 'email',
     });
-  } catch (e) {
-    if (e.code === 11000) return res.status(400).json({ success: false, message: 'Email already registered.' });
-    console.error('Register error:', e);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+
+    // Issue a token embedding the new user's MongoDB ID and role
+    const authToken = signToken({ id: newUser._id, role: newUser.role });
+
+    res.status(201).json({
+      success: true,
+      token:   authToken,
+      user:    toPublicUser(newUser),
+    });
+
+  } catch (err) {
+    // MongoDB duplicate-key error (code 11000) — race-condition duplicate email
+    if (err.code === 11000)
+      return res.status(400).json({ success: false, message: 'Email already registered.' });
+
+    console.error('Register error:', err);
+    res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
-// ─── POST /api/auth/login ────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// POST /api/auth/login
+// ─────────────────────────────────────────────────────────────────
+/**
+ * Authenticates a user with email + password.
+ * Admin credentials are checked against env vars — no DB lookup needed.
+ * Regular users are fetched from MongoDB and validated with bcrypt.
+ *
+ * @returns {200} { success, token, user }
+ * @returns {400} Missing fields or Google-only account attempted password login
+ * @returns {401} Wrong credentials or account not found
+ * @returns {403} Account suspended
+ * @returns {500} Unexpected server error
+ */
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+
     if (!email || !password)
       return res.status(400).json({ success: false, message: 'Enter email and password.' });
 
-    const normalized = email.toLowerCase().trim();
+    const normalisedEmail = email.toLowerCase().trim();
 
-    // Admin check first
-    if (normalized === process.env.ADMIN_EMAIL.toLowerCase()) {
+    // ── Admin login path ─────────────────────────────────────────
+    // Credentials live in .env — skip the database entirely
+    if (isAdminEmail(normalisedEmail)) {
       if (password !== process.env.ADMIN_PASSWORD)
         return res.status(401).json({ success: false, message: 'Incorrect password.' });
-      return res.json({ success: true, token: signAdminToken(), user: ADMIN_RESP });
+
+      return res.json({
+        success: true,
+        token:   buildAdminToken(),
+        user:    buildAdminUser(),
+      });
     }
 
-    const found = await UserModel.findOne({ email: normalized }).select('+password');
-    if (!found)
+    // ── Regular user login path ──────────────────────────────────
+    // select('+password') is required — password field has select:false by default
+    const foundUser = await User.findOne({ email: normalisedEmail }).select('+password');
+
+    if (!foundUser)
       return res.status(401).json({ success: false, message: 'No account found. Please sign up first.' });
-    if (found.authProvider === 'google' && !found.password)
+
+    // Google-only accounts never set a password — redirect to Google Sign-In
+    if (foundUser.authProvider === 'google' && !foundUser.password)
       return res.status(400).json({ success: false, message: 'This account uses Google Sign-In.' });
-    if (!(await found.comparePassword(password)))
+
+    if (!(await foundUser.comparePassword(password)))
       return res.status(401).json({ success: false, message: 'Incorrect password.' });
-    if (found.status === 'blocked')
+
+    if (foundUser.status === 'blocked')
       return res.status(403).json({ success: false, message: 'Account suspended. Contact admin.' });
 
-    const jwtTok = signToken({ id: found._id, role: found.role });
-    return res.json({ success: true, token: jwtTok, user: userShape(found) });
-  } catch (e) {
-    console.error('Login error:', e);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const authToken = signToken({ id: foundUser._id, role: foundUser.role });
+
+    res.json({ success: true, token: authToken, user: toPublicUser(foundUser) });
+
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
-// ─── POST /api/auth/google ───────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// POST /api/auth/google
+// ─────────────────────────────────────────────────────────────────
+/**
+ * Sign in or sign up using a real Google ID token produced by GSI.
+ * The credential is verified with Google's servers before any DB access —
+ * this prevents token forgery attacks.
+ *
+ * Modes:
+ *   signin — account must already exist; Google ID is linked if absent
+ *   signup — account must NOT exist; role selection is required
+ *
+ * @returns {200} { success, token, user }
+ * @returns {400} Missing credential, invalid role, or account conflict
+ * @returns {401} Bad Google token or account not found (signin mode)
+ * @returns {403} Account suspended
+ * @returns {500} Unexpected server error
+ */
 router.post('/google', async (req, res) => {
   try {
     const { credential, role, mode } = req.body;
+
     if (!credential)
       return res.status(400).json({ success: false, message: 'Google credential required.' });
 
-    let gData;
+    // 1. Cryptographically verify the Google ID token
+    let googlePayload;
     try {
-      const verified = await googleVerifier.verifyIdToken({ idToken: credential, audience: process.env.GOOGLE_CLIENT_ID });
-      gData = verified.getPayload();
+      const ticket = await googleClient.verifyIdToken({
+        idToken:  credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      googlePayload = ticket.getPayload();
     } catch {
       return res.status(401).json({ success: false, message: 'Invalid Google token.' });
     }
 
-    const { email, name, sub: gSub } = gData;
-    const normalized = email.toLowerCase();
+    const { email, name, sub: googleId } = googlePayload;
+    const normalisedEmail = email.toLowerCase();
 
-    if (normalized === process.env.ADMIN_EMAIL.toLowerCase())
-      return res.json({ success: true, token: signAdminToken(), user: ADMIN_RESP });
+    // 2. Admin shortcut — no DB lookup required
+    if (isAdminEmail(normalisedEmail))
+      return res.json({ success: true, token: buildAdminToken(), user: buildAdminUser() });
 
-    let gUser = await UserModel.findOne({ email: normalized });
+    let foundUser = await User.findOne({ email: normalisedEmail });
 
+    // 3. Branch: sign-in vs. sign-up
     if (mode === 'signin') {
-      if (!gUser)
-        return res.status(401).json({ success: false, message: 'No account for ' + email + '. Please sign up.' });
-      if (gUser.status === 'blocked')
+      if (!foundUser)
+        return res.status(401).json({
+          success: false,
+          message: 'No account for ' + email + '. Please sign up.',
+        });
+
+      if (foundUser.status === 'blocked')
         return res.status(403).json({ success: false, message: 'Account suspended.' });
-      if (!gUser.googleId) { gUser.googleId = gSub; gUser.authProvider = 'google'; await gUser.save(); }
+
+      // Link Google subject ID on first Google sign-in for this existing account
+      if (!foundUser.googleId) {
+        foundUser.googleId     = googleId;
+        foundUser.authProvider = 'google';
+        await foundUser.save();
+      }
     } else {
-      if (gUser)
+      if (foundUser)
         return res.status(400).json({ success: false, message: 'Account already exists. Please sign in.' });
-      if (!role || !['tenant', 'landlord'].includes(role))
+
+      if (!role || !ALLOWED_ROLES.includes(role))
         return res.status(400).json({ success: false, message: 'Select Tenant or Landlord first.' });
-      gUser = await UserModel.create({ name: name || normalized.split('@')[0], email: normalized, role, authProvider: 'google', googleId: gSub });
+
+      // Derive display name from email prefix if Google did not supply one
+      foundUser = await User.create({
+        name:         name || normalisedEmail.split('@')[0],
+        email:        normalisedEmail,
+        role,
+        authProvider: 'google',
+        googleId,
+      });
     }
 
-    const jwtTok = signToken({ id: gUser._id, role: gUser.role });
-    return res.json({ success: true, token: jwtTok, user: userShape(gUser) });
-  } catch (e) {
-    console.error('Google error:', e);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    const authToken = signToken({ id: foundUser._id, role: foundUser.role });
+    res.json({ success: true, token: authToken, user: toPublicUser(foundUser) });
+
+  } catch (err) {
+    console.error('Google auth error:', err);
+    res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
-// ─── POST /api/auth/google-fallback ──────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// POST /api/auth/google-fallback
+// ─────────────────────────────────────────────────────────────────
+/**
+ * Development-only fallback for environments where the Google GSI popup
+ * is blocked (e.g. file:// pages, strict CSP policies).
+ * Authenticates by email address alone — no real Google token is verified.
+ *
+ * ⚠️  DO NOT enable or expose this endpoint in production.
+ *
+ * @returns {200} { success, token, user }
+ * @returns {400} Missing email, missing role, or account conflict
+ * @returns {401} Account not found (signin mode)
+ * @returns {403} Account suspended
+ * @returns {500} Unexpected server error
+ */
 router.post('/google-fallback', async (req, res) => {
   try {
     const { email, role, mode } = req.body;
-    if (!email) return res.status(400).json({ success: false, message: 'Email required.' });
 
-    const normalized = email.toLowerCase().trim();
-    if (normalized === process.env.ADMIN_EMAIL.toLowerCase())
-      return res.json({ success: true, token: signAdminToken(), user: ADMIN_RESP });
+    if (!email)
+      return res.status(400).json({ success: false, message: 'Email required.' });
 
-    let fbU = await UserModel.findOne({ email: normalized });
+    const normalisedEmail = email.toLowerCase().trim();
+
+    // Admin shortcut — skip the DB
+    if (isAdminEmail(normalisedEmail))
+      return res.json({ success: true, token: buildAdminToken(), user: buildAdminUser() });
+
+    let foundUser = await User.findOne({ email: normalisedEmail });
+
     if (mode === 'signin') {
-      if (!fbU)  return res.status(401).json({ success: false, message: 'No account for ' + email + '.' });
-      if (fbU.status === 'blocked') return res.status(403).json({ success: false, message: 'Account suspended.' });
+      // Account must exist to sign in
+      if (!foundUser)
+        return res.status(401).json({ success: false, message: 'No account for ' + email + '.' });
+      if (foundUser.status === 'blocked')
+        return res.status(403).json({ success: false, message: 'Account suspended.' });
     } else {
-      if (fbU)   return res.status(400).json({ success: false, message: 'Account already exists.' });
-      if (!role) return res.status(400).json({ success: false, message: 'Select role first.' });
-      fbU = await UserModel.create({ name: normalized.split('@')[0], email: normalized, role, authProvider: 'google' });
+      // Account must NOT exist to sign up
+      if (foundUser)
+        return res.status(400).json({ success: false, message: 'Account already exists.' });
+      if (!role)
+        return res.status(400).json({ success: false, message: 'Select role first.' });
+
+      // Derive display name from the local part of the email address
+      foundUser = await User.create({
+        name:         normalisedEmail.split('@')[0],
+        email:        normalisedEmail,
+        role,
+        authProvider: 'google',
+      });
     }
-    const jwtTok = signToken({ id: fbU._id, role: fbU.role });
-    return res.json({ success: true, token: jwtTok, user: { id: fbU._id, name: fbU.name, email: fbU.email, role: fbU.role, status: fbU.status, verified: fbU.verified } });
-  } catch (e) {
-    return res.status(500).json({ success: false, message: 'Server error.' });
+
+    const authToken = signToken({ id: foundUser._id, role: foundUser.role });
+    res.json({ success: true, token: authToken, user: toPublicUser(foundUser) });
+
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
-// ─── GET /api/auth/me ────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// GET /api/auth/me
+// ─────────────────────────────────────────────────────────────────
+/**
+ * Returns the currently authenticated user's profile.
+ * Admin receives a synthetic object; regular users receive the DB document.
+ *
+ * @middleware protect - JWT must be valid
+ * @returns {200} { success, user }
+ */
 router.get('/me', protect, (req, res) => {
-  if (req.user?.isAdmin) return res.json({ success: true, user: ADMIN_RESP });
-  return res.json({ success: true, user: req.user });
+  if (req.user?.isAdmin)
+    return res.json({ success: true, user: buildAdminUser() });
+
+  res.json({ success: true, user: req.user });
 });
 
-// ─── PUT /api/auth/profile ───────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// PUT /api/auth/profile
+// ─────────────────────────────────────────────────────────────────
+/**
+ * Updates the editable profile fields of the logged-in user.
+ * Admin has no DB record so the update is skipped and success is returned.
+ * Only name, phone, cnic, city, and address are user-writable.
+ *
+ * @middleware protect - JWT must be valid
+ * @returns {200} { success, user }
+ * @returns {500} Unexpected server error
+ */
 router.put('/profile', protect, async (req, res) => {
   try {
-    if (req.user?.isAdmin) return res.json({ success: true, message: 'Admin profile updated.' });
+    // Admin identity is JWT-only — there is no DB row to update
+    if (req.user?.isAdmin)
+      return res.json({ success: true, message: 'Admin profile updated.' });
+
+    // Only accept the fields the user is allowed to modify
     const { name, phone, cnic, city, address } = req.body;
-    const updated = await UserModel.findByIdAndUpdate(req.user._id, { name, phone, cnic, city, address }, { new: true });
-    return res.json({ success: true, user: updated });
-  } catch (e) {
-    return res.status(500).json({ success: false, message: 'Server error.' });
+
+    // { new: true } returns the document state after the update
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { name, phone, cnic, city, address },
+      { new: true }
+    );
+
+    res.json({ success: true, user: updatedUser });
+
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 

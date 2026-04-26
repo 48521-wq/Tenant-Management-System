@@ -21,6 +21,11 @@ const API_BASE = 'http://localhost:5000/api';
 const LS_TOKEN = 'tms_token'; // stores the JWT string
 const LS_USER  = 'tms_user';  // stores the serialized user object
 
+// ── Password rules ─────────────────────────────────────────────
+// Minimum password length enforced on the client before hitting the API.
+// Must stay in sync with the minlength: 6 constraint in User.js schema.
+const PASSWORD_MIN_LENGTH = 6;
+
 // ── Role → dashboard mapping ───────────────────────────────────
 // Maps each role string to the correct dashboard HTML file path.
 // Used by goToDashboard() after a successful login or OAuth flow.
@@ -56,6 +61,12 @@ const clearAuth = () => {
 
 // ── API helper ─────────────────────────────────────────────────
 
+// Authorization header prefix for JWT bearer tokens
+const BEARER_PREFIX = 'Bearer ';
+
+// Loading state label shown on buttons while a request is in flight
+const LOADING_LABEL = 'Please wait…';
+
 /**
  * Centralized fetch wrapper — automatically attaches the
  * Authorization header when a JWT token is available.
@@ -73,7 +84,7 @@ async function api(endpoint, method = 'GET', body = null) {
 
   // Attach JWT bearer token if the user is already signed in
   const token = getToken();
-  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+  if (token) opts.headers['Authorization'] = BEARER_PREFIX + token;
 
   // Serialize body for mutation requests
   if (body) opts.body = JSON.stringify(body);
@@ -131,7 +142,7 @@ function setBtnLoad(id, loading, txt) {
   const btn = document.getElementById(id);
   if (btn) {
     btn.disabled    = loading;
-    btn.textContent = loading ? 'Please wait…' : txt;
+    btn.textContent = loading ? LOADING_LABEL : txt;
   }
 }
 
@@ -212,6 +223,14 @@ function selectRole(role) {
 
 // ── Password strength meter ─────────────────────────────────────
 
+// ── Password strength meter ─────────────────────────────────────
+
+// Colors for each strength level (index 0 = score 1 = Weak … index 3 = score 4 = Strong)
+const PASSWORD_STRENGTH_COLORS = ['#FF6B6B', '#FFB347', '#C9A96E', '#4ECDC4'];
+
+// Human-readable label for each score (index 0 = empty/no input)
+const PASSWORD_STRENGTH_LABELS = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+
 /**
  * Update the 4-segment password strength bar and label.
  *
@@ -226,9 +245,6 @@ function selectRole(role) {
  * @param {string} val - current value of the password input
  */
 function checkStrength(val) {
-  // Colors correspond to score 1–4 (Weak → Strong)
-  const colors = ['#FF6B6B', '#FFB347', '#C9A96E', '#4ECDC4'];
-
   // Count satisfied criteria
   let score = 0;
   if (val.length >= 8)           score++; // length
@@ -239,15 +255,14 @@ function checkStrength(val) {
   // Colour each segment: filled if index < score, reset otherwise
   ['s1', 's2', 's3', 's4'].forEach((id, i) => {
     const el = document.getElementById(id);
-    if (el) el.style.background = i < score ? colors[score - 1] : '';
+    if (el) el.style.background = i < score ? PASSWORD_STRENGTH_COLORS[score - 1] : '';
   });
 
   // Update the text label below the bar
-  const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
   const lbl = document.getElementById('strength-label');
   if (lbl) {
-    lbl.textContent = score > 0 ? labels[score] : '';
-    lbl.style.color = colors[score - 1] || '';
+    lbl.textContent = score > 0 ? PASSWORD_STRENGTH_LABELS[score] : '';
+    lbl.style.color = PASSWORD_STRENGTH_COLORS[score - 1] || '';
   }
 }
 
@@ -379,7 +394,10 @@ async function handleSignup() {
   if (pass !== conf) { showErr('Passwords do not match.'); return; }
 
   // Enforce minimum password length
-  if (pass.length < 6) { showErr('Password must be at least 6 characters.'); return; }
+  if (pass.length < PASSWORD_MIN_LENGTH) {
+    showErr(`Password must be at least ${PASSWORD_MIN_LENGTH} characters.`);
+    return;
+  }
 
   // Enforce role selection
   if (!selRole) {
@@ -504,7 +522,11 @@ function handleGoogleSignup() {
  * The off-screen div is positioned at -999px so it is never visible
  * but still attached to the DOM (required for GSI to render into it).
  */
-function triggerGPopup() {
+// Milliseconds to wait for GSI to finish rendering its button before clicking it
+const GSI_POPUP_DELAY = 100;
+
+// Milliseconds to wait before focusing the email input inside the fallback modal
+const GMODAL_FOCUS_DELAY = 120;
   // Reuse existing hidden container or create one on first call
   let box = document.getElementById('_g_btn_box');
   if (!box) {
@@ -521,7 +543,7 @@ function triggerGPopup() {
   // Ask GSI to render its standard sign-in button into the hidden div
   google.accounts.id.renderButton(box, { theme: 'outline', size: 'large' });
 
-  // 100ms delay lets the GSI script finish rendering the button
+  // GSI_POPUP_DELAY lets the GSI script finish rendering the button
   setTimeout(() => {
     const btn = box.querySelector('[role=button]') || box.firstElementChild;
 
@@ -537,12 +559,15 @@ function triggerGPopup() {
         }
       });
     }
-  }, 100);
+  }, GSI_POPUP_DELAY);
 }
 
 // ── Google fallback modal ──────────────────────────────────────
 // Used when the GSI popup is blocked by the browser or unavailable
 // in development environments (e.g. file:// protocol).
+
+// Email format validation regex — used in confirmGoogle() before hitting the server
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
  * Open the email-only Google fallback modal.
@@ -563,8 +588,8 @@ function openGModal(mode) {
   // Show the modal overlay
   document.getElementById('g-overlay').classList.add('open');
 
-  // 120ms delay lets the CSS open animation finish before focusing
-  setTimeout(() => document.getElementById('g-email-input').focus(), 120);
+  // GMODAL_FOCUS_DELAY lets the CSS open animation finish before focusing
+  setTimeout(() => document.getElementById('g-email-input').focus(), GMODAL_FOCUS_DELAY);
 }
 
 /**
@@ -591,8 +616,7 @@ async function confirmGoogle() {
   };
 
   // Basic email format check before hitting the server
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email || !emailRegex.test(email)) { gErr('Enter valid email.'); return; }
+  if (!email || !EMAIL_REGEX.test(email)) { gErr('Enter valid email.'); return; }
 
   try {
     const { ok, data } = await api('/auth/google-fallback', 'POST', {

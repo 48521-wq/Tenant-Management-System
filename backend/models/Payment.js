@@ -21,6 +21,10 @@
 
 const mongoose = require('mongoose');
 
+// ── Schema constants ─────────────────────────────────────────────
+const PAYMENT_METHODS  = ['Cash', 'Bank Transfer', 'JazzCash', 'EasyPaisa', 'Cheque', 'Other'];
+const PAYMENT_STATUSES = ['paid', 'pending', 'overdue'];
+
 const paymentSchema = new mongoose.Schema(
   {
     // ── Who made the payment ─────────────────────────────────────
@@ -55,14 +59,14 @@ const paymentSchema = new mongoose.Schema(
     // Payment channel used by the tenant
     method: {
       type:    String,
-      enum:    ['Cash', 'Bank Transfer', 'JazzCash', 'EasyPaisa', 'Cheque', 'Other'],
+      enum:    PAYMENT_METHODS,
       default: 'Cash',
     },
 
     // ── Status ───────────────────────────────────────────────────
     status: {
       type:    String,
-      enum:    ['paid', 'pending', 'overdue'],
+      enum:    PAYMENT_STATUSES,
       default: 'pending',
     },
 

@@ -1,48 +1,156 @@
-// ============================================================
-// TMS — User Management Routes (Admin Only)
-// ============================================================
-'use strict';
+/**
+ * @file users.js
+ * @route /api/users
+ * @description Admin-only endpoints for managing tenant and landlord accounts.
+ *
+ * All routes in this file require two middleware guards in sequence:
+ *   protect   → verifies the JWT and populates req.user
+ *   adminOnly → rejects any non-admin caller with 403 Forbidden
+ *
+ * Available operations:
+ *   GET    /           → list all users (filterable by role)
+ *   PUT    /:id/block  → toggle account status between active ↔ blocked
+ *   PUT    /:id/verify → mark account as verified (one-way; cannot undo)
+ *   DELETE /:id        → permanently delete a user account
+ */
 
-const router    = require('express').Router();
-const UserModel = require('../models/User');
+const express = require('express');
+const User    = require('../models/User');
 const { protect, adminOnly } = require('../middleware/auth');
 
-// ─── GET / ───────────────────────────────────────────────────
+const router = express.Router();
+
+// HTTP status codes
+const HTTP_NOT_FOUND    = 404;
+const HTTP_SERVER_ERROR = 500;
+
+// ─────────────────────────────────────────────────────────────────
+// GET /api/users
+// ─────────────────────────────────────────────────────────────────
+/**
+ * Returns a list of all registered users.
+ * Optional query parameters:
+ *   ?role=tenant    → return only tenants
+ *   ?role=landlord  → return only landlords
+ *
+ * Results are sorted newest first so the admin sees recent sign-ups
+ * at the top of the dashboard table.
+ *
+ * @middleware protect   - Valid JWT required
+ * @middleware adminOnly - Admin access required
+ * @returns {200} { success, count, users }
+ * @returns {500} Unexpected server error
+ */
 router.get('/', protect, adminOnly, async (req, res) => {
   try {
-    const qry = {};
-    if (req.query.role) qry.role = req.query.role;
-    const rows = await UserModel.find(qry).sort({ createdAt: -1 });
-    return res.json({ success: true, count: rows.length, users: rows });
-  } catch (e) { return res.status(500).json({ success: false, message: 'Server error.' }); }
+    const queryFilter = {};
+
+    // Apply role filter when provided
+    if (req.query.role) queryFilter.role = req.query.role;
+
+    const allUsers = await User.find(queryFilter).sort({ createdAt: -1 });
+
+    res.json({ success: true, count: allUsers.length, users: allUsers });
+
+  } catch (err) {
+    res.status(HTTP_SERVER_ERROR).json({ success: false, message: 'Server error.' });
+  }
 });
 
-// ─── PUT /:id/block ──────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// PUT /api/users/:id/block
+// ─────────────────────────────────────────────────────────────────
+/**
+ * Toggles a user's account status between 'active' and 'blocked'.
+ * A blocked user receives 403 Forbidden on every protected route —
+ * effectively locking them out without deleting their data.
+ * Calling this endpoint again on a blocked account unblocks it.
+ *
+ * @middleware protect   - Valid JWT required
+ * @middleware adminOnly - Admin access required
+ * @returns {200} { success, message, user }  — message reflects new status
+ * @returns {404} User not found
+ * @returns {500} Unexpected server error
+ */
 router.put('/:id/block', protect, adminOnly, async (req, res) => {
   try {
-    const target = await UserModel.findById(req.params.id);
-    if (!target) return res.status(404).json({ success: false, message: 'User not found.' });
-    target.status = target.status === 'blocked' ? 'active' : 'blocked';
-    await target.save();
-    return res.json({ success: true, message: `User ${target.status}.`, user: target });
-  } catch (e) { return res.status(500).json({ success: false, message: 'Server error.' }); }
+    const targetUser = await User.findById(req.params.id);
+
+    if (!targetUser)
+      return res.status(HTTP_NOT_FOUND).json({ success: false, message: 'User not found.' });
+
+    // Toggle: blocked → active; active → blocked
+    targetUser.status = targetUser.status === 'blocked' ? 'active' : 'blocked';
+    await targetUser.save();
+
+    // Response message reflects the new status ("User active." / "User blocked.")
+    res.json({
+      success: true,
+      message: `User ${targetUser.status}.`,
+      user:    targetUser,
+    });
+
+  } catch (err) {
+    res.status(HTTP_SERVER_ERROR).json({ success: false, message: 'Server error.' });
+  }
 });
 
-// ─── PUT /:id/verify ─────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// PUT /api/users/:id/verify
+// ─────────────────────────────────────────────────────────────────
+/**
+ * Marks a user account as verified (sets verified: true).
+ * Verification is a one-way operation — once verified, the flag stays true.
+ * Admin uses this after reviewing the user's identity documents
+ * (typically part of the landlord approval workflow).
+ *
+ * @middleware protect   - Valid JWT required
+ * @middleware adminOnly - Admin access required
+ * @returns {200} { success, message, user }
+ * @returns {404} User not found
+ * @returns {500} Unexpected server error
+ */
 router.put('/:id/verify', protect, adminOnly, async (req, res) => {
   try {
-    const verified = await UserModel.findByIdAndUpdate(req.params.id, { verified: true }, { new: true });
-    if (!verified) return res.status(404).json({ success: false, message: 'User not found.' });
-    return res.json({ success: true, message: 'User verified.', user: verified });
-  } catch (e) { return res.status(500).json({ success: false, message: 'Server error.' }); }
+    // { new: true } returns the document AFTER the update is applied
+    const verifiedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { verified: true },
+      { new: true }
+    );
+
+    if (!verifiedUser)
+      return res.status(HTTP_NOT_FOUND).json({ success: false, message: 'User not found.' });
+
+    res.json({ success: true, message: 'User verified.', user: verifiedUser });
+
+  } catch (err) {
+    res.status(HTTP_SERVER_ERROR).json({ success: false, message: 'Server error.' });
+  }
 });
 
-// ─── DELETE /:id ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// DELETE /api/users/:id
+// ─────────────────────────────────────────────────────────────────
+/**
+ * Permanently removes a user account from the database (admin only).
+ * Hard delete — the record cannot be recovered.
+ * Properties, complaints, or leases linked to this user remain in
+ * the database but lose their owner reference (orphaned documents).
+ *
+ * @middleware protect   - Valid JWT required
+ * @middleware adminOnly - Admin access required
+ * @returns {200} { success, message }
+ * @returns {500} Unexpected server error
+ */
 router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
-    await UserModel.findByIdAndDelete(req.params.id);
-    return res.json({ success: true, message: 'User deleted.' });
-  } catch (e) { return res.status(500).json({ success: false, message: 'Server error.' }); }
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'User deleted.' });
+
+  } catch (err) {
+    res.status(HTTP_SERVER_ERROR).json({ success: false, message: 'Server error.' });
+  }
 });
 
 module.exports = router;
