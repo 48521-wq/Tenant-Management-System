@@ -18,52 +18,52 @@
 
 require('dotenv').config();
 
-const express   = require('express');
-const cors      = require('cors');
-const connectDB = require('./config/database');
+const express = require('express');
+const cors    = require('cors');
+const initDB  = require('./config/database');
 
 // Application constants
-const DEFAULT_PORT        = 5000;
-const JSON_PAYLOAD_LIMIT  = '10mb';
-const API_BASE_PATH       = '/api';
-const HEALTH_CHECK_PATH   = `${API_BASE_PATH}/health`;
+const DEFAULT_PORT       = 5000;
+const BODY_SIZE_LIMIT    = '10mb';
+const API_PREFIX         = '/api';
+const HEALTH_ROUTE       = `${API_PREFIX}/health`;
 
 const app = express();
 
 // Initialise database connection
-connectDB();
+initDB();
 
 // ── CORS Configuration ─────────────────────────────────────────
 // ⚠️  Production: restrict origin to your actual domain.
-const corsOptions = {
-  origin: function (requestOrigin, callback) {
+const corsConfig = {
+  origin: function allowAll(requestOrigin, cb) {
     // Allow requests with no Origin header (Postman, curl, mobile apps)
-    if (!requestOrigin) return callback(null, true);
-    callback(null, true);
+    if (!requestOrigin) return cb(null, true);
+    cb(null, true);
   },
   credentials: true,
 };
-app.use(cors(corsOptions));
+app.use(cors(corsConfig));
 
 // ── Body Parsers ───────────────────────────────────────────────
-app.use(express.json({ limit: JSON_PAYLOAD_LIMIT }));
+app.use(express.json({ limit: BODY_SIZE_LIMIT }));
 app.use(express.urlencoded({ extended: true }));
 
 // ── Route Registration ─────────────────────────────────────────
-const routes = [
-  { path: `${API_BASE_PATH}/auth`,        handler: require('./routes/auth')        },
-  { path: `${API_BASE_PATH}/users`,       handler: require('./routes/users')       },
-  { path: `${API_BASE_PATH}/properties`,  handler: require('./routes/properties')  },
-  { path: `${API_BASE_PATH}/complaints`,  handler: require('./routes/complaints')  },
-  { path: `${API_BASE_PATH}/maintenance`, handler: require('./routes/maintenance') },
-  { path: `${API_BASE_PATH}/payments`,    handler: require('./routes/payments')    },
-  { path: `${API_BASE_PATH}/leases`,      handler: require('./routes/leases')      },
+const apiRoutes = [
+  { path: `${API_PREFIX}/auth`,        handler: require('./routes/auth')        },
+  { path: `${API_PREFIX}/users`,       handler: require('./routes/users')       },
+  { path: `${API_PREFIX}/properties`,  handler: require('./routes/properties')  },
+  { path: `${API_PREFIX}/complaints`,  handler: require('./routes/complaints')  },
+  { path: `${API_PREFIX}/maintenance`, handler: require('./routes/maintenance') },
+  { path: `${API_PREFIX}/payments`,    handler: require('./routes/payments')    },
+  { path: `${API_PREFIX}/leases`,      handler: require('./routes/leases')      },
 ];
 
-routes.forEach(({ path, handler }) => app.use(path, handler));
+apiRoutes.forEach(({ path, handler }) => app.use(path, handler));
 
 // ── Health Check ───────────────────────────────────────────────
-app.get(HEALTH_CHECK_PATH, (req, res) => {
+app.get(HEALTH_ROUTE, (req, res) => {
   res.json({
     status: 'OK',
     time:   new Date().toISOString(),
@@ -91,12 +91,12 @@ app.use((err, req, res, next) => {
 
 // ── Start Server ───────────────────────────────────────────────
 const SERVER_PORT = process.env.PORT || DEFAULT_PORT;
-const BASE_URL    = `http://localhost:${SERVER_PORT}`;
+const SERVER_URL  = `http://localhost:${SERVER_PORT}`;
 
 app.listen(SERVER_PORT, () => {
-  console.log(`\n🚀 TMS Backend running on ${BASE_URL}`);
-  console.log(`📍 API Base:  ${BASE_URL}${API_BASE_PATH}`);
-  console.log(`❤️  Health:   ${BASE_URL}${HEALTH_CHECK_PATH}`);
+  console.log(`\n🚀 TMS Backend running on ${SERVER_URL}`);
+  console.log(`📍 API Base:  ${SERVER_URL}${API_PREFIX}`);
+  console.log(`❤️  Health:   ${SERVER_URL}${HEALTH_ROUTE}`);
   console.log(`🔑 Admin:     ${process.env.ADMIN_EMAIL}`);
   console.log(`✅ Routes:    auth, users, properties, complaints, maintenance, payments, leases\n`);
 });
