@@ -1,7 +1,20 @@
-// ============================================================
-// TMS — Express Application Bootstrap
-// ============================================================
-'use strict';
+/**
+ * @file server.js
+ * @description TMS Backend entry point — Node.js + Express + MongoDB Atlas.
+ *
+ * Responsibilities:
+ *   - Load environment variables from .env
+ *   - Bootstrap the Express application
+ *   - Connect to MongoDB Atlas via Mongoose
+ *   - Configure CORS, JSON body parsing, and request size limits
+ *   - Mount all API route handlers under /api/*
+ *   - Provide health-check, 404, and global error-handler endpoints
+ *   - Start the HTTP server on the configured PORT
+ *
+ * Start:
+ *   node server.js
+ *   npm start
+ */
 
 require('dotenv').config();
 
@@ -9,55 +22,81 @@ const express   = require('express');
 const cors      = require('cors');
 const connectDB = require('./config/database');
 
-// ── Initialise Express ───────────────────────────────────────
-const api = express();
+// Application constants
+const DEFAULT_PORT        = 5000;
+const JSON_PAYLOAD_LIMIT  = '10mb';
+const API_BASE_PATH       = '/api';
+const HEALTH_CHECK_PATH   = `${API_BASE_PATH}/health`;
+
+const app = express();
+
+// Initialise database connection
 connectDB();
 
-// ── CORS Configuration ───────────────────────────────────────
-const corsSettings = {
-  origin: function permitAll(requestOrigin, respond) {
-    if (!requestOrigin) return respond(null, true);
-    respond(null, true); // open to all origins in dev
+// ── CORS Configuration ─────────────────────────────────────────
+// ⚠️  Production: restrict origin to your actual domain.
+const corsOptions = {
+  origin: function (requestOrigin, callback) {
+    // Allow requests with no Origin header (Postman, curl, mobile apps)
+    if (!requestOrigin) return callback(null, true);
+    callback(null, true);
   },
   credentials: true,
 };
-api.use(cors(corsSettings));
+app.use(cors(corsOptions));
 
-// ── Request Body Parsers ─────────────────────────────────────
-api.use(express.json({ limit: '10mb' }));
-api.use(express.urlencoded({ extended: true }));
+// ── Body Parsers ───────────────────────────────────────────────
+app.use(express.json({ limit: JSON_PAYLOAD_LIMIT }));
+app.use(express.urlencoded({ extended: true }));
 
-// ── Route Registration Helper ────────────────────────────────
-const addRoute = (prefix, modulePath) => api.use(prefix, require(modulePath));
+// ── Route Registration ─────────────────────────────────────────
+const routes = [
+  { path: `${API_BASE_PATH}/auth`,        handler: require('./routes/auth')        },
+  { path: `${API_BASE_PATH}/users`,       handler: require('./routes/users')       },
+  { path: `${API_BASE_PATH}/properties`,  handler: require('./routes/properties')  },
+  { path: `${API_BASE_PATH}/complaints`,  handler: require('./routes/complaints')  },
+  { path: `${API_BASE_PATH}/maintenance`, handler: require('./routes/maintenance') },
+  { path: `${API_BASE_PATH}/payments`,    handler: require('./routes/payments')    },
+  { path: `${API_BASE_PATH}/leases`,      handler: require('./routes/leases')      },
+];
 
-addRoute('/api/auth',        './routes/auth');
-addRoute('/api/users',       './routes/users');
-addRoute('/api/properties',  './routes/properties');
-addRoute('/api/complaints',  './routes/complaints');
-addRoute('/api/maintenance', './routes/maintenance');
-addRoute('/api/payments',    './routes/payments');
-addRoute('/api/leases',      './routes/leases');
+routes.forEach(({ path, handler }) => app.use(path, handler));
 
-// ── Health Probe ─────────────────────────────────────────────
-api.get('/api/health', (_req, res) => {
-  res.json({ status: 'OK', time: new Date().toISOString() });
+// ── Health Check ───────────────────────────────────────────────
+app.get(HEALTH_CHECK_PATH, (req, res) => {
+  res.json({
+    status: 'OK',
+    time:   new Date().toISOString(),
+    uptime: `${Math.floor(process.uptime())}s`,
+  });
 });
 
-// ── 404 Fallback ─────────────────────────────────────────────
-api.use((_req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found.' });
+// ── 404 Handler ────────────────────────────────────────────────
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found.',
+  });
 });
 
-// ── Global Error Handler ─────────────────────────────────────
-api.use((appErr, _req, res, _next) => {
-  res.status(500).json({ success: false, message: 'Server error.' });
+// ── Global Error Handler ───────────────────────────────────────
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err.message || err);
+  res.status(500).json({
+    success: false,
+    message: 'Server error.',
+  });
 });
 
-// ── Boot Server ───────────────────────────────────────────────
-const PORT = process.env.PORT || 5000;
-api.listen(PORT, () => {
-  console.log(`🚀 TMS Backend running on http://localhost:${PORT}`);
-  console.log(`📍 API: http://localhost:${PORT}/api`);
-  console.log(`🔑 Admin: ${process.env.ADMIN_EMAIL}`);
-  console.log(`✅ Routes: auth, users, properties, complaints, maintenance, payments, leases`);
+// ── Start Server ───────────────────────────────────────────────
+const SERVER_PORT = process.env.PORT || DEFAULT_PORT;
+const BASE_URL    = `http://localhost:${SERVER_PORT}`;
+
+app.listen(SERVER_PORT, () => {
+  console.log(`\n🚀 TMS Backend running on ${BASE_URL}`);
+  console.log(`📍 API Base:  ${BASE_URL}${API_BASE_PATH}`);
+  console.log(`❤️  Health:   ${BASE_URL}${HEALTH_CHECK_PATH}`);
+  console.log(`🔑 Admin:     ${process.env.ADMIN_EMAIL}`);
+  console.log(`✅ Routes:    auth, users, properties, complaints, maintenance, payments, leases\n`);
 });
