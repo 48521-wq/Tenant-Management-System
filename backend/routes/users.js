@@ -3,46 +3,46 @@
 // ============================================================
 'use strict';
 
-const router    = require('express').Router();
-const UserModel = require('../models/User');
+const userRouter = require('express').Router();
+const TmsUser    = require('../models/User');
 const { protect, adminOnly } = require('../middleware/auth');
 
-// ─── GET / ───────────────────────────────────────────────────
-router.get('/', protect, adminOnly, async (req, res) => {
+// ─── GET / — list all users ───────────────────────────────────
+userRouter.get('/', protect, adminOnly, async (req, res) => {
   try {
-    const qry = {};
-    if (req.query.role) qry.role = req.query.role;
-    const rows = await UserModel.find(qry).sort({ createdAt: -1 });
-    return res.json({ success: true, count: rows.length, users: rows });
-  } catch (e) { return res.status(500).json({ success: false, message: 'Server error.' }); }
+    const filter = {};
+    if (req.query.role) filter.role = req.query.role;
+    const userList = await TmsUser.find(filter).sort({ createdAt: -1 });
+    return res.json({ success: true, count: userList.length, users: userList });
+  } catch (err) { return res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
-// ─── PUT /:id/block ──────────────────────────────────────────
-router.put('/:id/block', protect, adminOnly, async (req, res) => {
+// ─── PUT /:id/block — toggle block/active ────────────────────
+userRouter.put('/:id/block', protect, adminOnly, async (req, res) => {
   try {
-    const target = await UserModel.findById(req.params.id);
-    if (!target) return res.status(404).json({ success: false, message: 'User not found.' });
-    target.status = target.status === 'blocked' ? 'active' : 'blocked';
-    await target.save();
-    return res.json({ success: true, message: `User ${target.status}.`, user: target });
-  } catch (e) { return res.status(500).json({ success: false, message: 'Server error.' }); }
+    const picked = await TmsUser.findById(req.params.id);
+    if (!picked) return res.status(404).json({ success: false, message: 'User not found.' });
+    picked.status = picked.status === 'blocked' ? 'active' : 'blocked';
+    await picked.save();
+    return res.json({ success: true, message: `User ${picked.status}.`, user: picked });
+  } catch (err) { return res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
-// ─── PUT /:id/verify ─────────────────────────────────────────
-router.put('/:id/verify', protect, adminOnly, async (req, res) => {
+// ─── PUT /:id/verify — mark user verified ────────────────────
+userRouter.put('/:id/verify', protect, adminOnly, async (req, res) => {
   try {
-    const verified = await UserModel.findByIdAndUpdate(req.params.id, { verified: true }, { new: true });
-    if (!verified) return res.status(404).json({ success: false, message: 'User not found.' });
-    return res.json({ success: true, message: 'User verified.', user: verified });
-  } catch (e) { return res.status(500).json({ success: false, message: 'Server error.' }); }
+    const confirmed = await TmsUser.findByIdAndUpdate(req.params.id, { verified: true }, { new: true });
+    if (!confirmed) return res.status(404).json({ success: false, message: 'User not found.' });
+    return res.json({ success: true, message: 'User verified.', user: confirmed });
+  } catch (err) { return res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
-// ─── DELETE /:id ─────────────────────────────────────────────
-router.delete('/:id', protect, adminOnly, async (req, res) => {
+// ─── DELETE /:id — remove user ───────────────────────────────
+userRouter.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
-    await UserModel.findByIdAndDelete(req.params.id);
+    await TmsUser.findByIdAndDelete(req.params.id);
     return res.json({ success: true, message: 'User deleted.' });
-  } catch (e) { return res.status(500).json({ success: false, message: 'Server error.' }); }
+  } catch (err) { return res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
-module.exports = router;
+module.exports = userRouter;
