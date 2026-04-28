@@ -1,174 +1,119 @@
-/**
- * @file maintenance.js
- * @route /api/maintenance
- * @description Maintenance request management for tenants, landlords, and admin.
- *
- * Access scoped by role:
- *   Tenant   → submit new requests; view their own
- *   Landlord → view requests linked to their properties
- *   Admin    → view all; update status; delete
- *
- * Status lifecycle:  pending → in_progress → resolved | cancelled
- */
-
-const express           = require('express');
-const MaintenanceModel  = require('../models/Maintenance');
+const express     = require('express');
+const mongoose    = require('mongoose');
+const Maintenance = require('../models/Maintenance');
+const Property    = require('../models/Property');
 const { protect, adminOnly } = require('../middleware/auth');
+const router = express.Router();
 
-const maintRouter = express.Router();
-
-// ── HTTP status code constants ─────────────────────────────────
-const STATUS_CREATED      = 201;
-const STATUS_BAD_REQUEST  = 400;
-const STATUS_FORBIDDEN    = 403;
-const STATUS_NOT_FOUND    = 404;
-const STATUS_SERVER_ERROR = 500;
-
-// ─────────────────────────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────────────────────────
-
-/**
- * Builds a role-scoped MongoDB query for maintenance requests.
- *
- *   Admin    → all requests; optional ?status narrowing
- *   Tenant   → only requests they submitted (tenantId)
- *   Landlord → requests linked to their properties (landlordId)
- *
- * @param {Object} caller      - req.user from protect middleware
- * @param {Object} queryString - req.query from the request
- * @returns {Object} Mongoose filter object
- */
-function makeMaintQuery(caller, queryString) {
-  const dbQuery = {};
-
-  if (caller.isAdmin) {
-    if (queryString.status) dbQuery.status = queryString.status;
-  } else if (caller.role === 'tenant') {
-    dbQuery.tenantId = caller._id;
-  } else if (caller.role === 'landlord') {
-    dbQuery.landlordId = caller._id;
-  }
-
-  return dbQuery;
-}
-
-// ─────────────────────────────────────────────────────────────────
-// GET /api/maintenance
-// ─────────────────────────────────────────────────────────────────
-/**
- * Retrieves maintenance requests scoped to the user's role.
- * Sorted newest first.
- *
- * @middleware protect
- * @returns {200} { success, count, requests }
- * @returns {500} Server error
- */
-maintRouter.get('/', protect, async (req, res) => {
+// GET maintenance requests
+router.get('/', protect, async (req, res) => {
   try {
-    const dbQuery      = makeMaintQuery(req.user, req.query);
-    const requestSet   = await MaintenanceModel.find(dbQuery).sort({ createdAt: -1 });
-
-    res.json({ success: true, count: requestSet.length, requests: requestSet });
-
-  } catch (getErr) {
-    res.status(STATUS_SERVER_ERROR).json({ success: false, message: 'Server error.' });
-  }
+    let filter = {};
+    if (req.user?.isAdmin) {
+      if (req.query.status) filter.status = req.query.status;
+    } else if (req.user.role === 'tenant') {
+      filter.tenantId = req.user._id;
+    } else if (req.user.role === 'landlord') {
+      const props = await Property.find({ landlordId: req.user._id }).select('_id title');
+      const propIds = props.map(p => p._id);
+      const propTitles = props.map(p => p.title).filter(Boolean);
+      const escapedName = (req.user.name || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const nameRegex = new RegExp(`^${escapedName}$`, 'i');
+      const titleRegexes = propTitles.map(t => new RegExp(`^${t.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}$`, 'i'));
+      filter = {
+        $or: [
+          { landlordId: req.user._id },
+          { propertyId: { $in: propIds } },
+          { landlordName: nameRegex },
+          ...(titleRegexes.length ? [{ propertyTitle: { $in: titleRegexes } }] : []),
+        ]
+      };
+    }
+    const requests = await Maintenance.find(filter).sort({ createdAt: -1 });
+    res.json({ success: true, count: requests.length, requests });
+  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
-// ─────────────────────────────────────────────────────────────────
-// POST /api/maintenance
-// ─────────────────────────────────────────────────────────────────
-/**
- * Submits a new maintenance request (tenants only).
- * tenantId and tenantName come from the verified JWT.
- *
- * @middleware protect
- * @returns {201} { success, request }
- * @returns {400} Missing description
- * @returns {403} Admin cannot submit maintenance
- * @returns {500} Server error
- */
-maintRouter.post('/', protect, async (req, res) => {
+// POST create request (tenant)
+router.post('/', protect, async (req, res) => {
   try {
-    if (req.user?.isAdmin)
-      return res.status(STATUS_FORBIDDEN).json({ success: false, message: 'Admin cannot submit maintenance.' });
-
-    const { type, priority, description, propertyTitle } = req.body;
-
-    if (!description)
-      return res.status(STATUS_BAD_REQUEST).json({ success: false, message: 'Description is required.' });
-
-    const savedRequest = await MaintenanceModel.create({
-      tenantId:      req.user._id,
-      tenantName:    req.user.name,
+    if (req.user?.isAdmin) return res.status(403).json({ success: false, message: 'Admin cannot submit maintenance.' });
+    const { type, priority, description, propertyTitle, landlordId, landlordName, propertyId } = req.body;
+    if (!description) return res.status(400).json({ success: false, message: 'Description is required.' });
+    const requestData = {
+      tenantId:    req.user._id,
+      tenantName:  req.user.name,
       type,
       priority,
       description,
       propertyTitle: propertyTitle || '',
-    });
-
-    res.status(STATUS_CREATED).json({ success: true, request: savedRequest });
-
-  } catch (postErr) {
-    res.status(STATUS_SERVER_ERROR).json({ success: false, message: 'Server error.' });
+    };
+    if (landlordId && mongoose.Types.ObjectId.isValid(landlordId)) requestData.landlordId = landlordId;
+    if (landlordName) requestData.landlordName = landlordName;
+    if (propertyId && mongoose.Types.ObjectId.isValid(propertyId)) requestData.propertyId = propertyId;
+    const request = await Maintenance.create(requestData);
+    res.status(201).json({ success: true, request });
+  } catch (e) {
+    res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
-// ─────────────────────────────────────────────────────────────────
-// PUT /api/maintenance/:id/status
-// ─────────────────────────────────────────────────────────────────
-/**
- * Updates a maintenance request status and optionally adds an admin note.
- * Stamps resolvedAt when status becomes 'resolved'.
- *
- * @middleware protect, adminOnly
- * @returns {200} { success, request }
- * @returns {404} Not found
- * @returns {500} Server error
- */
-maintRouter.put('/:id/status', protect, adminOnly, async (req, res) => {
+// PUT update status (admin only)
+router.put('/:id/status', protect, adminOnly, async (req, res) => {
   try {
     const { status, adminNote } = req.body;
-
-    const patchData = { status };
-    if (adminNote)             patchData.adminNote  = adminNote;
-    if (status === 'resolved') patchData.resolvedAt = new Date();
-
-    const patchedRequest = await MaintenanceModel.findByIdAndUpdate(
-      req.params.id,
-      patchData,
-      { new: true }
-    );
-
-    if (!patchedRequest)
-      return res.status(STATUS_NOT_FOUND).json({ success: false, message: 'Not found.' });
-
-    res.json({ success: true, request: patchedRequest });
-
-  } catch (patchErr) {
-    res.status(STATUS_SERVER_ERROR).json({ success: false, message: 'Server error.' });
-  }
+    const update = { status };
+    if (adminNote) update.adminNote = adminNote;
+    if (status === 'resolved') update.resolvedAt = new Date();
+    const request = await Maintenance.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!request) return res.status(404).json({ success: false, message: 'Not found.' });
+    res.json({ success: true, request });
+  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
-// ─────────────────────────────────────────────────────────────────
-// DELETE /api/maintenance/:id
-// ─────────────────────────────────────────────────────────────────
-/**
- * Permanently removes a maintenance request (admin only).
- *
- * @middleware protect, adminOnly
- * @returns {200} { success, message }
- * @returns {500} Server error
- */
-maintRouter.delete('/:id', protect, adminOnly, async (req, res) => {
+// PUT approve/in-progress maintenance (landlord)
+router.put('/:id/approve', protect, async (req, res) => {
   try {
-    await MaintenanceModel.findByIdAndDelete(req.params.id);
-    res.json({ success: true, message: 'Deleted.' });
-
-  } catch (delErr) {
-    res.status(STATUS_SERVER_ERROR).json({ success: false, message: 'Server error.' });
-  }
+    if (req.user.role !== 'landlord') return res.status(403).json({ success: false, message: 'Not authorized.' });
+    const request = await Maintenance.findById(req.params.id);
+    if (!request) return res.status(404).json({ success: false, message: 'Request not found.' });
+    if (request.landlordId && request.landlordId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized.' });
+    }
+    if (!request.landlordId && request.landlordName !== req.user.name) {
+      return res.status(403).json({ success: false, message: 'Not authorized.' });
+    }
+    request.status = 'in_progress';
+    await request.save();
+    res.json({ success: true, request });
+  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
-module.exports = maintRouter;
+// PUT mark done/resolved maintenance (landlord)
+router.put('/:id/done', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'landlord') return res.status(403).json({ success: false, message: 'Not authorized.' });
+    const request = await Maintenance.findById(req.params.id);
+    if (!request) return res.status(404).json({ success: false, message: 'Request not found.' });
+    if (request.landlordId && request.landlordId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized.' });
+    }
+    if (!request.landlordId && request.landlordName !== req.user.name) {
+      return res.status(403).json({ success: false, message: 'Not authorized.' });
+    }
+    request.status = 'resolved';
+    request.resolvedAt = new Date();
+    await request.save();
+    res.json({ success: true, request });
+  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
+});
+
+// DELETE (admin)
+router.delete('/:id', protect, adminOnly, async (req, res) => {
+  try {
+    await Maintenance.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Deleted.' });
+  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
+});
+
+module.exports = router;
