@@ -7,11 +7,26 @@ const GOOGLE_CLIENT_ID = '1092570435598-nicfmpo6mpqo6a1h36eg614082k8994l.apps.go
 const API_BASE = 'http://localhost:5000/api';
 
 // ── Session helpers ───────────────────────────────────
-const getToken = ()    => localStorage.getItem('tms_token');
-const setToken = (t)   => localStorage.setItem('tms_token', t);
-const setUser  = (u)   => localStorage.setItem('tms_user', JSON.stringify(u));
-const getUser  = ()    => { try { return JSON.parse(localStorage.getItem('tms_user')); } catch { return null; } };
-const clearAuth= ()    => { localStorage.removeItem('tms_token'); localStorage.removeItem('tms_user'); };
+const storage = {
+  get: (key) => localStorage.getItem(key),
+  set: (key, value) => localStorage.setItem(key, value),
+  remove: (key) => localStorage.removeItem(key)
+};
+
+const getToken = () => storage.get('tms_token');
+const setToken = (token) => storage.set('tms_token', token);
+const setUser = (user) => storage.set('tms_user', JSON.stringify(user));
+const getUser = () => {
+  try {
+    return JSON.parse(storage.get('tms_user'));
+  } catch {
+    return null;
+  }
+};
+const clearAuth = () => {
+  storage.remove('tms_token');
+  storage.remove('tms_user');
+};
 
 // ── API helper ────────────────────────────────────────
 async function api(endpoint, method = 'GET', body = null) {
@@ -40,8 +55,10 @@ function clearErr() {
   if (b) { b.textContent = ''; b.style.display = 'none'; }
 }
 function setBtnLoad(id, loading, txt) {
-  const b = document.getElementById(id);
-  if (b) { b.disabled = loading; b.textContent = loading ? 'Please wait…' : txt; }
+  const button = document.getElementById(id);
+  if (!button) return;
+  button.disabled = loading;
+  button.textContent = loading ? 'Please wait…' : txt;
 }
 
 // ── Tabs ──────────────────────────────────────────────
