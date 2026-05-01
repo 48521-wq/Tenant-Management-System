@@ -22,10 +22,10 @@ const propertySchema = new mongoose.Schema({
   tenantId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   tenantName:  { type: String, default: '' },
 
-  // 3D Model Config — Mixed type so any config can be saved freely
+  // 360 / 3D viewer config — Mixed type so any config can be saved freely
   model3d: { type: mongoose.Schema.Types.Mixed, default: {
-    houseType: 'standard', wallColor: '#8B7355', roofColor: '#5C3A1E',
-    floorColor: '#D2B48C', floors: 1, hasGarden: false, hasPool: false, hasGarage: false
+    viewerMode: 'panorama360',
+    panoramaUrl: 'https://kuula.co/share/54YJg/collection/7FbtP?fs=1&vr=0&sd=1&initload=1'
   }},
 
   // Furniture Layouts — separate for landlord and tenant
