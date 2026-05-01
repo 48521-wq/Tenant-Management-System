@@ -762,14 +762,25 @@ function updateStats() {
   set('st-total',total);set('st-avail',avail);set('st-rented',rented);
   set('st-rev','Rs. '+rev.toLocaleString());
 }
-function modelGlbPath(name) {
-  const base = window.location.pathname.includes('/pages/') ? '../models/' : './models/';
-  return base + name;
+const DEFAULT_PANORAMA_URL = 'https://kuula.co/share/54YJg/collection/7FbtP?fs=1&vr=0&sd=1&initload=1';
+
+function parseViewerConfig(model3dOrJson) {
+  let cfg = model3dOrJson;
+  if (typeof model3dOrJson === 'string') {
+    try { cfg = JSON.parse(model3dOrJson); } catch {
+      const url = model3dOrJson.trim();
+      cfg = /^(https?:\/\/)/i.test(url) ? { panoramaUrl: url } : {};
+    }
+  }
+  if (!cfg || typeof cfg !== 'object') cfg = {};
+  return {
+    viewerMode: cfg.viewerMode || 'panorama360',
+    panoramaUrl: cfg.panoramaUrl || cfg.embedUrl || cfg.url || DEFAULT_PANORAMA_URL
+  };
 }
-function getPropertyGlbPath(p) {
-  if (p && p.model3d && p.model3d.customGlb) return modelGlbPath(p.model3d.customGlb);
-  if (p && typeof p.title === 'string' && /agral/i.test(p.title)) return modelGlbPath('agral-new.glb');
-  return modelGlbPath('interior-room.glb');
+
+function getProperty360Url(p) {
+  return parseViewerConfig(p && p.model3d).panoramaUrl;
 }
 
 function renderMyProperties() {
@@ -791,26 +802,19 @@ function renderMyProperties() {
   const statusColors={available:'rgba(78,205,196,0.9)',rented:'rgba(255,179,71,0.9)',suspended:'rgba(255,107,107,0.9)'};
   const html = myProps.map(p => {
     const id = p._id;
-    // Custom GLB support: agar model3d.customGlb set hai to woh file use karo
-    const glbFile = getPropertyGlbPath(p);
+    const panoramaUrl = getProperty360Url(p);
     return `
     <div class="pcard">
       <div class="pcard-thumb" style="padding:0;overflow:hidden;cursor:pointer" onclick="quickView3D('${id}')">
-        <model-viewer
-          src="${glbFile}"
-          alt="Property Interior"
-          auto-rotate
-          auto-rotate-delay="0"
-          rotation-per-second="12deg"
-          shadow-intensity="0.8"
-          environment-image="neutral"
-          exposure="1.0"
-          camera-orbit="0deg 70deg 7m"
-          style="width:100%;height:100%;background:#111;"
+        <iframe
+          src="${panoramaUrl}"
+          title="Property 360 panorama"
           loading="lazy"
-        ></model-viewer>
+          referrerpolicy="strict-origin-when-cross-origin"
+          style="width:100%;height:100%;background:#111;border:0;pointer-events:none"
+        ></iframe>
         <span style="position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:${statusColors[p.status]||statusColors.available};color:#fff;pointer-events:none">${p.status||'available'}</span>
-        <span style="position:absolute;bottom:10px;right:10px;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--gold);border:1px solid rgba(201,169,110,0.3);pointer-events:none">⬡ 3D</span>
+        <span style="position:absolute;bottom:10px;right:10px;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--gold);border:1px solid rgba(201,169,110,0.3);pointer-events:none">360 View</span>
       </div>
       <div class="pcard-body">
         <div class="pcard-title">${p.title||'Untitled'}</div>
@@ -820,7 +824,7 @@ function renderMyProperties() {
         </div>
         <div class="pcard-price">Rs. ${Number(p.rent||0).toLocaleString()} <span>/mo</span></div>
         <div class="pcard-actions" style="flex-wrap:wrap;gap:6px">
-          <button class="btn btn-gold btn-sm" style="flex:1" onclick="edit3DByPropId('${id}')">🏗️ Edit 3D</button>
+          <button class="btn btn-gold btn-sm" style="flex:1" onclick="edit3DByPropId('${id}')">Edit 360</button>
           <button class="btn btn-ghost btn-sm" style="flex:1" onclick="furnViewByPropId('${id}')">${Object.keys((window._propMap&&window._propMap[id]&&window._propMap[id].landlordFurnitureLayout)||{}).length>0?'✅ My Layout':'🛋️ Interior'}</button>
           <button class="btn btn-danger btn-sm" onclick="deleteProp('${id}')">🗑</button>
         </div>
@@ -833,8 +837,8 @@ function renderMyProperties() {
 }
 // Current 3D model config being built
 let current3DConfig = {
-  houseType: 'standard', wallColor: '#C9A96E', roofColor: '#7A4F2A',
-  floorColor: '#D2B48C', floors: 1, hasGarden: false, hasPool: false, hasGarage: false
+  viewerMode: 'panorama360',
+  panoramaUrl: DEFAULT_PANORAMA_URL
 };
 let editingPropId = null; // which property's 3D we're editing
 
@@ -852,7 +856,7 @@ async function submitAddProp() {
     if (data.success) {
       showMsg('ap-msg','✅ Property listed successfully!','ok');
       ['ap-title','ap-addr','ap-desc'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
-      current3DConfig = {houseType:'standard',wallColor:'#C9A96E',roofColor:'#7A4F2A',floorColor:'#D2B48C',floors:1,hasGarden:false,hasPool:false,hasGarage:false};
+      current3DConfig = {viewerMode:'panorama360', panoramaUrl: DEFAULT_PANORAMA_URL};
       await loadMyProperties();
     } else showMsg('ap-msg','⚠️ '+(data.message||'Error'),'err');
   } catch { showMsg('ap-msg','⚠️ Cannot connect to server.','err'); }
@@ -864,22 +868,10 @@ async function submitAddProp() {
 // ══════════════════════════════════════
 function open3DBuilder(propId, propTitle, model3dOrJson) {
   editingPropId = propId;
-  if (model3dOrJson && typeof model3dOrJson === 'object') {
-    current3DConfig = { ...model3dOrJson };
-  } else {
-    try { current3DConfig = model3dOrJson ? JSON.parse(model3dOrJson) : { ...current3DConfig }; } catch { }
-  }
-  document.getElementById('b3d-title').textContent = propTitle || 'Configure 3D Model';
-  // Fill controls from config
-  const setVal = (id, v) => { const e=document.getElementById(id); if(e) { if(e.type==='checkbox') e.checked=!!v; else e.value=v||''; }};
-  setVal('b3d-type',   current3DConfig.houseType||'standard');
-  setVal('b3d-wall',   current3DConfig.wallColor||'#C9A96E');
-  setVal('b3d-roof',   current3DConfig.roofColor||'#7A4F2A');
-  setVal('b3d-floor',  current3DConfig.floorColor||'#D2B48C');
-  setVal('b3d-floors', current3DConfig.floors||1);
-  setVal('b3d-garden', current3DConfig.hasGarden);
-  setVal('b3d-pool',   current3DConfig.hasPool);
-  setVal('b3d-garage', current3DConfig.hasGarage);
+  current3DConfig = parseViewerConfig(model3dOrJson);
+  document.getElementById('b3d-title').textContent = propTitle || 'Configure 360 View';
+  const urlInput = document.getElementById('b3d-panorama-url');
+  if (urlInput) urlInput.value = current3DConfig.panoramaUrl || DEFAULT_PANORAMA_URL;
   document.getElementById('ov3d-builder').classList.add('open');
   document.body.style.overflow = 'hidden';
   setTimeout(previewBuilderModel, 120);
@@ -889,35 +881,29 @@ function close3DBuilder() {
   document.body.style.overflow = '';
 }
 function previewBuilderModel() {
-  const g = id => document.getElementById(id);
+  const url = document.getElementById('b3d-panorama-url')?.value?.trim() || DEFAULT_PANORAMA_URL;
   current3DConfig = {
-    houseType:  g('b3d-type')?.value   || 'standard',
-    wallColor:  g('b3d-wall')?.value   || '#C9A96E',
-    roofColor:  g('b3d-roof')?.value   || '#7A4F2A',
-    floorColor: g('b3d-floor')?.value  || '#D2B48C',
-    floors:     parseInt(g('b3d-floors')?.value)||1,
-    hasGarden:  g('b3d-garden')?.checked || false,
-    hasPool:    g('b3d-pool')?.checked   || false,
-    hasGarage:  g('b3d-garage')?.checked || false,
+    viewerMode: 'panorama360',
+    panoramaUrl: url
   };
-  initHouse3D('c3d-builder', current3DConfig);
+  const frame = document.getElementById('c3d-builder-frame');
+  if (frame) frame.src = current3DConfig.panoramaUrl;
 }
 async function save3DModel() {
   previewBuilderModel();
   const btn = document.getElementById('b3d-save-btn');
-  if(btn){btn.disabled=true;btn.textContent='Saving…';}
+  if(btn){btn.disabled=true;btn.textContent='Saving...';}
   try {
     if (editingPropId) {
       await lFetch('/properties/'+editingPropId+'/model3d','PUT', current3DConfig);
-      showMsg('b3d-msg','✅ 3D Model saved!','ok');
+      showMsg('b3d-msg','360 view saved successfully.','ok');
     } else {
-      // If no prop ID yet (inline in add-property form), just keep in current3DConfig
-      showMsg('b3d-msg','✅ 3D config applied! Will save with property.','ok');
+      showMsg('b3d-msg','360 view applied. It will save with the property.','ok');
     }
     setTimeout(close3DBuilder, 1800);
     await loadMyProperties();
-  } catch { showMsg('b3d-msg','⚠️ Error saving.','err'); }
-  finally { if(btn){btn.disabled=false;btn.textContent='💾 Save 3D Model';} }
+  } catch { showMsg('b3d-msg','Error saving 360 view.','err'); }
+  finally { if(btn){btn.disabled=false;btn.textContent='Save 360 View';} }
 }
 
 // ══════════════════════════════════════
@@ -1511,25 +1497,17 @@ let curr3DId = null;
 function open3D(propId, name, model3dOrJson, type) {
   curr3DId = propId;
   document.getElementById('ov3d').classList.add('open');
-  document.getElementById('m3dn').textContent = (name || 'Property') + ' — Interior 3D';
+  document.getElementById('m3dn').textContent = (name || 'Property') + ' — Full Opening 360 View';
   document.body.style.overflow = 'hidden';
-  // Custom GLB support: agar model3d mein customGlb field hai to woh use karo
-  let model3dObj = model3dOrJson;
-  if (typeof model3dOrJson === 'string') {
-    try { model3dObj = JSON.parse(model3dOrJson); } catch { model3dObj = {}; }
-  }
-  const glbFile = getPropertyGlbPath({ title: name, model3d: model3dObj });
-  // Show loading overlay, hide when model-viewer loads
+  const viewerCfg = parseViewerConfig(model3dOrJson);
   const loadingEl = document.getElementById('c3main-loading');
   if (loadingEl) loadingEl.style.display = 'flex';
   const viewer = document.getElementById('c3main-viewer');
   if (viewer) {
-    viewer.setAttribute('src', glbFile);
-    viewer.addEventListener('load', function onLoad() {
+    viewer.src = viewerCfg.panoramaUrl;
+    viewer.onload = function() {
       if (loadingEl) loadingEl.style.display = 'none';
-      viewer.removeEventListener('load', onLoad);
-    });
-    // Fallback: hide loading after 5s
+    };
     setTimeout(() => { if (loadingEl) loadingEl.style.display = 'none'; }, 5000);
   }
 }
@@ -1709,7 +1687,7 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
           <span style="font-size:13px;font-weight:700;color:var(--text)">🏗️ 3D Model Configuration</span>
           <button class="btn btn-ghost btn-sm" onclick="open3DBuilder(null,'New Property',null)">Configure 3D →</button>
         </div>
-        <div style="font-size:12px;color:var(--muted)">Configure house type, colors, floors, garden, pool, garage for your property's 3D model.</div>
+        <div style="font-size:12px;color:var(--muted)">Save the same full opening 360 panorama here for this property.</div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;margin-top:16px">
         <button class="submit-btn" id="ap-btn" onclick="submitAddProp()">🏠 Add Property</button>
@@ -1904,32 +1882,27 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
 <div class="ov" id="ov3d">
   <div class="ov-box">
     <div class="ov-head">
-      <span class="ov-title" id="m3dn">3D View</span>
+      <span class="ov-title" id="m3dn">360 View</span>
       <div style="display:flex;gap:6px;align-items:center">
         <button class="close-btn" onclick="c3d()">✕</button>
       </div>
     </div>
     <div style="width:100%;height:480px;background:#0a0d16;position:relative">
-      <model-viewer
+      <iframe
         id="c3main-viewer"
-        src="../models/interior-room.glb"
-        alt="Property 3D Interior"
-        camera-controls
-        auto-rotate
-        auto-rotate-delay="1000"
-        rotation-per-second="15deg"
-        shadow-intensity="1"
-        environment-image="neutral"
-        exposure="0.8"
-        style="width:100%;height:100%;background:#0a0d16"
-        loading="eager"
-      ></model-viewer>
+        src="https://kuula.co/share/54YJg/collection/7FbtP?fs=1&vr=0&sd=1&initload=1"
+        title="Property 360 Interior"
+        allowfullscreen
+        allow="xr-spatial-tracking; gyroscope; accelerometer"
+        referrerpolicy="strict-origin-when-cross-origin"
+        style="width:100%;height:100%;background:#0a0d16;border:0"
+      ></iframe>
       <div id="c3main-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0a0d16;flex-direction:column;gap:10px;pointer-events:none">
         <div style="width:36px;height:36px;border:3px solid rgba(201,169,110,0.3);border-top-color:#C9A96E;border-radius:50%;animation:spin 0.8s linear infinite"></div>
-        <span style="color:#C9A96E;font-size:12px;font-weight:600">Loading 3D Model…</span>
+        <span style="color:#C9A96E;font-size:12px;font-weight:600">Loading 360 View...</span>
       </div>
     </div>
-    <div style="padding:10px 16px;font-size:11px;color:var(--muted);text-align:center;border-top:1px solid var(--border)">🖱️ Drag to rotate · Scroll to zoom · Two fingers to pan</div>
+    <div style="padding:10px 16px;font-size:11px;color:var(--muted);text-align:center;border-top:1px solid var(--border)">Drag inside the viewer to move around just like the Kuula link.</div>
   </div>
 </div>
 
@@ -1937,74 +1910,33 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
 <div class="ov" id="ov3d-builder">
   <div class="ov-box" style="width:min(860px,97vw);max-height:94vh;overflow-y:auto">
     <div class="ov-head" style="position:sticky;top:0;background:var(--card);z-index:2">
-      <span class="ov-title" id="b3d-title">Configure 3D Model</span>
+      <span class="ov-title" id="b3d-title">Configure 360 View</span>
       <button class="close-btn" onclick="close3DBuilder()">✕</button>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:0;min-height:460px">
-      <!-- Controls panel -->
       <div style="padding:20px;border-right:1px solid var(--border);overflow-y:auto">
-        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">House Configuration</div>
-
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">Panorama Link</div>
         <div class="fg" style="margin-bottom:13px">
-          <label>House Type</label>
-          <select id="b3d-type" onchange="previewBuilderModel()" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;-webkit-appearance:none;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 10px center;background-color:var(--input-bg);padding-right:28px">
-            <option value="standard">Standard House</option>
-            <option value="villa">Villa</option>
-            <option value="apartment">Apartment Block</option>
-            <option value="bungalow">Bungalow</option>
-          </select>
+          <label>360 URL</label>
+          <input type="url" id="b3d-panorama-url" onchange="previewBuilderModel()" placeholder="https://kuula.co/share/..." style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%">
         </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px">
-          <div class="fg">
-            <label>Wall Color</label>
-            <input type="color" id="b3d-wall" value="#C9A96E" oninput="previewBuilderModel()" style="width:100%;height:40px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;background:var(--input-bg)">
-          </div>
-          <div class="fg">
-            <label>Roof Color</label>
-            <input type="color" id="b3d-roof" value="#7A4F2A" oninput="previewBuilderModel()" style="width:100%;height:40px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;background:var(--input-bg)">
-          </div>
-          <div class="fg">
-            <label>Floor Color</label>
-            <input type="color" id="b3d-floor" value="#D2B48C" oninput="previewBuilderModel()" style="width:100%;height:40px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;background:var(--input-bg)">
-          </div>
-          <div class="fg">
-            <label>Floors (1–4)</label>
-            <input type="number" id="b3d-floors" min="1" max="4" value="1" onchange="previewBuilderModel()" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%">
-          </div>
-        </div>
-
-        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Extras</div>
-        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px">
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;background:var(--input-bg);border-radius:9px;border:1px solid var(--border)">
-            <input type="checkbox" id="b3d-garden" onchange="previewBuilderModel()" style="width:16px;height:16px;accent-color:var(--gold)">
-            <span style="font-size:13px;color:var(--text)">🌿 Garden</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;background:var(--input-bg);border-radius:9px;border:1px solid var(--border)">
-            <input type="checkbox" id="b3d-pool" onchange="previewBuilderModel()" style="width:16px;height:16px;accent-color:var(--gold)">
-            <span style="font-size:13px;color:var(--text)">🏊 Swimming Pool</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;background:var(--input-bg);border-radius:9px;border:1px solid var(--border)">
-            <input type="checkbox" id="b3d-garage" onchange="previewBuilderModel()" style="width:16px;height:16px;accent-color:var(--gold)">
-            <span style="font-size:13px;color:var(--text)">🚗 Garage</span>
-          </label>
-        </div>
-
+        <div style="font-size:12px;line-height:1.55;color:var(--muted);margin-bottom:18px">Is property ka purana 3D model remove karke yahan same exact full opening 360 panorama save hoga.</div>
         <div style="display:flex;align-items:center;gap:10px">
-          <button class="submit-btn" id="b3d-save-btn" onclick="save3DModel()">💾 Save 3D Model</button>
+          <button class="submit-btn" id="b3d-save-btn" onclick="save3DModel()">Save 360 View</button>
         </div>
         <div id="b3d-msg" style="display:none;padding:8px 12px;border-radius:9px;font-size:12px;font-weight:600;margin-top:10px"></div>
       </div>
-      <!-- 3D Preview -->
       <div style="position:relative;background:#080B12">
-        <canvas id="c3d-builder" style="width:100%;height:100%;min-height:460px;display:block"></canvas>
-        <div style="position:absolute;bottom:10px;right:12px;display:flex;gap:6px">
-          <button onclick="h3d_front('c3d-builder')" style="padding:4px 10px;border-radius:7px;border:1px solid rgba(201,169,110,0.3);background:rgba(0,0,0,0.6);color:var(--gold);font-size:11px;cursor:pointer">Front</button>
-          <button onclick="h3d_side('c3d-builder')" style="padding:4px 10px;border-radius:7px;border:1px solid rgba(201,169,110,0.3);background:rgba(0,0,0,0.6);color:var(--gold);font-size:11px;cursor:pointer">Side</button>
-          <button onclick="h3d_top('c3d-builder')" style="padding:4px 10px;border-radius:7px;border:1px solid rgba(201,169,110,0.3);background:rgba(0,0,0,0.6);color:var(--gold);font-size:11px;cursor:pointer">Top</button>
-          <button onclick="h3d_night('c3d-builder')" style="padding:4px 10px;border-radius:7px;border:1px solid rgba(201,169,110,0.3);background:rgba(0,0,0,0.6);color:var(--gold);font-size:11px;cursor:pointer">🌙</button>
-        </div>
-        <div style="position:absolute;bottom:10px;left:12px;font-size:10px;color:rgba(255,255,255,0.4)">Drag to rotate · Scroll to zoom</div>
+        <iframe
+          id="c3d-builder-frame"
+          src="https://kuula.co/share/54YJg/collection/7FbtP?fs=1&vr=0&sd=1&initload=1"
+          title="360 preview"
+          allowfullscreen
+          allow="xr-spatial-tracking; gyroscope; accelerometer"
+          referrerpolicy="strict-origin-when-cross-origin"
+          style="width:100%;height:100%;min-height:460px;display:block;border:0;background:#080B12"
+        ></iframe>
+        <div style="position:absolute;bottom:10px;left:12px;font-size:10px;color:rgba(255,255,255,0.4)">Preview opens with the same Kuula-style 360 movement.</div>
       </div>
     </div>
   </div>
