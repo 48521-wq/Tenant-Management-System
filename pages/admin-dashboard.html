@@ -110,7 +110,495 @@ tr:hover td{background:rgba(255,107,107,0.02)}
 .sel-status{background:var(--input-bg);border:1.5px solid var(--border);border-radius:8px;padding:5px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer}
 .sel-status:focus{border-color:var(--red)}
 .sel-status option{background:var(--bg);color:var(--text)}
+/* Dark theme native select fix */
+select, select option {
+  background-color: #12151C !important;
+  color: #EDF0F7 !important;
+}
+[data-theme="light"] select, [data-theme="light"] select option {
+  background-color: #ffffff !important;
+  color: #1A1D28 !important;
+}
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2352607A' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px !important;
+}
+.notif-item{display:flex;gap:12px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;align-items:flex-start}
+.notif-item.unread{border-color:rgba(255,107,107,0.25);background:rgba(255,107,107,0.04)}
+.notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;background:var(--red)}
+.notif-text{font-size:13px;color:var(--text)}
+.notif-time{font-size:11px;color:var(--muted);margin-top:3px}
 </style>
+
+<!-- ═══════════════════════════════════════════════════════
+     PROFESSIONAL DESIGN UPGRADE — TMS v2 Premium
+     No structural changes — pure visual enhancements
+═══════════════════════════════════════════════════════ -->
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+/* ─── REFINED CSS VARIABLES ─── */
+:root {
+  --gold:        #C9A96E;
+  --gold-l:      #E8C97A;
+  --gold-d:      #A07840;
+  --gold-glow:   rgba(201,169,110,0.18);
+  --card-hover:  rgba(201,169,110,0.06);
+  --radius-lg:   18px;
+  --radius-md:   12px;
+  --radius-sm:   8px;
+  --shadow-gold: 0 4px 24px rgba(201,169,110,0.15);
+  --shadow-card: 0 2px 16px rgba(0,0,0,0.28);
+  --transition:  all 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ─── TYPOGRAPHY UPGRADE ─── */
+.pg-title, .ov-title, .fp-title, .success-title {
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif !important;
+  font-size: 26px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.3px;
+}
+.tn-name {
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+}
+.stat-val {
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif !important;
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+.pcard-price {
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif !important;
+  font-size: 22px !important;
+}
+
+/* ─── TOPNAV PREMIUM ─── */
+.topnav {
+  height: 64px !important;
+  padding: 0 28px !important;
+  background: rgba(7,9,12,0.96) !important;
+  border-bottom: 1px solid rgba(201,169,110,0.12) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+}
+[data-theme="light"] .topnav {
+  background: rgba(253,250,244,0.97) !important;
+}
+.tn-icon {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 16px rgba(201,169,110,0.35), inset 0 1px 0 rgba(255,255,255,0.15) !important;
+}
+
+/* ─── SIDEBAR PREMIUM ─── */
+.sidebar {
+  width: 232px !important;
+  background: rgba(7,9,12,0.98) !important;
+  border-right: 1px solid rgba(201,169,110,0.1) !important;
+}
+[data-theme="light"] .sidebar {
+  background: rgba(253,250,244,0.99) !important;
+}
+.nav-item {
+  padding: 9px 14px !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.1px;
+  transition: var(--transition) !important;
+  margin-bottom: 1px !important;
+}
+.nav-item:hover {
+  color: var(--text) !important;
+  background: rgba(201,169,110,0.08) !important;
+  padding-left: 17px !important;
+}
+.nav-item.active {
+  color: var(--gold) !important;
+  background: linear-gradient(90deg, rgba(201,169,110,0.14) 0%, rgba(201,169,110,0.04) 100%) !important;
+  font-weight: 600 !important;
+  border-left: 2px solid var(--gold);
+  padding-left: 12px !important;
+}
+.nav-item svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+.sb-lbl {
+  font-size: 9.5px !important;
+  letter-spacing: 1.4px !important;
+  font-weight: 700 !important;
+  color: rgba(86,96,112,0.7) !important;
+  padding: 0 14px 6px !important;
+}
+
+/* ─── STAT CARDS PREMIUM ─── */
+.stat-card {
+  border-radius: var(--radius-md) !important;
+  padding: 18px 20px !important;
+  transition: var(--transition) !important;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(201,169,110,0.1) !important;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
+  transform: translate(20px, -20px);
+  pointer-events: none;
+}
+.stat-card:hover {
+  border-color: rgba(201,169,110,0.25) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: var(--shadow-gold) !important;
+}
+.stat-icon {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 12px !important;
+  font-size: 19px !important;
+  flex-shrink: 0;
+}
+.stat-lbl {
+  font-size: 9.5px !important;
+  letter-spacing: 0.8px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  margin-top: 3px !important;
+}
+
+/* ─── CARDS PREMIUM ─── */
+.card, .form-card {
+  border-radius: var(--radius-lg) !important;
+  border: 1px solid rgba(201,169,110,0.1) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+.card {
+  padding: 22px !important;
+}
+
+/* ─── PROPERTY CARDS ─── */
+.pcard {
+  border-radius: var(--radius-lg) !important;
+  border: 1px solid rgba(201,169,110,0.1) !important;
+  transition: var(--transition) !important;
+  overflow: hidden;
+}
+.pcard:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.35), 0 0 0 1px rgba(201,169,110,0.25) !important;
+  border-color: rgba(201,169,110,0.3) !important;
+}
+.pcard-thumb {
+  height: 175px !important;
+  background: linear-gradient(135deg, rgba(201,169,110,0.08) 0%, rgba(201,169,110,0.02) 100%) !important;
+}
+.pcard-body {
+  padding: 15px 17px !important;
+}
+.pcard-title {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.1px;
+}
+.pcard-loc {
+  font-size: 11.5px !important;
+  letter-spacing: 0.1px;
+}
+
+/* ─── BUTTONS PREMIUM ─── */
+.btn {
+  border-radius: var(--radius-sm) !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.1px;
+  transition: var(--transition) !important;
+}
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-l) 100%) !important;
+  box-shadow: 0 3px 14px rgba(201,169,110,0.28) !important;
+  color: #0A0C0F !important;
+}
+.btn-gold:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(201,169,110,0.42) !important;
+}
+.btn-ghost {
+  border: 1px solid rgba(201,169,110,0.16) !important;
+  background: rgba(255,255,255,0.03) !important;
+}
+.btn-ghost:hover {
+  border-color: rgba(201,169,110,0.32) !important;
+  background: rgba(201,169,110,0.07) !important;
+  color: var(--text) !important;
+}
+.submit-btn {
+  border-radius: var(--radius-sm) !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.1px;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-l) 100%) !important;
+  box-shadow: 0 4px 16px rgba(201,169,110,0.32) !important;
+  transition: var(--transition) !important;
+}
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 22px rgba(201,169,110,0.44) !important;
+}
+
+/* ─── TABLES PREMIUM ─── */
+th {
+  font-size: 10px !important;
+  letter-spacing: 1px !important;
+  font-weight: 700 !important;
+  padding: 10px 16px !important;
+  color: rgba(86,96,112,0.8) !important;
+  background: rgba(201,169,110,0.03);
+}
+td {
+  padding: 13px 16px !important;
+  font-size: 13px !important;
+  border-bottom: 1px solid rgba(201,169,110,0.07) !important;
+}
+tr:hover td {
+  background: rgba(201,169,110,0.03) !important;
+}
+
+/* ─── FORM INPUTS PREMIUM ─── */
+.fg label {
+  font-size: 10px !important;
+  letter-spacing: 0.8px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+}
+.fg input, .fg select, .fg textarea {
+  border-radius: var(--radius-sm) !important;
+  padding: 10px 14px !important;
+  border: 1.5px solid rgba(201,169,110,0.14) !important;
+  font-size: 13px !important;
+  transition: var(--transition) !important;
+}
+.fg input:focus, .fg select:focus, .fg textarea:focus {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 0 3px rgba(201,169,110,0.1) !important;
+}
+
+/* ─── PAGE HEAD ─── */
+.pg-head {
+  margin-bottom: 24px !important;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(201,169,110,0.08);
+}
+.pg-sub {
+  font-size: 12.5px !important;
+  letter-spacing: 0.1px;
+  margin-top: 4px !important;
+}
+
+/* ─── LIST ITEMS ─── */
+.list-item {
+  border-radius: var(--radius-md) !important;
+  padding: 14px 18px !important;
+  border: 1px solid rgba(201,169,110,0.09) !important;
+  transition: var(--transition) !important;
+}
+.list-item:hover {
+  border-color: rgba(201,169,110,0.24) !important;
+  background: rgba(201,169,110,0.02);
+}
+.li-title {
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+}
+.li-sub {
+  font-size: 11.5px !important;
+}
+
+/* ─── NOTIFICATION ITEMS ─── */
+.notif-item {
+  border-radius: var(--radius-md) !important;
+  padding: 14px 18px !important;
+  border: 1px solid rgba(201,169,110,0.09) !important;
+  transition: var(--transition) !important;
+  margin-bottom: 8px !important;
+}
+.notif-item.unread {
+  border-color: rgba(201,169,110,0.22) !important;
+  background: rgba(201,169,110,0.03) !important;
+}
+
+/* ─── BADGES PREMIUM ─── */
+.badge {
+  padding: 3px 10px !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  border-radius: 20px !important;
+  letter-spacing: 0.2px;
+}
+
+/* ─── MODALS PREMIUM ─── */
+.ov-box {
+  border-radius: 22px !important;
+  border: 1px solid rgba(201,169,110,0.14) !important;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6) !important;
+}
+.ov-head {
+  padding: 18px 24px !important;
+  border-bottom: 1px solid rgba(201,169,110,0.1) !important;
+}
+.ov-title {
+  font-size: 17px !important;
+}
+
+/* ─── SCROLLBAR PREMIUM ─── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(201,169,110,0.25);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(201,169,110,0.45);
+}
+
+/* ─── ICON BUTTON ─── */
+.icon-btn {
+  border-radius: 10px !important;
+  width: 36px !important;
+  height: 36px !important;
+  transition: var(--transition) !important;
+}
+.icon-btn:hover {
+  background: rgba(201,169,110,0.1) !important;
+  border-color: rgba(201,169,110,0.3) !important;
+}
+
+/* ─── PROFILE SECTION ─── */
+.prof-header {
+  border-radius: var(--radius-lg) !important;
+  padding: 24px !important;
+  border: 1px solid rgba(201,169,110,0.1) !important;
+}
+.prof-av {
+  width: 68px !important;
+  height: 68px !important;
+  border-radius: 50% !important;
+  box-shadow: 0 4px 18px rgba(201,169,110,0.3) !important;
+}
+
+/* ─── USER SIDEBAR FOOTER ─── */
+.sb-user {
+  border-radius: var(--radius-md) !important;
+  border: 1px solid rgba(201,169,110,0.1) !important;
+  padding: 11px 14px !important;
+}
+.sb-av {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 10px rgba(201,169,110,0.25) !important;
+}
+.sb-uname {
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+}
+.sb-urole {
+  font-size: 10px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ─── LOADING SPINNER ─── */
+.spinner {
+  border-width: 2px !important;
+  border-top-color: var(--gold) !important;
+}
+
+/* ─── PAGE ANIMATION ─── */
+@keyframes pgIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page.active {
+  animation: pgIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) both !important;
+}
+
+/* ─── TOPNAV LOGOUT BUTTON ─── */
+.logout-btn {
+  border-radius: var(--radius-sm) !important;
+  font-size: 12px !important;
+  padding: 7px 16px !important;
+  gap: 6px !important;
+  transition: var(--transition) !important;
+}
+.logout-btn:hover {
+  background: rgba(255,107,107,0.18) !important;
+  transform: translateY(-1px);
+}
+
+/* ─── PILL / TAG ─── */
+.tn-pill {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.2px;
+  padding: 5px 14px !important;
+  border-radius: 20px !important;
+}
+
+/* ─── nb-pill (notification badge in nav) ─── */
+.nb-pill {
+  min-width: 18px !important;
+  height: 18px !important;
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+  border-radius: 9px !important;
+}
+
+/* ─── MAIN PAGE PADDING ─── */
+.page {
+  padding: 30px 36px 60px !important;
+}
+@media (max-width: 900px) {
+  .page { padding: 20px 18px 40px !important; }
+  .stats-row { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* ─── SUBTLE GRAIN TEXTURE ON BODY ─── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.4;
+}
+
+/* ─── LIGHT THEME REFINEMENTS ─── */
+[data-theme="light"] .card,
+[data-theme="light"] .form-card,
+[data-theme="light"] .stat-card,
+[data-theme="light"] .list-item,
+[data-theme="light"] .notif-item {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07) !important;
+}
+[data-theme="light"] .nav-item.active {
+  background: linear-gradient(90deg, rgba(201,169,110,0.12) 0%, rgba(201,169,110,0.03) 100%) !important;
+}
+[data-theme="light"] body::after { opacity: 0.15; }
+</style>
+
 </head>
 <body>
 <script>
@@ -125,7 +613,20 @@ async function aFetch(url, method='GET', body=null) {
   const opts = { method, headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+tok() } };
   if (body) opts.body = JSON.stringify(body);
   const r = await fetch(API + url, opts);
-  return r.json();
+  let data;
+  try { data = await r.json(); }
+  catch(_) { data = { success:false, message: r.statusText || 'Unexpected server response.' }; }
+  if (!r.ok) {
+    if (r.status === 401 || r.status === 403) {
+      localStorage.clear(); sessionStorage.clear(); window.location.replace('../index.html');
+      return;
+    }
+    throw new Error(data.message || data.error || r.statusText || 'Request failed.');
+  }
+  if (data && data.success === false) {
+    throw new Error(data.message || 'Request failed.');
+  }
+  return data;
 }
 function tmsLogout() { localStorage.clear(); sessionStorage.clear(); window.location.replace('../index.html'); }
 
@@ -181,20 +682,22 @@ async function loadDashboardStats() {
 
     const tenants   = users.filter(u=>u.role==='tenant');
     const landlords = users.filter(u=>u.role==='landlord');
-    const pending   = users.filter(u=>!u.verified);
-    const openComps = comps.filter(c=>c.status==='open');
+    const uniqueTenants = tenants.filter((u,i,self)=> self.findIndex(x=>x.email===u.email)===i);
+    const uniqueLandlords = landlords.filter((u,i,self)=> self.findIndex(x=>x.email===u.email)===i);
+    const verifiedTenants = uniqueTenants; // tenants are counted as active users by default
+    const verifiedLandlords = uniqueLandlords.filter(u=>u.verified);
     const pendMaint = maint.filter(m=>m.status==='pending');
 
     const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-    set('d-tenants',tenants.length); set('d-landlords',landlords.length);
-    set('d-props',props.length); set('d-users',users.length);
+    set('d-tenants',uniqueTenants.length); set('d-landlords',uniqueLandlords.length);
+    set('d-props',props.length); set('d-users',uniqueTenants.length);
     set('d-avail',props.filter(p=>p.status==='available').length);
     set('d-maint',maint.length); set('d-comps',comps.length);
     set('d-payments',payments.length);
 
     // Pending actions
-    set('pa-verif', pending.length);
-    set('pa-comps', openComps.length);
+    set('pa-verif', verifiedLandlords.length);
+    set('pa-comps', verifiedTenants.length);
     set('pa-maint', pendMaint.length);
 
     // Style counts
@@ -204,9 +707,10 @@ async function loadDashboardStats() {
     });
 
     // Bar chart
-    const max=Math.max(tenants.length,landlords.length,props.length,1);
+    const max=Math.max(uniqueTenants.length,uniqueLandlords.length,props.length,1);
     const bar=(id,v)=>{const el=document.getElementById(id);if(el){el.style.width=Math.min((v/max)*100,100).toFixed(1)+'%';const sp=el.querySelector('span');if(sp)sp.textContent=v;}};
-    bar('bar-tenants',tenants.length);bar('bar-landlords',landlords.length);bar('bar-props',props.length);
+    bar('bar-tenants',uniqueTenants.length);bar('bar-landlords',uniqueLandlords.length);bar('bar-props',props.length);
+    set('bar-ll-cnt',uniqueLandlords.length);
 
   } catch(e) { console.log('Stats error:',e); }
 }
@@ -220,6 +724,7 @@ async function loadTenants(filter) {
   try {
     const data=await aFetch('/users?role=tenant');
     let list=data.users||[];
+    list = list.filter((u,i,self)=> self.findIndex(x=>x.email===u.email)===i);
     if(filter) list=list.filter(u=>u.name?.toLowerCase().includes(filter.toLowerCase())||u.email?.toLowerCase().includes(filter.toLowerCase()));
     set_count('tenants-count',list.length);
     if(!list.length){tbody.innerHTML='<tr><td colspan="7" class="loading">No tenants registered yet. They will appear here after sign-up.</td></tr>';return;}
@@ -494,6 +999,17 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
     <button class="nav-item" onclick="sp('complaints',this)">
       <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Complaints
     </button>
+    <button class="nav-item" onclick="sp('3d-requests',this);adminLoad3DRequests()">
+      <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>3D Requests
+      <span class="nb-pill" id="nb-3dreq-admin" style="display:none">0</span>
+    </button>
+  </div>
+  <div class="sb-sec">
+    <span class="sb-lbl">System</span>
+    <button class="nav-item" onclick="sp('notifications',this)">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>Notifications
+      <span class="nb-pill" id="nb-notifs-admin" style="display:none">0</span>
+    </button>
   </div>
   <div class="sb-foot">
     <div class="sb-user">
@@ -566,11 +1082,11 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
       <div class="card">
         <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px">⚡ Pending Actions</h3>
         <div class="action-item">
-          <div><div class="action-label">Unverified Landlords</div><div class="action-sub">Awaiting manual approval</div></div>
+          <div><div class="action-label">Verified Landlords</div><div class="action-sub">Approved landlords</div></div>
           <span class="action-count count-zero" id="pa-verif">0</span>
         </div>
         <div class="action-item">
-          <div><div class="action-label">Open Complaints</div><div class="action-sub">Need resolution</div></div>
+          <div><div class="action-label">Verified Tenants</div><div class="action-sub">Approved tenants</div></div>
           <span class="action-count count-zero" id="pa-comps">0</span>
         </div>
         <div class="action-item">
@@ -690,6 +1206,61 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
     </div>
   </div>
 
+  <div class="page" id="page-notifications">
+    <div style="margin-bottom:24px">
+      <div style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px">🔔 Notifications</div>
+      <div style="font-size:13px;color:var(--muted)">System-wide notifications from landlords and admin</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px">
+      <div style="display:grid;gap:14px">
+        <div style="display:grid;grid-template-columns:1fr 180px;gap:14px;align-items:end">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Title</label>
+            <input id="notif-title" placeholder="Notification title" type="text" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Send To</label>
+            <select id="notif-to" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
+              <option value="all">Everyone</option>
+              <option value="tenant">Tenants</option>
+              <option value="landlord">Landlords</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Message</label>
+          <textarea id="notif-msg" placeholder="Write your notification message..." rows="3" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:vertical"></textarea>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;align-items:center">
+          <span id="notif-ok" style="font-size:12px;color:var(--green);font-weight:600;opacity:0;transition:opacity 0.3s">✅ Notification sent!</span>
+          <button onclick="adminSendNotification()" style="padding:9px 22px;border-radius:9px;border:none;background:var(--red);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Send Notification</button>
+        </div>
+      </div>
+    </div>
+    <div id="notifs-list"></div>
+  </div>
+
+
+
+  <!-- 3D MODEL REQUESTS PAGE -->
+  <div class="page" id="page-3d-requests">
+    <div class="pg-head">
+      <div><div class="pg-title">3D Model Requests</div><div class="pg-sub" id="admin-3dreq-sub">3D visualization requests — review, negotiate and deliver models</div></div>
+      <div style="display:flex;gap:8px">
+        <select id="admin-3dreq-filter" onchange="adminLoad3DRequests()" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:7px 12px;color:var(--text);font-size:12px;outline:none">
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="negotiating">Negotiating</option>
+          <option value="agreed">Agreed</option>
+          <option value="completed">Completed</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+    </div>
+    <div id="admin-3dreq-list" style="display:grid;gap:14px"><div class="loading">Loading…</div></div>
+  </div>
+
 </main>
 </div>
 
@@ -712,11 +1283,63 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
   </div>
 </div>
 
+<script src="../js/tms-data.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="../js/house3d.js"></script>
 <script>
 // Fix admin 3D modal - use propMap to avoid JSON-in-HTML issues
 document.getElementById('ov-admin3d').style.display = 'none';
+
+// Admin notifications
+window.adminSendNotification = function() {
+  const title = document.getElementById('notif-title')?.value.trim();
+  const msg   = document.getElementById('notif-msg')?.value.trim();
+  const to    = document.getElementById('notif-to')?.value || 'all';
+  if (!title || !msg) { alert('Title and message required.'); return; }
+  if (typeof TMS === 'undefined') { alert('Notification system not loaded.'); return; }
+  TMS.addNotif(title, msg, 'red', to, 'admin');
+  document.getElementById('notif-title').value = '';
+  document.getElementById('notif-msg').value   = '';
+  document.getElementById('notif-to').value    = 'all';
+  if (typeof tmsRenderNotifs === 'function') tmsRenderNotifs();
+  const ok = document.getElementById('notif-ok');
+  if (ok) { ok.style.opacity='1'; setTimeout(()=>ok.style.opacity='0',3000); }
+};
+
+// Add notifications page to sp handler
+const _origSp = window.sp;
+if (typeof _origSp === 'function') {
+  window.sp = function(id, el) {
+    _origSp(id, el);
+    if (id === 'notifications') {
+      if (typeof tmsRenderNotifs === 'function') tmsRenderNotifs();
+      if (typeof TMS !== 'undefined') {
+        TMS.markAllNotifsRead();
+        const nb = document.getElementById('nb-notifs-admin');
+        if (nb) nb.style.display = 'none';
+      }
+    }
+  };
+}
+// Update notification badge on load
+setTimeout(() => {
+  if (typeof tmsUpdateStats === 'function') tmsUpdateStats();
+  setInterval(() => { if (typeof tmsUpdateStats === 'function') tmsUpdateStats(); }, 5000);
+  // Update admin-specific badge
+  function updateAdminNotifBadge() {
+    if (typeof TMS === 'undefined') return;
+    const notifs = TMS.getNotifs ? TMS.getNotifs() : [];
+    const unread = notifs.filter(n => {
+      const r = Array.isArray(n.to) ? n.to : [n.to||'all'];
+      return !n.read && (r.includes('all') || r.includes('admin'));
+    }).length;
+    const nb = document.getElementById('nb-notifs-admin');
+    if (nb) { nb.textContent = unread; nb.style.display = unread > 0 ? 'flex' : 'none'; }
+  }
+  updateAdminNotifBadge();
+  setInterval(updateAdminNotifBadge, 5000);
+}, 500);
+
 
 window.adminView3DById = function(propId) {
   const p = (window._adminPropMap||{})[propId]; if(!p) return;
@@ -730,6 +1353,57 @@ window.adminView3DById = function(propId) {
 
 window.closeAdmin3D = function() {
   document.getElementById('ov-admin3d').style.display = 'none';
+
+// Admin notifications
+window.adminSendNotification = function() {
+  const title = document.getElementById('notif-title')?.value.trim();
+  const msg   = document.getElementById('notif-msg')?.value.trim();
+  const to    = document.getElementById('notif-to')?.value || 'all';
+  if (!title || !msg) { alert('Title and message required.'); return; }
+  if (typeof TMS === 'undefined') { alert('Notification system not loaded.'); return; }
+  TMS.addNotif(title, msg, 'red', to, 'admin');
+  document.getElementById('notif-title').value = '';
+  document.getElementById('notif-msg').value   = '';
+  document.getElementById('notif-to').value    = 'all';
+  if (typeof tmsRenderNotifs === 'function') tmsRenderNotifs();
+  const ok = document.getElementById('notif-ok');
+  if (ok) { ok.style.opacity='1'; setTimeout(()=>ok.style.opacity='0',3000); }
+};
+
+// Add notifications page to sp handler
+const _origSp = window.sp;
+if (typeof _origSp === 'function') {
+  window.sp = function(id, el) {
+    _origSp(id, el);
+    if (id === 'notifications') {
+      if (typeof tmsRenderNotifs === 'function') tmsRenderNotifs();
+      if (typeof TMS !== 'undefined') {
+        TMS.markAllNotifsRead();
+        const nb = document.getElementById('nb-notifs-admin');
+        if (nb) nb.style.display = 'none';
+      }
+    }
+  };
+}
+// Update notification badge on load
+setTimeout(() => {
+  if (typeof tmsUpdateStats === 'function') tmsUpdateStats();
+  setInterval(() => { if (typeof tmsUpdateStats === 'function') tmsUpdateStats(); }, 5000);
+  // Update admin-specific badge
+  function updateAdminNotifBadge() {
+    if (typeof TMS === 'undefined') return;
+    const notifs = TMS.getNotifs ? TMS.getNotifs() : [];
+    const unread = notifs.filter(n => {
+      const r = Array.isArray(n.to) ? n.to : [n.to||'all'];
+      return !n.read && (r.includes('all') || r.includes('admin'));
+    }).length;
+    const nb = document.getElementById('nb-notifs-admin');
+    if (nb) { nb.textContent = unread; nb.style.display = unread > 0 ? 'flex' : 'none'; }
+  }
+  updateAdminNotifBadge();
+  setInterval(updateAdminNotifBadge, 5000);
+}, 500);
+
   document.body.style.overflow = '';
 };
 // Close on backdrop click
@@ -738,5 +1412,317 @@ document.getElementById('ov-admin3d').addEventListener('click', function(e) {
 });
 </script>
 
+
+<!-- ══════════════════════════════════════════════════════
+     ADMIN: 3D NEGOTIATE MODAL
+══════════════════════════════════════════════════════ -->
+<div class="ov" id="ov-admin3dreq" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border-radius:18px;border:1px solid var(--border);width:min(740px,97vw);max-height:92vh;display:flex;flex-direction:column">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-size:15px;font-weight:700;color:var(--text)" id="adm3d-title">3D Request</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px" id="adm3d-status"></div>
+      </div>
+      <button onclick="closeAdmin3DReqModal()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,107,107,0.12);color:#FF6B6B;font-size:16px;cursor:pointer">✕</button>
+    </div>
+    <!-- Requirements info -->
+    <div id="adm3d-info" style="padding:12px 22px;background:var(--input-bg);border-bottom:1px solid var(--border);font-size:12px;color:var(--muted)"></div>
+    <!-- Chat -->
+    <div id="adm3d-msgs" style="flex:1;overflow-y:auto;padding:16px 22px;display:flex;flex-direction:column;gap:10px;min-height:160px;max-height:280px"></div>
+    <!-- Admin actions panel -->
+    <div style="padding:16px 22px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:12px">
+      <!-- Propose / update amount -->
+      <div id="adm3d-propose-row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input id="adm3d-amount" type="number" placeholder="Propose amount (Rs.)" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;width:180px">
+        <textarea id="adm3d-msg-text" rows="2" placeholder="Message to landlord..." style="flex:1;min-width:160px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;resize:none"></textarea>
+        <button onclick="adminSend3DMessage()" style="padding:9px 18px;border-radius:9px;border:none;background:var(--red,#FF6B6B);color:#fff;font-size:13px;font-weight:700;cursor:pointer">Send</button>
+      </div>
+      <!-- Finalize + Reject row -->
+      <div id="adm3d-action-row" style="display:flex;gap:8px;flex-wrap:wrap">
+        <button id="adm3d-finalize-btn" onclick="adminFinalize3D()" style="padding:9px 18px;border-radius:9px;border:none;background:#22c55e;color:#fff;font-size:13px;font-weight:700;cursor:pointer">🤝 Finalize Amount</button>
+        <input id="adm3d-finalize-amount" type="number" placeholder="Final Rs." style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;width:130px">
+        <button id="adm3d-reject-btn" onclick="adminReject3D()" style="padding:9px 18px;border-radius:9px;border:none;background:rgba(255,107,107,0.15);color:#FF6B6B;border:1px solid rgba(255,107,107,0.3);font-size:13px;font-weight:700;cursor:pointer">❌ Reject</button>
+        <input id="adm3d-reject-reason" placeholder="Rejection reason..." style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;flex:1;min-width:140px">
+      </div>
+      <!-- Complete with 3D builder (shown only when agreed) -->
+      <div id="adm3d-complete-row" style="display:none;background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:14px">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px">🏗️ Build & Attach 3D Model</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Type</label>
+            <select id="adm3d-build-type" style="width:100%;margin-top:4px;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12px;outline:none">
+              <option value="standard">Standard</option>
+              <option value="modern">Modern</option>
+              <option value="villa">Villa</option>
+              <option value="bungalow">Bungalow</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Floors</label>
+            <input id="adm3d-build-floors" type="number" min="1" max="5" value="1" style="width:100%;margin-top:4px;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12px;outline:none;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Wall Color</label>
+            <input id="adm3d-build-wall" type="color" value="#C9A96E" style="width:100%;margin-top:4px;height:34px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;background:var(--card)">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Roof Color</label>
+            <input id="adm3d-build-roof" type="color" value="#7A4F2A" style="width:100%;margin-top:4px;height:34px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;background:var(--card)">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Floor Color</label>
+            <input id="adm3d-build-floor" type="color" value="#D2B48C" style="width:100%;margin-top:4px;height:34px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;background:var(--card)">
+          </div>
+        </div>
+        <div style="display:flex;gap:14px;margin-bottom:12px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);cursor:pointer"><input id="adm3d-build-garden" type="checkbox"> 🌿 Garden</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);cursor:pointer"><input id="adm3d-build-pool" type="checkbox"> 🏊 Pool</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);cursor:pointer"><input id="adm3d-build-garage" type="checkbox"> 🚗 Garage</label>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button onclick="adminComplete3D()" style="padding:9px 22px;border-radius:9px;border:none;background:var(--gold,#C9A96E);color:#1a1a1a;font-size:13px;font-weight:700;cursor:pointer">✅ Complete & Attach 3D to Property</button>
+          <div id="adm3d-complete-msg" style="display:none;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  ADMIN: 3D MODEL REQUESTS
+// ══════════════════════════════════════════════════════════
+let _admin3dRequests = [];
+let _adminViewing3dId = null;
+
+function adm3dBadge(status) {
+  const map = {
+    pending:       { color:'#f59e0b', label:'⏳ Pending' },
+    admin_reviewed:{ color:'#3b82f6', label:'👁️ Reviewed' },
+    negotiating:   { color:'#a855f7', label:'💬 Negotiating' },
+    agreed:        { color:'#22c55e', label:'🤝 Agreed' },
+    completed:     { color:'#C9A96E', label:'✅ Completed' },
+    rejected:      { color:'#ef4444', label:'❌ Rejected' },
+  };
+  const s = map[status] || { color:'#888', label: status };
+  return `<span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${s.color}22;color:${s.color}">${s.label}</span>`;
+}
+
+async function adminLoad3DRequests() {
+  const el = document.getElementById('admin-3dreq-list');
+  try {
+    const statusFilter = document.getElementById('admin-3dreq-filter')?.value || '';
+    const url = '/3d-requests' + (statusFilter ? '?status='+statusFilter : '');
+    const data = await aFetch(url);
+    _admin3dRequests = data.requests || [];
+    const sub = document.getElementById('admin-3dreq-sub');
+    if(sub) sub.textContent = _admin3dRequests.length + ' request(s)';
+
+    // Update badge
+    const pending = _admin3dRequests.filter(r=>r.status==='pending'||r.status==='negotiating').length;
+    const nb = document.getElementById('nb-3dreq-admin');
+    if(nb) { nb.textContent = pending; nb.style.display = pending > 0 ? 'flex' : 'none'; }
+
+    adminRender3DRequests();
+  } catch(e) {
+    console.error('Failed to load admin 3D requests:', e);
+    if (el) {
+      el.innerHTML = `<div class="loading" style="padding:40px;text-align:center"><div style="font-size:18px;font-weight:700;color:var(--text)">Unable to load 3D requests</div><div style="color:var(--muted);font-size:13px;margin-top:8px">${e.message}</div></div>`;
+    }
+  }
+}
+
+function adminRender3DRequests() {
+  const el = document.getElementById('admin-3dreq-list');
+  if(!el) return;
+  if(!_admin3dRequests.length) {
+    el.innerHTML = '<div class="loading" style="padding:40px;text-align:center"><div style="font-size:40px;margin-bottom:12px">🏗️</div><div style="font-size:15px;font-weight:600;color:var(--text)">No 3D Requests</div><div style="color:var(--muted);font-size:13px;margin-top:6px">No landlord has submitted a 3D model request yet.</div></div>';
+    return;
+  }
+  el.innerHTML = _admin3dRequests.map(r => `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text)">${r.propertyTitle||'Property'}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">by ${r.landlordName||'Landlord'} · ${new Date(r.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>
+        </div>
+        ${adm3dBadge(r.status)}
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:10px">
+        <span>🏠 ${r.requirements?.houseType||'standard'}</span>
+        <span>🏢 ${r.requirements?.floors||1} floor(s)</span>
+        ${r.requirements?.hasGarden?'<span>🌿 Garden</span>':''}
+        ${r.requirements?.hasPool?'<span>🏊 Pool</span>':''}
+        ${r.requirements?.hasGarage?'<span>🚗 Garage</span>':''}
+        ${r.requirements?.extraNotes ? `<span>📝 "${r.requirements.extraNotes.substring(0,40)}${r.requirements.extraNotes.length>40?'…':''}"</span>` : ''}
+      </div>
+      ${r.agreedAmount ? `<div style="font-size:12px;color:#22c55e;margin-bottom:8px">🤝 Agreed: <strong>Rs. ${r.agreedAmount.toLocaleString()}</strong></div>` : (r.proposedAmount ? `<div style="font-size:12px;color:var(--gold,#C9A96E);margin-bottom:8px">💰 Proposed: Rs. ${r.proposedAmount.toLocaleString()}</div>` : '')}
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="openAdmin3DReqModal('${r._id}')" style="padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:12px;font-weight:600;cursor:pointer">
+          ${r.status==='pending' ? '👁️ Review' : r.status==='negotiating' ? '💬 Negotiate' : r.status==='agreed' ? '🏗️ Build 3D' : '👁️ View'}
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openAdmin3DReqModal(reqId) {
+  _adminViewing3dId = reqId;
+  const req = _admin3dRequests.find(r=>r._id===reqId);
+  if(!req) return;
+
+  document.getElementById('adm3d-title').textContent = req.propertyTitle || 'Request Detail';
+  document.getElementById('adm3d-status').innerHTML = adm3dBadge(req.status);
+
+  // Info
+  document.getElementById('adm3d-info').innerHTML = [
+    `👤 ${req.landlordName||'Landlord'}`,
+    `🏠 ${req.requirements?.houseType||'standard'}`,
+    `🏢 ${req.requirements?.floors||1} floor(s)`,
+    req.requirements?.hasGarden ? '🌿 Garden' : '',
+    req.requirements?.hasPool   ? '🏊 Pool'   : '',
+    req.requirements?.hasGarage ? '🚗 Garage' : '',
+    req.requirements?.extraNotes ? `📝 "${req.requirements.extraNotes}"` : '',
+  ].filter(Boolean).join(' &nbsp;|&nbsp; ');
+
+  // Pre-fill 3D builder from requirements
+  const setVal = (id, val) => { const e=document.getElementById(id); if(e) e.value=val; };
+  const setChk = (id, val) => { const e=document.getElementById(id); if(e) e.checked=val; };
+  setVal('adm3d-build-type',   req.requirements?.houseType||'standard');
+  setVal('adm3d-build-floors', req.requirements?.floors||1);
+  setVal('adm3d-build-wall',   req.requirements?.wallColor||'#C9A96E');
+  setVal('adm3d-build-roof',   req.requirements?.roofColor||'#7A4F2A');
+  setVal('adm3d-build-floor',  req.requirements?.floorColor||'#D2B48C');
+  setChk('adm3d-build-garden', req.requirements?.hasGarden||false);
+  setChk('adm3d-build-pool',   req.requirements?.hasPool||false);
+  setChk('adm3d-build-garage', req.requirements?.hasGarage||false);
+  if(req.proposedAmount) setVal('adm3d-finalize-amount', req.proposedAmount);
+
+  // Messages
+  const msgsEl = document.getElementById('adm3d-msgs');
+  msgsEl.innerHTML = (req.messages||[]).length ? (req.messages||[]).map(m => `
+    <div style="display:flex;flex-direction:column;align-items:${m.from==='admin'?'flex-end':'flex-start'}">
+      <div style="max-width:80%;padding:9px 13px;border-radius:12px;background:${m.from==='admin'?'rgba(255,107,107,0.12)':'var(--input-bg)'};border:1px solid ${m.from==='admin'?'rgba(255,107,107,0.3)':'var(--border)'};font-size:13px;color:var(--text)">
+        ${m.text}
+        ${m.amount ? `<div style="font-size:11px;font-weight:700;color:var(--gold,#C9A96E);margin-top:4px">💰 Rs. ${m.amount.toLocaleString()}</div>` : ''}
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:3px">${m.from==='admin'?'You (Admin)':'Landlord'} · ${new Date(m.createdAt||Date.now()).toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'})}</div>
+    </div>
+  `).join('') : '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">No messages yet. Start by proposing an amount.</div>';
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+
+  // Show/hide action panels based on status
+  const isActive = ['pending','negotiating','admin_reviewed'].includes(req.status);
+  const isAgreed = req.status === 'agreed';
+  const isDone   = req.status === 'completed' || req.status === 'rejected';
+  document.getElementById('adm3d-propose-row').style.display = isActive ? 'flex' : 'none';
+  document.getElementById('adm3d-action-row').style.display  = isActive ? 'flex' : 'none';
+  document.getElementById('adm3d-complete-row').style.display = isAgreed ? 'block' : 'none';
+
+  const modal = document.getElementById('ov-admin3dreq');
+  if(modal) { modal.style.display='flex'; document.body.style.overflow='hidden'; }
+}
+
+function closeAdmin3DReqModal() {
+  const modal = document.getElementById('ov-admin3dreq');
+  if(modal) { modal.style.display='none'; document.body.style.overflow=''; }
+}
+
+async function adminSend3DMessage() {
+  const text   = document.getElementById('adm3d-msg-text')?.value?.trim();
+  const amount = document.getElementById('adm3d-amount')?.value;
+  if(!text && !amount) return;
+  const body = { text: text || (amount ? `Admin proposes Rs. ${amount} for your 3D model.` : 'Message from admin.') };
+  if(amount) body.proposedAmount = Number(amount);
+  try {
+    const data = await aFetch('/3d-requests/'+_adminViewing3dId+'/review','PUT', body);
+    if(data.success) {
+      document.getElementById('adm3d-msg-text').value = '';
+      document.getElementById('adm3d-amount').value   = '';
+      const idx = _admin3dRequests.findIndex(r=>r._id===_adminViewing3dId);
+      if(idx>=0) _admin3dRequests[idx] = data.request;
+      openAdmin3DReqModal(_adminViewing3dId);
+      adminRender3DRequests();
+    }
+  } catch(e) { console.error(e); }
+}
+
+async function adminFinalize3D() {
+  const amount = document.getElementById('adm3d-finalize-amount')?.value;
+  if(!amount) { alert('Please enter the final agreed amount.'); return; }
+  try {
+    const data = await aFetch('/3d-requests/'+_adminViewing3dId+'/finalize','PUT',{ agreedAmount:Number(amount) });
+    if(data.success) {
+      const idx = _admin3dRequests.findIndex(r=>r._id===_adminViewing3dId);
+      if(idx>=0) _admin3dRequests[idx] = data.request;
+      openAdmin3DReqModal(_adminViewing3dId);
+      adminRender3DRequests();
+    }
+  } catch(e) { console.error(e); }
+}
+
+async function adminReject3D() {
+  const reason = document.getElementById('adm3d-reject-reason')?.value?.trim() || 'Request rejected by admin.';
+  if(!confirm('Reject this 3D model request?')) return;
+  try {
+    const data = await aFetch('/3d-requests/'+_adminViewing3dId+'/reject','PUT',{ reason });
+    if(data.success) {
+      const idx = _admin3dRequests.findIndex(r=>r._id===_adminViewing3dId);
+      if(idx>=0) _admin3dRequests[idx] = data.request;
+      closeAdmin3DReqModal();
+      adminRender3DRequests();
+    }
+  } catch(e) { console.error(e); }
+}
+
+async function adminComplete3D() {
+  const model3d = {
+    houseType:  document.getElementById('adm3d-build-type')?.value   || 'standard',
+    floors:     parseInt(document.getElementById('adm3d-build-floors')?.value)||1,
+    wallColor:  document.getElementById('adm3d-build-wall')?.value   || '#C9A96E',
+    roofColor:  document.getElementById('adm3d-build-roof')?.value   || '#7A4F2A',
+    floorColor: document.getElementById('adm3d-build-floor')?.value  || '#D2B48C',
+    hasGarden:  document.getElementById('adm3d-build-garden')?.checked || false,
+    hasPool:    document.getElementById('adm3d-build-pool')?.checked   || false,
+    hasGarage:  document.getElementById('adm3d-build-garage')?.checked || false,
+  };
+  const msgEl = document.getElementById('adm3d-complete-msg');
+  try {
+    const data = await aFetch('/3d-requests/'+_adminViewing3dId+'/complete','PUT',{ model3d });
+    if(data.success) {
+      if(msgEl){ msgEl.style.display='block'; msgEl.style.background='rgba(34,197,94,0.15)'; msgEl.style.color='#22c55e'; msgEl.textContent='✅ 3D model attached to property!'; }
+      const idx = _admin3dRequests.findIndex(r=>r._id===_adminViewing3dId);
+      if(idx>=0) _admin3dRequests[idx] = data.request;
+      setTimeout(()=>{ closeAdmin3DReqModal(); adminRender3DRequests(); }, 2000);
+    } else {
+      if(msgEl){ msgEl.style.display='block'; msgEl.style.background='rgba(255,107,107,0.12)'; msgEl.style.color='#FF6B6B'; msgEl.textContent='⚠️ '+(data.message||'Error'); }
+    }
+  } catch(e) {
+    if(msgEl){ msgEl.style.display='block'; msgEl.style.color='#FF6B6B'; msgEl.textContent='⚠️ Server error.'; }
+  }
+}
+
+// Close on backdrop
+document.getElementById('ov-admin3dreq').addEventListener('click', function(e){ if(e.target===this) closeAdmin3DReqModal(); });
+
+// Load on page open (also hook into sp)
+const _adminSpOrig2 = window.sp;
+if(typeof _adminSpOrig2 === 'function') {
+  window.sp = function(id, el) {
+    _adminSpOrig2(id, el);
+    if(id === '3d-requests') adminLoad3DRequests();
+  };
+}
+// Refresh badge periodically
+setInterval(()=>{ if(typeof adminLoad3DRequests==='function' && document.getElementById('nb-3dreq-admin')) {
+  aFetch('/3d-requests').then(d=>{
+    const pending = (d.requests||[]).filter(r=>r.status==='pending'||r.status==='negotiating').length;
+    const nb = document.getElementById('nb-3dreq-admin');
+    if(nb){ nb.textContent=pending; nb.style.display=pending>0?'flex':'none'; }
+  }).catch(()=>{});
+}}, 15000);
+</script>
 </body>
+
 </html>

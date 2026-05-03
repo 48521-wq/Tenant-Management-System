@@ -1,161 +1,121 @@
-/**
- * @file complaints.js
- * @route /api/complaints
- * @description Complaint management routes for tenants, landlords, and admin.
- *
- * Role-based access:
- *   Tenant   — file new complaints; view their own records
- *   Landlord — view complaints filed against their properties
- *   Admin    — view all; update status; add notes; delete
- *
- * Status lifecycle:  open → in_progress → resolved | closed
- */
-
-'use strict';
-
 const express   = require('express');
+const mongoose  = require('mongoose');
 const Complaint = require('../models/Complaint');
+const Property  = require('../models/Property');
 const { protect, adminOnly } = require('../middleware/auth');
-
 const router = express.Router();
 
-// ── HTTP status codes ──────────────────────────────────────────
-const STATUS_CREATED      = 201;
-const STATUS_BAD_REQUEST  = 400;
-const STATUS_FORBIDDEN    = 403;
-const STATUS_NOT_FOUND    = 404;
-const STATUS_SERVER_ERROR = 500;
-
-// ── Helpers ────────────────────────────────────────────────────
-
-/**
- * Builds a role-scoped MongoDB filter for complaint queries.
- *
- *   Admin    → all complaints; optional ?status narrowing
- *   Tenant   → only complaints they personally filed (tenantId)
- *   Landlord → complaints linked to their properties (landlordId)
- *
- * @param {Object} user   - req.user set by protect middleware
- * @param {Object} query  - req.query from the incoming request
- * @returns {Object} Mongoose-compatible filter object
- */
-function buildFilter(user, query) {
-  const filter = {};
-
-  if (user.isAdmin) {
-    if (query.status) filter.status = query.status;
-  } else if (user.role === 'tenant') {
-    filter.tenantId = user._id;
-  } else if (user.role === 'landlord') {
-    filter.landlordId = user._id;
-  }
-
-  return filter;
-}
-
-// ── GET /api/complaints ────────────────────────────────────────
-/**
- * Returns complaints scoped to the caller's role, newest first.
- *
- * @middleware protect
- * @returns {200} { success, count, complaints }
- * @returns {500} Server error
- */
+// GET complaints — tenant sees own, admin sees all, landlord sees their property complaints
 router.get('/', protect, async (req, res) => {
   try {
-    const filter     = buildFilter(req.user, req.query);
+    let filter = {};
+    if (req.user?.isAdmin) {
+      if (req.query.status) filter.status = req.query.status;
+    } else if (req.user.role === 'tenant') {
+      filter.tenantId = req.user._id;
+    } else if (req.user.role === 'landlord') {
+      const props = await Property.find({ landlordId: req.user._id }).select('_id title');
+      const propIds = props.map(p => p._id);
+      const propTitles = props.map(p => p.title).filter(Boolean);
+      const escapedName = (req.user.name || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const nameRegex = new RegExp(`^${escapedName}$`, 'i');
+      const titleRegexes = propTitles.map(t => new RegExp(`^${t.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}$`, 'i'));
+      filter = {
+        $or: [
+          { landlordId: req.user._id },
+          { propertyId: { $in: propIds } },
+          { landlordName: nameRegex },
+          ...(titleRegexes.length ? [{ propertyTitle: { $in: titleRegexes } }] : []),
+        ]
+      };
+    }
+    if (req.user?.isAdmin && req.query.status) filter.status = req.query.status;
     const complaints = await Complaint.find(filter).sort({ createdAt: -1 });
-
     res.json({ success: true, count: complaints.length, complaints });
-
-  } catch (_err) {
-    res.status(STATUS_SERVER_ERROR).json({ success: false, message: 'Server error.' });
-  }
+  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
-// ── POST /api/complaints ───────────────────────────────────────
-/**
- * Files a new complaint. Tenants only.
- * tenantId and tenantName are sourced from the verified JWT.
- *
- * @middleware protect
- * @returns {201} { success, complaint }
- * @returns {400} Missing subject
- * @returns {403} Admin cannot file complaints
- * @returns {500} Server error
- */
+// POST create complaint (tenant)
 router.post('/', protect, async (req, res) => {
   try {
-    if (req.user?.isAdmin)
-      return res.status(STATUS_FORBIDDEN).json({ success: false, message: 'Admin cannot file complaints.' });
-
-    const { subject, description, category, priority } = req.body;
-
-    if (!subject)
-      return res.status(STATUS_BAD_REQUEST).json({ success: false, message: 'Subject is required.' });
-
-    const complaint = await Complaint.create({
+    if (req.user?.isAdmin) return res.status(403).json({ success: false, message: 'Admin cannot file complaints.' });
+    const { subject, description, category, priority, landlordId, landlordName, propertyId } = req.body;
+    if (!subject) return res.status(400).json({ success: false, message: 'Subject is required.' });
+    const complaintData = {
       tenantId:   req.user._id,
       tenantName: req.user.name,
       subject,
       description,
       category,
       priority,
-    });
-
-    res.status(STATUS_CREATED).json({ success: true, complaint });
-
-  } catch (_err) {
-    res.status(STATUS_SERVER_ERROR).json({ success: false, message: 'Server error.' });
+    };
+    if (landlordId && mongoose.Types.ObjectId.isValid(landlordId)) complaintData.landlordId = landlordId;
+    if (landlordName) complaintData.landlordName = landlordName;
+    if (propertyId && mongoose.Types.ObjectId.isValid(propertyId)) complaintData.propertyId = propertyId;
+    const complaint = await Complaint.create(complaintData);
+    res.status(201).json({ success: true, complaint });
+  } catch (e) {
+    res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
 
-// ── PUT /api/complaints/:id/status ─────────────────────────────
-/**
- * Updates complaint status and optional admin note. Admin only.
- * Stamps resolvedAt automatically when status is set to 'resolved'.
- *
- * @middleware protect, adminOnly
- * @returns {200} { success, complaint }
- * @returns {404} Not found
- * @returns {500} Server error
- */
+// PUT update status (admin only)
 router.put('/:id/status', protect, adminOnly, async (req, res) => {
   try {
     const { status, adminNote } = req.body;
-
-    const changes = { status };
-    if (adminNote)             changes.adminNote  = adminNote;
-    if (status === 'resolved') changes.resolvedAt = new Date();
-
-    const updated = await Complaint.findByIdAndUpdate(req.params.id, changes, { new: true });
-
-    if (!updated)
-      return res.status(STATUS_NOT_FOUND).json({ success: false, message: 'Not found.' });
-
-    res.json({ success: true, complaint: updated });
-
-  } catch (_err) {
-    res.status(STATUS_SERVER_ERROR).json({ success: false, message: 'Server error.' });
-  }
+    const update = { status };
+    if (adminNote) update.adminNote = adminNote;
+    if (status === 'resolved') update.resolvedAt = new Date();
+    const complaint = await Complaint.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!complaint) return res.status(404).json({ success: false, message: 'Not found.' });
+    res.json({ success: true, complaint });
+  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
-// ── DELETE /api/complaints/:id ─────────────────────────────────
-/**
- * Permanently deletes a complaint record. Admin only.
- *
- * @middleware protect, adminOnly
- * @returns {200} { success, message }
- * @returns {500} Server error
- */
+// PUT approve/in-progress complaint (landlord)
+router.put('/:id/approve', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'landlord') return res.status(403).json({ success: false, message: 'Not authorized.' });
+    const complaint = await Complaint.findById(req.params.id);
+    if (!complaint) return res.status(404).json({ success: false, message: 'Complaint not found.' });
+    // Check landlord ownership
+    if (complaint.landlordId && complaint.landlordId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized.' });
+    }
+    if (!complaint.landlordId && complaint.landlordName !== req.user.name) {
+      return res.status(403).json({ success: false, message: 'Not authorized.' });
+    }
+    complaint.status = 'in_progress';
+    await complaint.save();
+    res.json({ success: true, complaint });
+  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
+});
+
+// PUT resolve/close complaint (landlord)
+router.put('/:id/resolve', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'landlord') return res.status(403).json({ success: false, message: 'Not authorized.' });
+    const complaint = await Complaint.findById(req.params.id);
+    if (!complaint) return res.status(404).json({ success: false, message: 'Complaint not found.' });
+    if (complaint.landlordId && complaint.landlordId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized.' });
+    }
+    if (!complaint.landlordId && complaint.landlordName !== req.user.name) {
+      return res.status(403).json({ success: false, message: 'Not authorized.' });
+    }
+    complaint.status = 'resolved';
+    complaint.resolvedAt = new Date();
+    await complaint.save();
+    res.json({ success: true, complaint });
+  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
+});
+
+// DELETE complaint (admin)
 router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
     await Complaint.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Complaint deleted.' });
-
-  } catch (_err) {
-    res.status(STATUS_SERVER_ERROR).json({ success: false, message: 'Server error.' });
-  }
+  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
 module.exports = router;
