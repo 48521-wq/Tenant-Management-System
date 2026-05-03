@@ -1,0 +1,33 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Check API route",
+			"type": "shell",
+			"command": "cd \"c:\\Users\\HP\\Desktop\\Tenant 14\\TMS_fixed_final\" && python - <<'PY'\nimport urllib.request\ntry:\n    with urllib.request.urlopen('http://localhost:5000/api/leases') as r:\n        print(r.status)\n        print(r.read().decode())\nexcept Exception as e:\n    print('ERROR', e)\nPY",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check API route 2",
+			"type": "shell",
+			"command": "cd \"c:\\Users\\HP\\Desktop\\Tenant 14\\TMS_fixed_final\" ; python -c \"import urllib.request; import json; import sys; \ntry:\n    r = urllib.request.urlopen('http://localhost:5000/api/leases')\n    print(r.status)\n    print(r.read().decode())\nexcept Exception as e:\n    print('ERROR', e)\n\"",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check API route 3",
+			"type": "shell",
+			"command": "cd \"c:\\Users\\HP\\Desktop\\Tenant 14\\TMS_fixed_final\" ; python -c \"import urllib.request; import urllib.error; \ntry: r=urllib.request.urlopen('http://localhost:5000/api/leases'); print(r.status); print(r.read().decode())\nexcept Exception as e: print('ERROR', e)\"",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check API route 4",
+			"type": "shell",
+			"command": "cd \"c:\\Users\\HP\\Desktop\\Tenant 14\\TMS_fixed_final\" ; python -c \"import urllib.request; r=urllib.request.urlopen('http://localhost:5000/api/leases'); print(r.status); print(r.read().decode())\"",
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}

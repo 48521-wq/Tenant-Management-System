@@ -163,6 +163,96 @@
     [data-theme="light"] .g-input::placeholder { color: #AAB0BA; }
     [data-theme="light"] .g-btn-cancel { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
   </style>
+
+<!-- ═══════ PROFESSIONAL DESIGN UPGRADE ═══════ -->
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+/* Login Page Premium Refinements */
+body { font-family: 'DM Sans', sans-serif; }
+
+.logo h1 {
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.2px !important;
+}
+
+.panel {
+  border-radius: 26px !important;
+  padding: 50px 46px !important;
+  border: 1px solid rgba(201,169,110,0.13) !important;
+  box-shadow: 0 40px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.03) !important;
+}
+
+.form-label {
+  font-size: 10px !important;
+  letter-spacing: 1px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  color: rgba(156,163,175,0.8) !important;
+}
+
+.form-input {
+  border-radius: 11px !important;
+  padding: 13px 14px 13px 42px !important;
+  font-size: 13.5px !important;
+  border: 1.5px solid rgba(255,255,255,0.07) !important;
+  transition: all 0.22s cubic-bezier(0.4,0,0.2,1) !important;
+}
+.form-input:focus {
+  border-color: #C9A96E !important;
+  box-shadow: 0 0 0 3px rgba(201,169,110,0.1) !important;
+}
+
+.btn-primary {
+  border-radius: 11px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.1px !important;
+  transition: all 0.22s cubic-bezier(0.4,0,0.2,1) !important;
+}
+.btn-gold {
+  box-shadow: 0 6px 22px rgba(201,169,110,0.32) !important;
+}
+.btn-gold:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 9px 28px rgba(201,169,110,0.45) !important;
+}
+
+.tabs { border-radius: 13px !important; padding: 5px !important; }
+.tab { border-radius: 10px !important; font-size: 13.5px !important; font-weight: 500 !important; }
+.tab.active {
+  font-weight: 600 !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25) !important;
+}
+
+.logo-icon {
+  border-radius: 15px !important;
+  box-shadow: 0 8px 28px rgba(201,169,110,0.35), inset 0 1px 0 rgba(255,255,255,0.15) !important;
+}
+
+.fp-title, .success-title {
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif !important;
+  font-size: 24px !important;
+  font-weight: 700 !important;
+}
+
+.role-card-inline {
+  border-radius: 15px !important;
+  padding: 17px 13px !important;
+  transition: all 0.22s cubic-bezier(0.4,0,0.2,1) !important;
+}
+
+/* Subtle grain */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 999; opacity: 0.4;
+}
+[data-theme="light"] body::after { opacity: 0.12; }
+</style>
+
 </head>
 <body>
 
