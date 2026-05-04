@@ -1,3 +1,4 @@
+// ─── RentalRequest Model ──────────────────────────────────────────────────────────────
 const mongoose = require('mongoose');
 
 const rentalRequestSchema = new mongoose.Schema({
