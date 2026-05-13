@@ -1,3 +1,4 @@
+// ─── Lease Model ──────────────────────────────────────────────────────────────
 const mongoose = require('mongoose');
 
 const leaseSchema = new mongoose.Schema({
