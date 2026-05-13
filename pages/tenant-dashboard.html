@@ -9,17 +9,13 @@
 /* ═══ THEME ═══ */
 :root{
   --blue:#C9A96E;--blue-l:#E8C97A;--green:#4ECDC4;--gold:#C9A96E;--error:#FF6B6B;--warn:#FFB347;
-  --bg:#07090D;--card:rgba(16,22,32,0.97);--border:rgba(201,169,110,0.14);
+  --bg:#000000;--card:rgba(16,22,32,0.97);--border:rgba(201,169,110,0.14);
   --text:#E8EDF5;--muted:#566070;--sidebar-bg:rgba(10,14,22,0.98);--input-bg:rgba(255,255,255,0.04);
 }
-[data-theme="light"]{
-  --bg:#F0F4FA;--card:#FFFFFF;--border:rgba(201,169,110,0.18);
-  --text:#1A2332;--muted:#6B7C93;--sidebar-bg:#FFFFFF;--input-bg:#F5F8FF;
-}
+
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--blue);border-radius:10px}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;transition:background 0.3s,color 0.3s}
-.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 10% 15%,rgba(201,169,110,0.07) 0%,transparent 55%),radial-gradient(ellipse 60% 50% at 90% 80%,rgba(78,205,196,0.04) 0%,transparent 55%),linear-gradient(160deg,#07090D 0%,#0C1018 100%)}
-[data-theme="light"] .bg{background:radial-gradient(ellipse 80% 60% at 10% 15%,rgba(201,169,110,0.05) 0%,transparent 55%),linear-gradient(160deg,#EEF2FA 0%,#F5F8FF 100%)}
+.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 10% 15%,rgba(201,169,110,0.07) 0%,transparent 55%),radial-gradient(ellipse 60% 50% at 90% 80%,rgba(78,205,196,0.04) 0%,transparent 55%),linear-gradient(160deg,#000000 0%,#07090D 100%)}
 /* TOPNAV */
 .topnav{position:sticky;top:0;z-index:200;background:var(--sidebar-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;height:62px;gap:12px}
 .topnav-logo{display:flex;align-items:center;gap:10px;margin-right:auto}
@@ -76,14 +72,27 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .pcard:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(0,0,0,0.25);border-color:rgba(201,169,110,0.35)}
 .pcard-thumb{height:170px;background:linear-gradient(135deg,rgba(201,169,110,0.1),rgba(201,169,110,0.03));position:relative;display:flex;align-items:center;justify-content:center;font-size:56px}
 .pcard-body{padding:14px 16px}
-.pcard-price{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--blue);margin-bottom:2px}
+.pcard-price{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold);margin-bottom:12px}
 .pcard-price span{font-size:11px;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:400}
-.pcard-title{font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text)}
+.pcard-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
 .pcard-loc{font-size:12px;color:var(--muted);margin-bottom:8px}
 .pcard-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .ptag{padding:3px 9px;border-radius:7px;background:var(--input-bg);border:1px solid var(--border);font-size:11px;color:var(--muted)}
 .pcard-btn{width:100%;padding:9px;border-radius:9px;border:1px solid rgba(201,169,110,0.25);background:rgba(201,169,110,0.07);color:var(--blue);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s}
 .pcard-btn:hover{background:rgba(201,169,110,0.15)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;border:none}
+.btn svg{width:14px;height:14px;stroke:currentColor;fill:none}
+.btn-gold,.btn-teal,.submit-btn,.search-btn,.btn-red,.btn-primary{color:#FFFFFF !important}
+.btn-gold{background:linear-gradient(135deg,var(--blue),var(--blue-l));color:#FFFFFF;box-shadow:0 3px 12px rgba(37,99,235,0.28)}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(37,99,235,0.36)}
+.btn-ghost{background:var(--input-bg);color:var(--text) !important;border:1px solid var(--border)}
+.btn-ghost:hover{background:rgba(201,169,110,0.08);color:var(--text) !important}
+.btn-danger{background:rgba(255,107,107,0.08);color:var(--error);border:1px solid rgba(255,107,107,0.18)}
+.btn-danger:hover{background:rgba(255,107,107,0.15)}
+.btn-sm{padding:5px 12px;font-size:11.5px;border-radius:7px}
+.btn-teal{background:linear-gradient(135deg,#4ECDC4,#45B7A8);color:#fff}
+.btn-teal:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(78,205,196,0.35)}
+.pcard-actions{display:flex;gap:7px}
 /* FORM */
 .form-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px}
 .form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
@@ -161,7 +170,6 @@ select, select option {
   background-color: #12151C !important;
   color: #E8E4DC !important;
 }
-[data-theme="light"] select, [data-theme="light"] select option {
   background-color: #ffffff !important;
   color: #1A1E26 !important;
 }
@@ -208,6 +216,15 @@ select {
   padding: 16px;
   margin-top: 16px !important;
 }
+
+
+/* ── Light theme: Furniture catalog buttons ── */
+/* Furniture page: ADD label */
+/* Furniture canvas: use light bg in light mode */
+/* Furniture page controls in light mode */
+/* Topnav: ensure portal label visible */
+/* Notification badge dot */
+
 </style>
 
 <!-- ═══════════════════════════════════════════════════════
@@ -263,9 +280,6 @@ select {
   border-bottom: 1px solid rgba(201,169,110,0.12) !important;
   backdrop-filter: blur(28px) saturate(180%) !important;
 }
-[data-theme="light"] .topnav {
-  background: rgba(253,250,244,0.97) !important;
-}
 .tn-icon {
   width: 36px !important;
   height: 36px !important;
@@ -278,9 +292,6 @@ select {
   width: 232px !important;
   background: rgba(7,9,12,0.98) !important;
   border-right: 1px solid rgba(201,169,110,0.1) !important;
-}
-[data-theme="light"] .sidebar {
-  background: rgba(253,250,244,0.99) !important;
 }
 .nav-item {
   padding: 9px 14px !important;
@@ -379,6 +390,14 @@ select {
 .pcard-thumb {
   height: 175px !important;
   background: linear-gradient(135deg, rgba(201,169,110,0.08) 0%, rgba(201,169,110,0.02) 100%) !important;
+  position: relative;
+  overflow: hidden;
+}
+.pcard-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 .pcard-body {
   padding: 15px 17px !important;
@@ -402,13 +421,13 @@ select {
   transition: var(--transition) !important;
 }
 .btn-gold {
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-l) 100%) !important;
-  box-shadow: 0 3px 14px rgba(201,169,110,0.28) !important;
-  color: #0A0C0F !important;
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue-l) 100%) !important;
+  box-shadow: 0 3px 14px rgba(37,99,235,0.28) !important;
+  color: #FFFFFF !important;
 }
 .btn-gold:hover {
   transform: translateY(-1px) !important;
-  box-shadow: 0 6px 20px rgba(201,169,110,0.42) !important;
+  box-shadow: 0 6px 20px rgba(37,99,235,0.42) !important;
 }
 .btn-ghost {
   border: 1px solid rgba(201,169,110,0.16) !important;
@@ -424,8 +443,8 @@ select {
   font-size: 13.5px !important;
   font-weight: 600 !important;
   letter-spacing: 0.1px;
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-l) 100%) !important;
-  box-shadow: 0 4px 16px rgba(201,169,110,0.32) !important;
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue-l) 100%) !important;
+  box-shadow: 0 4px 16px rgba(37,99,235,0.32) !important;
   transition: var(--transition) !important;
 }
 .submit-btn:hover:not(:disabled) {
@@ -559,6 +578,11 @@ tr:hover td {
   background: rgba(201,169,110,0.1) !important;
   border-color: rgba(201,169,110,0.3) !important;
 }
+  background: #E0E0E0 !important;
+  border-color: rgba(0,0,0,0.25) !important;
+}
+  stroke: #1A1A1A !important;
+}
 
 /* ─── PROFILE SECTION ─── */
 .prof-header {
@@ -661,18 +685,417 @@ body::after {
   opacity: 0.4;
 }
 
-/* ─── LIGHT THEME REFINEMENTS ─── */
+
+
+/* ═══════════════════════════════════════════════════════════
+   UNIFIED PROFESSIONAL LIGHT THEME — TMS v3
+   Projector-optimized: maximum contrast, zero washout
+   Dark theme untouched.
+═══════════════════════════════════════════════════════════ */
+
+/* ── Core palette overrides ── */
+[data-theme="light"] {
+  --bg:         #EFF2F7;
+  --card:       #FFFFFF;
+  --border:     rgba(0,0,0,0.10);
+  --text:       #0D1117;
+  --muted:      #4B5563;
+  --sidebar-bg: #FFFFFF;
+  --input-bg:   #F8F9FC;
+  --blue:       #2563EB;
+  --blue-l:     #4F7BFE;
+}
+
+/* ── Background: clean neutral, no orb distractions ── */
+[data-theme="light"] body {
+  background: #EFF2F7 !important;
+}
+[data-theme="light"] .bg {
+  background: linear-gradient(160deg, #EFF2F7 0%, #E8EDF5 100%) !important;
+}
+[data-theme="light"] body::after {
+  opacity: 0 !important;
+}
+
+/* ── Scrollbar ── */
+[data-theme="light"] ::-webkit-scrollbar-track { background: #E8EDF5; }
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); }
+
+/* ── Topnav ── */
+[data-theme="light"] .topnav {
+  background: #FFFFFF !important;
+  border-bottom: 1.5px solid rgba(0,0,0,0.10) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07) !important;
+}
+[data-theme="light"] .tn-name {
+  background: linear-gradient(135deg, #1A3A8F, #2563EB) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+[data-theme="light"] .tn-pill {
+  background: rgba(37,99,235,0.08) !important;
+  border-color: rgba(37,99,235,0.2) !important;
+  color: #1D4ED8 !important;
+}
+
+/* ── Icon buttons ── */
+[data-theme="light"] .icon-btn {
+  background: #F1F5F9 !important;
+  border: 1.5px solid rgba(0,0,0,0.12) !important;
+  color: #1A202C !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+}
+[data-theme="light"] .icon-btn svg {
+  stroke: #1A202C !important;
+  color: #1A202C !important;
+}
+[data-theme="light"] .icon-btn:hover {
+  background: #E2E8F0 !important;
+  border-color: rgba(0,0,0,0.22) !important;
+}
+
+/* ── Logout button ── */
+[data-theme="light"] .logout-btn {
+  background: rgba(220,38,38,0.07) !important;
+  border-color: rgba(220,38,38,0.22) !important;
+  color: #DC2626 !important;
+}
+[data-theme="light"] .logout-btn svg { stroke: #DC2626 !important; }
+[data-theme="light"] .logout-btn:hover { background: rgba(220,38,38,0.14) !important; }
+
+/* ── Sidebar ── */
+[data-theme="light"] .sidebar {
+  background: #FFFFFF !important;
+  border-right: 1.5px solid rgba(0,0,0,0.09) !important;
+  box-shadow: 2px 0 12px rgba(0,0,0,0.05) !important;
+}
+[data-theme="light"] .sb-lbl,
+[data-theme="light"] .sidebar-label {
+  color: #6B7280 !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.2px !important;
+}
+[data-theme="light"] .sb-foot,
+[data-theme="light"] .sidebar-foot {
+  border-top: 1.5px solid rgba(0,0,0,0.09) !important;
+}
+[data-theme="light"] .sb-user,
+[data-theme="light"] .user-card {
+  background: #F3F6FC !important;
+  border: 1px solid rgba(0,0,0,0.09) !important;
+}
+[data-theme="light"] .sb-uname,
+[data-theme="light"] .u-name {
+  color: #0D1117 !important;
+  font-weight: 700 !important;
+}
+[data-theme="light"] .sb-urole,
+[data-theme="light"] .u-role {
+  color: #4B5563 !important;
+}
+
+/* ── Nav items ── */
+[data-theme="light"] .nav-item {
+  color: #374151 !important;
+}
+[data-theme="light"] .nav-item svg {
+  stroke: #374151 !important;
+}
+[data-theme="light"] .nav-item:hover {
+  color: #0D1117 !important;
+  background: rgba(0,0,0,0.06) !important;
+}
+[data-theme="light"] .nav-item:hover svg {
+  stroke: #0D1117 !important;
+}
+[data-theme="light"] .nav-item.active {
+  color: #1D4ED8 !important;
+  background: rgba(37,99,235,0.09) !important;
+  font-weight: 700 !important;
+}
+[data-theme="light"] .nav-item.active svg {
+  stroke: #1D4ED8 !important;
+}
+[data-theme="light"] .nb-pill {
+  background: #DC2626 !important;
+  color: #FFFFFF !important;
+}
+
+/* ── Page headings ── */
+[data-theme="light"] .pg-title {
+  color: #0D1117 !important;
+  font-weight: 700 !important;
+}
+[data-theme="light"] .pg-sub {
+  color: #4B5563 !important;
+}
+
+/* ── Cards, form cards, stat cards ── */
 [data-theme="light"] .card,
 [data-theme="light"] .form-card,
 [data-theme="light"] .stat-card,
 [data-theme="light"] .list-item,
-[data-theme="light"] .notif-item {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.07) !important;
+[data-theme="light"] .pcard,
+[data-theme="light"] .notif-item,
+[data-theme="light"] .lease-box,
+[data-theme="light"] .filter-bar,
+[data-theme="light"] .ov-box,
+[data-theme="light"] .action-item,
+[data-theme="light"] .ntype-btn,
+[data-theme="light"] .person-result,
+[data-theme="light"] .tenant-pill {
+  background: #FFFFFF !important;
+  border-color: rgba(0,0,0,0.09) !important;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06) !important;
 }
-[data-theme="light"] .nav-item.active {
-  background: linear-gradient(90deg, rgba(201,169,110,0.12) 0%, rgba(201,169,110,0.03) 100%) !important;
+
+/* ── ALL text inside cards ── */
+[data-theme="light"] .card,
+[data-theme="light"] .card *,
+[data-theme="light"] .stat-card,
+[data-theme="light"] .stat-card * {
+  color: #0D1117;
 }
-[data-theme="light"] body::after { opacity: 0.15; }
+
+/* ── Specific text classes ── */
+[data-theme="light"] .li-title,
+[data-theme="light"] .pcard-title,
+[data-theme="light"] .lease-title,
+[data-theme="light"] .ov-title,
+[data-theme="light"] .action-label,
+[data-theme="light"] .stat-val,
+[data-theme="light"] .stat-num,
+[data-theme="light"] .notif-text {
+  color: #0D1117 !important;
+  font-weight: 600 !important;
+}
+[data-theme="light"] .li-sub,
+[data-theme="light"] .pcard-loc,
+[data-theme="light"] .lease-key,
+[data-theme="light"] .lease-sub,
+[data-theme="light"] .stat-lbl,
+[data-theme="light"] .stat-label,
+[data-theme="light"] .action-sub,
+[data-theme="light"] .notif-time {
+  color: #4B5563 !important;
+}
+[data-theme="light"] .lease-val {
+  color: #0D1117 !important;
+  font-weight: 600 !important;
+}
+
+/* ── Table ── */
+[data-theme="light"] table { border-color: rgba(0,0,0,0.07) !important; }
+[data-theme="light"] table th {
+  color: #374151 !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  background: #F3F6FC !important;
+  border-bottom: 2px solid rgba(0,0,0,0.10) !important;
+  letter-spacing: 0.6px !important;
+}
+[data-theme="light"] table td {
+  color: #0D1117 !important;
+  border-bottom: 1px solid rgba(0,0,0,0.07) !important;
+}
+[data-theme="light"] tr:hover td {
+  background: rgba(37,99,235,0.04) !important;
+}
+
+/* ── Badges — keep vibrant, projector-safe ── */
+[data-theme="light"] .b-green  { background: #D1FAE5 !important; color: #065F46 !important; border-color: #6EE7B7 !important; }
+[data-theme="light"] .b-gold   { background: #FEF3C7 !important; color: #92400E !important; border-color: #FCD34D !important; }
+[data-theme="light"] .b-blue   { background: #DBEAFE !important; color: #1E40AF !important; border-color: #93C5FD !important; }
+[data-theme="light"] .b-red    { background: #FEE2E2 !important; color: #991B1B !important; border-color: #FCA5A5 !important; }
+[data-theme="light"] .b-warn   { background: #FEF9C3 !important; color: #854D0E !important; border-color: #FDE047 !important; }
+[data-theme="light"] .b-muted  { background: #F1F5F9 !important; color: #374151 !important; border-color: rgba(0,0,0,0.12) !important; }
+
+/* ── Search bar ── */
+[data-theme="light"] .search-bar {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(0,0,0,0.14) !important;
+  color: #0D1117 !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05) !important;
+}
+[data-theme="light"] .search-bar::placeholder { color: #9CA3AF !important; }
+[data-theme="light"] .search-bar:focus {
+  border-color: #2563EB !important;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12) !important;
+}
+
+/* ── Form inputs ── */
+[data-theme="light"] input,
+[data-theme="light"] textarea,
+[data-theme="light"] .fg input,
+[data-theme="light"] .fg textarea,
+[data-theme="light"] .finp {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(0,0,0,0.14) !important;
+  color: #0D1117 !important;
+}
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder,
+[data-theme="light"] .finp::placeholder { color: #9CA3AF !important; }
+[data-theme="light"] input:focus,
+[data-theme="light"] textarea:focus,
+[data-theme="light"] .finp:focus {
+  border-color: #2563EB !important;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12) !important;
+}
+
+/* ── Select dropdowns ── */
+[data-theme="light"] select,
+[data-theme="light"] .fg select,
+[data-theme="light"] .fsel,
+[data-theme="light"] .sel-status {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(0,0,0,0.14) !important;
+  color: #0D1117 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23374151' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+}
+[data-theme="light"] select option,
+[data-theme="light"] .fsel option {
+  background: #FFFFFF !important;
+  color: #0D1117 !important;
+}
+
+/* ── Form labels ── */
+[data-theme="light"] label,
+[data-theme="light"] .fg label,
+[data-theme="light"] .flbl {
+  color: #374151 !important;
+  font-weight: 600 !important;
+}
+
+/* ── Nav pills ── */
+[data-theme="light"] .nav-pill {
+  background: #F1F5F9 !important;
+  color: #374151 !important;
+  border-color: rgba(0,0,0,0.12) !important;
+}
+
+/* ── Notification items ── */
+[data-theme="light"] .notif-item.unread {
+  background: #EFF6FF !important;
+  border-color: rgba(37,99,235,0.20) !important;
+}
+[data-theme="light"] .notif-dot { background: #2563EB !important; }
+
+/* ── Count pills ── */
+[data-theme="light"] .count-zero { background: #F1F5F9 !important; color: #4B5563 !important; }
+[data-theme="light"] .count-pos  { background: #FEE2E2 !important; color: #991B1B !important; border-color: rgba(220,38,38,0.2) !important; }
+
+/* ── Profile sections ── */
+[data-theme="light"] .profile-header {
+  background: #FFFFFF !important;
+  border-color: rgba(0,0,0,0.09) !important;
+}
+[data-theme="light"] .profile-av-info h3 { color: #0D1117 !important; }
+[data-theme="light"] .profile-av-info p  { color: #4B5563 !important; }
+
+/* ── Tags, chips ── */
+[data-theme="light"] .ptag {
+  background: #F1F5F9 !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #374151 !important;
+}
+
+/* ── Spinner ── */
+[data-theme="light"] .spinner {
+  border-color: rgba(0,0,0,0.12) !important;
+  border-top-color: #2563EB !important;
+}
+[data-theme="light"] .loading { color: #4B5563 !important; }
+
+/* ── Toast ── */
+[data-theme="light"] .toast {
+  background: #FFFFFF !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #0D1117 !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
+}
+
+/* ── Close button ── */
+[data-theme="light"] .close-btn {
+  background: #F1F5F9 !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #374151 !important;
+}
+
+/* ── Sign area ── */
+[data-theme="light"] .sign-area {
+  border-top-color: rgba(0,0,0,0.10) !important;
+}
+
+/* ── Filter bar ── */
+[data-theme="light"] .filter-bar {
+  background: #FFFFFF !important;
+  border-color: rgba(0,0,0,0.09) !important;
+}
+
+/* ── Buttons — always readable ── */
+[data-theme="light"] .btn-gold    { color: #FFFFFF !important; }
+[data-theme="light"] .btn-red     { color: #FFFFFF !important; }
+[data-theme="light"] .btn-green   { color: #FFFFFF !important; }
+[data-theme="light"] .submit-btn  { color: #FFFFFF !important; }
+[data-theme="light"] .search-btn  { color: #FFFFFF !important; }
+[data-theme="light"] .btn-ghost {
+  background: #F1F5F9 !important;
+  color: #0D1117 !important;
+  border: 1.5px solid rgba(0,0,0,0.12) !important;
+}
+[data-theme="light"] .btn-danger {
+  color: #DC2626 !important;
+  background: rgba(220,38,38,0.07) !important;
+}
+[data-theme="light"] .btn-warn {
+  color: #92400E !important;
+  background: rgba(245,158,11,0.10) !important;
+  border-color: rgba(245,158,11,0.25) !important;
+}
+[data-theme="light"] .pcard-btn {
+  background: rgba(37,99,235,0.08) !important;
+  border-color: rgba(37,99,235,0.22) !important;
+  color: #1D4ED8 !important;
+}
+
+/* ── Furniture/3D page specific ── */
+[data-theme="light"] #furn-page-catalog button {
+  background: #F1F5F9 !important;
+  border-color: rgba(0,0,0,0.14) !important;
+  color: #0D1117 !important;
+}
+[data-theme="light"] #furn-page-catalog button:hover {
+  background: #E2E8F0 !important;
+}
+[data-theme="light"] #furn-page-catalog button span { color: #0D1117 !important; }
+[data-theme="light"] #c3d-furnpage,
+[data-theme="light"] #c3d-tfurn { background: #D4D9E3 !important; }
+[data-theme="light"] #furn-page-controls {
+  background: #F1F5F9 !important;
+  border-color: rgba(0,0,0,0.10) !important;
+}
+[data-theme="light"] #furn-page-controls button {
+  background: #FFFFFF !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #0D1117 !important;
+}
+[data-theme="light"] #furn-page-controls span { color: #374151 !important; }
+[data-theme="light"] #page-furniture [style*="color:var(--muted)"] { color: #374151 !important; }
+
+/* ── Topnav muted spans ── */
+[data-theme="light"] .topnav .nav-pill,
+[data-theme="light"] .topnav span:not(.nb-pill) { color: #374151 !important; }
+
+/* ── Notification badge ── */
+[data-theme="light"] .notif-badge { background: #DC2626 !important; color: #FFFFFF !important; }
+
+/* ═══════════════════════════════════════════════════════════
+   END UNIFIED PROFESSIONAL LIGHT THEME
+═══════════════════════════════════════════════════════════ */
 </style>
 
 </head>
@@ -695,8 +1118,15 @@ async function tFetch(url, method='GET', body=null) {
   const r = await fetch(fullUrl, opts);
   const data = await r.json().catch(() => null);
   if (!r.ok) {
+    if (r.status === 401 || r.status === 403) {
+      localStorage.clear(); sessionStorage.clear(); window.location.replace('../index.html');
+      return;
+    }
     const message = data?.message || r.statusText || 'Request failed';
     throw new Error(`${r.status} ${message} (${fullUrl})`);
+  }
+  if (data && data.success === false) {
+    throw new Error(data.message || 'Request failed');
   }
   return data;
 }
@@ -708,13 +1138,12 @@ function toggleTheme() {
   const h = document.documentElement;
   const n = h.getAttribute('data-theme')==='dark'?'light':'dark';
   h.setAttribute('data-theme', n);
-  const b = document.getElementById('theme-btn'); if(b) b.textContent = n==='dark'?'🌙':'☀️';
+  const b = document.getElementById('theme-btn'); if(b) b.innerHTML = n==='dark'?`<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>`:`<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
   localStorage.setItem('tms-theme', n);
 }
 (function(){
-  const s = 'dark';
-  document.documentElement.setAttribute('data-theme', s);
-  localStorage.setItem('tms-theme', s);
+  const saved = localStorage.getItem('tms-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
 })();
 
 // ── NAV ───────────────────────────────────────────────
@@ -758,11 +1187,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const email = user.email || '';
   const init  = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() || 'T';
 
-  // Theme apply
-  const s = 'dark';
-  document.documentElement.setAttribute('data-theme', s);
-  localStorage.setItem('tms-theme', s);
-  const tb = document.getElementById('theme-btn'); if(tb) tb.textContent = '🌙';
+  // Theme apply — respect saved preference
+  const savedTheme = localStorage.getItem('tms-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  const tb = document.getElementById('theme-btn');
+  if(tb) tb.innerHTML = savedTheme === 'dark'
+    ? `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>`
+    : `<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
 
   // Set names
   ['pav','sav'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=init; });
@@ -828,7 +1259,9 @@ async function loadProperties() {
     renderProps(allProps, rentedProps.map(p => p._id));
     const rc = document.getElementById('rc'); if(rc) rc.textContent = allProps.length;
   } catch(e) {
-    grid.innerHTML = '<div class="loading">⚠️ Backend not connected. Start the server first.</div>';
+    console.error('loadProperties error:', e);
+    const msg = e?.message ? `Backend error: ${e.message}` : 'Unable to connect to backend. Start the server first.';
+    grid.innerHTML = `<div class="loading">⚠️ ${msg}</div>`;
   }
 }
 function modelGlbPath(name) {
@@ -843,6 +1276,20 @@ function getPropertyGlbPath(p) {
 
 const DEFAULT_PANORAMA_URL = 'https://kuula.co/share/54YJg/collection/7FbtP?fs=1&vr=0&sd=1&initload=1';
 
+function normalizePanoramaUrl(url) {
+  try {
+    const u = new URL(url.trim());
+    if (/kuula\.co$/i.test(u.hostname) && u.pathname.startsWith('/share/')) {
+      if (!u.pathname.endsWith('/embed')) {
+        u.pathname = u.pathname.replace(/\/?$/, '/embed');
+      }
+    }
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
 function parseViewerConfig(model3dOrJson) {
   let cfg = model3dOrJson;
   if (typeof model3dOrJson === 'string') {
@@ -854,12 +1301,13 @@ function parseViewerConfig(model3dOrJson) {
   if (!cfg || typeof cfg !== 'object') cfg = {};
   return {
     viewerMode: cfg.viewerMode || 'panorama360',
-    panoramaUrl: cfg.panoramaUrl || cfg.embedUrl || cfg.url || DEFAULT_PANORAMA_URL
+    panoramaUrl: normalizePanoramaUrl(cfg.panoramaUrl || cfg.embedUrl || cfg.url || '')
   };
 }
 
 function getProperty360Url(p) {
-  return parseViewerConfig(p && p.model3d).panoramaUrl;
+  const url = parseViewerConfig(p && p.model3d).panoramaUrl;
+  return url || '';
 }
 
 function renderProps(list, rentedIds) {
@@ -876,39 +1324,50 @@ function renderProps(list, rentedIds) {
   list.forEach(p => { window._tenantPropMap[p._id] = p; });
   const myRented = new Set(rentedIds || []);
 
-  const emojis = {House:'🏠',Flat:'🏢',Apartment:'🏙️',Villa:'🏡',Room:'🛏️'};
+  const statusColors={available:'rgba(78,205,196,0.9)',rented:'rgba(255,179,71,0.9)',suspended:'rgba(255,107,107,0.9)'};
   grid.innerHTML = list.map(p => {
     const pid = p._id;
     const isMine = myRented.has(pid);
-    // Custom GLB: agar property ka apna model hai to woh use karo
     const panoramaUrl = getProperty360Url(p);
-        <iframe
-          src="${panoramaUrl}"
-          title="Property 360 panorama"
-          loading="lazy"
-          referrerpolicy="strict-origin-when-cross-origin"
-          style="width:100%;height:100%;background:#111;border:0;pointer-events:none"
-        ></iframe>
-        ${statusBadge}
-        <span style="position:absolute;bottom:10px;right:10px;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--blue);border:1px solid rgba(201,169,110,0.3);pointer-events:none">⬡ 3D View</span>
-        <span onclick="tenantOpenFurniture('${pid}')" style="position:absolute;bottom:10px;left:10px;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:#4ECDC4;border:1px solid rgba(78,205,196,0.3);cursor:pointer;backdrop-filter:blur(4px)">🛋️ ${Object.keys(p.tenantFurnitureLayout||{}).length>0?'✅ My Layout':'Furnish'}</span>
+    const has360 = !!panoramaUrl;
+    const coverImage = p.frontImage || (Array.isArray(p.images) && p.images.length ? p.images[0] : (typeof p.images === 'string' ? p.images : ''));
+    const thumbnail = coverImage
+      ? `<img src="${coverImage}" alt="${p.title||'Property'}">`
+      : has360
+        ? `<iframe src="${normalizePanoramaUrl(panoramaUrl)}" title="${p.title||'Property'} 360 preview" loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" style="width:100%;height:100%;border:0;background:#111;pointer-events:none"></iframe>`
+        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.7);font-size:13px;background:#111">Front image unavailable</div>`;
+    const btnBaseStyle = 'flex:1;min-width:120px';
+    const viewButton = has360
+      ? `<button class="btn btn-gold btn-sm" style="${btnBaseStyle}" onclick="tenantView3D('${pid}')">View 360</button>`
+      : `<button class="btn btn-gold btn-sm" style="${btnBaseStyle};opacity:0.65;cursor:not-allowed" disabled>360 Pending</button>`;
+    const requestBtn = isMine
+      ? `<button class="btn btn-teal btn-sm" style="${btnBaseStyle};opacity:0.65;cursor:not-allowed" disabled>✅ My Property</button>`
+      : (p.status === 'available'
+          ? `<button class="btn btn-teal btn-sm" style="${btnBaseStyle}" onclick="openRentalRequestModal('${pid}')">Request Rental</button>`
+          : `<button class="btn btn-ghost btn-sm" style="${btnBaseStyle};opacity:0.5;cursor:not-allowed" disabled>Not Available</button>`);
+    return `
+    <div class="pcard">
+      <div class="pcard-thumb" style="padding:0;cursor:pointer" onclick="tenantView3D('${pid}')">
+        ${thumbnail}
+        <span style="position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:${statusColors[p.status]||statusColors.available};color:#fff;pointer-events:none">${p.status||'available'}</span>
+        <span style="position:absolute;bottom:10px;right:10px;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--gold);border:1px solid rgba(201,169,110,0.3);pointer-events:none">${has360 ? '360 View' : 'Details'}</span>
       </div>
       <div class="pcard-body">
-        <div class="pcard-price">Rs. ${Number(p.rent||0).toLocaleString()} <span>/mo</span></div>
         <div class="pcard-title">${p.title||'Untitled'}</div>
-        <div class="pcard-loc">📍 ${p.address||p.area||'—'}</div>
-        <div class="pcard-tags">
-          <span class="ptag">🛏 ${p.beds||'?'} Beds</span>
-          <span class="ptag">🚿 ${p.baths||'?'} Baths</span>
-          <span class="ptag">${p.type||'House'}</span>
+        <div class="pcard-loc">📍 ${p.area||p.address||'—'}, ${p.city||''}</div>
+        <div style="display:flex;gap:10px;font-size:11.5px;color:var(--muted);margin-bottom:10px">
+          <span>🛏 ${p.beds||'?'}</span><span>🚿 ${p.baths||'?'}</span><span>${p.type||'House'}</span>
         </div>
-        <div style="display:flex;gap:8px">
-          <button class="pcard-btn" onclick="tenantView3D('${pid}')" style="flex:1">View 3D Model →</button>
+        <div class="pcard-price">Rs. ${Number(p.rent||0).toLocaleString()} <span>/mo</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px">${has360 ? '360 view available' : 'Details only — no 3D model yet.'}</div>
+        <div class="pcard-actions" style="flex-wrap:wrap;gap:6px;margin-top:10px">
+          ${viewButton}
           ${requestBtn}
+          <button class="btn btn-teal btn-sm" style="flex:1;min-width:120px" onclick="tenantOpenFurniture('${pid}')">${Object.keys(p.tenantFurnitureLayout||{}).length>0?'✅ My Layout':'🛋️ Furnish'}</button>
         </div>
       </div>
     </div>
-  `;
+    `;
   }).join('');
 }
 function applyFilters() {
@@ -1121,6 +1580,7 @@ async function submitComp() {
 // ═══════════════════════════════════════════════════════
 //  RENTAL REQUESTS
 // ═══════════════════════════════════════════════════════
+function openRentalRequestModal(propertyId) { showRequestModal(propertyId); }
 function showRequestModal(propertyId) {
   const prop = window._tenantPropMap[propertyId];
   if (!prop) { alert('Property not found'); return; }
@@ -1198,7 +1658,7 @@ async function loadRentalRequests() {
     
     // Update badge
     const badge = document.getElementById('rental-requests-badge');
-    const pendingCount = requests.filter(r => r.status === 'pending').length;
+    const pendingCount = requests.filter(r => r.status === 'pending' || r.status === 'negotiating').length;
     if (badge) {
       badge.textContent = pendingCount;
       badge.style.display = pendingCount > 0 ? 'flex' : 'none';
@@ -1209,37 +1669,32 @@ async function loadRentalRequests() {
       return;
     }
     
-    const statusBadges = {
-      pending: 'b-warn',
-      accepted: 'b-green',
-      rejected: 'b-red',
-      cancelled: 'b-muted'
-    };
+    const statusBadges = {pending:'b-warn',accepted:'b-green',rejected:'b-red',cancelled:'b-muted',negotiating:'b-blue'};
+    const statusEmoji = {pending:'⏳',accepted:'✅',rejected:'❌',cancelled:'🚫',negotiating:'💬'};
     
-    const statusEmoji = {
-      pending: '⏳',
-      accepted: '✅',
-      rejected: '❌',
-      cancelled: '🚫'
-    };
-    
-    list.innerHTML = requests.map(req => `
-      <div class="list-item" style="margin-bottom:10px;flex-direction:column;align-items:flex-start">
+    list.innerHTML = requests.map(req => {
+      const lastMsg = (req.negotiationMessages||[]).slice(-1)[0];
+      return `
+      <div class="list-item" style="margin-bottom:10px;flex-direction:column;align-items:flex-start;border-color:${req.status==='negotiating'?'rgba(74,158,255,0.3)':'var(--border)'}">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;width:100%;gap:10px">
           <div style="flex:1">
             <div class="li-title">${req.propertyTitle} - ${req.propertyAddress}</div>
             <div class="li-sub">📍 Rent: Rs. ${Number(req.propertyRent||0).toLocaleString()}/month · Landlord: ${req.landlordName}</div>
             <div style="font-size:11px;color:var(--muted);margin-top:4px">Requested: ${new Date(req.requestedAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>
-            ${req.message?`<div style="font-size:12px;color:var(--text);margin-top:6px;padding:8px;background:var(--input-bg);border-left:2px solid var(--blue);border-radius:4px">"${req.message}"</div>`:''}
-            ${req.respondedAt?`<div style="font-size:11px;color:var(--muted);margin-top:4px">Responded: ${new Date(req.respondedAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>`:''}
+            ${req.proposedRent ? `<div style="font-size:12px;color:var(--blue);font-weight:600;margin-top:4px">🏷️ Aapki offer: Rs. ${Number(req.proposedRent).toLocaleString()}/mo</div>` : ''}
+            ${req.agreedRent ? `<div style="font-size:12px;color:var(--green);font-weight:600;margin-top:4px">🤝 Agreed rent: Rs. ${Number(req.agreedRent).toLocaleString()}/mo</div>` : ''}
+            ${lastMsg ? `<div style="font-size:12px;color:var(--muted);margin-top:6px;padding:8px;background:var(--input-bg);border-left:2px solid var(--blue);border-radius:4px">${lastMsg.senderRole==='landlord'?'🏠 Landlord':'Aap'}: ${lastMsg.text||''}${lastMsg.proposedRent?' · Rs. '+Number(lastMsg.proposedRent).toLocaleString()+'/mo':''}</div>` : (req.message?`<div style="font-size:12px;color:var(--text);margin-top:6px;padding:8px;background:var(--input-bg);border-left:2px solid var(--blue);border-radius:4px">"${req.message}"</div>`:'')}
           </div>
           <span class="badge ${statusBadges[req.status]||'b-warn'}">${statusEmoji[req.status]||''} ${req.status}</span>
         </div>
-        ${req.status === 'pending' ? `<div style="display:flex;gap:8px;margin-top:10px;width:100%">
-          <button onclick="cancelRentalRequest('${req._id}')" style="flex:1;padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Cancel Request</button>
-        </div>` : ''}
-      </div>
-    `).join('');
+        <div style="display:flex;gap:8px;margin-top:10px;width:100%">
+          ${(req.status==='pending'||req.status==='negotiating') ? `
+            <button onclick="openTenantNegModal('${req._id}','${(req.propertyTitle||'').replace(/'/g,"\\'")}',${req.propertyRent||0},${req.proposedRent||0})" style="flex:1;padding:7px 12px;border-radius:7px;border:none;background:rgba(74,158,255,0.12);color:var(--blue);font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">💬 ${(req.negotiationMessages||[]).length?'Chat':'Negotiate'}</button>
+            <button onclick="cancelRentalRequest('${req._id}')" style="flex:1;padding:7px 12px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Cancel</button>
+          ` : ''}
+        </div>
+      </div>`;
+    }).join('');
   } catch(e) {
     list.innerHTML = '<div class="loading">⚠️ Error loading requests.</div>';
   }
@@ -1403,7 +1858,7 @@ async function loadLease() {
               </div>
               <div style="background:rgba(201,169,110,0.12)"></div>
               <div style="padding:16px 18px">
-                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:700;margin-bottom:8px">🏠 TENANT (Lessee)</div>
+                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:700;margin-bottom:8px">TENANT (Lessee)</div>
                 <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px">${l.tenantName||user.name||'—'}</div>
                 <div style="font-size:12px;color:var(--muted)">Resident Occupant</div>
               </div>
@@ -1606,20 +2061,44 @@ async function signLease() {
 //  NOTIFICATIONS (static for now — can be extended)
 // ═══════════════════════════════════════════════════════
 function loadNotifications() {
-  if (typeof tmsRenderNotifs === 'function') {
-    tmsRenderNotifs();
-  } else {
-    const container = document.getElementById('notifs-list');
-    if (container) {
-      container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">Notifications are unavailable right now.</div>`;
-    }
-  }
-  // Mark all read and hide badge
+  const container = document.getElementById('notifs-list');
+  if (!container) return;
+  // Mark read and hide badge
   if (typeof TMS !== 'undefined') {
     TMS.markAllNotifsRead();
     const nb = document.getElementById('nb'); if(nb) nb.style.display='none';
     const nb2 = document.getElementById('nb2'); if(nb2) nb2.style.display='none';
   }
+  // Render received notifications for this user
+  const list = (typeof TMS !== 'undefined')
+    ? TMS.getNotifs().filter(n => TMS._isNotifForUser(n))
+    : [];
+  if (!list.length) {
+    container.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--muted)">
+      <div style="font-size:40px;margin-bottom:12px">🔔</div>
+      <div style="font-size:14px;font-weight:600">No notifications yet</div>
+      <div style="font-size:12px;margin-top:6px">Your landlord's messages will appear here</div>
+    </div>`;
+    return;
+  }
+  const colorMap = { gold: 'var(--gold)', blue: '#4A9EFF', green: '#4ECDC4', red: '#FF6B6B', warn: '#FFB347' };
+  container.innerHTML = list.map(n => {
+    const dot = colorMap[n.color] || n.color || 'var(--gold)';
+    return `
+      <div style="display:flex;gap:12px;padding:16px;background:var(--card);border:1px solid ${n.read ? 'var(--border)' : 'rgba(201,169,110,0.3)'};border-radius:13px;margin-bottom:10px;${n.read ? '' : 'background:rgba(201,169,110,0.04)'}">
+        <div style="width:10px;height:10px;border-radius:50%;background:${dot};flex-shrink:0;margin-top:5px"></div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+            <div style="font-size:14px;font-weight:700;color:var(--text)">${n.title}</div>
+            ${!n.read ? '<span style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(201,169,110,0.18);color:var(--gold);font-weight:700;flex-shrink:0">NEW</span>' : ''}
+          </div>
+          <div style="font-size:13px;color:var(--text);margin-top:6px;line-height:1.6">${n.msg}</div>
+          <div style="margin-top:8px;font-size:11px;color:var(--muted)">
+            👤 From: <strong style="color:var(--text)">${n.from || 'System'}</strong> &nbsp;·&nbsp; 🕐 ${n.time}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1650,10 +2129,15 @@ async function saveProfile() {
 //  3D MODAL
 // ═══════════════════════════════════════════════════════
 function open3D(id, name, model3dOrJson, type) {
+  const viewerCfg = parseViewerConfig(model3dOrJson);
+  if (!viewerCfg.panoramaUrl) {
+    alert('3D view is not yet available for this property. Please wait for admin approval.');
+    return;
+  }
+  window._t3dPropId = id;
   document.getElementById('ov3d').classList.add('open');
   document.getElementById('m3dn').textContent = (name || 'Property') + ' — Full Opening 360 View';
   document.body.style.overflow = 'hidden';
-  const viewerCfg = parseViewerConfig(model3dOrJson);
   const loadingEl = document.getElementById('c3main-loading');
   if (loadingEl) loadingEl.style.display = 'flex';
   const viewer = document.getElementById('c3main-viewer');
@@ -1667,6 +2151,10 @@ function open3D(id, name, model3dOrJson, type) {
 }
 function tenantView3D(propId) {
   const p = (window._tenantPropMap||{})[propId]; if(!p) return;
+  const panoramaUrl = getProperty360Url(p);
+  if (!panoramaUrl) {
+    return alert('3D view is pending admin approval for this property.');
+  }
   open3D(propId, p.title, p.model3d, p.type);
 }
 function c3d() {
@@ -1737,11 +2225,8 @@ async function saveTenantFurnitureLayout() {
     if (toast) { toast.style.display='flex'; setTimeout(()=>toast.style.display='none',2500); }
     const badge = document.getElementById('tfurn-saved-badge');
     if (badge) badge.style.display = 'flex';
-    // Refresh property map so re-open shows saved layout
-    const data = await tFetch('/properties?status=available');
-    allProps = data.properties || [];
-    window._tenantPropMap = {};
-    allProps.forEach(p => { window._tenantPropMap[p._id] = p; });
+    // Refresh property list including rented properties so Furnish remains available
+    await loadProperties();
   } catch(e) { alert('Layout save nahi ho saka.'); }
   finally { if(btn){btn.disabled=false;btn.textContent='💾 Save Layout';} }
 }
@@ -1763,9 +2248,9 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
     <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
     <span class="logo-text">TMS</span><span class="logo-sep" style="margin:0 4px">/</span><span style="font-size:12px;color:var(--muted)">Tenant</span>
   </div>
-  <span class="nav-pill">🏠 Tenant Portal</span>
-  <button class="icon-btn" onclick="sp('notifications',null)" title="Notifications">🔔<span class="notif-badge" id="nb" style="display:none">0</span></button>
-  <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+  <span class="nav-pill">Tenant Portal</span>
+  <button class="icon-btn" onclick="sp('notifications',null)" title="Notifications"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span class="notif-badge" id="nb" style="display:none">0</span></button>
+  <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></button>
   <button class="logout-btn" onclick="tmsLogout()">
     <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout
   </button>
@@ -1929,7 +2414,7 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
       </div>
       <!-- Canvas -->
       <div style="position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--border)">
-        <canvas id="c3d-furnpage" style="width:100%;height:520px;display:block;background:#1A1A2E;border-radius:10px"></canvas>
+        <canvas id="c3d-furnpage" style="width:100%;height:520px;display:block;background:#1A1A2E;border-radius:10px" class="furn-canvas"></canvas>
         <div id="furn-page-viewlabel" style="position:absolute;top:12px;left:14px;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.6);font-size:11px;font-weight:700;color:#4ECDC4;display:none"></div>
       </div>
       <!-- Action buttons -->
@@ -2049,34 +2534,13 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
   <!-- NOTIFICATIONS -->
   <div class="page" id="page-notifications">
     <div class="pg-head">
-      <div><div class="pg-title">Notifications</div><div class="pg-sub">Your recent updates</div></div>
+      <div><div class="pg-title">Notifications</div><div class="pg-sub">Messages from your landlord and admin</div></div>
     </div>
-    <div class="card" style="margin-bottom:18px;">
-      <div style="display:grid;gap:14px">
-        <div style="display:grid;grid-template-columns:1fr 160px;gap:14px;align-items:end">
-          <div class="fg" style="margin-bottom:0">
-            <label>Title</label>
-            <input id="notif-title" placeholder="Notification title" type="text">
-          </div>
-          <div class="fg" style="margin-bottom:0">
-            <label>Send to</label>
-            <select id="notif-to">
-              <option value="all">Everyone</option>
-              <option value="tenant">Tenants</option>
-              <option value="landlord">Landlords</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-        </div>
-        <div class="fg full" style="margin-bottom:0">
-          <label>Message</label>
-          <textarea id="notif-msg" placeholder="Write your notification message..."></textarea>
-        </div>
-        <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap">
-          <button class="submit-btn" onclick="tmsSendNotification()">Send Notification</button>
-          <span id="notif-ok" class="toast">Notification sent!</span>
-        </div>
-      </div>
+
+    <!-- Received Notifications -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="font-size:14px;font-weight:700;color:var(--text)">📥 My Notifications</div>
+      <button onclick="if(typeof TMS!=='undefined'){TMS.markAllNotifsRead();loadNotifications();}" style="font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;padding:4px 8px">Mark all read</button>
     </div>
     <div id="notifs-list"></div>
   </div>
@@ -2089,6 +2553,7 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
     <div class="ov-head">
       <span class="ov-title" id="m3dn">360 View</span>
       <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn btn-ghost btn-sm" style="padding:8px 12px" onclick="tenantOpenFurniture(window._t3dPropId)">🛋️ Furnish</button>
         <button class="close-btn" onclick="c3d()">✕</button>
       </div>
     </div>
@@ -2102,12 +2567,17 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
         referrerpolicy="strict-origin-when-cross-origin"
         style="width:100%;height:100%;background:#0a0d16;border:0"
       ></iframe>
+      <!-- Overlays to hide third-party watermarks -->
+      <div style="position:absolute;bottom:0;left:0;width:180px;height:48px;background:#0a0d16;pointer-events:none;z-index:10"></div>
+      <div style="position:absolute;bottom:0;right:0;width:160px;height:48px;background:#0a0d16;pointer-events:none;z-index:10"></div>
+      <div style="position:absolute;top:0;left:0;width:160px;height:44px;background:#0a0d16;pointer-events:none;z-index:10"></div>
+      <div style="position:absolute;top:0;right:0;width:160px;height:44px;background:#0a0d16;pointer-events:none;z-index:10"></div>
       <div id="c3main-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0a0d16;flex-direction:column;gap:10px;pointer-events:none">
         <div style="width:36px;height:36px;border:3px solid rgba(201,169,110,0.3);border-top-color:#C9A96E;border-radius:50%;animation:spin 0.8s linear infinite"></div>
         <span style="color:#C9A96E;font-size:12px;font-weight:600">Loading 360 View...</span>
       </div>
     </div>
-    <div style="padding:8px 16px;font-size:11px;color:var(--muted);text-align:center;border-top:1px solid var(--border)">Drag inside the viewer to move around just like the Kuula link.</div>
+    <div style="padding:8px 16px;font-size:11px;color:var(--muted);text-align:center;border-top:1px solid var(--border)">360° view — drag to explore the property.</div>
   </div>
 </div>
 
@@ -2247,8 +2717,8 @@ function loadFurniturePage() {
       const btn = document.createElement('button');
       btn.style.cssText = 'padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:DM Sans,sans-serif;font-size:11.5px;display:flex;align-items:center;gap:5px;transition:background 0.12s';
       btn.innerHTML = `<span>${item.icon}</span><span>${item.label}</span>`;
-      btn.onmouseenter = () => btn.style.background = 'var(--input-bg)';
-      btn.onmouseleave = () => btn.style.background = 'var(--card)';
+      btn.onmouseenter = () => btn.style.background = document.documentElement.getAttribute('data-theme')==='light' ? '#E2E2E2' : 'var(--input-bg)';
+      btn.onmouseleave = () => btn.style.background = document.documentElement.getAttribute('data-theme')==='light' ? '#F0F0F0' : 'var(--card)';
       btn.onclick = () => {
         const sc = getFurnitureScene('c3d-furnpage');
         if (sc) sc.addFurniture(item.type, parseInt(item.color.replace('#',''),16));
@@ -2344,11 +2814,8 @@ async function furnPageSave() {
     await tFetch('/properties/'+_furnPagePropId+'/furniture/tenant','PUT',layout);
     const badge = document.getElementById('furn-page-saved-badge');
     if (badge) badge.style.display = 'flex';
-    // Refresh allProps map
-    const data = await tFetch('/properties?status=available');
-    allProps = data.properties||[];
-    window._tenantPropMap = {};
-    allProps.forEach(p => { window._tenantPropMap[p._id] = p; });
+    // Refresh property list including rented properties so Furnish remains available
+    await loadProperties();
     // Check if landlord has layout now — show toggle
     const updatedProp = (window._tenantPropMap||{})[_furnPagePropId];
     const hasLandlord = Object.keys((updatedProp||{}).landlordFurnitureLayout||{}).length > 0;
@@ -2387,9 +2854,10 @@ function furnPageDownloadJSON() {
     <div style="padding:22px 24px">
       <!-- Tabs -->
       <div style="display:flex;background:rgba(255,255,255,0.04);border-radius:10px;padding:3px;margin-bottom:18px;gap:3px">
-        <button id="sig-tab-draw" onclick="switchSigTab('draw')" style="flex:1;padding:9px;border-radius:8px;border:none;background:rgba(201,169,110,0.15);color:var(--gold);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">✍️ Draw Signature</button>
-        <button id="sig-tab-type" onclick="switchSigTab('type')" style="flex:1;padding:9px;border-radius:8px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer">⌨️ Type Signature</button>
-        <button id="sig-tab-thumb" onclick="switchSigTab('thumb')" style="flex:1;padding:9px;border-radius:8px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer">👆 Thumb Print</button>
+        <button id="sig-tab-draw" onclick="switchSigTab('draw')" style="flex:1;padding:9px;border-radius:8px;border:none;background:rgba(201,169,110,0.15);color:var(--gold);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">✍️ Draw</button>
+        <button id="sig-tab-type" onclick="switchSigTab('type')" style="flex:1;padding:9px;border-radius:8px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer">⌨️ Type</button>
+        <button id="sig-tab-thumb" onclick="switchSigTab('thumb')" style="flex:1;padding:9px;border-radius:8px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer">👆 Thumb</button>
+        <button id="sig-tab-pdf" onclick="switchSigTab('pdf')" style="flex:1;padding:9px;border-radius:8px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer">📄 PDF</button>
       </div>
 
       <!-- DRAW TAB -->
@@ -2440,6 +2908,43 @@ function furnPageDownloadJSON() {
         <div style="font-size:11px;color:var(--muted);margin-top:10px">Fingerprint — For Legal Enforceability, Use Physical Stamp on Printed Copy</div>
       </div>
 
+
+      <!-- PDF UPLOAD TAB -->
+      <div id="sig-panel-pdf" style="display:none;padding:8px 0">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">
+          Upload the signed agreement PDF — it will be attached to the agreement and available for download.
+        </div>
+        <!-- Drop zone -->
+        <div id="pdf-drop-zone" onclick="document.getElementById('sig-pdf-input').click()" 
+             ondragover="event.preventDefault();this.style.borderColor='var(--gold)'" 
+             ondragleave="this.style.borderColor='rgba(201,169,110,0.25)'"
+             ondrop="handlePdfDrop(event)"
+             style="border:2px dashed rgba(201,169,110,0.25);border-radius:14px;padding:36px 20px;text-align:center;cursor:pointer;transition:border-color 0.2s;background:rgba(201,169,110,0.03)">
+          <div style="font-size:36px;margin-bottom:10px">📄</div>
+          <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">PDF File Yahan Drop Karo</div>
+          <div style="font-size:12px;color:var(--muted)">or click to select a file</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:8px">Sirf PDF files • Max 10MB</div>
+        </div>
+        <input type="file" id="sig-pdf-input" accept=".pdf,application/pdf" style="display:none" onchange="handlePdfSelect(event)">
+        <!-- Preview area (hidden until file selected) -->
+        <div id="pdf-preview-area" style="display:none;margin-top:14px;background:var(--input-bg);border:1px solid rgba(201,169,110,0.15);border-radius:12px;padding:14px 16px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:42px;height:42px;border-radius:10px;background:rgba(255,107,107,0.12);border:1px solid rgba(255,107,107,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📄</div>
+            <div style="flex:1;min-width:0">
+              <div id="pdf-file-name" style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
+              <div id="pdf-file-size" style="font-size:11px;color:var(--muted);margin-top:2px">—</div>
+            </div>
+            <button onclick="clearPdfSelection()" style="width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,107,107,0.1);color:#FF6B6B;font-size:14px;cursor:pointer;flex-shrink:0">✕</button>
+          </div>
+          <div style="margin-top:12px;padding:10px 12px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.18);border-radius:8px;font-size:12px;color:#22c55e;font-weight:600">
+            ✅ PDF ready — click "Apply Signature" button to save the agreement
+          </div>
+        </div>
+        <div style="margin-top:14px;padding:10px 13px;background:rgba(74,158,255,0.06);border:1px solid rgba(74,158,255,0.15);border-radius:9px;font-size:12px;color:var(--muted);line-height:1.6">
+          <strong style="color:var(--text)">Note:</strong> Yeh PDF locally save hogi — download karke dobara dekh sakte hain.
+        </div>
+      </div>
+
       <!-- Confirmation -->
       <div style="margin-top:18px;background:rgba(201,169,110,0.05);border:1px solid rgba(201,169,110,0.12);border-radius:10px;padding:12px 14px">
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
@@ -2448,7 +2953,7 @@ function furnPageDownloadJSON() {
         </label>
       </div>
       <div style="display:flex;gap:10px;margin-top:14px">
-        <button onclick="applyDigitalSignature()" style="flex:1;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--gold),var(--gold-l,#E8C97A));color:#0A0C0F;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.1px">✅ Apply Signature to Agreement</button>
+        <button onclick="applyDigitalSignature()" style="flex:1;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--blue),var(--blue-l));color:#FFFFFF;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.1px">✅ Apply Signature to Agreement</button>
       </div>
       <div id="sig-error" style="display:none;margin-top:10px;padding:9px 13px;background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.2);border-radius:8px;color:#FF6B6B;font-size:12px;font-weight:600"></div>
     </div>
@@ -2520,7 +3025,7 @@ function closeSignaturePad() {
 
 function switchSigTab(tab) {
   _sigTab = tab;
-  ['draw','type','thumb'].forEach(t => {
+  ['draw','type','thumb','pdf'].forEach(t => {
     document.getElementById('sig-panel-'+t).style.display = t===tab ? 'block' : 'none';
     const btn = document.getElementById('sig-tab-'+t);
     if(btn) {
@@ -2625,6 +3130,47 @@ function loadThumbImage(event) {
 }
 
 // ── Apply Signature ──
+
+// ── PDF Upload for Signature ──────────────────────────────
+let _sigPdfDataUrl = null;
+
+function handlePdfDrop(e) {
+  e.preventDefault();
+  document.getElementById('pdf-drop-zone').style.borderColor = 'rgba(201,169,110,0.25)';
+  const file = e.dataTransfer.files[0];
+  if (file) processPdfFile(file);
+}
+
+function handlePdfSelect(e) {
+  const file = e.target.files[0];
+  if (file) processPdfFile(file);
+}
+
+function processPdfFile(file) {
+  if (!file.type.includes('pdf') && !file.name.endsWith('.pdf')) {
+    alert('Sirf PDF file upload ho sakti hai.'); return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    alert('PDF file 10MB se choti honi chahiye.'); return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    _sigPdfDataUrl = e.target.result;
+    document.getElementById('pdf-file-name').textContent = file.name;
+    document.getElementById('pdf-file-size').textContent = (file.size / 1024).toFixed(1) + ' KB';
+    document.getElementById('pdf-preview-area').style.display = 'block';
+    document.getElementById('pdf-drop-zone').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearPdfSelection() {
+  _sigPdfDataUrl = null;
+  document.getElementById('sig-pdf-input').value = '';
+  document.getElementById('pdf-preview-area').style.display = 'none';
+  document.getElementById('pdf-drop-zone').style.display = 'block';
+}
+
 async function applyDigitalSignature() {
   const errEl = document.getElementById('sig-error');
   errEl.style.display = 'none';
@@ -2878,6 +3424,96 @@ document.getElementById('lease-doc-modal').addEventListener('click', function(e)
 
 // Init first tab
 setTimeout(()=>{ if(document.getElementById('sig-canvas')) initSigCanvas(); }, 200);
+</script>
+
+<!-- TENANT NEGOTIATION MODAL -->
+<div class="ov" id="ov-tenant-neg-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;width:min(500px,96vw);max-height:90vh;overflow:hidden;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--text)">💬 Price Negotiate Karein</div>
+        <div id="teg-modal-title" style="font-size:12px;color:var(--muted);margin-top:2px"></div>
+      </div>
+      <button onclick="closeTenantNegModal()" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--input-bg);cursor:pointer;font-size:18px;color:var(--muted)">×</button>
+    </div>
+    <div style="display:flex;gap:0;border-bottom:1px solid var(--border)">
+      <div style="flex:1;padding:12px 16px;text-align:center;border-right:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Listed Rent</div>
+        <div id="teg-original-rent" style="font-size:15px;font-weight:700;color:var(--text);font-family:'Playfair Display',serif"></div>
+      </div>
+      <div style="flex:1;padding:12px 16px;text-align:center">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Aapki Offer</div>
+        <div id="teg-proposed-rent" style="font-size:15px;font-weight:700;color:var(--blue);font-family:'Playfair Display',serif"></div>
+      </div>
+    </div>
+    <div id="teg-messages" style="flex:1;padding:16px;overflow-y:auto;max-height:250px;min-height:100px;display:flex;flex-direction:column"></div>
+    <div style="border-top:1px solid var(--border);padding:14px 16px">
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Aapki Proposed Rent (Rs.)</label>
+        <input type="number" id="teg-rent-input" placeholder="Amount likhein..." style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Message (Reason)</label>
+        <textarea id="teg-msg-input" rows="2" placeholder="Apna reason likhein — jaise: Budget kam hai, long-term rehna chahta hoon..." style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none"></textarea>
+      </div>
+      <button onclick="sendTenantNegMsg()" style="width:100%;padding:10px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--blue),var(--blue-l));color:#FFFFFF;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer">🏷️ Negotiate Bhejein</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let _tNegReqId = '';
+function openTenantNegModal(reqId, propTitle, originalRent, currentProposed) {
+  _tNegReqId = reqId;
+  document.getElementById('teg-modal-title').textContent = propTitle;
+  document.getElementById('teg-original-rent').textContent = 'Rs. '+Number(originalRent).toLocaleString()+'/mo';
+  document.getElementById('teg-proposed-rent').textContent = currentProposed ? 'Rs. '+Number(currentProposed).toLocaleString()+'/mo' : 'Abhi tak koi offer nahi';
+  document.getElementById('teg-rent-input').value = currentProposed || originalRent;
+  loadTenantNegMessages(reqId);
+  const modal = document.getElementById('ov-tenant-neg-modal');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeTenantNegModal() {
+  document.getElementById('ov-tenant-neg-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+async function loadTenantNegMessages(reqId) {
+  const el = document.getElementById('teg-messages');
+  if(!el)return;
+  try {
+    const data = await tFetch('/rental-requests/'+reqId+'/negotiation');
+    const msgs = (data.request?.negotiationMessages)||[];
+    if(!msgs.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">💬 Negotiation shuru nahi hui. Apni offer bhejein!</div>';return;}
+    el.innerHTML = msgs.map(m=>`
+      <div style="display:flex;flex-direction:column;align-items:${m.senderRole==='tenant'?'flex-end':'flex-start'};margin-bottom:10px">
+        <div style="max-width:78%;padding:10px 14px;border-radius:${m.senderRole==='tenant'?'14px 14px 4px 14px':'14px 14px 14px 4px'};background:${m.senderRole==='tenant'?'rgba(201,169,110,0.15)':'rgba(74,158,255,0.12)'};border:1px solid ${m.senderRole==='tenant'?'rgba(201,169,110,0.25)':'rgba(74,158,255,0.2)'}">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px">${m.senderRole==='tenant'?'🧑 Aap':'🏠 Landlord'}</div>
+          <div style="font-size:13px;color:var(--text)">${m.text||''}</div>
+          ${m.proposedRent?`<div style="font-size:12px;color:var(--gold);font-weight:700;margin-top:4px">🏷️ Offer: Rs. ${Number(m.proposedRent).toLocaleString()}/mo</div>`:''}
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px">${new Date(m.sentAt).toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+    `).join('');
+    el.scrollTop = el.scrollHeight;
+    if(data.request?.proposedRent) document.getElementById('teg-proposed-rent').textContent = 'Rs. '+Number(data.request.proposedRent).toLocaleString()+'/mo';
+  } catch(e){console.error(e);}
+}
+async function sendTenantNegMsg() {
+  const text = document.getElementById('teg-msg-input')?.value?.trim()||'';
+  const proposedRent = document.getElementById('teg-rent-input')?.value;
+  if (!text && !proposedRent) { alert('Pehle apni offer ya message likhein.'); return; }
+  try {
+    const data = await tFetch('/rental-requests/'+_tNegReqId+'/negotiate','PUT',{
+      text, proposedRent: proposedRent ? Number(proposedRent) : undefined
+    });
+    if(data.success) {
+      document.getElementById('teg-msg-input').value='';
+      await loadTenantNegMessages(_tNegReqId);
+      await loadRentalRequests();
+    } else alert(data.message||'Error');
+  } catch{alert('Server se connect nahi ho saka.');}
+}
 </script>
 </body>
 

@@ -208,12 +208,28 @@ const TMS = {
     });
     if (notifs.length > 50) notifs.pop();
     this.save(this.KEYS.notifications, notifs);
+    // ── Broadcast to other open tabs ──────────────────
+    try {
+      if (window._tmsBroadcast) {
+        window._tmsBroadcast.postMessage({ type: 'tms_notif_update' });
+      }
+    } catch(e) {}
+    this._refreshNotifBadge();
+  },
+
+  _refreshNotifBadge() {
+    const notifs = this.getNotifs();
     const unread = notifs.filter(n => !n.read && this._isNotifForUser(n)).length;
     document.querySelectorAll('.tn-badge, #notif-nb, #nb, #nb2, #nb-notifs-admin').forEach(el => {
       if (!el) return;
       el.textContent = unread;
       el.style.display = unread > 0 ? 'flex' : 'none';
     });
+    // Also refresh list if notifications page is currently visible
+    const notifPageEl = document.getElementById('page-notifications');
+    if (notifPageEl && notifPageEl.classList.contains('active')) {
+      if (typeof tmsRenderNotifs === 'function') tmsRenderNotifs();
+    }
   },
 
   markAllNotifsRead() {
@@ -759,18 +775,50 @@ function tmsShowFormMsg(elId, msg, success) {
 }
 
 // ── Send Notification Handler ────────────────────────────
+function tmsOnNotifToChange() {
+  const toVal = document.getElementById('notif-to')?.value || 'all';
+  const specificWrap = document.getElementById('notif-specific-wrap');
+  const specificSel = document.getElementById('notif-specific');
+  if (!specificWrap || !specificSel) return;
+  if (toVal === 'tenant') {
+    const tenants = TMS.getTenants();
+    specificSel.innerHTML = '<option value="">\u2014 Sab Tenants \u2014</option>' +
+      tenants.map(t => '<option value="' + (t.email || t.id) + '">' + t.name + (t.email ? ' (' + t.email + ')' : '') + '</option>').join('');
+    specificWrap.style.display = 'block';
+  } else if (toVal === 'landlord') {
+    const landlords = TMS.getLandlords();
+    specificSel.innerHTML = '<option value="">\u2014 Sab Landlords \u2014</option>' +
+      landlords.map(l => '<option value="' + (l.email || l.id) + '">' + l.name + (l.email ? ' (' + l.email + ')' : '') + '</option>').join('');
+    specificWrap.style.display = 'block';
+  } else {
+    specificSel.innerHTML = '';
+    specificWrap.style.display = 'none';
+  }
+}
+
 function tmsSendNotification() {
   const title = document.getElementById('notif-title')?.value.trim();
   const msg = document.getElementById('notif-msg')?.value.trim();
-  const to = document.getElementById('notif-to')?.value || 'all';
-  if (!title || !msg) { alert('Title and message required.'); return; }
+  const toRole = document.getElementById('notif-to')?.value || 'all';
+  const specific = document.getElementById('notif-specific')?.value || '';
+  if (!title || !msg) { alert('Title aur message zaroori hain.'); return; }
+  // Agar specific person select kiya toh uska email/id use karo, warna role
+  const to = (specific && (toRole === 'tenant' || toRole === 'landlord')) ? specific : toRole;
   const current = TMS.getCurrentUser();
   const sender = current?.role || 'admin';
   TMS.addNotif(title, msg, 'blue', to, sender);
-  TMS.addLog('info', `${sender} sent notification to ${to}: "${title}"`, sender || 'system');
+  let toLabel = to;
+  if (specific) {
+    const sel = document.getElementById('notif-specific');
+    const opt = sel?.options[sel.selectedIndex];
+    toLabel = opt ? opt.text : to;
+  }
+  TMS.addLog('info', `${sender} sent notification to ${toLabel}: "${title}"`, sender || 'system');
   document.getElementById('notif-title').value = '';
   document.getElementById('notif-msg').value = '';
   if (document.getElementById('notif-to')) document.getElementById('notif-to').value = 'all';
+  const sw = document.getElementById('notif-specific-wrap');
+  if (sw) sw.style.display = 'none';
   tmsRenderNotifs(); tmsUpdateStats();
   const ok = document.getElementById('notif-ok');
   if (ok) { ok.classList.add('show'); setTimeout(() => ok.classList.remove('show'), 3000); }
@@ -829,3 +877,42 @@ document.addEventListener('DOMContentLoaded', () => {
   tmsRenderPendingActions();
   tmsRenderRecentActivity();
 });
+
+// ── Cross-tab notification sync ───────────────────────────
+// Method 1: BroadcastChannel (same browser, multiple tabs)
+try {
+  window._tmsBroadcast = new BroadcastChannel('tms_notifications_channel');
+  window._tmsBroadcast.onmessage = (e) => {
+    if (e.data && e.data.type === 'tms_notif_update') {
+      if (typeof TMS !== 'undefined') {
+        TMS._refreshNotifBadge();
+        if (typeof tmsUpdateStats === 'function') tmsUpdateStats();
+        if (typeof tmsRenderNotifs === 'function') {
+          const notifPage = document.getElementById('notifs-list');
+          if (notifPage) tmsRenderNotifs();
+        }
+      }
+    }
+  };
+} catch(e) {}
+
+// Method 2: storage event (cross-tab fallback)
+window.addEventListener('storage', (e) => {
+  if (e.key === 'tms_notifications') {
+    if (typeof TMS !== 'undefined') {
+      TMS._refreshNotifBadge();
+      if (typeof tmsUpdateStats === 'function') tmsUpdateStats();
+      if (typeof tmsRenderNotifs === 'function') {
+        const notifPage = document.getElementById('notifs-list');
+        if (notifPage) tmsRenderNotifs();
+      }
+    }
+  }
+});
+
+// Method 3: Polling every 3 seconds as safety net
+setInterval(() => {
+  if (typeof TMS !== 'undefined' && typeof TMS._refreshNotifBadge === 'function') {
+    TMS._refreshNotifBadge();
+  }
+}, 3000);
