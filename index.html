@@ -101,6 +101,29 @@
     [data-theme="light"] .or-divider::before, [data-theme="light"] .or-divider::after { background: rgba(0,0,0,0.1); }
     [data-theme="light"] .panel-footer { color: #AAB0BA; }
     [data-theme="light"] .strength-seg { background: rgba(0,0,0,0.08); }
+    /* Logo text visible on light theme */
+    [data-theme="light"] .logo h1 {
+      background: linear-gradient(135deg, #B8892A 0%, #C9A96E 100%) !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+    }
+    /* Card & panel text */
+    [data-theme="light"] .panel-footer { color: #9CA3AF !important; }
+    [data-theme="light"] .tab { color: #7A8390 !important; }
+    [data-theme="light"] .tab.active { color: #1A1E26 !important; background: rgba(255,255,255,0.85) !important; }
+    [data-theme="light"] .role-card-inline { background: rgba(0,0,0,0.02) !important; border-color: rgba(0,0,0,0.08) !important; }
+    [data-theme="light"] .role-inline-desc { color: #7A8390 !important; }
+    [data-theme="light"] .role-inline-name { color: #1A1E26 !important; }
+    [data-theme="light"] .form-label { color: #6B7280 !important; }
+    [data-theme="light"] .switch-text { color: #7A8390 !important; }
+    [data-theme="light"] .forgot-link { color: #7A8390 !important; }
+    [data-theme="light"] .logo p { color: #7A8390 !important; }
+    [data-theme="light"] .or-divider { color: #9CA3AF !important; }
+    [data-theme="light"] .btn-google { background: rgba(0,0,0,0.03) !important; border-color: rgba(0,0,0,0.1) !important; color: #1A1E26 !important; }
+    [data-theme="light"] .btn-google:hover { background: rgba(0,0,0,0.07) !important; }
+    [data-theme="light"] .strength-seg { background: rgba(0,0,0,0.08) !important; }
+
 
     /* ── Google Account Modal ── */
     .g-overlay {
@@ -389,9 +412,41 @@ body::after {
           </div>
           <div id="role-error" class="role-error-msg">Please select a role to continue.</div>
         </div>
-        <button class="btn-primary btn-gold" id="signup-btn" onclick="handleSignup()">Create Account</button>
+        <button class="btn-primary btn-gold" id="signup-btn" onclick="handleSignup()">Send Verification Code</button>
         <div class="switch-text">
           Already have an account? <button class="switch-link" onclick="switchTab('signin')">Sign in</button>
+        </div>
+      </div>
+
+      <!-- ===== OTP VERIFICATION STEP ===== -->
+      <div id="form-otp" style="display:none;">
+        <button class="back-btn" onclick="showOtpBack()" style="margin-bottom:16px;">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <div style="text-align:center;margin-bottom:20px;">
+          <div style="font-size:48px;margin-bottom:8px;">📧</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">Check Your Email</div>
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.5;">
+            We've sent a 6-digit verification code to<br>
+            <strong id="otp-email-display" style="color:var(--gold);"></strong>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Enter OTP Code</label>
+          <div class="input-wrap">
+            <input type="text" class="form-input" id="otp-input" placeholder="Enter 6-digit code" maxlength="6"
+              style="letter-spacing:6px;font-size:22px;font-weight:700;text-align:center;"
+              oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+              onkeydown="if(event.key==='Enter')verifyOTP()">
+            <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);text-align:center;margin-bottom:16px;" id="otp-timer"></div>
+        <button class="btn-primary btn-gold" id="otp-verify-btn" onclick="verifyOTP()">Verify & Create Account</button>
+        <div style="text-align:center;margin-top:14px;">
+          <span style="font-size:13px;color:var(--text-secondary);">Didn't receive it? </span>
+          <button class="switch-link" id="resend-otp-btn" onclick="resendOTP()" style="font-size:13px;" disabled>Resend OTP</button>
         </div>
       </div>
 

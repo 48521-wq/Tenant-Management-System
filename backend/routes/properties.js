@@ -21,12 +21,11 @@ router.get('/', async (req, res) => {
     if (req.query.beds)       filter.beds   = { $gte: Number(req.query.beds) };
     if (req.query.maxRent)    filter.rent   = { $lte: Number(req.query.maxRent) };
     if (req.query.landlordId) {
-      // MongoDB stores landlordId as ObjectId — use string comparison via regex or cast
       const mongoose = require('mongoose');
       try {
         filter.landlordId = new mongoose.Types.ObjectId(req.query.landlordId);
       } catch {
-        filter.landlordId = req.query.landlordId; // fallback if not valid ObjectId
+        filter.landlordId = req.query.landlordId;
       }
     }
     const props = await Property.find(filter).sort({ createdAt: -1 });
@@ -67,6 +66,21 @@ router.put('/:id', protect, async (req, res) => {
       return res.status(403).json({ success: false, message: 'Not authorized.' });
     const updated = await Property.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json({ success: true, property: updated });
+  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
+});
+
+// PUT upload front image (base64 data URL)
+router.put('/:id/front-image', protect, async (req, res) => {
+  try {
+    const prop = await Property.findById(req.params.id);
+    if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
+    if (prop.landlordId.toString() !== req.user._id.toString())
+      return res.status(403).json({ success: false, message: 'Not authorized.' });
+    const { frontImage } = req.body;
+    if (!frontImage) return res.status(400).json({ success: false, message: 'No image provided.' });
+    prop.frontImage = frontImage;
+    await prop.save();
+    res.json({ success: true, message: 'Front image saved.', property: prop });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 

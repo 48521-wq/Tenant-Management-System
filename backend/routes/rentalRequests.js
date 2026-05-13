@@ -219,3 +219,92 @@ router.get('/', async (req, res) => {
 });
 
 module.exports = router;
+
+// ─── TENANT: Start negotiation (propose a rent) ───
+router.put('/:id/negotiate', protect, async (req, res) => {
+  try {
+    const rentalRequest = await RentalRequest.findById(req.params.id);
+    if (!rentalRequest) return res.status(404).json({ success: false, message: 'Request not found.' });
+    if (rentalRequest.tenantId.toString() !== req.user._id.toString())
+      return res.status(403).json({ success: false, message: 'Not authorized.' });
+    if (!['pending', 'negotiating'].includes(rentalRequest.status))
+      return res.status(400).json({ success: false, message: 'Cannot negotiate at this stage.' });
+
+    const { proposedRent, text } = req.body;
+    rentalRequest.status = 'negotiating';
+    rentalRequest.proposedRent = proposedRent || rentalRequest.proposedRent;
+    rentalRequest.negotiationMessages.push({
+      senderId:   req.user._id,
+      senderName: req.user.name,
+      senderRole: 'tenant',
+      text: text || '',
+      proposedRent: proposedRent || null,
+      sentAt: new Date()
+    });
+    await rentalRequest.save();
+    res.json({ success: true, message: 'Negotiation message sent.', request: rentalRequest });
+  } catch (e) { console.error(e); res.status(500).json({ success: false, message: 'Server error.' }); }
+});
+
+// ─── LANDLORD: Respond to negotiation ───
+router.put('/:id/negotiate-reply', protect, async (req, res) => {
+  try {
+    const rentalRequest = await RentalRequest.findById(req.params.id);
+    if (!rentalRequest) return res.status(404).json({ success: false, message: 'Request not found.' });
+
+    // Verify landlord owns this property
+    const property = await Property.findById(rentalRequest.propertyId);
+    if (!property || property.landlordId.toString() !== req.user._id.toString())
+      return res.status(403).json({ success: false, message: 'Not authorized.' });
+
+    const { text, counterRent, action } = req.body;
+
+    if (action === 'accept') {
+      // Accept the proposed rent
+      rentalRequest.status = 'accepted';
+      rentalRequest.agreedRent = rentalRequest.proposedRent;
+      rentalRequest.respondedAt = new Date();
+      rentalRequest.negotiationMessages.push({
+        senderId:   req.user._id,
+        senderName: req.user.name,
+        senderRole: 'landlord',
+        text: text || 'Offer accepted! Welcome.',
+        sentAt: new Date()
+      });
+    } else if (action === 'reject') {
+      rentalRequest.status = 'rejected';
+      rentalRequest.respondedAt = new Date();
+      rentalRequest.negotiationMessages.push({
+        senderId:   req.user._id,
+        senderName: req.user.name,
+        senderRole: 'landlord',
+        text: text || 'Sorry, we cannot proceed.',
+        sentAt: new Date()
+      });
+    } else {
+      // Counter offer
+      rentalRequest.status = 'negotiating';
+      if (counterRent) rentalRequest.proposedRent = counterRent;
+      rentalRequest.negotiationMessages.push({
+        senderId:   req.user._id,
+        senderName: req.user.name,
+        senderRole: 'landlord',
+        text: text || '',
+        proposedRent: counterRent || null,
+        sentAt: new Date()
+      });
+    }
+
+    await rentalRequest.save();
+    res.json({ success: true, message: 'Reply sent.', request: rentalRequest });
+  } catch (e) { console.error(e); res.status(500).json({ success: false, message: 'Server error.' }); }
+});
+
+// ─── GET negotiation messages for a request ───
+router.get('/:id/negotiation', protect, async (req, res) => {
+  try {
+    const rentalRequest = await RentalRequest.findById(req.params.id);
+    if (!rentalRequest) return res.status(404).json({ success: false, message: 'Not found.' });
+    res.json({ success: true, request: rentalRequest });
+  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
+});

@@ -7,26 +7,11 @@ const GOOGLE_CLIENT_ID = '1092570435598-nicfmpo6mpqo6a1h36eg614082k8994l.apps.go
 const API_BASE = 'http://localhost:5000/api';
 
 // ── Session helpers ───────────────────────────────────
-const storage = {
-  get: (key) => localStorage.getItem(key),
-  set: (key, value) => localStorage.setItem(key, value),
-  remove: (key) => localStorage.removeItem(key)
-};
-
-const getToken = () => storage.get('tms_token');
-const setToken = (token) => storage.set('tms_token', token);
-const setUser = (user) => storage.set('tms_user', JSON.stringify(user));
-const getUser = () => {
-  try {
-    return JSON.parse(storage.get('tms_user'));
-  } catch {
-    return null;
-  }
-};
-const clearAuth = () => {
-  storage.remove('tms_token');
-  storage.remove('tms_user');
-};
+const getToken = ()    => localStorage.getItem('tms_token');
+const setToken = (t)   => localStorage.setItem('tms_token', t);
+const setUser  = (u)   => localStorage.setItem('tms_user', JSON.stringify(u));
+const getUser  = ()    => { try { return JSON.parse(localStorage.getItem('tms_user')); } catch { return null; } };
+const clearAuth= ()    => { localStorage.removeItem('tms_token'); localStorage.removeItem('tms_user'); };
 
 // ── API helper ────────────────────────────────────────
 async function api(endpoint, method = 'GET', body = null) {
@@ -55,10 +40,8 @@ function clearErr() {
   if (b) { b.textContent = ''; b.style.display = 'none'; }
 }
 function setBtnLoad(id, loading, txt) {
-  const button = document.getElementById(id);
-  if (!button) return;
-  button.disabled = loading;
-  button.textContent = loading ? 'Please wait…' : txt;
+  const b = document.getElementById(id);
+  if (b) { b.disabled = loading; b.textContent = loading ? 'Please wait…' : txt; }
 }
 
 // ── Tabs ──────────────────────────────────────────────
@@ -66,13 +49,16 @@ function switchTab(tab) {
   clearErr();
   const si = document.getElementById('form-signin');
   const su = document.getElementById('form-signup');
+  const ot = document.getElementById('form-otp');
   const ti = document.getElementById('tab-signin');
   const tu = document.getElementById('tab-signup');
   if (tab === 'signin') {
     si.style.display = ''; su.style.display = 'none';
+    if (ot) { ot.style.display = 'none'; clearOtpTimer(); }
     ti.classList.add('active'); tu.classList.remove('active');
   } else {
     si.style.display = 'none'; su.style.display = '';
+    if (ot) ot.style.display = 'none';
     ti.classList.remove('active'); tu.classList.add('active');
   }
   const sf = document.getElementById('screen-forgot');
@@ -159,6 +145,9 @@ async function handleSignin() {
 // ═══════════════════════════════════════════════════════
 //  SIGN UP
 // ═══════════════════════════════════════════════════════
+// ─── OTP SIGNUP FLOW ─────────────────────────────────────────────────────────
+let _otpCountdown = null;
+
 async function handleSignup() {
   clearErr();
   const name  = document.getElementById('signup-name')?.value.trim();
@@ -172,17 +161,98 @@ async function handleSignup() {
     document.getElementById('role-error')?.style && (document.getElementById('role-error').style.display='block');
     showErr('Select Tenant or Landlord.'); return;
   }
-  setBtnLoad('signup-btn', true, 'Create Account');
+  setBtnLoad('signup-btn', true, 'Sending OTP...');
   try {
-    const { ok, data } = await api('/auth/register', 'POST', { name, email, password: pass, role: selRole });
+    const { ok, data } = await api('/auth/send-otp', 'POST', { name, email, password: pass, role: selRole });
     if (ok && data.success) {
+      // Show OTP screen
+      document.getElementById('form-signup').style.display = 'none';
+      document.getElementById('form-otp').style.display    = 'block';
+      const disp = document.getElementById('otp-email-display');
+      if (disp) disp.textContent = email;
+      document.getElementById('otp-input')?.focus();
+      startOtpTimer(600); // 10 min
+    } else {
+      showErr(data.message || 'Failed to send OTP.');
+    }
+  } catch { showErr('Cannot connect to server. Make sure backend is running.'); }
+  finally { setBtnLoad('signup-btn', false, 'Send Verification Code'); }
+}
+
+async function verifyOTP() {
+  clearErr();
+  const email = document.getElementById('signup-email')?.value.trim().toLowerCase();
+  const otp   = document.getElementById('otp-input')?.value.trim();
+  if (!otp || otp.length !== 6) { showErr('Enter the 6-digit OTP sent to your email.'); return; }
+  setBtnLoad('otp-verify-btn', true, 'Verifying...');
+  try {
+    const { ok, data } = await api('/auth/verify-otp', 'POST', { email, otp });
+    if (ok && data.success) {
+      clearOtpTimer();
       setToken(data.token); setUser(data.user);
       goToDashboard(data.user.role);
     } else {
-      showErr(data.message || 'Registration failed.');
+      showErr(data.message || 'Verification failed.');
     }
   } catch { showErr('Cannot connect to server.'); }
-  finally { setBtnLoad('signup-btn', false, 'Create Account'); }
+  finally { setBtnLoad('otp-verify-btn', false, 'Verify & Create Account'); }
+}
+
+async function resendOTP() {
+  clearErr();
+  const name  = document.getElementById('signup-name')?.value.trim();
+  const email = document.getElementById('signup-email')?.value.trim().toLowerCase();
+  const pass  = document.getElementById('signup-password')?.value;
+  const role  = selRole;
+  const btn   = document.getElementById('resend-otp-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+  try {
+    const { ok, data } = await api('/auth/send-otp', 'POST', { name, email, password: pass, role });
+    if (ok && data.success) {
+      document.getElementById('otp-input').value = '';
+      startOtpTimer(600);
+      showErr(''); // clear errors
+      // show brief success
+      const timerEl = document.getElementById('otp-timer');
+      if (timerEl) { const prev = timerEl.textContent; timerEl.textContent = '✅ New OTP sent!'; setTimeout(()=>{ timerEl.textContent = prev; }, 2000); }
+    } else {
+      showErr(data.message || 'Failed to resend OTP.');
+      if (btn) { btn.disabled = false; btn.textContent = 'Resend OTP'; }
+    }
+  } catch { showErr('Cannot connect to server.'); if (btn) { btn.disabled = false; btn.textContent = 'Resend OTP'; } }
+}
+
+function showOtpBack() {
+  clearOtpTimer();
+  document.getElementById('form-otp').style.display    = 'none';
+  document.getElementById('form-signup').style.display = 'block';
+}
+
+function startOtpTimer(seconds) {
+  clearOtpTimer();
+  const timerEl  = document.getElementById('otp-timer');
+  const resendBtn = document.getElementById('resend-otp-btn');
+  if (resendBtn) { resendBtn.disabled = true; resendBtn.textContent = 'Resend OTP'; }
+  let remaining = seconds;
+  function tick() {
+    const m = Math.floor(remaining / 60).toString().padStart(2,'0');
+    const s = (remaining % 60).toString().padStart(2,'0');
+    if (timerEl) timerEl.textContent = `Code expires in ${m}:${s}`;
+    if (remaining <= 0) {
+      clearOtpTimer();
+      if (timerEl) timerEl.textContent = '⚠️ OTP expired. Please request a new one.';
+      if (resendBtn) { resendBtn.disabled = false; }
+      return;
+    }
+    if (remaining === 30 && resendBtn) resendBtn.disabled = false; // enable resend in last 30s
+    remaining--;
+  }
+  tick();
+  _otpCountdown = setInterval(tick, 1000);
+}
+
+function clearOtpTimer() {
+  if (_otpCountdown) { clearInterval(_otpCountdown); _otpCountdown = null; }
 }
 
 // ═══════════════════════════════════════════════════════

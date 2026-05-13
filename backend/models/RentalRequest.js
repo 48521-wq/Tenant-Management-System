@@ -21,12 +21,28 @@ const rentalRequestSchema = new mongoose.Schema({
   // Request status
   status:        {
     type: String,
-    enum: ['pending', 'accepted', 'rejected', 'cancelled'],
+    enum: ['pending', 'accepted', 'rejected', 'cancelled', 'negotiating'],
     default: 'pending'
   },
 
   // Optional: Tenant message/reason
   message:       { type: String, default: '' },
+
+  // Negotiation: proposed rent by tenant
+  proposedRent:  { type: Number, default: null },
+
+  // Negotiation chat messages
+  negotiationMessages: [{
+    senderId:   { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    senderName: { type: String },
+    senderRole: { type: String, enum: ['tenant', 'landlord'] },
+    text:       { type: String },
+    proposedRent: { type: Number, default: null },
+    sentAt:     { type: Date, default: Date.now }
+  }],
+
+  // Final agreed rent (set when landlord accepts negotiation)
+  agreedRent:    { type: Number, default: null },
 
   // Timeline
   requestedAt:   { type: Date, default: Date.now },

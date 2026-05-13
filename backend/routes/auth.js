@@ -1,5 +1,6 @@
-const express = require('express');
-const jwt     = require('jsonwebtoken');
+const express    = require('express');
+const jwt        = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
 const User    = require('../models/User');
 const { protect } = require('../middleware/auth');
@@ -8,6 +9,43 @@ const router  = express.Router();
 const gClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const genToken = (payload) => jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+// ─── OTP In-Memory Store ────────────────────────────────────────────────────
+// key = email, value = { otp, expiresAt, userData }
+const otpStore = new Map();
+
+// Nodemailer transporter
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,   // Gmail App Password
+  },
+});
+
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit
+}
+
+async function sendOTPEmail(email, otp, name) {
+  await transporter.sendMail({
+    from: `"TMS - Tenant Management System" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: '🔐 Your TMS Verification Code',
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;background:#f9f9f9;border-radius:12px;padding:32px;border:1px solid #e0e0e0;">
+        <h2 style="color:#c9a84c;margin-bottom:4px;">TMS Verification</h2>
+        <p style="color:#555;margin-bottom:24px;">Hi <strong>${name}</strong>, please use the code below to verify your email.</p>
+        <div style="background:#fff;border:2px dashed #c9a84c;border-radius:10px;padding:20px;text-align:center;margin-bottom:24px;">
+          <span style="font-size:36px;font-weight:bold;letter-spacing:10px;color:#222;">${otp}</span>
+        </div>
+        <p style="color:#888;font-size:13px;">This code expires in <strong>10 minutes</strong>. Do not share it with anyone.</p>
+        <hr style="border:none;border-top:1px solid #eee;margin:20px 0;">
+        <p style="color:#aaa;font-size:12px;text-align:center;">Tenant Management System &copy; 2026</p>
+      </div>
+    `,
+  });
+}
 const adminTok = () => genToken({ isAdmin: true, email: process.env.ADMIN_EMAIL });
 
 // POST /api/auth/register
@@ -36,6 +74,66 @@ router.post('/register', async (req, res) => {
   } catch (e) {
     if (e.code === 11000) return res.status(400).json({ success: false, message: 'Email already registered.' });
     console.error('Register:', e);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+});
+
+// POST /api/auth/send-otp  — Step 1: validate fields & send OTP
+router.post('/send-otp', async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+    if (!name || !email || !password || !role)
+      return res.status(400).json({ success: false, message: 'Please fill all fields.' });
+    if (!['tenant','landlord'].includes(role))
+      return res.status(400).json({ success: false, message: 'Invalid role.' });
+    if (password.length < 6)
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
+    if (email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase())
+      return res.status(400).json({ success: false, message: 'This email cannot be registered.' });
+
+    const exists = await User.findOne({ email: email.toLowerCase() });
+    if (exists) return res.status(400).json({ success: false, message: 'Account already exists. Please sign in.' });
+
+    const otp = generateOTP();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+    otpStore.set(email.toLowerCase(), { otp, expiresAt, userData: { name: name.trim(), email: email.toLowerCase(), password, role } });
+
+    await sendOTPEmail(email, otp, name.trim());
+    res.json({ success: true, message: 'OTP sent to your email. Please check your inbox.' });
+  } catch (e) {
+    console.error('Send OTP:', e);
+    res.status(500).json({ success: false, message: 'Failed to send OTP. Check server email config.' });
+  }
+});
+
+// POST /api/auth/verify-otp  — Step 2: verify OTP & create account
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) return res.status(400).json({ success: false, message: 'Email and OTP required.' });
+
+    const record = otpStore.get(email.toLowerCase());
+    if (!record) return res.status(400).json({ success: false, message: 'OTP expired or not requested. Please try again.' });
+    if (Date.now() > record.expiresAt) {
+      otpStore.delete(email.toLowerCase());
+      return res.status(400).json({ success: false, message: 'OTP has expired. Please request a new one.' });
+    }
+    if (record.otp !== otp.trim()) return res.status(400).json({ success: false, message: 'Incorrect OTP. Please try again.' });
+
+    otpStore.delete(email.toLowerCase()); // one-time use
+
+    const { name, password, role } = record.userData;
+    const user = await User.create({ name, email: email.toLowerCase(), password, role, authProvider: 'email' });
+    const token = genToken({ id: user._id, role: user.role });
+
+    res.status(201).json({
+      success: true,
+      token,
+      user: { id: user._id, name: user.name, email: user.email, role: user.role, status: user.status, verified: user.verified, createdAt: user.createdAt }
+    });
+  } catch (e) {
+    if (e.code === 11000) return res.status(400).json({ success: false, message: 'Email already registered.' });
+    console.error('Verify OTP:', e);
     res.status(500).json({ success: false, message: 'Server error.' });
   }
 });

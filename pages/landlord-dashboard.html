@@ -7,28 +7,24 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --gold:#C9A96E;--gold-l:#E8C97A;--green:#4ECDC4;--blue:#4A9EFF;--error:#FF6B6B;--warn:#FFB347;
-  --bg:#07090C;--card:rgba(14,18,26,0.97);--border:rgba(201,169,110,0.14);
-  --text:#EDE9E0;--muted:#566070;--sidebar-bg:rgba(9,11,16,0.98);--input-bg:rgba(255,255,255,0.04);
+  --gold:#C9A96E;--gold-l:#E8C97A;--green:#4ECDC4;--blue:#2563EB;--blue-l:#4F7BFE;--error:#FF6B6B;--warn:#FFB347;
+  --bg:#000000;--card:rgba(14,18,26,0.97);--border:rgba(37,99,235,0.16);
+  --text:#EDE9E0;--muted:#A0AEC0;--sidebar-bg:rgba(9,11,16,0.98);--input-bg:rgba(255,255,255,0.04);
 }
-[data-theme="light"]{
-  --bg:#F5F0E8;--card:#FFFFFF;--border:rgba(201,169,110,0.22);
-  --text:#1A1610;--muted:#6B5C45;--sidebar-bg:#FDFAF4;--input-bg:#FFFBF2;
-}
+
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(201,169,110,0.3);border-radius:4px}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;transition:background 0.3s,color 0.3s}
-.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 70% 55% at 5% 12%,rgba(201,169,110,0.05) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 92% 85%,rgba(78,205,196,0.025) 0%,transparent 55%),linear-gradient(168deg,#07090C 0%,#0B0F16 100%)}
-[data-theme="light"] .bg{background:radial-gradient(ellipse 70% 55% at 5% 12%,rgba(201,169,110,0.08) 0%,transparent 55%),linear-gradient(168deg,#F5F0E8 0%,#FBF7EE 100%)}
+.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 70% 55% at 5% 12%,rgba(201,169,110,0.05) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 92% 85%,rgba(78,205,196,0.025) 0%,transparent 55%),linear-gradient(168deg,#000000 0%,#07090C 100%)}
 /* TOPNAV */
 .topnav{position:sticky;top:0;z-index:200;background:var(--sidebar-bg);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;height:62px;gap:12px}
 .tn-brand{display:flex;align-items:center;gap:10px;margin-right:auto}
-.tn-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--gold-l));display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(201,169,110,0.3)}
-.tn-icon svg{width:17px;height:17px;fill:#0A0C0F}
-.tn-name{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;background:linear-gradient(135deg,var(--gold),var(--gold-l));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tn-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--blue),var(--blue-l));display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(37,99,235,0.3)}
+.tn-icon svg{width:17px;height:17px;fill:#fff}
+.tn-name{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;background:linear-gradient(135deg,var(--blue),var(--blue-l));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .tn-sep{color:var(--muted);font-size:12px}
 .tn-pill{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:rgba(201,169,110,0.08);color:var(--gold);font-size:12px;font-weight:600}
 .icon-btn{position:relative;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:var(--input-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.2s;flex-shrink:0;color:var(--text)}
-.icon-btn:hover{background:rgba(201,169,110,0.12);border-color:var(--gold)}
+.icon-btn:hover{background:rgba(37,99,235,0.12);border-color:var(--blue)}
 .notif-badge{position:absolute;top:-2px;right:-2px;width:17px;height:17px;border-radius:50%;background:var(--error);font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
 .logout-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:9px;background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.2);color:#FF6B6B;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
 .logout-btn:hover{background:rgba(255,107,107,0.15)}
@@ -46,7 +42,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .nb-pill{margin-left:auto;min-width:18px;height:18px;border-radius:9px;background:var(--error);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
 .sb-foot{margin-top:auto;padding:14px 12px;border-top:1px solid var(--border)}
 .sb-user{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--input-bg);border-radius:12px;border:1px solid var(--border)}
-.sb-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-l));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#0A0C0F;flex-shrink:0}
+.sb-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-l));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#FFFFFF;flex-shrink:0}
 .sb-uname{font-size:12px;font-weight:600;color:var(--text)}.sb-urole{font-size:10px;color:var(--muted)}
 /* MAIN */
 .main{flex:1;min-width:0}
@@ -59,11 +55,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 /* BUTTONS */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;border:none}
 .btn svg{width:14px;height:14px;stroke:currentColor;fill:none}
-.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-l));color:#0A0C0F;box-shadow:0 3px 12px rgba(201,169,110,0.24)}
-.btn-gold:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(201,169,110,0.38)}
-.btn-ghost{background:var(--input-bg);color:var(--muted);border:1px solid var(--border)}
-.btn-ghost:hover{background:rgba(201,169,110,0.08);color:var(--text)}
-.btn-danger{background:rgba(255,107,107,0.08);color:var(--error);border:1px solid rgba(255,107,107,0.18)}
+.btn-gold,.btn-teal,.submit-btn,.search-btn,.btn-red,.btn-primary{color:#FFFFFF !important}
+.btn-gold{background:linear-gradient(135deg,var(--blue),var(--blue-l));color:#FFFFFF;box-shadow:0 3px 12px rgba(37,99,235,0.28)}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(37,99,235,0.36)}
+.btn-ghost{background:var(--input-bg);color:#FFFFFF;border:1px solid var(--border)}
+.btn-ghost:hover{background:rgba(201,169,110,0.08);color:#FFFFFF}
+.btn-danger{background:rgba(255,107,107,0.08);color:#FFFFFF;border:1px solid rgba(255,107,107,0.18)}
 .btn-danger:hover{background:rgba(255,107,107,0.15)}
 .btn-sm{padding:5px 12px;font-size:11.5px;border-radius:7px}
 /* CARDS */
@@ -95,7 +92,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .fg select option{background:var(--bg);color:var(--text)}
 .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,110,0.08)}
 .fg textarea{resize:vertical;min-height:80px}
-.submit-btn{padding:11px 26px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--gold),var(--gold-l));color:#0A0C0F;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(201,169,110,0.28);transition:all 0.2s}
+.submit-btn{padding:11px 26px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--blue),var(--blue-l));color:#FFFFFF;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(37,99,235,0.28);transition:all 0.2s}
 .submit-btn:hover{transform:translateY(-1px)}
 .submit-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
 /* TOAST */
@@ -124,7 +121,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .pcard-actions{display:flex;gap:7px}
 /* PROFILE */
 .prof-header{display:flex;align-items:center;gap:18px;margin-bottom:22px;padding:22px;background:var(--card);border:1px solid var(--border);border-radius:16px}
-.prof-av{width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-l));display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#0A0C0F;flex-shrink:0}
+.prof-av{width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-l));display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#FFFFFF;flex-shrink:0}
 /* TABLE */
 .tbl-wrap{overflow-x:auto;margin-top:12px}
 table{width:100%;border-collapse:collapse;font-size:13px}
@@ -149,7 +146,6 @@ select, select option {
   background-color: #12151C !important;
   color: #E8E4DC !important;
 }
-[data-theme="light"] select, [data-theme="light"] select option {
   background-color: #ffffff !important;
   color: #1A1E26 !important;
 }
@@ -161,6 +157,8 @@ select {
   background-position: right 10px center;
   padding-right: 30px !important;
 }
+
+
 </style>
 
 <!-- ═══════════════════════════════════════════════════════
@@ -216,9 +214,6 @@ select {
   border-bottom: 1px solid rgba(201,169,110,0.12) !important;
   backdrop-filter: blur(28px) saturate(180%) !important;
 }
-[data-theme="light"] .topnav {
-  background: rgba(253,250,244,0.97) !important;
-}
 .tn-icon {
   width: 36px !important;
   height: 36px !important;
@@ -231,9 +226,6 @@ select {
   width: 232px !important;
   background: rgba(7,9,12,0.98) !important;
   border-right: 1px solid rgba(201,169,110,0.1) !important;
-}
-[data-theme="light"] .sidebar {
-  background: rgba(253,250,244,0.99) !important;
 }
 .nav-item {
   padding: 9px 14px !important;
@@ -332,6 +324,14 @@ select {
 .pcard-thumb {
   height: 175px !important;
   background: linear-gradient(135deg, rgba(201,169,110,0.08) 0%, rgba(201,169,110,0.02) 100%) !important;
+  position: relative;
+  overflow: hidden;
+}
+.pcard-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 .pcard-body {
   padding: 15px 17px !important;
@@ -355,13 +355,13 @@ select {
   transition: var(--transition) !important;
 }
 .btn-gold {
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-l) 100%) !important;
-  box-shadow: 0 3px 14px rgba(201,169,110,0.28) !important;
-  color: #0A0C0F !important;
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue-l) 100%) !important;
+  box-shadow: 0 3px 14px rgba(37,99,235,0.28) !important;
+  color: #FFFFFF !important;
 }
 .btn-gold:hover {
   transform: translateY(-1px) !important;
-  box-shadow: 0 6px 20px rgba(201,169,110,0.42) !important;
+  box-shadow: 0 6px 20px rgba(37,99,235,0.42) !important;
 }
 .btn-ghost {
   border: 1px solid rgba(201,169,110,0.16) !important;
@@ -377,8 +377,8 @@ select {
   font-size: 13.5px !important;
   font-weight: 600 !important;
   letter-spacing: 0.1px;
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-l) 100%) !important;
-  box-shadow: 0 4px 16px rgba(201,169,110,0.32) !important;
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue-l) 100%) !important;
+  box-shadow: 0 4px 16px rgba(37,99,235,0.32) !important;
   transition: var(--transition) !important;
 }
 .submit-btn:hover:not(:disabled) {
@@ -614,18 +614,415 @@ body::after {
   opacity: 0.4;
 }
 
-/* ─── LIGHT THEME REFINEMENTS ─── */
+
+
+/* ═══════════════════════════════════════════════════════════
+   UNIFIED PROFESSIONAL LIGHT THEME — TMS v3
+   Projector-optimized: maximum contrast, zero washout
+   Dark theme untouched.
+═══════════════════════════════════════════════════════════ */
+
+/* ── Core palette overrides ── */
+[data-theme="light"] {
+  --bg:         #EFF2F7;
+  --card:       #FFFFFF;
+  --border:     rgba(0,0,0,0.10);
+  --text:       #0D1117;
+  --muted:      #4B5563;
+  --sidebar-bg: #FFFFFF;
+  --input-bg:   #F8F9FC;
+}
+
+/* ── Background: clean neutral, no orb distractions ── */
+[data-theme="light"] body {
+  background: #EFF2F7 !important;
+}
+[data-theme="light"] .bg {
+  background: linear-gradient(160deg, #EFF2F7 0%, #E8EDF5 100%) !important;
+}
+[data-theme="light"] body::after {
+  opacity: 0 !important;
+}
+
+/* ── Scrollbar ── */
+[data-theme="light"] ::-webkit-scrollbar-track { background: #E8EDF5; }
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); }
+
+/* ── Topnav ── */
+[data-theme="light"] .topnav {
+  background: #FFFFFF !important;
+  border-bottom: 1.5px solid rgba(0,0,0,0.10) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07) !important;
+}
+[data-theme="light"] .tn-name {
+  background: linear-gradient(135deg, #1A3A8F, #2563EB) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+[data-theme="light"] .tn-pill {
+  background: rgba(37,99,235,0.08) !important;
+  border-color: rgba(37,99,235,0.2) !important;
+  color: #1D4ED8 !important;
+}
+
+/* ── Icon buttons ── */
+[data-theme="light"] .icon-btn {
+  background: #F1F5F9 !important;
+  border: 1.5px solid rgba(0,0,0,0.12) !important;
+  color: #1A202C !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+}
+[data-theme="light"] .icon-btn svg {
+  stroke: #1A202C !important;
+  color: #1A202C !important;
+}
+[data-theme="light"] .icon-btn:hover {
+  background: #E2E8F0 !important;
+  border-color: rgba(0,0,0,0.22) !important;
+}
+
+/* ── Logout button ── */
+[data-theme="light"] .logout-btn {
+  background: rgba(220,38,38,0.07) !important;
+  border-color: rgba(220,38,38,0.22) !important;
+  color: #DC2626 !important;
+}
+[data-theme="light"] .logout-btn svg { stroke: #DC2626 !important; }
+[data-theme="light"] .logout-btn:hover { background: rgba(220,38,38,0.14) !important; }
+
+/* ── Sidebar ── */
+[data-theme="light"] .sidebar {
+  background: #FFFFFF !important;
+  border-right: 1.5px solid rgba(0,0,0,0.09) !important;
+  box-shadow: 2px 0 12px rgba(0,0,0,0.05) !important;
+}
+[data-theme="light"] .sb-lbl,
+[data-theme="light"] .sidebar-label {
+  color: #6B7280 !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.2px !important;
+}
+[data-theme="light"] .sb-foot,
+[data-theme="light"] .sidebar-foot {
+  border-top: 1.5px solid rgba(0,0,0,0.09) !important;
+}
+[data-theme="light"] .sb-user,
+[data-theme="light"] .user-card {
+  background: #F3F6FC !important;
+  border: 1px solid rgba(0,0,0,0.09) !important;
+}
+[data-theme="light"] .sb-uname,
+[data-theme="light"] .u-name {
+  color: #0D1117 !important;
+  font-weight: 700 !important;
+}
+[data-theme="light"] .sb-urole,
+[data-theme="light"] .u-role {
+  color: #4B5563 !important;
+}
+
+/* ── Nav items ── */
+[data-theme="light"] .nav-item {
+  color: #374151 !important;
+}
+[data-theme="light"] .nav-item svg {
+  stroke: #374151 !important;
+}
+[data-theme="light"] .nav-item:hover {
+  color: #0D1117 !important;
+  background: rgba(0,0,0,0.06) !important;
+}
+[data-theme="light"] .nav-item:hover svg {
+  stroke: #0D1117 !important;
+}
+[data-theme="light"] .nav-item.active {
+  color: #1D4ED8 !important;
+  background: rgba(37,99,235,0.09) !important;
+  font-weight: 700 !important;
+}
+[data-theme="light"] .nav-item.active svg {
+  stroke: #1D4ED8 !important;
+}
+[data-theme="light"] .nb-pill {
+  background: #DC2626 !important;
+  color: #FFFFFF !important;
+}
+
+/* ── Page headings ── */
+[data-theme="light"] .pg-title {
+  color: #0D1117 !important;
+  font-weight: 700 !important;
+}
+[data-theme="light"] .pg-sub {
+  color: #4B5563 !important;
+}
+
+/* ── Cards, form cards, stat cards ── */
 [data-theme="light"] .card,
 [data-theme="light"] .form-card,
 [data-theme="light"] .stat-card,
 [data-theme="light"] .list-item,
-[data-theme="light"] .notif-item {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.07) !important;
+[data-theme="light"] .pcard,
+[data-theme="light"] .notif-item,
+[data-theme="light"] .lease-box,
+[data-theme="light"] .filter-bar,
+[data-theme="light"] .ov-box,
+[data-theme="light"] .action-item,
+[data-theme="light"] .ntype-btn,
+[data-theme="light"] .person-result,
+[data-theme="light"] .tenant-pill {
+  background: #FFFFFF !important;
+  border-color: rgba(0,0,0,0.09) !important;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06) !important;
 }
-[data-theme="light"] .nav-item.active {
-  background: linear-gradient(90deg, rgba(201,169,110,0.12) 0%, rgba(201,169,110,0.03) 100%) !important;
+
+/* ── ALL text inside cards ── */
+[data-theme="light"] .card,
+[data-theme="light"] .card *,
+[data-theme="light"] .stat-card,
+[data-theme="light"] .stat-card * {
+  color: #0D1117;
 }
-[data-theme="light"] body::after { opacity: 0.15; }
+
+/* ── Specific text classes ── */
+[data-theme="light"] .li-title,
+[data-theme="light"] .pcard-title,
+[data-theme="light"] .lease-title,
+[data-theme="light"] .ov-title,
+[data-theme="light"] .action-label,
+[data-theme="light"] .stat-val,
+[data-theme="light"] .stat-num,
+[data-theme="light"] .notif-text {
+  color: #0D1117 !important;
+  font-weight: 600 !important;
+}
+[data-theme="light"] .li-sub,
+[data-theme="light"] .pcard-loc,
+[data-theme="light"] .lease-key,
+[data-theme="light"] .lease-sub,
+[data-theme="light"] .stat-lbl,
+[data-theme="light"] .stat-label,
+[data-theme="light"] .action-sub,
+[data-theme="light"] .notif-time {
+  color: #4B5563 !important;
+}
+[data-theme="light"] .lease-val {
+  color: #0D1117 !important;
+  font-weight: 600 !important;
+}
+
+/* ── Table ── */
+[data-theme="light"] table { border-color: rgba(0,0,0,0.07) !important; }
+[data-theme="light"] table th {
+  color: #374151 !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  background: #F3F6FC !important;
+  border-bottom: 2px solid rgba(0,0,0,0.10) !important;
+  letter-spacing: 0.6px !important;
+}
+[data-theme="light"] table td {
+  color: #0D1117 !important;
+  border-bottom: 1px solid rgba(0,0,0,0.07) !important;
+}
+[data-theme="light"] tr:hover td {
+  background: rgba(37,99,235,0.04) !important;
+}
+
+/* ── Badges — keep vibrant, projector-safe ── */
+[data-theme="light"] .b-green  { background: #D1FAE5 !important; color: #065F46 !important; border-color: #6EE7B7 !important; }
+[data-theme="light"] .b-gold   { background: #FEF3C7 !important; color: #92400E !important; border-color: #FCD34D !important; }
+[data-theme="light"] .b-blue   { background: #DBEAFE !important; color: #1E40AF !important; border-color: #93C5FD !important; }
+[data-theme="light"] .b-red    { background: #FEE2E2 !important; color: #991B1B !important; border-color: #FCA5A5 !important; }
+[data-theme="light"] .b-warn   { background: #FEF9C3 !important; color: #854D0E !important; border-color: #FDE047 !important; }
+[data-theme="light"] .b-muted  { background: #F1F5F9 !important; color: #374151 !important; border-color: rgba(0,0,0,0.12) !important; }
+
+/* ── Search bar ── */
+[data-theme="light"] .search-bar {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(0,0,0,0.14) !important;
+  color: #0D1117 !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05) !important;
+}
+[data-theme="light"] .search-bar::placeholder { color: #9CA3AF !important; }
+[data-theme="light"] .search-bar:focus {
+  border-color: #2563EB !important;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12) !important;
+}
+
+/* ── Form inputs ── */
+[data-theme="light"] input,
+[data-theme="light"] textarea,
+[data-theme="light"] .fg input,
+[data-theme="light"] .fg textarea,
+[data-theme="light"] .finp {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(0,0,0,0.14) !important;
+  color: #0D1117 !important;
+}
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder,
+[data-theme="light"] .finp::placeholder { color: #9CA3AF !important; }
+[data-theme="light"] input:focus,
+[data-theme="light"] textarea:focus,
+[data-theme="light"] .finp:focus {
+  border-color: #2563EB !important;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12) !important;
+}
+
+/* ── Select dropdowns ── */
+[data-theme="light"] select,
+[data-theme="light"] .fg select,
+[data-theme="light"] .fsel,
+[data-theme="light"] .sel-status {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(0,0,0,0.14) !important;
+  color: #0D1117 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23374151' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+}
+[data-theme="light"] select option,
+[data-theme="light"] .fsel option {
+  background: #FFFFFF !important;
+  color: #0D1117 !important;
+}
+
+/* ── Form labels ── */
+[data-theme="light"] label,
+[data-theme="light"] .fg label,
+[data-theme="light"] .flbl {
+  color: #374151 !important;
+  font-weight: 600 !important;
+}
+
+/* ── Nav pills ── */
+[data-theme="light"] .nav-pill {
+  background: #F1F5F9 !important;
+  color: #374151 !important;
+  border-color: rgba(0,0,0,0.12) !important;
+}
+
+/* ── Notification items ── */
+[data-theme="light"] .notif-item.unread {
+  background: #EFF6FF !important;
+  border-color: rgba(37,99,235,0.20) !important;
+}
+[data-theme="light"] .notif-dot { background: #2563EB !important; }
+
+/* ── Count pills ── */
+[data-theme="light"] .count-zero { background: #F1F5F9 !important; color: #4B5563 !important; }
+[data-theme="light"] .count-pos  { background: #FEE2E2 !important; color: #991B1B !important; border-color: rgba(220,38,38,0.2) !important; }
+
+/* ── Profile sections ── */
+[data-theme="light"] .profile-header {
+  background: #FFFFFF !important;
+  border-color: rgba(0,0,0,0.09) !important;
+}
+[data-theme="light"] .profile-av-info h3 { color: #0D1117 !important; }
+[data-theme="light"] .profile-av-info p  { color: #4B5563 !important; }
+
+/* ── Tags, chips ── */
+[data-theme="light"] .ptag {
+  background: #F1F5F9 !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #374151 !important;
+}
+
+/* ── Spinner ── */
+[data-theme="light"] .spinner {
+  border-color: rgba(0,0,0,0.12) !important;
+  border-top-color: #2563EB !important;
+}
+[data-theme="light"] .loading { color: #4B5563 !important; }
+
+/* ── Toast ── */
+[data-theme="light"] .toast {
+  background: #FFFFFF !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #0D1117 !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
+}
+
+/* ── Close button ── */
+[data-theme="light"] .close-btn {
+  background: #F1F5F9 !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #374151 !important;
+}
+
+/* ── Sign area ── */
+[data-theme="light"] .sign-area {
+  border-top-color: rgba(0,0,0,0.10) !important;
+}
+
+/* ── Filter bar ── */
+[data-theme="light"] .filter-bar {
+  background: #FFFFFF !important;
+  border-color: rgba(0,0,0,0.09) !important;
+}
+
+/* ── Buttons — always readable ── */
+[data-theme="light"] .btn-gold    { color: #FFFFFF !important; }
+[data-theme="light"] .btn-red     { color: #FFFFFF !important; }
+[data-theme="light"] .btn-green   { color: #FFFFFF !important; }
+[data-theme="light"] .submit-btn  { color: #FFFFFF !important; }
+[data-theme="light"] .search-btn  { color: #FFFFFF !important; }
+[data-theme="light"] .btn-ghost {
+  background: #F1F5F9 !important;
+  color: #0D1117 !important;
+  border: 1.5px solid rgba(0,0,0,0.12) !important;
+}
+[data-theme="light"] .btn-danger {
+  color: #DC2626 !important;
+  background: rgba(220,38,38,0.07) !important;
+}
+[data-theme="light"] .btn-warn {
+  color: #92400E !important;
+  background: rgba(245,158,11,0.10) !important;
+  border-color: rgba(245,158,11,0.25) !important;
+}
+[data-theme="light"] .pcard-btn {
+  background: rgba(37,99,235,0.08) !important;
+  border-color: rgba(37,99,235,0.22) !important;
+  color: #1D4ED8 !important;
+}
+
+/* ── Furniture/3D page specific ── */
+[data-theme="light"] #furn-page-catalog button {
+  background: #F1F5F9 !important;
+  border-color: rgba(0,0,0,0.14) !important;
+  color: #0D1117 !important;
+}
+[data-theme="light"] #furn-page-catalog button:hover {
+  background: #E2E8F0 !important;
+}
+[data-theme="light"] #furn-page-catalog button span { color: #0D1117 !important; }
+[data-theme="light"] #c3d-furnpage,
+[data-theme="light"] #c3d-tfurn { background: #D4D9E3 !important; }
+[data-theme="light"] #furn-page-controls {
+  background: #F1F5F9 !important;
+  border-color: rgba(0,0,0,0.10) !important;
+}
+[data-theme="light"] #furn-page-controls button {
+  background: #FFFFFF !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #0D1117 !important;
+}
+[data-theme="light"] #furn-page-controls span { color: #374151 !important; }
+[data-theme="light"] #page-furniture [style*="color:var(--muted)"] { color: #374151 !important; }
+
+/* ── Topnav muted spans ── */
+[data-theme="light"] .topnav .nav-pill,
+[data-theme="light"] .topnav span:not(.nb-pill) { color: #374151 !important; }
+
+/* ── Notification badge ── */
+[data-theme="light"] .notif-badge { background: #DC2626 !important; color: #FFFFFF !important; }
+
+/* ═══════════════════════════════════════════════════════════
+   END UNIFIED PROFESSIONAL LIGHT THEME
+═══════════════════════════════════════════════════════════ */
 </style>
 
 </head>
@@ -647,6 +1044,12 @@ async function lFetch(url, method='GET', body=null) {
   try {
     const r = await fetch(API + url, { ...opts, signal: controller.signal });
     clearTimeout(timer);
+    if (r.status === 401) {
+      // Token expired or invalid — log out only for non-polling routes
+      const isPolling = url.includes('notifications') || url.includes('unread');
+      if (!isPolling) { localStorage.clear(); window.location.replace('../index.html'); }
+      throw new Error('Unauthorized');
+    }
     return r.json();
   } catch(e) {
     clearTimeout(timer);
@@ -681,7 +1084,7 @@ function sp(id, el) {
   if(id==='maintenance')         loadLandlordMaintenance();
   if(id==='complaints')          loadLandlordComplaints();
   if(id==='payments')            loadLandlordPayments();
-  if(id==='leases')              { loadLandlordLeases(); startLandlordLeaseSync(); }
+  if(id==='leases')              { loadLandlordLeases(); startLandlordLeaseSync(); renderLLPropLeaseCards(); }
   else { stopLandlordLeaseSync(); }
   if(id==='rental-requests')     loadLandlordRentalRequests();
   if(id==='notifications')       loadNotifications();
@@ -746,6 +1149,7 @@ async function loadMyProperties() {
     myProps = all.filter(p => (p.landlordId || '').toString() === myId);
     renderMyProperties();
     updateStats();
+    if (typeof renderLLPropLeaseCards === 'function') renderLLPropLeaseCards();
   } catch(e) {
     console.error('loadMyProperties error:', e);
     const errHtml = '<div class="loading" style="grid-column:1/-1"><div style="font-size:36px;margin-bottom:10px">⚠️</div><div style="font-weight:600;color:var(--text);margin-bottom:6px">Server se connect nahi ho saka</div><div style="font-size:12px;color:var(--muted)">Backend chal raha hai? Port 5000 check karen</div><button onclick="loadMyProperties()" style="margin-top:14px;padding:8px 20px;border-radius:9px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;font-family:DM Sans,sans-serif;font-size:13px">🔄 Retry</button></div>';
@@ -764,6 +1168,20 @@ function updateStats() {
 }
 const DEFAULT_PANORAMA_URL = 'https://kuula.co/share/54YJg/collection/7FbtP?fs=1&vr=0&sd=1&initload=1';
 
+function normalizePanoramaUrl(url) {
+  try {
+    const u = new URL(url.trim());
+    if (/kuula\.co$/i.test(u.hostname) && u.pathname.startsWith('/share/')) {
+      if (!u.pathname.endsWith('/embed')) {
+        u.pathname = u.pathname.replace(/\/?$/, '/embed');
+      }
+    }
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
 function parseViewerConfig(model3dOrJson) {
   let cfg = model3dOrJson;
   if (typeof model3dOrJson === 'string') {
@@ -775,12 +1193,13 @@ function parseViewerConfig(model3dOrJson) {
   if (!cfg || typeof cfg !== 'object') cfg = {};
   return {
     viewerMode: cfg.viewerMode || 'panorama360',
-    panoramaUrl: cfg.panoramaUrl || cfg.embedUrl || cfg.url || DEFAULT_PANORAMA_URL
+    panoramaUrl: normalizePanoramaUrl(cfg.panoramaUrl || cfg.embedUrl || cfg.url || '')
   };
 }
 
 function getProperty360Url(p) {
-  return parseViewerConfig(p && p.model3d).panoramaUrl;
+  const url = parseViewerConfig(p && p.model3d).panoramaUrl;
+  return url || '';
 }
 
 function renderMyProperties() {
@@ -803,18 +1222,22 @@ function renderMyProperties() {
   const html = myProps.map(p => {
     const id = p._id;
     const panoramaUrl = getProperty360Url(p);
+    const has360 = !!panoramaUrl;
+    const coverImage = p.frontImage || (Array.isArray(p.images) && p.images.length ? p.images[0] : (typeof p.images === 'string' ? p.images : ''));
+    const thumbnail = coverImage
+      ? `<img src="${coverImage}" alt="${p.title||'Property'}">`
+      : has360
+        ? `<iframe src="${normalizePanoramaUrl(panoramaUrl)}" title="${p.title||'Property'} 360 preview" loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" style="width:100%;height:100%;border:0;background:#111;pointer-events:none"></iframe>`
+        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.7);font-size:13px;background:#111">Front image unavailable</div>`;
+    const viewButton = has360
+      ? `<button class="btn btn-gold btn-sm" style="flex:1" onclick="quickView3D('${id}')">View 360</button>`
+      : `<button class="btn btn-ghost btn-sm" style="flex:1" onclick="open3DRequestModal('${id}')">Request 360</button>`;
     return `
     <div class="pcard">
-      <div class="pcard-thumb" style="padding:0;overflow:hidden;cursor:pointer" onclick="quickView3D('${id}')">
-        <iframe
-          src="${panoramaUrl}"
-          title="Property 360 panorama"
-          loading="lazy"
-          referrerpolicy="strict-origin-when-cross-origin"
-          style="width:100%;height:100%;background:#111;border:0;pointer-events:none"
-        ></iframe>
+      <div class="pcard-thumb" style="padding:0;cursor:pointer" onclick="quickView3D('${id}')">
+        ${thumbnail}
         <span style="position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:${statusColors[p.status]||statusColors.available};color:#fff;pointer-events:none">${p.status||'available'}</span>
-        <span style="position:absolute;bottom:10px;right:10px;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--gold);border:1px solid rgba(201,169,110,0.3);pointer-events:none">360 View</span>
+        <span style="position:absolute;bottom:10px;right:10px;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--gold);border:1px solid rgba(201,169,110,0.3);pointer-events:none">${has360 ? '360 View' : 'Details'}</span>
       </div>
       <div class="pcard-body">
         <div class="pcard-title">${p.title||'Untitled'}</div>
@@ -823,8 +1246,9 @@ function renderMyProperties() {
           <span>🛏 ${p.beds||'?'}</span><span>🚿 ${p.baths||'?'}</span><span>${p.type||'House'}</span>
         </div>
         <div class="pcard-price">Rs. ${Number(p.rent||0).toLocaleString()} <span>/mo</span></div>
-        <div class="pcard-actions" style="flex-wrap:wrap;gap:6px">
-          <button class="btn btn-gold btn-sm" style="flex:1" onclick="edit3DByPropId('${id}')">Edit 360</button>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px">${has360 ? '360 view available' : 'Details only until admin approves a 3D model.'}</div>
+        <div class="pcard-actions" style="flex-wrap:wrap;gap:6px;margin-top:10px">
+          ${viewButton}
           <button class="btn btn-ghost btn-sm" style="flex:1" onclick="furnViewByPropId('${id}')">${Object.keys((window._propMap&&window._propMap[id]&&window._propMap[id].landlordFurnitureLayout)||{}).length>0?'✅ My Layout':'🛋️ Interior'}</button>
           <button class="btn btn-danger btn-sm" onclick="deleteProp('${id}')">🗑</button>
         </div>
@@ -845,22 +1269,61 @@ let editingPropId = null; // which property's 3D we're editing
 async function submitAddProp() {
   const g = id => document.getElementById(id)?.value?.trim()||'';
   const title=g('ap-title'),type=g('ap-type'),area=g('ap-area'),addr=g('ap-addr'),rent=g('ap-rent'),beds=g('ap-beds'),baths=g('ap-baths'),sqft=g('ap-sqft'),desc=g('ap-desc');
-  if (!title||!area||!addr||!rent) { showMsg('ap-msg','⚠️ Title, area, address and rent are required.','err'); return; }
+  if (!title||!area||!addr||!rent) { showMsg('ap-msg','⚠️ Title, area, address aur rent zaroori hain.','err'); return; }
   const btn=document.getElementById('ap-btn'); if(btn){btn.disabled=true;btn.textContent='Saving…';}
   try {
     const data = await lFetch('/properties','POST',{
       title,type,area,address:addr,rent:Number(rent),
-      beds:Number(beds)||2,baths:Number(baths)||1,sqft:Number(sqft)||1000,description:desc,
-      model3d: current3DConfig
+      beds:Number(beds)||2,baths:Number(baths)||1,sqft:Number(sqft)||1000,description:desc
     });
     if (data.success) {
-      showMsg('ap-msg','✅ Property listed successfully!','ok');
+      // Upload front image if selected
+      const frontImage = window._apFrontImage || '';
+      if (frontImage && data.property?._id) {
+        try {
+          await lFetch('/properties/'+data.property._id+'/front-image','PUT',{ frontImage });
+        } catch(e) { console.warn('Image save failed',e); }
+      }
+      showMsg('ap-msg','✅ Property successfully list ho gayi!','ok');
       ['ap-title','ap-addr','ap-desc'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+      clearPropImage();
       current3DConfig = {viewerMode:'panorama360', panoramaUrl: DEFAULT_PANORAMA_URL};
       await loadMyProperties();
     } else showMsg('ap-msg','⚠️ '+(data.message||'Error'),'err');
-  } catch { showMsg('ap-msg','⚠️ Cannot connect to server.','err'); }
+  } catch { showMsg('ap-msg','⚠️ Server se connect nahi ho saka.','err'); }
   finally { if(btn){btn.disabled=false;btn.textContent='🏠 Add Property';} }
+}
+
+// ── Image upload helpers ──
+window._apFrontImage = '';
+function handleImgSelect(e) {
+  const file = e.target.files[0];
+  if (file) loadImgFile(file);
+}
+function handleImgDrop(e) {
+  e.preventDefault();
+  document.getElementById('ap-img-area').style.borderColor='var(--border)';
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadImgFile(file);
+}
+function loadImgFile(file) {
+  if (file.size > 5*1024*1024) { alert('Image 5MB se choti honi chahiye!'); return; }
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    window._apFrontImage = ev.target.result;
+    document.getElementById('ap-img-preview').src = ev.target.result;
+    document.getElementById('ap-img-preview-wrap').style.display = 'block';
+    document.getElementById('ap-img-placeholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+function clearPropImage(e) {
+  if (e) e.stopPropagation();
+  window._apFrontImage = '';
+  document.getElementById('ap-img-preview').src = '';
+  document.getElementById('ap-img-preview-wrap').style.display = 'none';
+  document.getElementById('ap-img-placeholder').style.display = 'block';
+  document.getElementById('ap-img-input').value = '';
 }
 
 // ══════════════════════════════════════
@@ -1124,46 +1587,38 @@ async function loadLandlordRentalRequests() {
     
     // Update badge
     const badge = document.getElementById('rental-requests-badge-ll');
-    const pendingCount = requests.filter(r => r.status === 'pending').length;
+    const pendingCount = requests.filter(r => r.status === 'pending' || r.status === 'negotiating').length;
     if (badge) {
       badge.textContent = pendingCount;
       badge.style.display = pendingCount > 0 ? 'flex' : 'none';
     }
     
-    if(!requests.length){list.innerHTML='<div class="loading" style="padding:20px">No rental requests yet.</div>';return;}
+    if(!requests.length){list.innerHTML='<div class="loading" style="padding:20px">Koi rental request nahi mili.</div>';return;}
     
-    const statusBadges = {pending:'b-warn',accepted:'b-green',rejected:'b-red',cancelled:'b-muted'};
-    const statusEmoji = {pending:'⏳',accepted:'✅',rejected:'❌',cancelled:'🚫'};
+    const statusBadges = {pending:'b-warn',accepted:'b-green',rejected:'b-red',cancelled:'b-muted',negotiating:'b-blue'};
+    const statusEmoji = {pending:'⏳',accepted:'✅',rejected:'❌',cancelled:'🚫',negotiating:'💬'};
     
-    // Group by status
-    const byStatus = {};
-    requests.forEach(r => {
-      if (!byStatus[r.status]) byStatus[r.status] = [];
-      byStatus[r.status].push(r);
-    });
-    
-    const sortedStatuses = ['pending', 'accepted', 'rejected', 'cancelled'];
+    const sortedStatuses = ['negotiating','pending', 'accepted', 'rejected', 'cancelled'];
     let html = '';
     
     sortedStatuses.forEach(status => {
-      const items = byStatus[status] || [];
+      const items = requests.filter(r => r.status === status);
       if (items.length === 0) return;
-      
-      const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+      const statusLabel = {pending:'Pending',accepted:'Accepted',rejected:'Rejected',cancelled:'Cancelled',negotiating:'Negotiating'}[status]||status;
       html += `<div style="margin-bottom:20px;border-top:1px solid var(--border);padding-top:14px">
         <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">${statusEmoji[status]} ${statusLabel} Requests (${items.length})</div>`;
-      
       items.forEach(req => {
+        const lastMsg = (req.negotiationMessages||[]).slice(-1)[0];
         html += `
-        <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+        <div style="background:var(--input-bg);border:1px solid ${status==='negotiating'?'rgba(74,158,255,0.3)':'var(--border)'};border-radius:12px;padding:14px 16px;margin-bottom:10px">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px">
             <div style="flex:1">
               <div style="font-size:13px;font-weight:600;color:var(--text)">${req.propertyTitle}</div>
               <div style="font-size:11px;color:var(--muted);margin-top:2px">📍 ${req.propertyAddress} · 💰 Rs. ${Number(req.propertyRent||0).toLocaleString()}/month</div>
+              ${req.proposedRent ? `<div style="font-size:12px;color:var(--blue);margin-top:4px;font-weight:600">🏷️ Tenant offer: Rs. ${Number(req.proposedRent).toLocaleString()}/mo</div>` : ''}
             </div>
             <span class="badge ${statusBadges[req.status]||'b-warn'}">${statusEmoji[req.status]||''} ${req.status}</span>
           </div>
-          
           <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
             <div>
               <div style="font-size:11px;color:var(--muted)">Tenant</div>
@@ -1171,75 +1626,101 @@ async function loadLandlordRentalRequests() {
               <div style="font-size:11px;color:var(--muted)">${req.tenantEmail}</div>
             </div>
             <div>
-              <div style="font-size:11px;color:var(--muted)">Requested</div>
+              <div style="font-size:11px;color:var(--muted)">Request Date</div>
               <div style="font-size:12px;font-weight:600;color:var(--text)">${new Date(req.requestedAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>
             </div>
           </div>
-          
-          ${req.message ? `<div style="margin:10px 0;padding:8px;background:rgba(74,158,255,0.08);border-left:2px solid var(--blue);border-radius:4px;font-size:12px;color:var(--text)">"${req.message}"</div>` : ''}
-          
-          ${req.status === 'pending' ? `<div style="display:flex;gap:8px;margin-top:10px">
-            <button onclick="acceptRentalRequest('${req._id}')" style="flex:1;padding:8px 12px;border-radius:9px;border:none;background:rgba(78,205,196,0.12);color:var(--green);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;transition:all 0.2s" onMouseOver="this.style.background='rgba(78,205,196,0.2)'" onMouseOut="this.style.background='rgba(78,205,196,0.12)'">✅ Accept</button>
-            <button onclick="rejectRentalRequest('${req._id}')" style="flex:1;padding:8px 12px;border-radius:9px;border:none;background:rgba(255,107,107,0.12);color:var(--error);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;transition:all 0.2s" onMouseOver="this.style.background='rgba(255,107,107,0.2)'" onMouseOut="this.style.background='rgba(255,107,107,0.12)'">❌ Reject</button>
-          </div>` : ''}
+          ${req.message ? `<div style="margin:8px 0;padding:8px;background:rgba(74,158,255,0.08);border-left:2px solid var(--blue);border-radius:4px;font-size:12px;color:var(--text)">"${req.message}"</div>` : ''}
+          ${lastMsg ? `<div style="margin:8px 0;padding:8px 10px;background:rgba(201,169,110,0.07);border-radius:8px;font-size:12px;color:var(--text)"><span style="color:var(--muted);font-size:11px">${lastMsg.senderRole==='tenant'?'🧑 Tenant':'🏠 Aap'}:</span> ${lastMsg.text||''}${lastMsg.proposedRent?` <span style="color:var(--blue);font-weight:700">Rs. ${Number(lastMsg.proposedRent).toLocaleString()}/mo</span>`:''}</div>` : ''}
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+            ${(req.status === 'pending' || req.status === 'negotiating') ? `
+              <button onclick="acceptRentalRequest('${req._id}')" style="flex:1;min-width:70px;padding:8px 12px;border-radius:9px;border:none;background:rgba(78,205,196,0.12);color:var(--green);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">✅ Accept</button>
+              <button onclick="openNegotiationModal('${req._id}','${(req.propertyTitle||'').replace(/'/g,'\\\'')}',${req.propertyRent||0},${req.proposedRent||0})" style="flex:1;min-width:70px;padding:8px 12px;border-radius:9px;border:none;background:rgba(74,158,255,0.12);color:var(--blue);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">💬 Negotiate</button>
+              <button onclick="rejectRentalRequest('${req._id}')" style="flex:1;min-width:70px;padding:8px 12px;border-radius:9px;border:none;background:rgba(255,107,107,0.12);color:var(--error);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">❌ Reject</button>
+            ` : ''}
+            ${req.status === 'accepted' && req.agreedRent ? `<div style="font-size:12px;color:var(--green);font-weight:600">🤝 Agreed: Rs. ${Number(req.agreedRent).toLocaleString()}/mo</div>` : ''}
+          </div>
         </div>`;
       });
-      
       html += '</div>';
     });
-    
     list.innerHTML = html;
-  } catch{list.innerHTML='<div class="loading">⚠️ Error loading.</div>';}
+  } catch(e){console.error(e);list.innerHTML='<div class="loading">⚠️ Error loading.</div>';}
+}
+
+// ── Negotiation Modal Functions ──
+let _negReqId = '';
+function openNegotiationModal(reqId, propTitle, originalRent, currentProposed) {
+  _negReqId = reqId;
+  document.getElementById('neg-modal-title').textContent = propTitle;
+  document.getElementById('neg-original-rent').textContent = 'Rs. '+Number(originalRent).toLocaleString()+'/mo';
+  document.getElementById('neg-proposed-rent').textContent = currentProposed ? 'Rs. '+Number(currentProposed).toLocaleString()+'/mo' : 'Koi offer nahi';
+  document.getElementById('neg-counter-input').value = currentProposed || originalRent;
+  loadNegotiationMessages(reqId);
+  document.getElementById('ov-neg-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeNegotiationModal() {
+  document.getElementById('ov-neg-modal')?.classList.remove('open');
+  document.body.style.overflow='';
+}
+async function loadNegotiationMessages(reqId) {
+  const el = document.getElementById('neg-messages');
+  if(!el)return;
+  try {
+    const data = await lFetch('/rental-requests/'+reqId+'/negotiation');
+    const msgs = (data.request?.negotiationMessages)||[];
+    if(!msgs.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">💬 Abhi tak koi message nahi. Negotiation shuru karein!</div>';return;}
+    el.innerHTML = msgs.map(m=>`
+      <div style="display:flex;flex-direction:column;align-items:${m.senderRole==='landlord'?'flex-end':'flex-start'};margin-bottom:10px">
+        <div style="max-width:78%;padding:10px 14px;border-radius:${m.senderRole==='landlord'?'14px 14px 4px 14px':'14px 14px 14px 4px'};background:${m.senderRole==='landlord'?'rgba(201,169,110,0.15)':'rgba(74,158,255,0.12)'};border:1px solid ${m.senderRole==='landlord'?'rgba(201,169,110,0.25)':'rgba(74,158,255,0.2)'}">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px">${m.senderRole==='landlord'?'🏠 Aap (Landlord)':'🧑 '+m.senderName}</div>
+          <div style="font-size:13px;color:var(--text)">${m.text||''}</div>
+          ${m.proposedRent?`<div style="font-size:12px;color:var(--gold);font-weight:700;margin-top:4px">🏷️ Offer: Rs. ${Number(m.proposedRent).toLocaleString()}/mo</div>`:''}
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px">${new Date(m.sentAt).toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+    `).join('');
+    el.scrollTop = el.scrollHeight;
+    if(data.request?.proposedRent) document.getElementById('neg-proposed-rent').textContent = 'Rs. '+Number(data.request.proposedRent).toLocaleString()+'/mo';
+  } catch(e){console.error(e);}
+}
+async function sendNegotiationReply(action) {
+  const text = document.getElementById('neg-msg-input')?.value?.trim()||'';
+  const counterRent = document.getElementById('neg-counter-input')?.value;
+  if (!text && action!=='accept' && action!=='reject') { alert('Pehle message likhein.'); return; }
+  try {
+    const body = { text, action: action||'counter', counterRent: counterRent ? Number(counterRent) : undefined };
+    const data = await lFetch('/rental-requests/'+_negReqId+'/negotiate-reply','PUT',body);
+    if(data.success) {
+      document.getElementById('neg-msg-input').value='';
+      await loadNegotiationMessages(_negReqId);
+      await loadLandlordRentalRequests();
+      if(action==='accept'||action==='reject') closeNegotiationModal();
+    } else alert(data.message||'Error');
+  } catch{alert('Server se connect nahi ho saka.');}
 }
 
 async function acceptRentalRequest(requestId) {
-  if (!confirm('This will assign the property to the tenant and reject all other pending requests. Continue?')) return;
-  
+  if (!confirm('Property is tenant ko assign ho jaye gi aur baaki requests reject ho jain gi. Jaari rakhein?')) return;
   const btn = event.target;
-  const originalText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = '⏳ Processing…';
-  
+  btn.disabled = true; btn.textContent = '⏳ Processing…';
   try {
     const r = await lFetch('/rental-requests/'+requestId+'/accept', 'PUT', {});
-    if (r.success) {
-      alert('✅ Request accepted! Property assigned to tenant.');
-      await loadLandlordRentalRequests();
-    } else {
-      alert('⚠️ ' + (r.message || 'Failed'));
-      btn.disabled = false;
-      btn.textContent = originalText;
-    }
-  } catch {
-    alert('❌ Cannot connect to server');
-    btn.disabled = false;
-    btn.textContent = originalText;
-  }
+    if (r.success) { alert('✅ Request accept ho gayi!'); await loadLandlordRentalRequests(); }
+    else { alert('⚠️ '+(r.message||'Failed')); btn.disabled=false; btn.textContent='✅ Accept'; }
+  } catch { alert('❌ Server se connect nahi ho saka'); btn.disabled=false; btn.textContent='✅ Accept'; }
 }
 
 async function rejectRentalRequest(requestId) {
-  if (!confirm('Reject this rental request?')) return;
-  
+  if (!confirm('Is rental request ko reject karein?')) return;
   const btn = event.target;
-  const originalText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = '⏳ Processing…';
-  
+  btn.disabled = true; btn.textContent = '⏳ Processing…';
   try {
     const r = await lFetch('/rental-requests/'+requestId+'/reject', 'PUT', {});
-    if (r.success) {
-      alert('✅ Request rejected.');
-      await loadLandlordRentalRequests();
-    } else {
-      alert('⚠️ ' + (r.message || 'Failed'));
-      btn.disabled = false;
-      btn.textContent = originalText;
-    }
-  } catch {
-    alert('❌ Cannot connect to server');
-    btn.disabled = false;
-    btn.textContent = originalText;
-  }
+    if (r.success) { alert('✅ Request reject ho gayi.'); await loadLandlordRentalRequests(); }
+    else { alert('⚠️ '+(r.message||'Failed')); btn.disabled=false; btn.textContent='❌ Reject'; }
+  } catch { alert('❌ Server se connect nahi ho saka'); btn.disabled=false; btn.textContent='❌ Reject'; }
 }
 
 // ══════════════════════════════════════
@@ -1335,7 +1816,12 @@ async function loadLandlordLeases() {
     </tr>`).join('');
   } catch (err) {
     console.error('loadLandlordLeases error', err);
-    tbody.innerHTML = '<tr><td colspan="6" class="loading">⚠️ Error loading leases.</td></tr>';
+    const isAuth = err.message === 'Unauthorized';
+    tbody.innerHTML = `<tr><td colspan="6" class="loading">
+      ${isAuth
+        ? '🔒 Session expire ho gayi. <a href="../index.html" style="color:var(--gold)">Dobara login karo</a>.'
+        : '⚠️ Leases load nahi ho sakay. Backend chal raha hai? <button onclick="loadLandlordLeases()" style="margin-left:8px;padding:4px 12px;border-radius:6px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;font-family:DM Sans,sans-serif;font-size:12px">🔄 Retry</button>'}
+    </td></tr>`;
   }
 }
 
@@ -1479,6 +1965,10 @@ async function saveProfile() {
 // Safe wrappers using propMap (avoids JSON-in-HTML attribute issues)
 function quickView3D(propId) {
   const p = (window._propMap||{})[propId]; if(!p) return;
+  const panoramaUrl = getProperty360Url(p);
+  if (!panoramaUrl) {
+    return open3DRequestModal(propId);
+  }
   open3D(propId, p.title, p.model3d, p.type);
 }
 function edit3DByPropId(propId) {
@@ -1495,11 +1985,15 @@ function furnViewByPropId(propId) {
 // ══════════════════════════════════════
 let curr3DId = null;
 function open3D(propId, name, model3dOrJson, type) {
+  const viewerCfg = parseViewerConfig(model3dOrJson);
+  if (!viewerCfg.panoramaUrl) {
+    alert('3D view is not yet available for this property. Please request a 3D model from admin.');
+    return;
+  }
   curr3DId = propId;
   document.getElementById('ov3d').classList.add('open');
   document.getElementById('m3dn').textContent = (name || 'Property') + ' — Full Opening 360 View';
   document.body.style.overflow = 'hidden';
-  const viewerCfg = parseViewerConfig(model3dOrJson);
   const loadingEl = document.getElementById('c3main-loading');
   if (loadingEl) loadingEl.style.display = 'flex';
   const viewer = document.getElementById('c3main-viewer');
@@ -1524,7 +2018,7 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
   </div>
   <span class="tn-pill">🔑 Landlord Portal</span>
   <button class="icon-btn" onclick="sp('notifications',null)" title="Notifications">🔔</button>
-  <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+  <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></button>
   <button class="logout-btn" onclick="tmsLogout()">
     <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout
   </button>
@@ -1680,14 +2174,27 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
         <div class="fg"><label>Bathrooms</label><input id="ap-baths" type="number" placeholder="1" value="1"></div>
         <div class="fg"><label>Size (sqft)</label><input id="ap-sqft" type="number" placeholder="1000" value="1000"></div>
         <div class="fg full"><label>Description</label><textarea id="ap-desc" placeholder="Describe amenities, nearby places, condition..."></textarea></div>
+        <!-- Front Image Upload -->
+        <div class="fg full">
+          <label>Front Image / Cover Photo</label>
+          <div id="ap-img-area" style="border:2px dashed var(--border);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--input-bg)" onclick="document.getElementById('ap-img-input').click()" ondragover="event.preventDefault();this.style.borderColor='var(--gold)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="handleImgDrop(event)">
+            <input type="file" id="ap-img-input" accept="image/*" style="display:none" onchange="handleImgSelect(event)">
+            <div id="ap-img-preview-wrap" style="display:none;position:relative">
+              <img id="ap-img-preview" src="" alt="Preview" style="max-height:180px;max-width:100%;border-radius:10px;object-fit:cover">
+              <button onclick="clearPropImage(event)" style="position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:var(--error);border:none;color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">×</button>
+            </div>
+            <div id="ap-img-placeholder" style="color:var(--muted)">
+              <div style="font-size:32px;margin-bottom:6px">🏠</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text)">Click ya drag kar ke image upload karein</div>
+              <div style="font-size:11px;margin-top:4px">JPG, PNG, WEBP — max 5MB</div>
+            </div>
+          </div>
+        </div>
       </div>
       <!-- 3D Model Preview for New Property -->
       <div style="margin-top:18px;padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:12px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <span style="font-size:13px;font-weight:700;color:var(--text)">🏗️ 3D Model Configuration</span>
-          <button class="btn btn-ghost btn-sm" onclick="open3DBuilder(null,'New Property',null)">Configure 3D →</button>
-        </div>
-        <div style="font-size:12px;color:var(--muted)">Save the same full opening 360 panorama here for this property.</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text)">🏗️ 360 View Approval</div>
+        <div style="margin-top:10px;font-size:12px;color:var(--muted)">New listings show only property details until admin approves a 360 model. After publishing, submit a request from the 3D Model Requests page.</div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;margin-top:16px">
         <button class="submit-btn" id="ap-btn" onclick="submitAddProp()">🏠 Add Property</button>
@@ -1722,15 +2229,209 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
 
   <!-- LEASE AGREEMENTS -->
   <div class="page" id="page-leases">
-    <div class="pg-head"><div><div class="pg-title">Lease Agreements</div><div class="pg-sub">Manage tenancy agreements under Punjab Rented Premises Act 2009</div></div></div>
-    <div class="card">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:12px;color:var(--text)">Lease Requests</h3>
+    <div class="pg-head">
+      <div>
+        <div class="pg-title">Lease Agreements</div>
+        <div class="pg-sub">Create &amp; send tenancy contracts — per property</div>
+      </div>
+      <button onclick="openLLWizard(null)" style="padding:9px 18px;border-radius:10px;border:none;background:linear-gradient(135deg,#2563EB,#4F7BFE);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">+ New Agreement</button>
+    </div>
+
+    <!-- Per-property lease cards -->
+    <div id="ll-prop-lease-cards">
+      <div class="loading"><span class="spinner"></span>Properties load ho rahi hain…</div>
+    </div>
+
+    <!-- All Leases Table -->
+    <div class="card" style="margin-top:18px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <h3 style="font-size:15px;font-weight:700;color:var(--text)">All Lease Requests (From Tenants)</h3>
+        <input id="ll-lease-search" oninput="filterLLLeases()" placeholder="Search tenant, property..." style="padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;width:200px">
+      </div>
       <div class="tbl-wrap">
         <table>
           <thead><tr><th>Tenant</th><th>Property</th><th>Rent</th><th>Period</th><th>Status</th><th>Action</th></tr></thead>
           <tbody id="lease-tbody"><tr><td colspan="6" class="loading">Loading…</td></tr></tbody>
         </table>
       </div>
+    </div>
+  </div>
+
+  <!-- LEASE WIZARD MODAL -->
+  <div id="ll-lease-wizard-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:3000;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;backdrop-filter:blur(8px)">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;width:100%;max-width:680px;margin:20px auto;padding:24px;position:relative">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:var(--text)" id="llwiz-prop-title">New Lease Agreement</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px" id="llwiz-prop-sub">Fill in all details and sign</div>
+        </div>
+        <button onclick="closeLLWizard()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,107,107,0.12);color:#FF6B6B;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+
+      <!-- Steps -->
+      <div style="display:flex;align-items:center;gap:0;margin-bottom:20px" id="llwiz-steps">
+        <div class="llwiz-step" id="llwiz-s1" style="flex:1;text-align:center;position:relative">
+          <div class="llwiz-circle" id="llwiz-c1" style="width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(201,169,110,0.4);background:rgba(201,169,110,0.12);color:var(--gold);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;margin:0 auto 5px">1</div>
+          <div style="font-size:11px;color:var(--gold);font-weight:600" id="llwiz-l1">Parties</div>
+          <div id="llwiz-line1" style="position:absolute;top:14px;left:calc(50% + 14px);width:calc(100% - 28px);height:1px;background:var(--border)"></div>
+        </div>
+        <div class="llwiz-step" id="llwiz-s2" style="flex:1;text-align:center;position:relative">
+          <div class="llwiz-circle" id="llwiz-c2" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:var(--input-bg);color:var(--muted);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;margin:0 auto 5px">2</div>
+          <div style="font-size:11px;color:var(--muted)" id="llwiz-l2">Property</div>
+          <div id="llwiz-line2" style="position:absolute;top:14px;left:calc(50% + 14px);width:calc(100% - 28px);height:1px;background:var(--border)"></div>
+        </div>
+        <div class="llwiz-step" id="llwiz-s3" style="flex:1;text-align:center;position:relative">
+          <div class="llwiz-circle" id="llwiz-c3" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:var(--input-bg);color:var(--muted);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;margin:0 auto 5px">3</div>
+          <div style="font-size:11px;color:var(--muted)" id="llwiz-l3">Financials</div>
+          <div id="llwiz-line3" style="position:absolute;top:14px;left:calc(50% + 14px);width:calc(100% - 28px);height:1px;background:var(--border)"></div>
+        </div>
+        <div class="llwiz-step" id="llwiz-s4" style="flex:1;text-align:center">
+          <div class="llwiz-circle" id="llwiz-c4" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:var(--input-bg);color:var(--muted);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;margin:0 auto 5px">4</div>
+          <div style="font-size:11px;color:var(--muted)" id="llwiz-l4">Sign</div>
+        </div>
+      </div>
+
+      <!-- Panel 1: Parties -->
+      <div id="llwiz-panel1">
+        <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px">
+          <div style="background:#1a2744;color:#c9a96e;font-size:12px;font-weight:600;padding:10px 14px;letter-spacing:.5px">👤 Landlord</div>
+          <div style="padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Full Name</label><input id="llw-ll-name" placeholder="Landlord full name" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">CNIC No.</label><input id="llw-ll-cnic" placeholder="XXXXX-XXXXXXX-X" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div style="display:flex;flex-direction:column;gap:3px;grid-column:1/-1"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Address</label><input id="llw-ll-addr" placeholder="Permanent address" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Phone</label><input id="llw-ll-phone" placeholder="+92-XXX-XXXXXXX" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Email</label><input id="llw-ll-email" placeholder="email@example.com" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+          </div>
+        </div>
+        <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px">
+          <div style="background:#1a2744;color:#c9a96e;font-size:12px;font-weight:600;padding:10px 14px;letter-spacing:.5px">👤 Tenant</div>
+          <div style="padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Full Name</label><input id="llw-tn-name" placeholder="Tenant full name" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">CNIC No.</label><input id="llw-tn-cnic" placeholder="XXXXX-XXXXXXX-X" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div style="display:flex;flex-direction:column;gap:3px;grid-column:1/-1"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Permanent Address</label><input id="llw-tn-addr" placeholder="Current permanent address" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Phone</label><input id="llw-tn-phone" placeholder="+92-XXX-XXXXXXX" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Occupation</label><input id="llw-tn-occ" placeholder="e.g. Teacher, Engineer" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button onclick="llwizNext(2)" style="flex:1;padding:10px;background:#1a2744;color:#c9a96e;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Next — Property →</button>
+        </div>
+      </div>
+
+      <!-- Panel 2: Property -->
+      <div id="llwiz-panel2" style="display:none">
+        <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px">
+          <div style="background:#1a2744;color:#c9a96e;font-size:12px;font-weight:600;padding:10px 14px;letter-spacing:.5px">🏢 Property Details</div>
+          <div style="padding:14px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Complete Address</label><input id="llw-prop-addr" placeholder="House No., Street, Mohalla, City" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Property Type</label>
+                <select id="llw-prop-type" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none">
+                  <option value="">Select type</option>
+                  <option>Residential House</option><option>Apartment / Flat</option><option>Commercial Shop</option><option>Office Space</option><option>Godown / Warehouse</option>
+                </select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Area</label><input id="llw-prop-area" placeholder="e.g. 5 Marla / 1200 sq ft" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+              <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Rooms / Config</label><input id="llw-prop-rooms" placeholder="e.g. 3 Bed, Ground Floor" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+              <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Plot / Khasra No.</label><input id="llw-prop-plot" placeholder="Registry reference" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button onclick="llwizNext(1)" style="padding:10px 18px;background:var(--input-bg);color:var(--text);border:1px solid var(--border);border-radius:10px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">← Back</button>
+          <button onclick="llwizNext(3)" style="flex:1;padding:10px;background:#1a2744;color:#c9a96e;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Next — Financials →</button>
+        </div>
+      </div>
+
+      <!-- Panel 3: Financials -->
+      <div id="llwiz-panel3" style="display:none">
+        <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px">
+          <div style="background:#1a2744;color:#c9a96e;font-size:12px;font-weight:600;padding:10px 14px;letter-spacing:.5px">💰 Financial Terms</div>
+          <div style="padding:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+            <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Monthly Rent</label><input id="llw-rent" placeholder="Rs. ____" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Security Deposit</label><input id="llw-deposit" placeholder="Rs. ____" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Advance</label><input id="llw-advance" placeholder="e.g. 2 months" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Start Date</label><input type="date" id="llw-start" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">End Date</label><input type="date" id="llw-end" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Rent Due Day</label><input id="llw-dueday" placeholder="e.g. 1st of month" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Annual Increase %</label><input id="llw-incpct" placeholder="e.g. 10%" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">City / Province</label><input id="llw-city" placeholder="e.g. Lahore, Punjab" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Duration</label><input id="llw-dur" placeholder="11 months" value="11 months" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none"></div>
+            <div style="display:flex;flex-direction:column;gap:3px;grid-column:1/-1"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Special Conditions (optional)</label><textarea id="llw-special" rows="2" placeholder="Any extra conditions agreed by both parties" style="border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;width:100%;outline:none;resize:vertical"></textarea></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button onclick="llwizNext(2)" style="padding:10px 18px;background:var(--input-bg);color:var(--text);border:1px solid var(--border);border-radius:10px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">← Back</button>
+          <button onclick="llwizNext(4)" style="flex:1;padding:10px;background:#1a2744;color:#c9a96e;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Next — Sign →</button>
+        </div>
+      </div>
+
+      <!-- Panel 4: Sign + Preview -->
+      <div id="llwiz-panel4" style="display:none">
+        <!-- Landlord Sig -->
+        <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px">
+          <div style="background:#1a2744;color:#c9a96e;font-size:12px;font-weight:600;padding:10px 14px;letter-spacing:.5px">✍️ Landlord Signature</div>
+          <div style="padding:14px">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Draw your signature below, or upload an image</div>
+            <div style="border:0.5px solid var(--border);border-radius:8px;overflow:hidden;background:rgba(255,255,255,0.03)">
+              <canvas id="llw-ll-canvas" height="100" style="display:block;width:100%;height:100px;cursor:crosshair;touch-action:none"></canvas>
+              <img id="llw-ll-img" style="display:none;width:100%;height:100px;object-fit:contain" alt="Landlord sig">
+            </div>
+            <div style="display:flex;gap:8px;padding:8px 0 0">
+              <button onclick="llwizClearSig('ll')" style="font-size:12px;padding:5px 12px;border:0.5px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif">🗑 Clear</button>
+              <label style="font-size:12px;padding:5px 12px;border:0.5px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:5px">📤 Upload<input type="file" accept="image/*" style="display:none" onchange="llwizUploadSig('ll',this)"></label>
+              <span id="llw-ll-ok" style="display:none;font-size:11px;color:#1D9E75;padding:5px 0;align-items:center;gap:4px">✅ Signature added</span>
+            </div>
+          </div>
+        </div>
+        <!-- Tenant Sig -->
+        <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px">
+          <div style="background:#1a2744;color:#c9a96e;font-size:12px;font-weight:600;padding:10px 14px;letter-spacing:.5px">✍️ Tenant Signature</div>
+          <div style="padding:14px">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Draw your signature below, or upload an image</div>
+            <div style="border:0.5px solid var(--border);border-radius:8px;overflow:hidden;background:rgba(255,255,255,0.03)">
+              <canvas id="llw-tn-canvas" height="100" style="display:block;width:100%;height:100px;cursor:crosshair;touch-action:none"></canvas>
+              <img id="llw-tn-img" style="display:none;width:100%;height:100px;object-fit:contain" alt="Tenant sig">
+            </div>
+            <div style="display:flex;gap:8px;padding:8px 0 0">
+              <button onclick="llwizClearSig('tn')" style="font-size:12px;padding:5px 12px;border:0.5px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif">🗑 Clear</button>
+              <label style="font-size:12px;padding:5px 12px;border:0.5px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:5px">📤 Upload<input type="file" accept="image/*" style="display:none" onchange="llwizUploadSig('tn',this)"></label>
+              <span id="llw-tn-ok" style="display:none;font-size:11px;color:#1D9E75;padding:5px 0;align-items:center;gap:4px">✅ Signature added</span>
+            </div>
+          </div>
+        </div>
+        <!-- Preview -->
+        <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px">
+          <div style="background:#1a2744;color:#c9a96e;font-size:12px;font-weight:600;padding:10px 14px;letter-spacing:.5px">👁 Preview</div>
+          <div style="padding:14px">
+            <div id="llwiz-preview" style="background:var(--card);border:0.5px solid var(--border);border-radius:10px;padding:16px;font-size:12.5px;line-height:1.8;color:var(--text)">Preview yahan dikhega…</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button onclick="llwizNext(3)" style="padding:10px 18px;background:var(--input-bg);color:var(--text);border:1px solid var(--border);border-radius:10px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">← Back</button>
+          <button onclick="llwizDownload()" style="padding:10px 18px;background:rgba(29,158,117,0.12);color:#1D9E75;border:1px solid rgba(29,158,117,0.25);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Download</button>
+          <button onclick="llwizSave()" style="flex:1;padding:10px;background:linear-gradient(135deg,#2563EB,#4F7BFE);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif" id="llwiz-save-btn">💾 Save & Lock Agreement</button>
+        </div>
+        <div id="llwiz-save-err" style="display:none;margin-top:10px;padding:9px 13px;background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.2);border-radius:8px;color:#FF6B6B;font-size:12px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEASE VIEW MODAL (read-only, locked) -->
+  <div id="ll-lease-view-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:3000;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;backdrop-filter:blur(8px)">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;width:100%;max-width:680px;margin:20px auto;padding:24px;position:relative">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:var(--text)">Lease Agreement</div>
+          <div style="font-size:12px;color:#1D9E75;margin-top:2px">🔒 Saved & Locked — Changes allowed nahi</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button onclick="llViewDownload()" style="padding:8px 14px;background:rgba(29,158,117,0.12);color:#1D9E75;border:1px solid rgba(29,158,117,0.25);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Download</button>
+          <button onclick="document.getElementById('ll-lease-view-modal').style.display='none'" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,107,107,0.12);color:#FF6B6B;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+        </div>
+      </div>
+      <div id="ll-lease-view-content" style="font-size:13px;line-height:1.8;color:var(--text)"></div>
     </div>
   </div>
 
@@ -1789,33 +2490,101 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
 
   <!-- NOTIFICATIONS -->
   <div class="page" id="page-notifications">
-    <div class="pg-head"><div><div class="pg-title">Notifications</div><div class="pg-sub">Latest updates</div></div></div>
+    <div class="pg-head">
+      <div>
+        <div class="pg-title">Notifications</div>
+        <div class="pg-sub">Send targeted notifications to your tenants or all users</div>
+      </div>
+    </div>
+
+    <!-- COMPOSE CARD -->
     <div class="card" style="margin-bottom:18px;">
-      <div style="display:grid;gap:14px">
-        <div style="display:grid;grid-template-columns:1fr 180px;gap:14px;align-items:end">
-          <div class="fg" style="margin-bottom:0">
-            <label>Title</label>
-            <input id="notif-title" placeholder="Notification title" type="text">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--gold-l,#E8C97A));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔔</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text)">Send Notification</div>
+          <div style="font-size:11px;color:var(--muted)">Choose recipients, then compose your message</div>
+        </div>
+      </div>
+
+      <div style="display:grid;gap:16px">
+
+        <!-- ROW 1: Title -->
+        <div class="fg" style="margin-bottom:0">
+          <label>Notification Title</label>
+          <input id="notif-title" placeholder="e.g. Rent Due Reminder, Maintenance Notice…" type="text">
+        </div>
+
+        <!-- ROW 2: Recipient Type -->
+        <div class="fg" style="margin-bottom:0">
+          <label>Send To</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap" id="notif-type-btns">
+            <button onclick="llSetNotifType('all')"     id="ntype-all"     class="ntype-btn ntype-active">🌐 Everyone</button>
+            <button onclick="llSetNotifType('mytenants')" id="ntype-mytenants" class="ntype-btn">🏠 My Tenants</button>
+            <button onclick="llSetNotifType('byprop')"  id="ntype-byprop"  class="ntype-btn">🏢 By Property</button>
+            <button onclick="llSetNotifType('specific')" id="ntype-specific" class="ntype-btn">👤 Specific Person</button>
           </div>
+        </div>
+
+        <!-- ROW 3a: Property Filter (shown when byprop) -->
+        <div id="notif-prop-wrap" style="display:none">
           <div class="fg" style="margin-bottom:0">
-            <label>Send to</label>
-            <select id="notif-to">
-              <option value="all">Everyone</option>
-              <option value="tenant">Tenants</option>
-              <option value="landlord">Landlords</option>
-              <option value="admin">Admin</option>
+            <label>Select Property — tenants in that property will be shown</label>
+            <select id="notif-prop-sel" onchange="llLoadTenantsForProp()">
+              <option value="">— Choose a property —</option>
             </select>
           </div>
         </div>
-        <div class="fg full" style="margin-bottom:0">
-          <label>Message</label>
-          <textarea id="notif-msg" placeholder="Write your notification message..."></textarea>
+
+        <!-- ROW 3b: Tenant multi-select (shown when byprop or mytenants) -->
+        <div id="notif-tenant-wrap" style="display:none">
+          <div class="fg" style="margin-bottom:0">
+            <label id="notif-tenant-label">Select Tenants — hold Ctrl / Cmd to select multiple</label>
+            <!-- Pill checkboxes for tenants -->
+            <div id="notif-tenant-pills" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;min-height:44px;padding:10px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px">
+              <div style="color:var(--muted);font-size:12px;align-self:center" id="notif-pills-placeholder">No tenants found for this property.</div>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:5px">
+              <span id="notif-selected-count">0 selected</span> ·
+              <button onclick="llSelectAllTenants()" style="background:none;border:none;color:var(--gold);cursor:pointer;font-size:11px;padding:0">Select All</button> ·
+              <button onclick="llClearTenants()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:0">Clear</button>
+            </div>
+          </div>
         </div>
-        <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap">
-          <button class="submit-btn" onclick="tmsSendNotification()">Send Notification</button>
-          <span id="notif-ok" class="toast">Notification sent!</span>
+
+        <!-- ROW 3c: Specific person (shown when specific) -->
+        <div id="notif-specific-wrap" style="display:none">
+          <div class="fg" style="margin-bottom:0">
+            <label>Search by Name or Email</label>
+            <input id="notif-search-input" type="text" placeholder="Type name or email to search…" oninput="llSearchPerson(this.value)">
+            <div id="notif-search-results" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:8px"></div>
+            <div id="notif-selected-specific" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px"></div>
+          </div>
+        </div>
+
+        <!-- ROW 4: Message -->
+        <div class="fg" style="margin-bottom:0">
+          <label>Message</label>
+          <textarea id="notif-msg" placeholder="Write your notification message…" style="min-height:90px"></textarea>
+        </div>
+
+        <!-- ROW 5: Preview + Send -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div id="notif-recipient-preview" style="font-size:12px;color:var(--muted);flex:1">
+            📬 Will be sent to: <strong id="notif-recipient-label" style="color:var(--text)">Everyone</strong>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <span id="notif-ok" class="toast" style="margin:0">✅ Notification sent!</span>
+            <button class="submit-btn" onclick="llSendNotification()">🚀 Send Notification</button>
+          </div>
         </div>
       </div>
+    </div>
+
+    <!-- INBOX: Received Notifications -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="font-size:14px;font-weight:700;color:var(--text)">📥 My Notifications</div>
+      <button onclick="llMarkAllRead()" style="font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;padding:4px 8px">Mark all read</button>
     </div>
     <div id="notifs-list"></div>
   </div>
@@ -1897,12 +2666,17 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
         referrerpolicy="strict-origin-when-cross-origin"
         style="width:100%;height:100%;background:#0a0d16;border:0"
       ></iframe>
+      <!-- Overlays to hide third-party watermarks -->
+      <div style="position:absolute;bottom:0;left:0;width:180px;height:48px;background:#0a0d16;pointer-events:none;z-index:10"></div>
+      <div style="position:absolute;bottom:0;right:0;width:160px;height:48px;background:#0a0d16;pointer-events:none;z-index:10"></div>
+      <div style="position:absolute;top:0;left:0;width:160px;height:44px;background:#0a0d16;pointer-events:none;z-index:10"></div>
+      <div style="position:absolute;top:0;right:0;width:160px;height:44px;background:#0a0d16;pointer-events:none;z-index:10"></div>
       <div id="c3main-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0a0d16;flex-direction:column;gap:10px;pointer-events:none">
         <div style="width:36px;height:36px;border:3px solid rgba(201,169,110,0.3);border-top-color:#C9A96E;border-radius:50%;animation:spin 0.8s linear infinite"></div>
         <span style="color:#C9A96E;font-size:12px;font-weight:600">Loading 360 View...</span>
       </div>
     </div>
-    <div style="padding:10px 16px;font-size:11px;color:var(--muted);text-align:center;border-top:1px solid var(--border)">Drag inside the viewer to move around just like the Kuula link.</div>
+    <div style="padding:10px 16px;font-size:11px;color:var(--muted);text-align:center;border-top:1px solid var(--border)">360° view — drag to explore the property.</div>
   </div>
 </div>
 
@@ -1918,7 +2692,7 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
         <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">Panorama Link</div>
         <div class="fg" style="margin-bottom:13px">
           <label>360 URL</label>
-          <input type="url" id="b3d-panorama-url" onchange="previewBuilderModel()" placeholder="https://kuula.co/share/..." style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%">
+          <input type="url" id="b3d-panorama-url" onchange="previewBuilderModel()" placeholder="https://share.example.com/360/..." style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%">
         </div>
         <div style="font-size:12px;line-height:1.55;color:var(--muted);margin-bottom:18px">Is property ka purana 3D model remove karke yahan same exact full opening 360 panorama save hoga.</div>
         <div style="display:flex;align-items:center;gap:10px">
@@ -1936,7 +2710,11 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
           referrerpolicy="strict-origin-when-cross-origin"
           style="width:100%;height:100%;min-height:460px;display:block;border:0;background:#080B12"
         ></iframe>
-        <div style="position:absolute;bottom:10px;left:12px;font-size:10px;color:rgba(255,255,255,0.4)">Preview opens with the same Kuula-style 360 movement.</div>
+        <!-- Overlays to hide third-party watermarks -->
+        <div style="position:absolute;bottom:0;left:0;width:180px;height:48px;background:#080B12;pointer-events:none;z-index:10"></div>
+        <div style="position:absolute;bottom:0;right:0;width:160px;height:48px;background:#080B12;pointer-events:none;z-index:10"></div>
+        <div style="position:absolute;top:0;left:0;width:160px;height:44px;background:#080B12;pointer-events:none;z-index:10"></div>
+        <div style="position:absolute;top:0;right:0;width:160px;height:44px;background:#080B12;pointer-events:none;z-index:10"></div>
       </div>
     </div>
   </div>
@@ -2022,20 +2800,408 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
   });
 })();
 
+// ════════════════════════════════════════════════
+// LANDLORD NOTIFICATION SYSTEM
+// ════════════════════════════════════════════════
+
+let _llNotifType   = 'all';   // 'all' | 'mytenants' | 'byprop' | 'specific'
+let _llSelTenants  = new Set(); // emails of selected tenant pills
+let _llSelSpecific = new Set(); // emails of specific persons selected
+let _llAllTenants  = [];       // all tenants (from TMS)
+let _llMyTenants   = [];       // tenants belonging to this landlord's properties
+
+// ── Init when page opens ─────────────────────────────────
 function loadNotifications() {
-  if (typeof tmsRenderNotifs === 'function') {
-    tmsRenderNotifs();
-  } else {
-    const container = document.getElementById('notifs-list');
-    if (container) {
-      container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">Notifications are unavailable right now.</div>`;
-    }
-  }
+  // Build my tenants list from leaseItems + myProps
+  _llBuildMyTenants();
+  // Populate property dropdown
+  _llPopulatePropDropdown();
+  // Render received notifications
+  llRenderReceivedNotifs();
+  // Reset compose UI
+  llSetNotifType('all');
   if (typeof TMS !== 'undefined') {
-    TMS.markAllNotifsRead();
     const nb = document.getElementById('nb'); if(nb) nb.style.display='none';
     const nb2 = document.getElementById('nb2'); if(nb2) nb2.style.display='none';
   }
+}
+
+function _llBuildMyTenants() {
+  // From TMS tenant store — all tenants whose landlordId matches current landlord's properties
+  const all = (typeof TMS !== 'undefined') ? TMS.getTenants() : [];
+  // Also pull from leaseItems (backend) if available
+  const fromLeases = (leaseItems || []).map(l => ({
+    name: l.tenantName || 'Tenant',
+    email: l.tenantEmail || l.tenantId || '',
+    property: l.propertyTitle || '',
+    propertyId: (l.propertyId || l.property || '').toString(),
+    avatar: (l.tenantName || 'T')[0].toUpperCase(),
+    color: '#C9A96E',
+  })).filter(t => t.email);
+
+  // Deduplicate by email
+  const seen = new Set();
+  _llMyTenants = [];
+  fromLeases.forEach(t => { if(t.email && !seen.has(t.email)) { seen.add(t.email); _llMyTenants.push(t); } });
+  // Also add from TMS store
+  all.forEach(t => {
+    if (t.email && !seen.has(t.email)) {
+      seen.add(t.email);
+      _llMyTenants.push({
+        name: t.name || t.email,
+        email: t.email,
+        property: '',
+        propertyId: (t.landlordId || ''),
+        avatar: (t.name || t.email)[0].toUpperCase(),
+        color: '#4A9EFF',
+      });
+    }
+  });
+  _llAllTenants = _llMyTenants;
+}
+
+function _llPopulatePropDropdown() {
+  const sel = document.getElementById('notif-prop-sel');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Choose a property —</option>';
+  (myProps || []).forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = (p._id || p.id || '').toString();
+    opt.textContent = p.title || p.address || 'Property';
+    sel.appendChild(opt);
+  });
+}
+
+// ── Type switcher ────────────────────────────────────────
+function llSetNotifType(type) {
+  _llNotifType = type;
+  _llSelTenants.clear();
+  _llSelSpecific.clear();
+
+  // Update button states
+  document.querySelectorAll('.ntype-btn').forEach(b => b.classList.remove('ntype-active'));
+  const activeBtn = document.getElementById('ntype-' + type);
+  if (activeBtn) activeBtn.classList.add('ntype-active');
+
+  // Show/hide panels
+  const propWrap      = document.getElementById('notif-prop-wrap');
+  const tenantWrap    = document.getElementById('notif-tenant-wrap');
+  const specificWrap  = document.getElementById('notif-specific-wrap');
+  if (propWrap)     propWrap.style.display     = (type === 'byprop') ? 'block' : 'none';
+  if (tenantWrap)   tenantWrap.style.display   = (type === 'mytenants' || type === 'byprop') ? 'block' : 'none';
+  if (specificWrap) specificWrap.style.display = (type === 'specific') ? 'block' : 'none';
+
+  if (type === 'mytenants') {
+    const lbl = document.getElementById('notif-tenant-label');
+    if (lbl) lbl.textContent = 'Select tenants from all your properties';
+    _llRenderTenantPills(_llMyTenants);
+  }
+  if (type === 'byprop') {
+    const lbl = document.getElementById('notif-tenant-label');
+    if (lbl) lbl.textContent = 'Select tenants in this property (or send to all)';
+    _llRenderTenantPills([]);
+  }
+  if (type === 'specific') {
+    const inp = document.getElementById('notif-search-input');
+    if (inp) inp.value = '';
+    const res = document.getElementById('notif-search-results');
+    if (res) res.innerHTML = '';
+    const sel = document.getElementById('notif-selected-specific');
+    if (sel) sel.innerHTML = '';
+  }
+
+  _llUpdateRecipientPreview();
+  _llUpdateSelectedCount();
+}
+
+// ── Property selected → load its tenants ────────────────
+function llLoadTenantsForProp() {
+  const propId = document.getElementById('notif-prop-sel')?.value || '';
+  _llSelTenants.clear();
+  if (!propId) { _llRenderTenantPills([]); _llUpdateRecipientPreview(); return; }
+  // Filter leaseItems by property
+  const propTenants = _llMyTenants.filter(t =>
+    t.propertyId && t.propertyId.toString() === propId
+  );
+  // fallback: from TMS if no leaseItems
+  const label = document.getElementById('notif-tenant-label');
+  if (label) label.textContent = propTenants.length
+    ? `Tenants in this property (${propTenants.length} found)`
+    : 'No tenants found for this property';
+  _llRenderTenantPills(propTenants);
+  _llUpdateRecipientPreview();
+}
+
+// ── Render tenant pills ──────────────────────────────────
+function _llRenderTenantPills(tenants) {
+  const container = document.getElementById('notif-tenant-pills');
+  const placeholder = document.getElementById('notif-pills-placeholder');
+  if (!container) return;
+  // Remove old pills (keep placeholder)
+  container.querySelectorAll('.tenant-pill').forEach(p => p.remove());
+  if (!tenants.length) {
+    if (placeholder) placeholder.style.display = 'block';
+    _llUpdateSelectedCount();
+    return;
+  }
+  if (placeholder) placeholder.style.display = 'none';
+  tenants.forEach(t => {
+    const pill = document.createElement('div');
+    pill.className = 'tenant-pill' + (_llSelTenants.has(t.email) ? ' pill-selected' : '');
+    pill.dataset.email = t.email;
+    pill.innerHTML = `
+      <div class="pill-av">${t.avatar || t.name[0].toUpperCase()}</div>
+      <div>
+        <div style="font-size:12px;font-weight:600">${t.name}</div>
+        <div style="font-size:10px;opacity:0.7">${t.email}</div>
+        ${t.property ? `<div style="font-size:10px;opacity:0.55">${t.property}</div>` : ''}
+      </div>
+      <div class="pill-check" style="margin-left:4px;font-size:14px">${_llSelTenants.has(t.email) ? '✓' : ''}</div>
+    `;
+    pill.onclick = () => _llToggleTenantPill(t.email, pill);
+    container.appendChild(pill);
+  });
+  _llUpdateSelectedCount();
+}
+
+function _llToggleTenantPill(email, pill) {
+  if (_llSelTenants.has(email)) {
+    _llSelTenants.delete(email);
+    pill.classList.remove('pill-selected');
+    pill.querySelector('.pill-check').textContent = '';
+  } else {
+    _llSelTenants.add(email);
+    pill.classList.add('pill-selected');
+    pill.querySelector('.pill-check').textContent = '✓';
+  }
+  _llUpdateSelectedCount();
+  _llUpdateRecipientPreview();
+}
+
+function llSelectAllTenants() {
+  document.querySelectorAll('.tenant-pill').forEach(pill => {
+    const email = pill.dataset.email;
+    if (email) {
+      _llSelTenants.add(email);
+      pill.classList.add('pill-selected');
+      const chk = pill.querySelector('.pill-check');
+      if (chk) chk.textContent = '✓';
+    }
+  });
+  _llUpdateSelectedCount();
+  _llUpdateRecipientPreview();
+}
+
+function llClearTenants() {
+  _llSelTenants.clear();
+  document.querySelectorAll('.tenant-pill').forEach(pill => {
+    pill.classList.remove('pill-selected');
+    const chk = pill.querySelector('.pill-check');
+    if (chk) chk.textContent = '';
+  });
+  _llUpdateSelectedCount();
+  _llUpdateRecipientPreview();
+}
+
+function _llUpdateSelectedCount() {
+  const el = document.getElementById('notif-selected-count');
+  if (el) el.textContent = _llSelTenants.size + ' selected';
+}
+
+// ── Specific person search ───────────────────────────────
+function llSearchPerson(query) {
+  const res = document.getElementById('notif-search-results');
+  if (!res) return;
+  res.innerHTML = '';
+  if (!query || query.length < 2) return;
+  const q = query.toLowerCase();
+  // Search all tenants (my tenants)
+  const matches = _llMyTenants.filter(t =>
+    (t.name || '').toLowerCase().includes(q) ||
+    (t.email || '').toLowerCase().includes(q)
+  ).slice(0, 8);
+  if (!matches.length) {
+    res.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:6px">No results found.</div>`;
+    return;
+  }
+  matches.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'person-result' + (_llSelSpecific.has(t.email) ? ' pr-selected' : '');
+    div.innerHTML = `
+      <div class="pr-av" style="background:linear-gradient(135deg,#4A9EFF,#7BBFFF)">${t.avatar || t.name[0]}</div>
+      <div style="min-width:0">
+        <div style="font-size:12px;font-weight:600;color:var(--text)">${t.name}</div>
+        <div style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis">${t.email}</div>
+      </div>
+      <div style="margin-left:auto;font-size:13px">${_llSelSpecific.has(t.email) ? '✓' : '+'}</div>
+    `;
+    div.onclick = () => _llToggleSpecificPerson(t, div);
+    res.appendChild(div);
+  });
+}
+
+function _llToggleSpecificPerson(t, el) {
+  if (_llSelSpecific.has(t.email)) {
+    _llSelSpecific.delete(t.email);
+    el.classList.remove('pr-selected');
+    el.querySelector('div:last-child').textContent = '+';
+    // Remove from selected chips
+    const chip = document.querySelector(`[data-chip="${t.email}"]`);
+    if (chip) chip.remove();
+  } else {
+    _llSelSpecific.add(t.email);
+    el.classList.add('pr-selected');
+    el.querySelector('div:last-child').textContent = '✓';
+    // Add chip
+    const selDiv = document.getElementById('notif-selected-specific');
+    if (selDiv) {
+      const chip = document.createElement('div');
+      chip.dataset.chip = t.email;
+      chip.style.cssText = 'display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:rgba(201,169,110,0.15);border:1px solid var(--gold);font-size:11px;font-weight:600;color:var(--gold)';
+      chip.innerHTML = `${t.name} <span style="cursor:pointer;opacity:0.7" onclick="event.stopPropagation();_llRemoveSpecific('${t.email}')">✕</span>`;
+      selDiv.appendChild(chip);
+    }
+  }
+  _llUpdateRecipientPreview();
+}
+
+function _llRemoveSpecific(email) {
+  _llSelSpecific.delete(email);
+  const chip = document.querySelector(`[data-chip="${email}"]`);
+  if (chip) chip.remove();
+  // Also update search results
+  document.querySelectorAll('.person-result').forEach(el => {
+    if (el.dataset.email === email) {
+      el.classList.remove('pr-selected');
+      el.querySelector('div:last-child').textContent = '+';
+    }
+  });
+  _llUpdateRecipientPreview();
+}
+
+// ── Recipient preview ────────────────────────────────────
+function _llUpdateRecipientPreview() {
+  const lbl = document.getElementById('notif-recipient-label');
+  if (!lbl) return;
+  if (_llNotifType === 'all') {
+    lbl.textContent = 'Everyone (all tenants, landlords, admin)';
+  } else if (_llNotifType === 'mytenants') {
+    const cnt = _llSelTenants.size;
+    lbl.textContent = cnt
+      ? `${cnt} tenant${cnt > 1 ? 's' : ''} (${[..._llSelTenants].join(', ')})`
+      : 'All my tenants';
+  } else if (_llNotifType === 'byprop') {
+    const propSel = document.getElementById('notif-prop-sel');
+    const propName = propSel?.options[propSel.selectedIndex]?.text || '';
+    const cnt = _llSelTenants.size;
+    lbl.textContent = cnt
+      ? `${cnt} tenant${cnt > 1 ? 's' : ''} in ${propName}`
+      : (propName ? `All tenants in ${propName}` : 'Select a property first');
+  } else if (_llNotifType === 'specific') {
+    const cnt = _llSelSpecific.size;
+    lbl.textContent = cnt
+      ? `${cnt} specific person${cnt > 1 ? 's' : ''}`
+      : 'No one selected yet';
+  }
+}
+
+// ── Send ─────────────────────────────────────────────────
+function llSendNotification() {
+  const title = document.getElementById('notif-title')?.value.trim();
+  const msg   = document.getElementById('notif-msg')?.value.trim();
+  if (!title || !msg) { alert('Please fill in both the title and message.'); return; }
+
+  let recipients = [];
+  let recipientLabel = '';
+
+  if (_llNotifType === 'all') {
+    recipients = ['all'];
+    recipientLabel = 'Everyone';
+  } else if (_llNotifType === 'mytenants') {
+    if (_llSelTenants.size > 0) {
+      recipients = [..._llSelTenants];
+      recipientLabel = recipients.length + ' tenant(s)';
+    } else {
+      // send to all tenants
+      recipients = _llMyTenants.map(t => t.email).filter(Boolean);
+      if (!recipients.length) recipients = ['tenant'];
+      recipientLabel = 'All my tenants';
+    }
+  } else if (_llNotifType === 'byprop') {
+    const propSel = document.getElementById('notif-prop-sel');
+    const propName = propSel?.options[propSel.selectedIndex]?.text || 'property';
+    if (_llSelTenants.size > 0) {
+      recipients = [..._llSelTenants];
+      recipientLabel = recipients.length + ' tenant(s) in ' + propName;
+    } else {
+      // all tenants of that property
+      const propId = propSel?.value || '';
+      const propTenants = _llMyTenants.filter(t => t.propertyId && t.propertyId.toString() === propId);
+      recipients = propTenants.map(t => t.email).filter(Boolean);
+      if (!recipients.length) { alert('No tenants found for this property. Please select tenants manually or choose a different property.'); return; }
+      recipientLabel = 'All tenants in ' + propName;
+    }
+  } else if (_llNotifType === 'specific') {
+    if (!_llSelSpecific.size) { alert('Please search and select at least one person.'); return; }
+    recipients = [..._llSelSpecific];
+    recipientLabel = recipients.length + ' specific person(s)';
+  }
+
+  const current = (typeof TMS !== 'undefined') ? TMS.getCurrentUser() : null;
+  const sender  = current?.email || current?.name || 'landlord';
+
+  if (typeof TMS !== 'undefined') {
+    TMS.addNotif(title, msg, 'gold', recipients, sender);
+    TMS.addLog('info', `Landlord sent notification to ${recipientLabel}: "${title}"`, sender);
+  }
+
+  // Reset
+  document.getElementById('notif-title').value = '';
+  document.getElementById('notif-msg').value = '';
+  llSetNotifType('all');
+
+  const ok = document.getElementById('notif-ok');
+  if (ok) { ok.classList.add('show'); setTimeout(() => ok.classList.remove('show'), 3000); }
+  llRenderReceivedNotifs();
+}
+
+// ── Render received notifications ────────────────────────
+function llRenderReceivedNotifs() {
+  const container = document.getElementById('notifs-list');
+  if (!container) return;
+  const current = (typeof TMS !== 'undefined') ? TMS.getCurrentUser() : null;
+  const list = (typeof TMS !== 'undefined')
+    ? TMS.getNotifs().filter(n => TMS._isNotifForUser(n))
+    : [];
+  if (!list.length) {
+    container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">No notifications yet.</div>`;
+    return;
+  }
+  container.innerHTML = list.map(n => {
+    const colorMap = { gold: 'var(--gold)', blue: '#4A9EFF', green: '#4ECDC4', red: '#FF6B6B', warn: '#FFB347' };
+    const dot = colorMap[n.color] || n.color || 'var(--gold)';
+    const recs = Array.isArray(n.to) ? n.to : [n.to || 'all'];
+    const recLabel = recs.includes('all') ? 'Everyone' : recs.join(', ');
+    return `
+      <div class="notif-item ${n.read ? '' : 'unread'}" style="display:flex;gap:12px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;transition:border-color 0.2s">
+        <div style="width:9px;height:9px;border-radius:50%;background:${dot};flex-shrink:0;margin-top:5px"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;color:var(--text)">${n.title}</div>
+          <div style="font-size:13px;color:var(--text);margin-top:4px">${n.msg}</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
+            <span style="font-size:11px;color:var(--muted)">📬 To: <strong style="color:var(--text)">${recLabel}</strong></span>
+            <span style="font-size:11px;color:var(--muted)">👤 From: ${n.from || 'system'}</span>
+            <span style="font-size:11px;color:var(--muted)">🕐 ${n.time}</span>
+            ${!n.read ? '<span style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(201,169,110,0.15);color:var(--gold);font-weight:700">NEW</span>' : ''}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function llMarkAllRead() {
+  if (typeof TMS !== 'undefined') TMS.markAllNotifsRead();
+  llRenderReceivedNotifs();
 }
 </script>
 
@@ -2501,6 +3667,348 @@ setTimeout(()=>{
   if(typeof myProps !== 'undefined') window._myProperties = myProps;
 }, 1500);
 </script>
+
+<!-- NEGOTIATION MODAL -->
+<div class="ov" id="ov-neg-modal">
+  <div class="ov-box" style="width:min(520px,96vw)">
+    <div class="ov-head">
+      <div>
+        <div class="ov-title">💬 Price Negotiation</div>
+        <div id="neg-modal-title" style="font-size:12px;color:var(--muted);margin-top:2px"></div>
+      </div>
+      <button class="close-btn" onclick="closeNegotiationModal()">×</button>
+    </div>
+    <!-- Rent info bar -->
+    <div style="display:flex;gap:0;border-bottom:1px solid var(--border)">
+      <div style="flex:1;padding:12px 16px;text-align:center;border-right:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Original Rent</div>
+        <div id="neg-original-rent" style="font-size:15px;font-weight:700;color:var(--text);font-family:'Playfair Display',serif"></div>
+      </div>
+      <div style="flex:1;padding:12px 16px;text-align:center">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Tenant Offer</div>
+        <div id="neg-proposed-rent" style="font-size:15px;font-weight:700;color:var(--blue);font-family:'Playfair Display',serif"></div>
+      </div>
+    </div>
+    <!-- Chat messages -->
+    <div id="neg-messages" style="flex:1;padding:16px;overflow-y:auto;max-height:280px;min-height:120px;display:flex;flex-direction:column"></div>
+    <!-- Reply area -->
+    <div style="border-top:1px solid var(--border);padding:14px 16px">
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Counter Rent (Rs.)</label>
+        <input type="number" id="neg-counter-input" placeholder="Enter amount..." style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Message</label>
+        <textarea id="neg-msg-input" rows="2" placeholder="Apna jawab likhein..." style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none"></textarea>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="sendNegotiationReply('accept')" style="flex:1;padding:9px;border-radius:9px;border:none;background:rgba(78,205,196,0.12);color:var(--green);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">✅ Offer Accept</button>
+        <button onclick="sendNegotiationReply('counter')" style="flex:1;padding:9px;border-radius:9px;border:none;background:rgba(201,169,110,0.12);color:var(--gold);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">↩️ Counter</button>
+        <button onclick="sendNegotiationReply('reject')" style="flex:1;padding:9px;border-radius:9px;border:none;background:rgba(255,107,107,0.12);color:var(--error);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">❌ Reject</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// LEASE WIZARD — Per-property, one-time lock
+// ══════════════════════════════════════════════════════
+let _llWizPropId = null;
+let _llWizPropObj = null;
+let _llWizCurStep = 1;
+const _llWizSigPads = {};
+
+function openLLWizard(propId) {
+  const prop = propId ? myProps.find(p => (p._id||'').toString() === propId) : null;
+  _llWizPropId = propId || null;
+  _llWizPropObj = prop || null;
+  const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
+  // Pre-fill landlord fields (only if empty)
+  _llwSet('llw-ll-name', user.name||'');
+  _llwSet('llw-ll-email', user.email||'');
+  _llwSet('llw-ll-phone', user.phone||'');
+  // Clear all fields first for fresh form
+  ['llw-ll-name','llw-ll-cnic','llw-ll-addr','llw-ll-phone','llw-ll-email',
+   'llw-tn-name','llw-tn-cnic','llw-tn-addr','llw-tn-phone','llw-tn-occ',
+   'llw-prop-addr','llw-prop-type','llw-prop-area','llw-prop-rooms','llw-prop-plot',
+   'llw-rent','llw-deposit','llw-advance','llw-start','llw-end','llw-dueday',
+   'llw-incpct','llw-city','llw-dur','llw-special'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('llw-dur').value = '11 months';
+  // Pre-fill from user + prop
+  const u = document.getElementById('llw-ll-name'); if(u) u.value = user.name||'';
+  const ue = document.getElementById('llw-ll-email'); if(ue) ue.value = user.email||'';
+  const up = document.getElementById('llw-ll-phone'); if(up) up.value = user.phone||'';
+  if (prop) {
+    const pa = document.getElementById('llw-prop-addr'); if(pa) pa.value = prop.address||prop.propertyAddress||prop.title||'';
+    const pc = document.getElementById('llw-city'); if(pc) pc.value = prop.city||'';
+    const pr = document.getElementById('llw-rent'); if(pr) pr.value = prop.rent||'';
+    document.getElementById('llwiz-prop-title').textContent = prop.title||'New Lease Agreement';
+    document.getElementById('llwiz-prop-sub').textContent = prop.address||prop.title||'Fill in all details and sign';
+  } else {
+    document.getElementById('llwiz-prop-title').textContent = 'New Lease Agreement';
+    document.getElementById('llwiz-prop-sub').textContent = 'Fill in all details and sign';
+  }
+  _llWizSigPads['ll'] = null;
+  _llWizSigPads['tn'] = null;
+  _llwizGoTo(1);
+  document.getElementById('llwiz-save-btn').disabled = false;
+  document.getElementById('llwiz-save-btn').textContent = '💾 Save & Lock Agreement';
+  document.getElementById('llwiz-save-err').style.display = 'none';
+  document.getElementById('ll-lease-wizard-modal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLLWizard() {
+  document.getElementById('ll-lease-wizard-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function _llwSet(id, val) { const el=document.getElementById(id); if(el&&!el.value) el.value=val; }
+function _llwGet(id) { const el=document.getElementById(id); return el?(el.value||'').trim():''; }
+
+function llwizNext(n) {
+  if (n > _llWizCurStep) {
+    if (_llWizCurStep===1 && (!_llwGet('llw-ll-name')||!_llwGet('llw-tn-name'))) {
+      alert('Landlord aur Tenant ka naam zaroor bharo.'); return;
+    }
+    if (_llWizCurStep===3 && (!_llwGet('llw-rent')||!_llwGet('llw-start')||!_llwGet('llw-end'))) {
+      alert('Rent, Start Date aur End Date zaroor bharo.'); return;
+    }
+  }
+  _llwizGoTo(n);
+}
+
+function _llwizGoTo(n) {
+  [1,2,3,4].forEach(i => {
+    const panel=document.getElementById('llwiz-panel'+i);
+    if(panel) panel.style.display = i===n?'block':'none';
+    const c=document.getElementById('llwiz-c'+i), l=document.getElementById('llwiz-l'+i), line=document.getElementById('llwiz-line'+i);
+    if(!c) return;
+    if(i<n){ c.style.cssText='width:28px;height:28px;border-radius:50%;border:1.5px solid #1D9E75;background:#1D9E75;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;margin:0 auto 5px'; c.textContent='✓'; if(l){l.style.color='var(--muted)';l.style.fontWeight='400';} if(line)line.style.background='#1D9E75'; }
+    else if(i===n){ c.style.cssText='width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(201,169,110,0.6);background:rgba(201,169,110,0.12);color:#C9A96E;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;margin:0 auto 5px'; c.textContent=String(i); if(l){l.style.color='#C9A96E';l.style.fontWeight='600';} if(line)line.style.background='var(--border)'; }
+    else{ c.style.cssText='width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:var(--input-bg);color:var(--muted);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;margin:0 auto 5px'; c.textContent=String(i); if(l){l.style.color='var(--muted)';l.style.fontWeight='400';} if(line)line.style.background='var(--border)'; }
+  });
+  _llWizCurStep=n;
+  if(n===4){ _llwizInitPads(); _llwizBuildPreview(); }
+}
+
+function _llwizInitPads() {
+  ['ll','tn'].forEach(id => {
+    if(_llWizSigPads[id]) return;
+    const canvas=document.getElementById('llw-'+id+'-canvas'); if(!canvas) return;
+    const dpr=window.devicePixelRatio||1, w=canvas.offsetWidth||600;
+    canvas.width=w*dpr; canvas.height=100*dpr;
+    const ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr);
+    ctx.strokeStyle='#1a2744'; ctx.lineWidth=2; ctx.lineCap='round'; ctx.lineJoin='round';
+    let drawing=false, drawn=false;
+    const pos=e=>{const r=canvas.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return{x:s.clientX-r.left,y:s.clientY-r.top};};
+    canvas.addEventListener('mousedown',e=>{e.preventDefault();drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});
+    canvas.addEventListener('mousemove',e=>{e.preventDefault();if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();drawn=true;_llwizShowOk(id);});
+    canvas.addEventListener('mouseup',()=>drawing=false);
+    canvas.addEventListener('mouseleave',()=>drawing=false);
+    canvas.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
+    canvas.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();drawn=true;_llwizShowOk(id);},{passive:false});
+    canvas.addEventListener('touchend',()=>drawing=false);
+    _llWizSigPads[id]={ctx,canvas,hasDrawn:()=>drawn,reset:()=>{ctx.clearRect(0,0,canvas.width/dpr,canvas.height/dpr);drawn=false;}};
+  });
+}
+
+function _llwizShowOk(id){const el=document.getElementById('llw-'+id+'-ok');if(el)el.style.display='flex';_llwizBuildPreview();}
+
+function llwizClearSig(id){
+  const pad=_llWizSigPads[id]; if(pad)pad.reset();
+  const img=document.getElementById('llw-'+id+'-img'), canvas=document.getElementById('llw-'+id+'-canvas');
+  if(img){img.style.display='none';img.src='';} if(canvas)canvas.style.display='block';
+  const ok=document.getElementById('llw-'+id+'-ok'); if(ok)ok.style.display='none';
+}
+
+function llwizUploadSig(id,input){
+  if(!input.files||!input.files[0])return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=document.getElementById('llw-'+id+'-img'), canvas=document.getElementById('llw-'+id+'-canvas');
+    if(img){img.src=e.target.result;img.style.display='block';} if(canvas)canvas.style.display='none';
+    _llwizShowOk(id);
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function _llwizGetSig(id){
+  const img=document.getElementById('llw-'+id+'-img');
+  if(img&&img.src&&img.style.display!=='none')return img.src;
+  const pad=_llWizSigPads[id]; if(pad&&pad.hasDrawn())return pad.canvas.toDataURL();
+  return '';
+}
+
+function _llwizBuildPreview(){
+  const llSig=_llwizGetSig('ll'), tnSig=_llwizGetSig('tn');
+  const el=document.getElementById('llwiz-preview'); if(!el)return;
+  el.innerHTML=`<strong style="font-size:13px">Lease Agreement — Summary</strong>
+    <table style="width:100%;font-size:12px;border-collapse:collapse;margin-top:8px">
+      <tr><td style="color:var(--muted);padding:3px 0;width:45%">Landlord</td><td>${_llwGet('llw-ll-name')} <span style="color:var(--muted)">${_llwGet('llw-ll-cnic')}</span></td></tr>
+      <tr><td style="color:var(--muted);padding:3px 0">Tenant</td><td>${_llwGet('llw-tn-name')} <span style="color:var(--muted)">${_llwGet('llw-tn-cnic')}</span></td></tr>
+      <tr><td style="color:var(--muted);padding:3px 0">Property</td><td>${_llwGet('llw-prop-addr')}</td></tr>
+      <tr><td style="color:var(--muted);padding:3px 0">Monthly Rent</td><td style="font-weight:600;color:var(--gold)">Rs. ${_llwGet('llw-rent')}</td></tr>
+      <tr><td style="color:var(--muted);padding:3px 0">Lease Period</td><td>${_llwGet('llw-start')} → ${_llwGet('llw-end')}</td></tr>
+      <tr><td style="color:var(--muted);padding:3px 0">Deposit</td><td>${_llwGet('llw-deposit')}</td></tr>
+    </table>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px">
+      <div style="border-top:1.5px solid #1a2744;padding-top:8px;text-align:center">
+        ${llSig?`<img src="${llSig}" style="height:60px;object-fit:contain;display:block;margin:0 auto 4px">`:'<div style="height:60px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px">Not signed yet</div>'}
+        <div style="font-size:11px;color:var(--muted)">Landlord</div><div style="font-size:12px;font-weight:600">${_llwGet('llw-ll-name')}</div>
+      </div>
+      <div style="border-top:1.5px solid #1a2744;padding-top:8px;text-align:center">
+        ${tnSig?`<img src="${tnSig}" style="height:60px;object-fit:contain;display:block;margin:0 auto 4px">`:'<div style="height:60px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px">Not signed yet</div>'}
+        <div style="font-size:11px;color:var(--muted)">Tenant</div><div style="font-size:12px;font-weight:600">${_llwGet('llw-tn-name')}</div>
+      </div>
+    </div>`;
+}
+
+function _llwizBuildDoc(llSig,tnSig){
+  const sp=_llwGet('llw-special');
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Lease Agreement — ${_llwGet('llw-ll-name')} & ${_llwGet('llw-tn-name')}</title>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Georgia,serif;max-width:740px;margin:40px auto;padding:0 28px;color:#111;font-size:13px;line-height:1.7}.hdr{text-align:center;border-bottom:2px solid #c9a84c;padding-bottom:16px;margin-bottom:24px}.hdr h1{font-size:20px;margin-bottom:4px}.hdr p{font-size:11px;color:#888;letter-spacing:1px}.hdr .badge{display:inline-block;border:1px solid #c9a84c;color:#888;font-size:10px;padding:2px 10px;border-radius:20px;margin-top:6px}.sec{font-size:13px;font-weight:bold;background:#1a2744;color:#c9a84c;padding:6px 12px;border-radius:4px;margin:20px 0 10px}table.dt{width:100%;border-collapse:collapse;margin-bottom:4px}table.dt td{padding:5px 6px;border-bottom:1px solid #eee;font-size:12.5px}table.dt td:first-child{color:#555;width:42%}ul.cl{list-style:none;padding:0}ul.cl li{padding:5px 0 5px 14px;border-bottom:1px solid #f0f0f0;font-size:12.5px;position:relative}ul.cl li::before{content:"•";color:#c9a84c;position:absolute;left:0}.sigs{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:28px}.sig-b{border-top:1.5px solid #1a2744;padding-top:10px;text-align:center}.sig-b img{height:75px;object-fit:contain;display:block;margin:0 auto 6px}.sig-b .lbl{font-size:11px;color:#888}.sig-b .nm{font-size:13px;font-weight:bold}.sig-b .cn{font-size:11px;color:#aaa}.notary{background:#1a2744;color:#fff;padding:14px 16px;border-radius:6px;margin-top:24px;font-size:12px}.notary .nt{color:#c9a84c;font-size:10px;letter-spacing:.8px;margin-bottom:6px}@media print{body{margin:0}}</style></head><body>
+<div class="hdr"><h1>Tenancy / Lease Agreement</h1><p>ISLAMIC REPUBLIC OF PAKISTAN</p><div class="badge">Transfer of Property Act 1882 · Punjab Rented Premises Act 2009</div></div>
+<div class="sec">Parties</div>
+<table class="dt"><tr><td>Landlord</td><td>${_llwGet('llw-ll-name')}</td></tr><tr><td>Landlord CNIC</td><td>${_llwGet('llw-ll-cnic')}</td></tr><tr><td>Landlord Address</td><td>${_llwGet('llw-ll-addr')}</td></tr><tr><td>Landlord Phone</td><td>${_llwGet('llw-ll-phone')}</td></tr><tr><td>Landlord Email</td><td>${_llwGet('llw-ll-email')}</td></tr><tr><td>Tenant</td><td>${_llwGet('llw-tn-name')}</td></tr><tr><td>Tenant CNIC</td><td>${_llwGet('llw-tn-cnic')}</td></tr><tr><td>Tenant Address</td><td>${_llwGet('llw-tn-addr')}</td></tr><tr><td>Tenant Phone</td><td>${_llwGet('llw-tn-phone')}</td></tr><tr><td>Tenant Occupation</td><td>${_llwGet('llw-tn-occ')}</td></tr></table>
+<div class="sec">Property</div>
+<table class="dt"><tr><td>Address</td><td>${_llwGet('llw-prop-addr')}</td></tr><tr><td>Type</td><td>${_llwGet('llw-prop-type')}</td></tr><tr><td>Area</td><td>${_llwGet('llw-prop-area')}</td></tr><tr><td>Rooms / Config</td><td>${_llwGet('llw-prop-rooms')}</td></tr><tr><td>Plot / Khasra No.</td><td>${_llwGet('llw-prop-plot')}</td></tr></table>
+<div class="sec">Financial Terms</div>
+<table class="dt"><tr><td>Monthly Rent</td><td>${_llwGet('llw-rent')}</td></tr><tr><td>Security Deposit</td><td>${_llwGet('llw-deposit')}</td></tr><tr><td>Advance</td><td>${_llwGet('llw-advance')}</td></tr><tr><td>Lease Start</td><td>${_llwGet('llw-start')}</td></tr><tr><td>Lease End</td><td>${_llwGet('llw-end')}</td></tr><tr><td>Duration</td><td>${_llwGet('llw-dur')}</td></tr><tr><td>Rent Due Date</td><td>${_llwGet('llw-dueday')}</td></tr><tr><td>Annual Increase</td><td>${_llwGet('llw-incpct')}%</td></tr><tr><td>City / Province</td><td>${_llwGet('llw-city')}</td></tr>${sp?`<tr><td>Special Conditions</td><td>${sp}</td></tr>`:''}</table>
+<div class="sec">Terms & Conditions</div>
+<ul class="cl"><li>Tenant shall use the premises solely for the stated purpose and shall not sublet or assign without written consent of the landlord.</li><li>Tenant shall maintain the property in good condition. Structural alterations require written landlord approval.</li><li>All utility bills (electricity, gas, water, telephone) shall be borne by the tenant and cleared before vacating.</li><li>Security deposit shall be refunded within 30 days of vacating, after deducting outstanding dues or damages.</li><li>Either party may terminate this agreement with one month's written notice. Failure to do so results in forfeiture of one month's rent.</li><li>Landlord may inspect the property on 48 hours' prior notice.</li><li>Tenant shall not conduct any unlawful activity or cause nuisance on the premises.</li><li>Tenant shall register the tenancy with the local police and complete NADRA verification as required by law.</li><li>This agreement is governed by Transfer of Property Act 1882 and Punjab Rented Premises Act 2009.</li><li>Disputes shall first be resolved by mutual negotiation, failing which by the competent Rent Controller or Civil Court.</li></ul>
+<div class="sigs"><div class="sig-b">${llSig?`<img src="${llSig}">`:'<div style="height:75px"></div>'}<div class="lbl">Landlord Signature</div><div class="nm">${_llwGet('llw-ll-name')}</div><div class="cn">CNIC: ${_llwGet('llw-ll-cnic')}</div></div><div class="sig-b">${tnSig?`<img src="${tnSig}">`:'<div style="height:75px"></div>'}<div class="lbl">Tenant Signature</div><div class="nm">${_llwGet('llw-tn-name')}</div><div class="cn">CNIC: ${_llwGet('llw-tn-cnic')}</div></div></div>
+<div class="notary"><div class="nt">NOTARY / ATTESTATION</div>This agreement was executed at ${_llwGet('llw-city')} and read out to both parties who confirmed understanding and affixed their signatures freely and voluntarily.<br><br><span style="opacity:.65;font-size:11px">Oath Commissioner / Notary Public — Seal & Signature: _________________________</span></div>
+</body></html>`;
+}
+
+function llwizDownload(){
+  const html=_llwizBuildDoc(_llwizGetSig('ll'),_llwizGetSig('tn'));
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download=`lease-${_llwGet('llw-tn-name')||'agreement'}.html`; a.click();
+}
+
+async function llwizSave(){
+  if(!_llwGet('llw-ll-name')||!_llwGet('llw-tn-name')||!_llwGet('llw-rent')||!_llwGet('llw-start')||!_llwGet('llw-end')){
+    _llwizShowErr('Zaroor fields: Landlord name, Tenant name, Rent, Start/End dates.'); return;
+  }
+  const llSig=_llwizGetSig('ll'), tnSig=_llwizGetSig('tn');
+  const user=JSON.parse(localStorage.getItem('tms_user')||'{}');
+  const landlordId=user._id||user.id||'';
+  const fullHtml=_llwizBuildDoc(llSig,tnSig);
+  const payload={
+    tenantName:_llwGet('llw-tn-name'), tenantCnic:_llwGet('llw-tn-cnic'), tenantAddress:_llwGet('llw-tn-addr'),
+    tenantPhone:_llwGet('llw-tn-phone'), tenantOccupation:_llwGet('llw-tn-occ'),
+    landlordName:_llwGet('llw-ll-name'), landlordCnic:_llwGet('llw-ll-cnic'), landlordAddress:_llwGet('llw-ll-addr'),
+    landlordPhone:_llwGet('llw-ll-phone'), landlordEmail:_llwGet('llw-ll-email'),
+    propertyAddress:_llwGet('llw-prop-addr'), propertyTitle:(_llWizPropObj?.title||_llwGet('llw-prop-addr')),
+    propertyType:_llwGet('llw-prop-type'), propertyArea:_llwGet('llw-prop-area'),
+    propertyRooms:_llwGet('llw-prop-rooms'), propertyPlot:_llwGet('llw-prop-plot'),
+    rent:Number(_llwGet('llw-rent'))||0, deposit:_llwGet('llw-deposit'), advance:_llwGet('llw-advance'),
+    startDate:_llwGet('llw-start'), endDate:_llwGet('llw-end'), duration:_llwGet('llw-dur')||'11 months',
+    dueDay:_llwGet('llw-dueday'), annualIncrease:_llwGet('llw-incpct'), city:_llwGet('llw-city'),
+    specialConditions:_llwGet('llw-special'), landlordSignature:llSig, tenantSignature:tnSig,
+    fullAgreementHtml:fullHtml, locked:true, terms:'Punjab Rented Premises Act 2009 — Standard Terms Applied',
+  };
+  if(landlordId) payload.landlordId=landlordId;
+  if(_llWizPropId) payload.propertyId=_llWizPropId;
+  const btn=document.getElementById('llwiz-save-btn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Saving…';}
+  try{
+    const r=await lFetch('/leases','POST',payload);
+    if(r.success){
+      // Lock locally
+      const lockData={...payload,savedAt:new Date().toISOString()};
+      localStorage.setItem('tms_lease_lock_'+_llWizPropId, JSON.stringify(lockData));
+      closeLLWizard();
+      await loadLandlordLeases();
+      renderLLPropLeaseCards();
+      alert('✅ Agreement save aur lock ho gaya! Ab isko change nahi kiya ja sakta.');
+    } else {
+      _llwizShowErr(r.message||'Save failed.');
+      if(btn){btn.disabled=false;btn.textContent='💾 Save & Lock Agreement';}
+    }
+  } catch(e){
+    _llwizShowErr('Server se connect nahi ho saka.');
+    if(btn){btn.disabled=false;btn.textContent='💾 Save & Lock Agreement';}
+  }
+}
+
+function _llwizShowErr(msg){const el=document.getElementById('llwiz-save-err');if(el){el.textContent=msg;el.style.display='block';}}
+
+function openLLLeaseView(propId){
+  const lock=JSON.parse(localStorage.getItem('tms_lease_lock_'+propId)||'null');
+  const modal=document.getElementById('ll-lease-view-modal');
+  const content=document.getElementById('ll-lease-view-content');
+  if(!modal||!content)return;
+  window._llViewLockData=lock;
+  if(lock&&lock.fullAgreementHtml){
+    const escaped=lock.fullAgreementHtml.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    content.innerHTML=`<iframe srcdoc="${escaped}" style="width:100%;height:70vh;border:1px solid var(--border);border-radius:10px;background:#fff"></iframe>`;
+  } else {
+    content.innerHTML='<div style="color:var(--muted);padding:20px;text-align:center">Agreement data nahi mila.</div>';
+  }
+  modal.style.display='flex'; document.body.style.overflow='hidden';
+}
+
+function llViewDownload(){
+  const lock=window._llViewLockData; if(!lock||!lock.fullAgreementHtml)return;
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([lock.fullAgreementHtml],{type:'text/html'}));
+  a.download=`lease-${lock.tenantName||'agreement'}.html`; a.click();
+}
+
+function renderLLPropLeaseCards(){
+  const container=document.getElementById('ll-prop-lease-cards'); if(!container)return;
+  if(!myProps||!myProps.length){container.innerHTML='<div class="loading" style="text-align:center;padding:24px 0"><div style="font-size:32px;margin-bottom:8px">🏠</div><div style="font-weight:600;color:var(--text);margin-bottom:4px">Koi property nahi mili</div><div style="font-size:12px;color:var(--muted);margin-bottom:14px">Pehle property add karo, ya manual lease banaao</div><button onclick="openLLWizard(null)" style="padding:9px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#2563EB,#4F7BFE);color:#fff;font-family:DM Sans,sans-serif;font-size:13px;font-weight:600;cursor:pointer">+ New Agreement</button></div>';return;}
+  container.innerHTML=myProps.map(p=>{
+    const pid=(p._id||'').toString();
+    const lock=JSON.parse(localStorage.getItem('tms_lease_lock_'+pid)||'null');
+    const isLocked=!!lock;
+    return `<div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;border-radius:10px;background:rgba(37,99,235,0.1);border:1px solid rgba(37,99,235,0.2);display:flex;align-items:center;justify-content:center;font-size:18px">🏠</div>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text)">${p.title||'Property'}</div>
+            <div style="font-size:12px;color:var(--muted)">${p.address||p.propertyAddress||''}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${isLocked
+            ?`<span style="padding:5px 12px;border-radius:20px;background:rgba(29,158,117,0.1);border:1px solid rgba(29,158,117,0.25);color:#1D9E75;font-size:11px;font-weight:600">🔒 Agreement Saved</span>
+               <button onclick="openLLLeaseView('${pid}')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(37,99,235,0.25);background:rgba(37,99,235,0.08);color:var(--blue);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">👁 View</button>`
+            :`<span style="padding:5px 12px;border-radius:20px;background:rgba(255,179,71,0.1);border:1px solid rgba(255,179,71,0.25);color:var(--warn);font-size:11px;font-weight:600">⏳ No Agreement</span>
+               <button onclick="openLLWizard('${pid}')" style="padding:7px 16px;border-radius:8px;border:none;background:linear-gradient(135deg,#2563EB,#4F7BFE);color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ New Agreement</button>`
+          }
+        </div>
+      </div>
+      ${isLocked?`<div style="margin-top:10px;padding:10px 12px;background:rgba(29,158,117,0.05);border-radius:8px;border:1px solid rgba(29,158,117,0.12);font-size:12px;color:var(--muted)">
+        Tenant: <strong style="color:var(--text)">${lock.tenantName||'—'}</strong> &nbsp;·&nbsp;
+        Rent: <strong style="color:var(--gold)">Rs. ${Number(lock.rent||0).toLocaleString()}</strong> &nbsp;·&nbsp;
+        ${lock.startDate||''} → ${lock.endDate||''} &nbsp;·&nbsp;
+        Saved: ${lock.savedAt?new Date(lock.savedAt).toLocaleDateString('en-PK'):'—'}
+      </div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ── Filter leases table ────────────────────────────────
+function filterLLLeases(){
+  const q=(document.getElementById('ll-lease-search')?.value||'').toLowerCase();
+  document.querySelectorAll('#lease-tbody tr').forEach(row=>{row.style.display=row.textContent.toLowerCase().includes(q)?'':'none';});
+}
+
+// ── Legacy stubs (no-ops so old onclick refs don't crash) ──
+function toggleNewLeaseForm(){}
+function llPopulateLeaseProperties(){}
+function llAutoFillLeaseProperty(){}
+function getStandardLeaseTerms(){return 'Punjab Rented Premises Act 2009 — Standard Terms';}
+async function llCreateLease(){}
+</script>
+
 </body>
 
 </html>

@@ -11,7 +11,7 @@ const PANORAMA_URLS = {
   villa:      'https://kuula.co/share/5GssB?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1',
   apartment:  'https://kuula.co/share/54YJg/collection/7FbtP?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1',
   flat:       'https://kuula.co/share/5GssB?logo=0&info=1&fs=1&vr=1&sd=1&thumbs=1&zoom=1',
-  house:      'https://kuula.co/share/54YJg/collection/7FbtP?logo=0&info=0&fs=1&vr=1&sd=1&thumbs=0',
+  house:      'https://kuula.co/share/h6VGH?logo=1&info=1&fs=1&vr=0&sd=1&thumbs=1',
 };
 
 const PROPERTIES = [
@@ -27,7 +27,8 @@ const PROPERTIES = [
     sqft:        4200,
     status:      'available',
     description: 'Ek khoobsurat 5 kamron wali luxury villa. Marble floors, modern kitchen, aur landscaped garden ke saath. Lahore ke behtareen ilaqe Zaman Park mein. Gated community, 24/7 security.',
-    model3d: { viewerMode: 'panorama360', panoramaUrl: PANORAMA_URLS.villa }
+    model3d: { viewerMode: 'panorama360', panoramaUrl: PANORAMA_URLS.villa },
+    images: ['https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=1200']
   },
   {
     title:       'DHA Phase 6 Modern Apartment',
@@ -41,7 +42,8 @@ const PROPERTIES = [
     sqft:        1800,
     status:      'available',
     description: 'Fully furnished 3 bed apartment DHA Phase 6 mein. 24/7 security, backup generator, gym aur covered parking. Stylish modern interior ke saath ready to move in.',
-    model3d: { viewerMode: 'panorama360', panoramaUrl: PANORAMA_URLS.apartment }
+    model3d: { viewerMode: 'panorama360', panoramaUrl: PANORAMA_URLS.apartment },
+    images: ['https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=1200']
   },
   {
     title:       'Gulberg III Executive Flat',
@@ -55,7 +57,8 @@ const PROPERTIES = [
     sqft:        1200,
     status:      'available',
     description: 'Khubsoorat 2 bed flat Gulberg ke qalb mein. Restaurants, markets aur hospitals qareeb. Stylish interior, wooden flooring, modern bathrooms.',
-    model3d: { viewerMode: 'panorama360', panoramaUrl: PANORAMA_URLS.flat }
+    model3d: { viewerMode: 'panorama360', panoramaUrl: PANORAMA_URLS.flat },
+    images: ['https://images.pexels.com/photos/2082090/pexels-photo-2082090.jpeg?auto=compress&cs=tinysrgb&w=1200']
   },
   {
     title:       'Bahria Town Family House',
@@ -69,7 +72,8 @@ const PROPERTIES = [
     sqft:        1400,
     status:      'available',
     description: 'Saaf suthra 5 marla ghar Bahria Town Sector C mein. Gated community, parks, schools aur mosques qareeb. Gas, bijli, pani sab available. Family ke liye ideal.',
-    model3d: { viewerMode: 'panorama360', panoramaUrl: PANORAMA_URLS.house }
+    model3d: { viewerMode: 'panorama360', panoramaUrl: PANORAMA_URLS.house },
+    images: ['https://images.pexels.com/photos/279746/pexels-photo-279746.jpeg?auto=compress&cs=tinysrgb&w=1200']
   }
 ];
 
@@ -89,7 +93,16 @@ async function seedProperties() {
     for (const prop of PROPERTIES) {
       const exists = await Property.findOne({ title: prop.title });
       if (exists) {
-        console.log(`ℹ️  Already exists: "${prop.title}" — skip kiya`);
+        const updateData = {};
+        if ((!Array.isArray(exists.images) || exists.images.length === 0) && Array.isArray(prop.images) && prop.images.length) {
+          updateData.images = prop.images;
+        }
+        if (Object.keys(updateData).length) {
+          await Property.updateOne({ _id: exists._id }, { $set: updateData });
+          console.log(`✅ Updated existing property: "${prop.title}"`);
+        } else {
+          console.log(`ℹ️  Already exists: "${prop.title}" — skip kiya`);
+        }
         continue;
       }
       const created = await Property.create({
