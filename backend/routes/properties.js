@@ -1,3 +1,4 @@
+// ─── properties Routes ─────────────────────────────────────────────────────────────
 const express  = require('express');
 const Property = require('../models/Property');
 const { protect, adminOnly } = require('../middleware/auth');
