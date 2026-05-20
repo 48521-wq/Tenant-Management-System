@@ -1,4 +1,3 @@
-// ─── complaints Routes ─────────────────────────────────────────────────────────────
 const express   = require('express');
 const mongoose  = require('mongoose');
 const Complaint = require('../models/Complaint');

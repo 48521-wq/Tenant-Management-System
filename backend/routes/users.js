@@ -1,4 +1,3 @@
-// ─── users Routes ─────────────────────────────────────────────────────────────
 const express = require('express');
 const User = require('../models/User');
 const { protect, adminOnly } = require('../middleware/auth');

@@ -1,4 +1,3 @@
-// ─── leases Routes ─────────────────────────────────────────────────────────────
 const express = require('express');
 const mongoose = require('mongoose');
 const Lease   = require('../models/Lease');

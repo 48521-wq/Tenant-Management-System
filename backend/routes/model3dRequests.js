@@ -1,4 +1,3 @@
-// ─── model3dRequests Routes ─────────────────────────────────────────────────────────────
 const express        = require('express');
 const Model3DRequest = require('../models/Model3DRequest');
 const Property       = require('../models/Property');

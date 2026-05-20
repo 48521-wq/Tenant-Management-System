@@ -82,10 +82,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .pcard-btn:hover{background:rgba(201,169,110,0.15)}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;border:none}
 .btn svg{width:14px;height:14px;stroke:currentColor;fill:none}
+.btn-gold,.btn-teal,.submit-btn,.search-btn,.btn-red,.btn-primary{color:#FFFFFF !important}
 .btn-gold{background:linear-gradient(135deg,var(--blue),var(--blue-l));color:#FFFFFF;box-shadow:0 3px 12px rgba(37,99,235,0.28)}
 .btn-gold:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(37,99,235,0.36)}
-.btn-ghost{background:var(--input-bg);color:var(--text);border:1px solid var(--border)}
-.btn-ghost:hover{background:rgba(201,169,110,0.08);color:var(--text)}
+.btn-ghost{background:var(--input-bg);color:var(--text) !important;border:1px solid var(--border)}
+.btn-ghost:hover{background:rgba(201,169,110,0.08);color:var(--text) !important}
 .btn-danger{background:rgba(255,107,107,0.08);color:var(--error);border:1px solid rgba(255,107,107,0.18)}
 .btn-danger:hover{background:rgba(255,107,107,0.15)}
 .btn-sm{padding:5px 12px;font-size:11.5px;border-radius:7px}
@@ -1323,11 +1324,7 @@ function renderProps(list, rentedIds) {
   list.forEach(p => { window._tenantPropMap[p._id] = p; });
   const myRented = new Set(rentedIds || []);
 
-<<<<<<< HEAD
   const statusColors={available:'rgba(78,205,196,0.9)',rented:'rgba(255,179,71,0.9)',suspended:'rgba(255,107,107,0.9)'};
-=======
-  const statusColors = {available:'rgba(78,205,196,0.9)', rented:'rgba(255,179,71,0.9)', suspended:'rgba(255,107,107,0.9)'};
->>>>>>> 89e6d64fe35a98e5f27762b2a9400631f6a4f21e
   grid.innerHTML = list.map(p => {
     const pid = p._id;
     const isMine = myRented.has(pid);
@@ -1335,14 +1332,14 @@ function renderProps(list, rentedIds) {
     const has360 = !!panoramaUrl;
     const coverImage = p.frontImage || (Array.isArray(p.images) && p.images.length ? p.images[0] : (typeof p.images === 'string' ? p.images : ''));
     const thumbnail = coverImage
-      ? `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover">`
+      ? `<img src="${coverImage}" alt="${p.title||'Property'}">`
       : has360
         ? `<iframe src="${normalizePanoramaUrl(panoramaUrl)}" title="${p.title||'Property'} 360 preview" loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" style="width:100%;height:100%;border:0;background:#111;pointer-events:none"></iframe>`
         : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.7);font-size:13px;background:#111">Front image unavailable</div>`;
     const btnBaseStyle = 'flex:1;min-width:120px';
     const viewButton = has360
       ? `<button class="btn btn-gold btn-sm" style="${btnBaseStyle}" onclick="tenantView3D('${pid}')">View 360</button>`
-      : `<button class="btn btn-ghost btn-sm" style="${btnBaseStyle};opacity:0.6;cursor:not-allowed" disabled>360 Pending</button>`;
+      : `<button class="btn btn-gold btn-sm" style="${btnBaseStyle};opacity:0.65;cursor:not-allowed" disabled>360 Pending</button>`;
     const requestBtn = isMine
       ? `<button class="btn btn-teal btn-sm" style="${btnBaseStyle};opacity:0.65;cursor:not-allowed" disabled>✅ My Property</button>`
       : (p.status === 'available'
@@ -1353,33 +1350,18 @@ function renderProps(list, rentedIds) {
       <div class="pcard-thumb" style="padding:0;cursor:pointer" onclick="tenantView3D('${pid}')">
         ${thumbnail}
         <span style="position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:${statusColors[p.status]||statusColors.available};color:#fff;pointer-events:none">${p.status||'available'}</span>
-<<<<<<< HEAD
         <span style="position:absolute;bottom:10px;right:10px;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--gold);border:1px solid rgba(201,169,110,0.3);pointer-events:none">${has360 ? '360 View' : 'Details'}</span>
       </div>
       <div class="pcard-body">
         <div class="pcard-title">${p.title||'Untitled'}</div>
         <div class="pcard-loc">📍 ${p.area||p.address||'—'}, ${p.city||''}</div>
-=======
-        <span style="position:absolute;bottom:10px;right:10px;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--blue);border:1px solid rgba(201,169,110,0.3);pointer-events:none">${has360 ? '360 View' : 'Details'}</span>
-      </div>
-      <div class="pcard-body">
-        <div class="pcard-title">${p.title||'Untitled'}</div>
-        <div class="pcard-loc">📍 ${p.area||p.address||'—'}, ${p.city||'Lahore'}</div>
->>>>>>> 89e6d64fe35a98e5f27762b2a9400631f6a4f21e
         <div style="display:flex;gap:10px;font-size:11.5px;color:var(--muted);margin-bottom:10px">
           <span>🛏 ${p.beds||'?'}</span><span>🚿 ${p.baths||'?'}</span><span>${p.type||'House'}</span>
         </div>
         <div class="pcard-price">Rs. ${Number(p.rent||0).toLocaleString()} <span>/mo</span></div>
-<<<<<<< HEAD
         <div style="font-size:12px;color:var(--muted);margin-top:6px">${has360 ? '360 view available' : 'Details only — no 3D model yet.'}</div>
         <div class="pcard-actions" style="flex-wrap:wrap;gap:6px;margin-top:10px">
           ${viewButton}
-=======
-        <div style="font-size:12px;color:var(--muted);margin-top:6px">${has360 ? '360 view available' : 'Details only until admin approves a 3D model.'}</div>
-        <div class="pcard-actions" style="flex-wrap:wrap;gap:6px;margin-top:10px">
-          ${viewButton}
-          ${furnitureBtn}
->>>>>>> 89e6d64fe35a98e5f27762b2a9400631f6a4f21e
           ${requestBtn}
           <button class="btn btn-teal btn-sm" style="flex:1;min-width:120px" onclick="tenantOpenFurniture('${pid}')">${Object.keys(p.tenantFurnitureLayout||{}).length>0?'✅ My Layout':'🛋️ Furnish'}</button>
         </div>
@@ -2152,14 +2134,7 @@ function open3D(id, name, model3dOrJson, type) {
     alert('3D view is not yet available for this property. Please wait for admin approval.');
     return;
   }
-<<<<<<< HEAD
   window._t3dPropId = id;
-=======
-  if (!viewerCfg.panoramaUrl) {
-    alert('3D view is not yet available for this property. Please wait for admin approval.');
-    return;
-  }
->>>>>>> 89e6d64fe35a98e5f27762b2a9400631f6a4f21e
   document.getElementById('ov3d').classList.add('open');
   document.getElementById('m3dn').textContent = (name || 'Property') + ' — Full Opening 360 View';
   document.body.style.overflow = 'hidden';

@@ -1,4 +1,15 @@
-// ─── properties Routes ─────────────────────────────────────────────────────────────
+// GET all rented properties for this landlord (with tenant info)
+router.get('/my/rented', protect, async (req, res) => {
+  try {
+    // Find all properties for this landlord that are rented and have a tenantId
+    const props = await Property.find({ landlordId: req.user._id, status: 'rented', tenantId: { $ne: null } })
+      .populate('tenantId', 'name email');
+    res.json({ success: true, count: props.length, properties: props });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+});
 const express  = require('express');
 const Property = require('../models/Property');
 const { protect, adminOnly } = require('../middleware/auth');

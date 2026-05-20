@@ -1,4 +1,3 @@
-// ─── payments Routes ─────────────────────────────────────────────────────────────
 const express = require('express');
 const mongoose = require('mongoose');
 const Payment = require('../models/Payment');
