@@ -1,3 +1,33 @@
+  <!-- RENTED PROPERTIES SECTION -->
+  <div class="card" style="margin-top:24px">
+    <h3 style="font-size:15px;font-weight:700;margin-bottom:14px;color:var(--text)">Rented Properties</h3>
+    <div id="rented-props-list"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+  </div>
+<script>
+// Load rented properties for this landlord
+async function loadRentedProperties() {
+  const list = document.getElementById('rented-props-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>';
+  try {
+    const data = await lFetch('/properties/my/rented');
+    const props = data.properties || [];
+    if (!props.length) {
+      list.innerHTML = '<div class="loading">No rented properties yet.</div>';
+      return;
+    }
+    list.innerHTML = `<table style="width:100%;margin-top:10px"><thead><tr><th>Title</th><th>Address</th><th>Tenant Name</th><th>Tenant Email</th><th>Rent</th></tr></thead><tbody>` +
+      props.map(p => {
+        const tenant = p.tenantId || {};
+        return `<tr><td>${p.title||''}</td><td>${p.address||''}</td><td>${tenant.name||p.tenantName||'-'}</td><td>${tenant.email||'-'}</td><td>Rs. ${Number(p.rent||0).toLocaleString()}</td></tr>`;
+      }).join('') + '</tbody></table>';
+  } catch(e) {
+    list.innerHTML = '<div class="loading">⚠️ Error loading rented properties.</div>';
+  }
+}
+// Call on page load
+document.addEventListener('DOMContentLoaded', loadRentedProperties);
+</script>
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
@@ -1223,7 +1253,7 @@ function renderMyProperties() {
     const id = p._id;
     const panoramaUrl = getProperty360Url(p);
     const has360 = !!panoramaUrl;
-  const coverImage = p.frontImage || (Array.isArray(p.images) && p.images.length ? p.images[0] : (typeof p.images === 'string' ? p.images : ''));
+    const coverImage = p.frontImage || (Array.isArray(p.images) && p.images.length ? p.images[0] : (typeof p.images === 'string' ? p.images : ''));
     const thumbnail = coverImage
       ? `<img src="${coverImage}" alt="${p.title||'Property'}">`
       : has360
@@ -1255,6 +1285,126 @@ function renderMyProperties() {
       </div>
     </div>
   `}).join('');
+// Lease Agreement Modal logic
+let leasePropId = null;
+async function openLeaseAgreementModal(propId) {
+  leasePropId = propId;
+  const prop = (window._propMap||{})[propId];
+  if (!prop) return;
+  // Hide both sections initially
+  document.getElementById('lease-form-section').style.display = 'none';
+  document.getElementById('lease-view-section').style.display = 'none';
+  // Fetch existing lease agreement for this property
+  let agreement = null;
+  try {
+    agreement = await lFetch(`/lease-agreements/property/${propId}`);
+  } catch (e) { agreement = null; }
+  const modal = document.getElementById('lease-agreement-modal');
+  if (agreement && agreement._id) {
+    // Show existing agreement details (read-only)
+    document.getElementById('lease-view-ll-name').textContent = agreement.landlord?.name || '-';
+    document.getElementById('lease-view-ll-cnic').textContent = agreement.landlord?.cnic || '-';
+    document.getElementById('lease-view-ll-addr').textContent = agreement.landlord?.address || '-';
+    document.getElementById('lease-view-ll-phone').textContent = agreement.landlord?.phone || '-';
+    document.getElementById('lease-view-ll-email').textContent = agreement.landlord?.email || '-';
+    document.getElementById('lease-view-tn-name').textContent = agreement.tenant?.name || '-';
+    document.getElementById('lease-view-tn-cnic').textContent = agreement.tenant?.cnic || '-';
+    document.getElementById('lease-view-tn-addr').textContent = agreement.tenant?.address || '-';
+    document.getElementById('lease-view-tn-phone').textContent = agreement.tenant?.phone || '-';
+    document.getElementById('lease-view-tn-occ').textContent = agreement.tenant?.occupation || '-';
+    document.getElementById('lease-view-prop-addr').textContent = agreement.propertyDetails?.address || '-';
+    document.getElementById('lease-view-prop-type').textContent = agreement.propertyDetails?.type || '-';
+    document.getElementById('lease-view-prop-area').textContent = agreement.propertyDetails?.area || '-';
+    document.getElementById('lease-view-prop-rooms').textContent = agreement.propertyDetails?.rooms || '-';
+    document.getElementById('lease-view-prop-plot').textContent = agreement.propertyDetails?.plot || '-';
+    document.getElementById('lease-view-rent').textContent = agreement.financials?.rent || '-';
+    document.getElementById('lease-view-deposit').textContent = agreement.financials?.deposit || '-';
+    document.getElementById('lease-view-advance').textContent = agreement.financials?.advance || '-';
+    document.getElementById('lease-view-start-date').textContent = agreement.financials?.startDate || '-';
+    document.getElementById('lease-view-end-date').textContent = agreement.financials?.endDate || '-';
+    document.getElementById('lease-view-due-day').textContent = agreement.financials?.dueDay || '-';
+    document.getElementById('lease-view-inc-pct').textContent = agreement.financials?.incPct || '-';
+    document.getElementById('lease-view-city').textContent = agreement.financials?.city || '-';
+    document.getElementById('lease-view-special').textContent = agreement.financials?.special || '-';
+    document.getElementById('lease-view-status').textContent = agreement.status || '-';
+    document.getElementById('lease-view-section').style.display = 'block';
+  } else {
+    // Pre-fill landlord and property fields for new agreement
+    document.getElementById('lease-ll-name').value = (prop.landlordName || '');
+    document.getElementById('lease-ll-cnic').value = (prop.landlordCnic || '');
+    document.getElementById('lease-ll-addr').value = (prop.landlordAddress || '');
+    document.getElementById('lease-ll-phone').value = (prop.landlordPhone || '');
+    document.getElementById('lease-ll-email').value = (prop.landlordEmail || '');
+    document.getElementById('lease-prop-addr').value = prop.address || '';
+    document.getElementById('lease-prop-type').value = prop.type || '';
+    document.getElementById('lease-prop-area').value = prop.area || '';
+    document.getElementById('lease-prop-rooms').value = prop.beds ? `${prop.beds} Bed` : '';
+    document.getElementById('lease-prop-plot').value = prop.plot || '';
+    document.getElementById('lease-rent').value = prop.rent || '';
+    document.getElementById('lease-city').value = prop.city || '';
+    document.getElementById('lease-form-section').style.display = 'block';
+  }
+  modal.style.display = 'flex';
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLeaseAgreementModal() {
+  const modal = document.getElementById('lease-agreement-modal');
+  modal.style.display = 'none';
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+async function submitLeaseAgreement() {
+  const get = id => document.getElementById(id)?.value?.trim()||'';
+  const payload = {
+    property: leasePropId,
+    landlord: {
+      name: get('lease-ll-name'),
+      cnic: get('lease-ll-cnic'),
+      address: get('lease-ll-addr'),
+      phone: get('lease-ll-phone'),
+      email: get('lease-ll-email')
+    },
+    tenant: {
+      name: get('lease-tn-name'),
+      cnic: get('lease-tn-cnic'),
+      address: get('lease-tn-addr'),
+      phone: get('lease-tn-phone'),
+      occupation: get('lease-tn-occ')
+    },
+    propertyDetails: {
+      address: get('lease-prop-addr'),
+      type: get('lease-prop-type'),
+      area: get('lease-prop-area'),
+      rooms: get('lease-prop-rooms'),
+      plot: get('lease-prop-plot')
+    },
+    financials: {
+      rent: get('lease-rent'),
+      deposit: get('lease-deposit'),
+      advance: get('lease-advance'),
+      startDate: get('lease-start-date'),
+      endDate: get('lease-end-date'),
+      dueDay: get('lease-due-day'),
+      incPct: get('lease-inc-pct'),
+      city: get('lease-city'),
+      special: get('lease-special')
+    },
+    signatures: { landlord: '', tenant: '' },
+    status: 'sent'
+  };
+  try {
+    const res = await lFetch('/lease-agreements/create', 'POST', payload);
+    if (res && res._id) {
+      alert('Lease agreement sent to tenant!');
+      closeLeaseAgreementModal();
+    } else {
+      alert('Error creating lease agreement.');
+    }
+  } catch (e) {
+    alert('Server error: ' + (e.message||e));
+  }
+}
 
   if (grid)  grid.innerHTML  = html;
   if (grid2) grid2.innerHTML = html;
@@ -2084,6 +2234,66 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
 <!-- MAIN -->
 <main class="main">
 
+<!-- Lease Agreement Modal -->
+<div id="lease-agreement-modal" style="display:none;position:fixed;z-index:9999;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;overflow:auto;">
+  <div style="background:#fff;color:#222;max-width:600px;width:98vw;margin:40px auto;border-radius:12px;padding:28px 24px;position:relative;box-shadow:0 8px 40px rgba(0,0,0,0.18);">
+    <button onclick="closeLeaseAgreementModal()" style="position:absolute;top:12px;right:12px;font-size:26px;background:none;border:none;cursor:pointer;line-height:1;width:40px;height:40px;display:flex;align-items:center;justify-content:center;z-index:10">✖</button>
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:18px;color:#1a2744">Lease Agreement</h2>
+    <!-- Existing Agreement View Section -->
+    <div id="lease-view-section" style="display:none">
+      <div style="margin-bottom:10px;font-weight:600;color:#2563EB">Existing Lease Agreement</div>
+      <div style="font-size:13px;margin-bottom:8px"><b>Status:</b> <span id="lease-view-status">-</span></div>
+      <div style="font-size:13px;margin-bottom:8px"><b>Landlord:</b> <span id="lease-view-ll-name"></span> | <b>CNIC:</b> <span id="lease-view-ll-cnic"></span> | <b>Phone:</b> <span id="lease-view-ll-phone"></span> | <b>Email:</b> <span id="lease-view-ll-email"></span></div>
+      <div style="font-size:13px;margin-bottom:8px"><b>Address:</b> <span id="lease-view-ll-addr"></span></div>
+      <div style="font-size:13px;margin-bottom:8px"><b>Tenant:</b> <span id="lease-view-tn-name"></span> | <b>CNIC:</b> <span id="lease-view-tn-cnic"></span> | <b>Phone:</b> <span id="lease-view-tn-phone"></span> | <b>Occupation:</b> <span id="lease-view-tn-occ"></span></div>
+      <div style="font-size:13px;margin-bottom:8px"><b>Tenant Address:</b> <span id="lease-view-tn-addr"></span></div>
+      <div style="font-size:13px;margin-bottom:8px"><b>Property:</b> <span id="lease-view-prop-addr"></span> | <b>Type:</b> <span id="lease-view-prop-type"></span> | <b>Area:</b> <span id="lease-view-prop-area"></span> | <b>Rooms:</b> <span id="lease-view-prop-rooms"></span> | <b>Plot:</b> <span id="lease-view-prop-plot"></span></div>
+      <div style="font-size:13px;margin-bottom:8px"><b>Rent:</b> <span id="lease-view-rent"></span> | <b>Deposit:</b> <span id="lease-view-deposit"></span> | <b>Advance:</b> <span id="lease-view-advance"></span></div>
+      <div style="font-size:13px;margin-bottom:8px"><b>Start:</b> <span id="lease-view-start-date"></span> | <b>End:</b> <span id="lease-view-end-date"></span> | <b>Due Day:</b> <span id="lease-view-due-day"></span></div>
+      <div style="font-size:13px;margin-bottom:8px"><b>Annual Increase %:</b> <span id="lease-view-inc-pct"></span> | <b>City:</b> <span id="lease-view-city"></span></div>
+      <div style="font-size:13px;margin-bottom:8px"><b>Special Conditions:</b> <span id="lease-view-special"></span></div>
+    </div>
+    <!-- New Agreement Form Section -->
+    <div id="lease-form-section" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
+        <div><label>Landlord Name</label><input id="lease-ll-name" style="width:100%"></div>
+        <div><label>Landlord CNIC</label><input id="lease-ll-cnic" style="width:100%"></div>
+        <div class="span2"><label>Landlord Address</label><input id="lease-ll-addr" style="width:100%"></div>
+        <div><label>Landlord Phone</label><input id="lease-ll-phone" style="width:100%"></div>
+        <div><label>Landlord Email</label><input id="lease-ll-email" style="width:100%"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
+        <div><label>Tenant Name</label><input id="lease-tn-name" style="width:100%"></div>
+        <div><label>Tenant CNIC</label><input id="lease-tn-cnic" style="width:100%"></div>
+        <div class="span2"><label>Tenant Address</label><input id="lease-tn-addr" style="width:100%"></div>
+        <div><label>Tenant Phone</label><input id="lease-tn-phone" style="width:100%"></div>
+        <div><label>Tenant Occupation</label><input id="lease-tn-occ" style="width:100%"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
+        <div class="span2"><label>Property Address</label><input id="lease-prop-addr" style="width:100%"></div>
+        <div><label>Property Type</label><input id="lease-prop-type" style="width:100%"></div>
+        <div><label>Area</label><input id="lease-prop-area" style="width:100%"></div>
+        <div><label>Rooms</label><input id="lease-prop-rooms" style="width:100%"></div>
+        <div><label>Plot/Khasra No.</label><input id="lease-prop-plot" style="width:100%"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:10px">
+        <div><label>Monthly Rent</label><input id="lease-rent" style="width:100%"></div>
+        <div><label>Security Deposit</label><input id="lease-deposit" style="width:100%"></div>
+        <div><label>Advance</label><input id="lease-advance" style="width:100%"></div>
+        <div><label>Start Date</label><input id="lease-start-date" type="date" style="width:100%"></div>
+        <div><label>End Date</label><input id="lease-end-date" type="date" style="width:100%"></div>
+        <div><label>Rent Due Day</label><input id="lease-due-day" style="width:100%"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
+        <div><label>Annual Increase %</label><input id="lease-inc-pct" style="width:100%"></div>
+        <div><label>City/Province</label><input id="lease-city" style="width:100%"></div>
+      </div>
+      <div style="margin-bottom:14px"><label>Special Conditions</label><textarea id="lease-special" rows="2" style="width:100%"></textarea></div>
+      <button class="btn btn-gold" style="width:100%;margin-top:10px" onclick="submitLeaseAgreement()">Send to Tenant</button>
+    </div>
+  </div>
+</div>
+
   <!-- DASHBOARD -->
   <div class="page active" id="page-dashboard">
     <div class="pg-head">
@@ -2239,7 +2449,7 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
 
     <!-- Per-property lease cards -->
     <div id="ll-prop-lease-cards">
-      <div class="loading"><span class="spinner"></span>Properties load ho rahi hain…</div>
+      <!-- Per-property lease cards will be rendered here -->
     </div>
 
     <!-- All Leases Table -->
@@ -3358,195 +3568,64 @@ function lFurnDownloadJSON() {
 </script>
 
 <!-- ══════════════════════════════════════════════════════
-     3D MODEL REQUEST MODAL — REDESIGNED
+     3D MODEL REQUEST MODAL
 ══════════════════════════════════════════════════════ -->
-<div id="ov-3dreq" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px)">
-  <div style="background:var(--card);border-radius:20px;border:1px solid var(--border);width:min(580px,97vw);max-height:92vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,0.5)">
-
-    <!-- Header -->
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card);z-index:2;border-radius:20px 20px 0 0">
-      <div>
-        <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--text)">📐 Request 3D Model</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px">Fill details below — admin will review and respond with pricing</div>
-      </div>
-      <button onclick="close3DRequestModal()" style="width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,107,107,0.12);color:#FF6B6B;font-size:17px;cursor:pointer;flex-shrink:0">✕</button>
+<div class="ov" id="ov-3dreq" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border-radius:18px;border:1px solid var(--border);width:min(680px,97vw);max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 0">
+      <span style="font-size:17px;font-weight:700;color:var(--text)" id="req3d-modal-title">Request 3D Model</span>
+      <button onclick="close3DRequestModal()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,107,107,0.12);color:#FF6B6B;font-size:16px;cursor:pointer">✕</button>
     </div>
-
-    <!-- Step indicators -->
-    <div style="display:flex;align-items:center;gap:0;padding:16px 24px;border-bottom:1px solid var(--border)">
-      <div id="step-ind-1" style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--gold,#C9A96E)">
-        <span style="width:24px;height:24px;border-radius:50%;background:var(--gold,#C9A96E);color:#0A0C0F;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">1</span> Property Details
+    <div style="padding:20px 24px 24px">
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Select Property *</label>
+        <select id="req3d-prop" style="width:100%;margin-top:6px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-size:13px;outline:none">
+          <option value="">-- Choose your property --</option>
+        </select>
       </div>
-      <div style="flex:1;height:2px;background:var(--border);margin:0 10px" id="step-line-1"></div>
-      <div id="step-ind-2" style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--muted)">
-        <span id="step-num-2" style="width:24px;height:24px;border-radius:50%;background:var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">2</span> Budget & Payment
-      </div>
-      <div style="flex:1;height:2px;background:var(--border);margin:0 10px" id="step-line-2"></div>
-      <div id="step-ind-3" style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--muted)">
-        <span id="step-num-3" style="width:24px;height:24px;border-radius:50%;background:var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">3</span> Confirmation
-      </div>
-    </div>
-
-    <div style="padding:22px 24px 24px">
-
-      <!-- ── STEP 1: Property Details ── -->
-      <div id="req3d-step1">
-        <div style="margin-bottom:16px">
-          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:7px">Select Property *</label>
-          <select id="req3d-prop" style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;-webkit-appearance:none;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 12px center">
-            <option value="">— Choose your property —</option>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">House Type</label>
+          <select id="req3d-type" style="width:100%;margin-top:6px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-size:13px;outline:none">
+            <option value="standard">Standard</option>
+            <option value="modern">Modern</option>
+            <option value="villa">Villa</option>
+            <option value="bungalow">Bungalow</option>
           </select>
-          <div id="req3d-prop-info" style="display:none;margin-top:10px;padding:12px 14px;background:rgba(201,169,110,0.06);border:1px solid rgba(201,169,110,0.18);border-radius:10px;font-size:12px;color:var(--muted)"></div>
         </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
-          <div>
-            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:7px">Model Type *</label>
-            <select id="req3d-type" style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;-webkit-appearance:none;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 12px center">
-              <option value="exterior_360">Exterior 360° View</option>
-              <option value="interior_360">Interior 360° Tour</option>
-              <option value="full_3d">Full 3D Walkthrough</option>
-              <option value="floor_plan">Interactive Floor Plan</option>
-            </select>
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:7px">Urgency</label>
-            <select id="req3d-urgency" style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;-webkit-appearance:none;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 12px center">
-              <option value="normal">Normal (5–7 days)</option>
-              <option value="urgent">Urgent (2–3 days)</option>
-              <option value="express">Express (24 hours)</option>
-            </select>
-          </div>
-        </div>
-
-        <div style="margin-bottom:16px">
-          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:7px">Model Description / Special Requirements</label>
-          <textarea id="req3d-notes" rows="4" placeholder="e.g. Show the main entrance, living room, master bedroom. Highlight the terrace view. Any specific angles or rooms you want included..." style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:vertical;box-sizing:border-box;min-height:100px"></textarea>
-        </div>
-
-        <div style="margin-bottom:20px">
-          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:10px">What to Include in the Model?</label>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <label style="display:flex;align-items:center;gap:9px;padding:10px 13px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;cursor:pointer;font-size:13px;color:var(--text);transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(201,169,110,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
-              <input id="req3d-inc-living" type="checkbox" checked style="accent-color:var(--gold,#C9A96E)"> 🛋️ Living Room
-            </label>
-            <label style="display:flex;align-items:center;gap:9px;padding:10px 13px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;cursor:pointer;font-size:13px;color:var(--text);transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(201,169,110,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
-              <input id="req3d-inc-bedroom" type="checkbox" checked style="accent-color:var(--gold,#C9A96E)"> 🛏️ Bedrooms
-            </label>
-            <label style="display:flex;align-items:center;gap:9px;padding:10px 13px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;cursor:pointer;font-size:13px;color:var(--text);transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(201,169,110,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
-              <input id="req3d-inc-kitchen" type="checkbox" style="accent-color:var(--gold,#C9A96E)"> 🍳 Kitchen
-            </label>
-            <label style="display:flex;align-items:center;gap:9px;padding:10px 13px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;cursor:pointer;font-size:13px;color:var(--text);transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(201,169,110,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
-              <input id="req3d-inc-exterior" type="checkbox" checked style="accent-color:var(--gold,#C9A96E)"> 🏠 Exterior
-            </label>
-            <label style="display:flex;align-items:center;gap:9px;padding:10px 13px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;cursor:pointer;font-size:13px;color:var(--text);transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(201,169,110,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
-              <input id="req3d-inc-bathroom" type="checkbox" style="accent-color:var(--gold,#C9A96E)"> 🚿 Bathrooms
-            </label>
-            <label style="display:flex;align-items:center;gap:9px;padding:10px 13px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;cursor:pointer;font-size:13px;color:var(--text);transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(201,169,110,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
-              <input id="req3d-inc-rooftop" type="checkbox" style="accent-color:var(--gold,#C9A96E)"> 🌇 Rooftop / Terrace
-            </label>
-          </div>
-        </div>
-
-        <div id="req3d-step1-err" style="display:none;padding:10px 14px;border-radius:9px;background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);color:#FF6B6B;font-size:13px;margin-bottom:14px"></div>
-        <div style="display:flex;justify-content:flex-end">
-          <button onclick="req3dNext(1)" style="padding:11px 28px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--gold,#C9A96E),#E8C97A);color:#0A0C0F;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(201,169,110,0.28)">Next: Budget →</button>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Floors</label>
+          <input id="req3d-floors" type="number" min="1" max="5" value="1" style="width:100%;margin-top:6px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-size:13px;outline:none;box-sizing:border-box">
         </div>
       </div>
-
-      <!-- ── STEP 2: Budget & Payment ── -->
-      <div id="req3d-step2" style="display:none">
-        <div style="padding:14px 16px;background:rgba(201,169,110,0.05);border:1px solid rgba(201,169,110,0.15);border-radius:12px;margin-bottom:20px;font-size:13px;color:var(--muted);line-height:1.6">
-          💡 <strong style="color:var(--text)">How it works:</strong> You propose a budget. Admin reviews your request and either accepts, counter-offers, or rejects. Once both sides agree, admin builds your model and you confirm payment before delivery.
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Wall Color</label>
+          <input id="req3d-wall" type="color" value="#C9A96E" style="width:100%;margin-top:6px;height:40px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;background:var(--input-bg)">
         </div>
-
-        <div style="margin-bottom:16px">
-          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:7px">Your Proposed Budget (Rs.) *</label>
-          <div style="position:relative">
-            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--muted);font-weight:600">Rs.</span>
-            <input id="req3d-budget" type="number" min="500" placeholder="e.g. 3000" style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px 11px 40px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;outline:none;box-sizing:border-box">
-          </div>
-          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-            <button type="button" onclick="document.getElementById('req3d-budget').value=1500" style="padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Rs. 1,500</button>
-            <button type="button" onclick="document.getElementById('req3d-budget').value=3000" style="padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Rs. 3,000</button>
-            <button type="button" onclick="document.getElementById('req3d-budget').value=5000" style="padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Rs. 5,000</button>
-            <button type="button" onclick="document.getElementById('req3d-budget').value=8000" style="padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Rs. 8,000</button>
-          </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Roof Color</label>
+          <input id="req3d-roof" type="color" value="#7A4F2A" style="width:100%;margin-top:6px;height:40px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;background:var(--input-bg)">
         </div>
-
-        <div style="margin-bottom:16px">
-          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:7px">Payment Method</label>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <label style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;color:var(--text)" id="pm-label-jazzcash">
-              <input type="radio" name="req3d-payment" value="jazzcash" id="req3d-pm-jazzcash" style="accent-color:var(--gold,#C9A96E)" checked onchange="togglePaymentDetail()">
-              <span style="font-size:18px">📱</span>
-              <div><div style="font-weight:600">JazzCash</div><div style="font-size:11px;color:var(--muted)">Mobile wallet payment</div></div>
-            </label>
-            <label style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;color:var(--text)" id="pm-label-easypaisa">
-              <input type="radio" name="req3d-payment" value="easypaisa" id="req3d-pm-easypaisa" style="accent-color:var(--gold,#C9A96E)" onchange="togglePaymentDetail()">
-              <span style="font-size:18px">💚</span>
-              <div><div style="font-weight:600">Easypaisa</div><div style="font-size:11px;color:var(--muted)">Mobile wallet payment</div></div>
-            </label>
-            <label style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;color:var(--text)" id="pm-label-bank">
-              <input type="radio" name="req3d-payment" value="bank_transfer" id="req3d-pm-bank" style="accent-color:var(--gold,#C9A96E)" onchange="togglePaymentDetail()">
-              <span style="font-size:18px">🏦</span>
-              <div><div style="font-weight:600">Bank Transfer</div><div style="font-size:11px;color:var(--muted)">Direct bank account transfer</div></div>
-            </label>
-            <label style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;color:var(--text)" id="pm-label-cash">
-              <input type="radio" name="req3d-payment" value="cash" id="req3d-pm-cash" style="accent-color:var(--gold,#C9A96E)" onchange="togglePaymentDetail()">
-              <span style="font-size:18px">💵</span>
-              <div><div style="font-weight:600">Cash on Delivery</div><div style="font-size:11px;color:var(--muted)">Pay when model is delivered</div></div>
-            </label>
-          </div>
-        </div>
-
-        <div id="req3d-payment-detail" style="margin-bottom:16px;display:none">
-          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:7px" id="req3d-payment-detail-label">Account Number</label>
-          <input id="req3d-account" type="text" placeholder="e.g. 03001234567" style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;box-sizing:border-box">
-        </div>
-
-        <div id="req3d-step2-err" style="display:none;padding:10px 14px;border-radius:9px;background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);color:#FF6B6B;font-size:13px;margin-bottom:14px"></div>
-        <div style="display:flex;gap:10px;justify-content:space-between">
-          <button onclick="req3dBack(2)" style="padding:11px 22px;border-radius:10px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">← Back</button>
-          <button onclick="req3dNext(2)" style="padding:11px 28px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--gold,#C9A96E),#E8C97A);color:#0A0C0F;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(201,169,110,0.28)">Review & Confirm →</button>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Floor Color</label>
+          <input id="req3d-floor" type="color" value="#D2B48C" style="width:100%;margin-top:6px;height:40px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;background:var(--input-bg)">
         </div>
       </div>
-
-      <!-- ── STEP 3: Confirmation ── -->
-      <div id="req3d-step3" style="display:none">
-        <div style="margin-bottom:20px">
-          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px">📋 Request Summary</div>
-          <div id="req3d-summary" style="background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;font-size:13px"></div>
-        </div>
-
-        <div style="padding:14px 16px;background:rgba(78,205,196,0.05);border:1px solid rgba(78,205,196,0.2);border-radius:12px;margin-bottom:20px">
-          <div style="font-size:13px;color:var(--text);font-weight:600;margin-bottom:6px">⚠️ Important — Payment Process</div>
-          <ul style="font-size:12px;color:var(--muted);line-height:1.8;padding-left:16px">
-            <li>Your request is submitted to admin for review</li>
-            <li>Admin may accept your budget or propose a counter-offer</li>
-            <li>You will be notified and can negotiate via messages</li>
-            <li><strong style="color:var(--text)">Payment is only processed after both parties agree on the final amount</strong></li>
-            <li>Model is delivered within the selected timeframe after payment</li>
-          </ul>
-        </div>
-
-        <div style="margin-bottom:20px">
-          <label style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text);cursor:pointer;line-height:1.5">
-            <input type="checkbox" id="req3d-agree" style="margin-top:3px;accent-color:var(--gold,#C9A96E);flex-shrink:0">
-            I understand that payment will only be processed after admin confirms and we agree on the final amount.
-          </label>
-        </div>
-
-        <div id="req3d-final-msg" style="display:none;padding:12px 16px;border-radius:10px;font-size:13px;font-weight:600;margin-bottom:14px"></div>
-        <div style="display:flex;gap:10px;justify-content:space-between">
-          <button onclick="req3dBack(3)" style="padding:11px 22px;border-radius:10px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">← Back</button>
-          <button onclick="submit3DRequest()" id="req3d-submit-btn" style="padding:11px 28px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--gold,#C9A96E),#E8C97A);color:#0A0C0F;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(201,169,110,0.28);display:flex;align-items:center;gap:8px">
-            <span>📤</span> Submit Request
-          </button>
-        </div>
+      <div style="display:flex;gap:20px;margin-bottom:14px">
+        <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text);cursor:pointer"><input id="req3d-garden" type="checkbox"> 🌿 Garden</label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text);cursor:pointer"><input id="req3d-pool" type="checkbox"> 🏊 Pool</label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text);cursor:pointer"><input id="req3d-garage" type="checkbox"> 🚗 Garage</label>
       </div>
-
-    </div><!-- /padding wrap -->
+      <div style="margin-bottom:18px">
+        <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Additional Requirements / Notes</label>
+        <textarea id="req3d-notes" rows="3" placeholder="Describe any special requirements for your 3D model..." style="width:100%;margin-top:6px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-size:13px;outline:none;resize:vertical;box-sizing:border-box"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button onclick="submit3DRequest()" style="padding:10px 28px;border-radius:9px;border:none;background:var(--gold,#C9A96E);color:#1a1a1a;font-size:13px;font-weight:700;cursor:pointer">📤 Submit Request</button>
+        <div id="req3d-msg" style="display:none;padding:8px 14px;border-radius:9px;font-size:13px;font-weight:600"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -3631,10 +3710,11 @@ function render3DRequestList() {
         ${req3dBadge(r.status)}
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:12px">
-        <span>📐 ${({exterior_360:'Exterior 360°',interior_360:'Interior Tour',full_3d:'Full 3D',floor_plan:'Floor Plan'})[r.requirements?.houseType]||r.requirements?.houseType||'—'}</span>
-        ${r.requirements?.urgency?`<span>⚡ ${{normal:'Normal',urgent:'Urgent',express:'Express'}[r.requirements.urgency]||r.requirements.urgency}</span>`:''}
-        ${r.requirements?.paymentMethod?`<span>💳 ${{jazzcash:'JazzCash',easypaisa:'Easypaisa',bank_transfer:'Bank Transfer',cash:'Cash'}[r.requirements.paymentMethod]||r.requirements.paymentMethod}</span>`:''}
-        ${r.proposedAmount?`<span style="color:var(--gold,#C9A96E);font-weight:600">💰 Budget: Rs. ${r.proposedAmount.toLocaleString()}</span>`:''}
+        <span>🏠 ${r.requirements?.houseType||'standard'}</span>
+        <span>🏢 ${r.requirements?.floors||1} floor(s)</span>
+        ${r.requirements?.hasGarden?'<span>🌿 Garden</span>':''}
+        ${r.requirements?.hasPool?'<span>🏊 Pool</span>':''}
+        ${r.requirements?.hasGarage?'<span>🚗 Garage</span>':''}
       </div>
       ${r.proposedAmount ? `<div style="font-size:12px;color:var(--muted);margin-bottom:10px">💰 Admin proposed: <strong style="color:var(--gold,#C9A96E)">Rs. ${r.proposedAmount.toLocaleString()}</strong></div>` : ''}
       ${r.agreedAmount ? `<div style="font-size:12px;color:#22c55e;margin-bottom:10px">🤝 Agreed amount: <strong>Rs. ${r.agreedAmount.toLocaleString()}</strong></div>` : ''}
@@ -3653,133 +3733,15 @@ function open3DRequestModal(preselectedPropId) {
   const sel = document.getElementById('req3d-prop');
   if(sel) {
     const props = window._myProperties || (typeof myProps !== 'undefined' ? myProps : []);
-    sel.innerHTML = '<option value="">— Choose your property —</option>';
+    sel.innerHTML = '<option value="">-- Choose your property --</option>';
     props.forEach(p => {
-      sel.innerHTML += `<option value="${p._id}" ${p._id===preselectedPropId?'selected':''}>${p.title} — ${p.area||p.city||''}</option>`;
+      sel.innerHTML += `<option value="${p._id}" ${p._id===preselectedPropId?'selected':''}>${p.title}</option>`;
     });
-    // If property pre-selected, show its info
-    if(preselectedPropId) {
-      const p = props.find(x=>x._id===preselectedPropId);
-      if(p) showPropInfo(p);
-    }
-    // On change, show property info
-    sel.onchange = function() {
-      const p = props.find(x=>x._id===this.value);
-      showPropInfo(p||null);
-    };
   }
-  // Reset to step 1
-  req3dGoStep(1);
-  togglePaymentDetail();
+  const msg = document.getElementById('req3d-msg');
+  if(msg) { msg.style.display='none'; }
   const modal = document.getElementById('ov-3dreq');
   if(modal) { modal.style.display='flex'; document.body.style.overflow='hidden'; }
-}
-
-function showPropInfo(p) {
-  const el = document.getElementById('req3d-prop-info');
-  if(!el) return;
-  if(!p) { el.style.display='none'; return; }
-  el.style.display='block';
-  el.innerHTML = `🏠 <strong>${p.title}</strong> &nbsp;|&nbsp; 📍 ${p.area||p.address||'—'}, ${p.city||'Lahore'} &nbsp;|&nbsp; 🛏 ${p.beds||'?'} Beds &nbsp;|&nbsp; Rs. ${Number(p.rent||0).toLocaleString()}/mo`;
-}
-
-function togglePaymentDetail() {
-  const val = document.querySelector('input[name="req3d-payment"]:checked')?.value;
-  const box = document.getElementById('req3d-payment-detail');
-  const lbl = document.getElementById('req3d-payment-detail-label');
-  const inp = document.getElementById('req3d-account');
-  if(!box) return;
-  if(val==='jazzcash'||val==='easypaisa') {
-    box.style.display='block';
-    if(lbl) lbl.textContent = val==='jazzcash'?'JazzCash Mobile Number':'Easypaisa Mobile Number';
-    if(inp) inp.placeholder='e.g. 03001234567';
-  } else if(val==='bank_transfer') {
-    box.style.display='block';
-    if(lbl) lbl.textContent='Bank Account / IBAN Number';
-    if(inp) inp.placeholder='e.g. PK36SCBL0000001123456702';
-  } else {
-    box.style.display='none';
-  }
-}
-
-function req3dGoStep(n) {
-  [1,2,3].forEach(i => {
-    const s = document.getElementById('req3d-step'+i);
-    if(s) s.style.display = i===n ? 'block' : 'none';
-    const ind = document.getElementById('step-ind-'+i);
-    const num = document.getElementById('step-num-'+i);
-    if(ind && num) {
-      if(i < n) {
-        ind.style.color='#22c55e';
-        num.style.background='#22c55e';
-        num.style.color='#fff';
-        num.textContent='✓';
-      } else if(i === n) {
-        ind.style.color='var(--gold,#C9A96E)';
-        num.style.background='var(--gold,#C9A96E)';
-        num.style.color='#0A0C0F';
-        num.textContent=i;
-      } else {
-        ind.style.color='var(--muted)';
-        num.style.background='var(--border)';
-        num.style.color='var(--muted)';
-        num.textContent=i;
-      }
-    }
-  });
-}
-
-function req3dNext(fromStep) {
-  if(fromStep===1) {
-    const prop = document.getElementById('req3d-prop')?.value;
-    const err = document.getElementById('req3d-step1-err');
-    if(!prop) { if(err){err.style.display='block';err.textContent='⚠️ Please select a property first.';} return; }
-    if(err) err.style.display='none';
-    req3dGoStep(2);
-  } else if(fromStep===2) {
-    const budget = document.getElementById('req3d-budget')?.value;
-    const err = document.getElementById('req3d-step2-err');
-    if(!budget || Number(budget) < 500) { if(err){err.style.display='block';err.textContent='⚠️ Please enter a valid budget (minimum Rs. 500).';} return; }
-    if(err) err.style.display='none';
-    buildReq3dSummary();
-    req3dGoStep(3);
-  }
-}
-
-function req3dBack(fromStep) {
-  req3dGoStep(fromStep - 1);
-}
-
-function buildReq3dSummary() {
-  const sel = document.getElementById('req3d-prop');
-  const propText = sel?.options[sel.selectedIndex]?.text || '—';
-  const type = document.getElementById('req3d-type')?.value || '—';
-  const urgency = document.getElementById('req3d-urgency');
-  const urgencyText = urgency?.options[urgency.selectedIndex]?.text || '—';
-  const budget = document.getElementById('req3d-budget')?.value || '—';
-  const pm = document.querySelector('input[name="req3d-payment"]:checked')?.value || '—';
-  const pmLabels = {jazzcash:'JazzCash',easypaisa:'Easypaisa',bank_transfer:'Bank Transfer',cash:'Cash on Delivery'};
-  const notes = document.getElementById('req3d-notes')?.value?.trim() || '—';
-  const includes = ['living','bedroom','kitchen','exterior','bathroom','rooftop']
-    .filter(x=>document.getElementById('req3d-inc-'+x)?.checked)
-    .map(x=>({living:'Living Room',bedroom:'Bedrooms',kitchen:'Kitchen',exterior:'Exterior',bathroom:'Bathrooms',rooftop:'Rooftop/Terrace'})[x]);
-
-  const rows = [
-    ['🏠 Property', propText],
-    ['📐 Model Type', {exterior_360:'Exterior 360°',interior_360:'Interior 360° Tour',full_3d:'Full 3D Walkthrough',floor_plan:'Interactive Floor Plan'}[type]||type],
-    ['⚡ Urgency', urgencyText],
-    ['🛋️ Includes', includes.length ? includes.join(', ') : '—'],
-    ['💰 Proposed Budget', `<strong style="color:var(--gold,#C9A96E);font-size:15px">Rs. ${Number(budget).toLocaleString()}</strong>`],
-    ['💳 Payment Method', pmLabels[pm]||pm],
-    ['📝 Notes', notes],
-  ];
-  const el = document.getElementById('req3d-summary');
-  if(el) el.innerHTML = rows.map(([k,v])=>`
-    <div style="display:flex;gap:12px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--border)">
-      <div style="min-width:130px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;padding-top:2px">${k}</div>
-      <div style="font-size:13px;color:var(--text)">${v}</div>
-    </div>
-  `).join('');
 }
 
 function close3DRequestModal() {
@@ -3788,45 +3750,28 @@ function close3DRequestModal() {
 }
 
 async function submit3DRequest() {
-  const agree = document.getElementById('req3d-agree')?.checked;
-  const msgEl = document.getElementById('req3d-final-msg');
-  if(!agree) {
-    if(msgEl){msgEl.style.display='block';msgEl.style.background='rgba(255,107,107,0.08)';msgEl.style.border='1px solid rgba(255,107,107,0.2)';msgEl.style.color='#FF6B6B';msgEl.textContent='⚠️ Please read and confirm the payment process above.';}
-    return;
-  }
   const propId = document.getElementById('req3d-prop')?.value;
-  if(!propId) return;
+  if(!propId) { showMsg('req3d-msg','⚠️ Please select a property.','err'); return; }
   const requirements = {
-    houseType:    document.getElementById('req3d-type')?.value || 'exterior_360',
-    urgency:      document.getElementById('req3d-urgency')?.value || 'normal',
-    includes: {
-      livingRoom: document.getElementById('req3d-inc-living')?.checked||false,
-      bedrooms:   document.getElementById('req3d-inc-bedroom')?.checked||false,
-      kitchen:    document.getElementById('req3d-inc-kitchen')?.checked||false,
-      exterior:   document.getElementById('req3d-inc-exterior')?.checked||false,
-      bathrooms:  document.getElementById('req3d-inc-bathroom')?.checked||false,
-      rooftop:    document.getElementById('req3d-inc-rooftop')?.checked||false,
-    },
-    paymentMethod: document.querySelector('input[name="req3d-payment"]:checked')?.value || 'jazzcash',
-    accountNumber: document.getElementById('req3d-account')?.value?.trim() || '',
-    extraNotes:    document.getElementById('req3d-notes')?.value?.trim() || '',
+    houseType:  document.getElementById('req3d-type')?.value  || 'standard',
+    floors:     parseInt(document.getElementById('req3d-floors')?.value)||1,
+    wallColor:  document.getElementById('req3d-wall')?.value  || '#C9A96E',
+    roofColor:  document.getElementById('req3d-roof')?.value  || '#7A4F2A',
+    floorColor: document.getElementById('req3d-floor')?.value || '#D2B48C',
+    hasGarden:  document.getElementById('req3d-garden')?.checked || false,
+    hasPool:    document.getElementById('req3d-pool')?.checked   || false,
+    hasGarage:  document.getElementById('req3d-garage')?.checked || false,
+    extraNotes: document.getElementById('req3d-notes')?.value   || '',
   };
-  const proposedAmount = Number(document.getElementById('req3d-budget')?.value) || 0;
-  const btn = document.getElementById('req3d-submit-btn');
-  if(btn){btn.disabled=true;btn.innerHTML='<span>⏳</span> Submitting…';}
   try {
-    const data = await lFetch('/3d-requests','POST',{ propertyId:propId, requirements, proposedAmount });
+    const data = await lFetch('/3d-requests','POST',{ propertyId:propId, requirements });
     if(data.success) {
-      if(msgEl){msgEl.style.display='block';msgEl.style.background='rgba(78,205,196,0.08)';msgEl.style.border='1px solid rgba(78,205,196,0.2)';msgEl.style.color='#4ECDC4';msgEl.textContent='✅ Request submitted! Admin will review and respond with pricing.';}
-      setTimeout(()=>{ close3DRequestModal(); load3DRequests(); }, 2200);
+      showMsg('req3d-msg','✅ Request submitted! Admin will review it shortly.','ok');
+      setTimeout(()=>{ close3DRequestModal(); load3DRequests(); }, 1800);
     } else {
-      if(msgEl){msgEl.style.display='block';msgEl.style.background='rgba(255,107,107,0.08)';msgEl.style.border='1px solid rgba(255,107,107,0.2)';msgEl.style.color='#FF6B6B';msgEl.textContent='⚠️ '+(data.message||'Error');}
+      showMsg('req3d-msg','⚠️ '+(data.message||'Error'),'err');
     }
-  } catch(e) {
-    if(msgEl){msgEl.style.display='block';msgEl.style.background='rgba(255,107,107,0.08)';msgEl.style.border='1px solid rgba(255,107,107,0.2)';msgEl.style.color='#FF6B6B';msgEl.textContent='⚠️ Cannot connect to server.';}
-  } finally {
-    if(btn){btn.disabled=false;btn.innerHTML='<span>📤</span> Submit Request';}
-  }
+  } catch(e) { showMsg('req3d-msg','⚠️ Cannot connect to server.','err'); }
 }
 
 // Detail/chat modal
@@ -3839,15 +3784,14 @@ function openDetail3DModal(reqId) {
 
   // Info bar
   const info = document.getElementById('detail3d-info');
-  const _htMap = {exterior_360:'Exterior 360°',interior_360:'Interior Tour',full_3d:'Full 3D',floor_plan:'Floor Plan'};
-  const _urgMap = {normal:'Normal',urgent:'Urgent',express:'Express'};
-  const _pmMap  = {jazzcash:'JazzCash',easypaisa:'Easypaisa',bank_transfer:'Bank Transfer',cash:'Cash'};
   info.innerHTML = [
-    `📐 ${_htMap[req.requirements?.houseType]||req.requirements?.houseType||'standard'}`,
-    req.requirements?.urgency ? `⚡ ${_urgMap[req.requirements.urgency]||req.requirements.urgency}` : '',
-    req.requirements?.paymentMethod ? `💳 ${_pmMap[req.requirements.paymentMethod]||req.requirements.paymentMethod}` : '',
+    `🏠 ${req.requirements?.houseType||'standard'}`,
+    `🏢 ${req.requirements?.floors||1} floor(s)`,
+    req.requirements?.hasGarden ? '🌿 Garden' : '',
+    req.requirements?.hasPool   ? '🏊 Pool'   : '',
+    req.requirements?.hasGarage ? '🚗 Garage' : '',
     req.requirements?.extraNotes ? `📝 "${req.requirements.extraNotes}"` : '',
-    req.agreedAmount ? `🤝 Agreed: Rs. ${req.agreedAmount.toLocaleString()}` : (req.proposedAmount ? `💰 Budget: Rs. ${req.proposedAmount.toLocaleString()}` : ''),
+    req.agreedAmount ? `🤝 Agreed: Rs. ${req.agreedAmount.toLocaleString()}` : (req.proposedAmount ? `💰 Proposed: Rs. ${req.proposedAmount.toLocaleString()}` : ''),
   ].filter(Boolean).join(' &nbsp;|&nbsp; ');
 
   // Messages
@@ -4152,39 +4096,52 @@ function _llwizBuildDoc(llSig,tnSig){
 }
 
 function llwizDownload(){
-  const html=_llwizBuildDoc(_llwizGetSig('ll'),_llwizGetSig('tn'));
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
-  a.download=`lease-${_llwGet('llw-tn-name')||'agreement'}.html`; a.click();
+  alert('llwizDownload called');
+  try {
+    const html=_llwizBuildDoc(_llwizGetSig('ll'),_llwizGetSig('tn'));
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+    a.download=`lease-${_llwGet('llw-tn-name')||'agreement'}.html`;
+    a.click();
+    console.log('Download triggered', a.download);
+  } catch(e) {
+    alert('Download error: ' + e);
+    console.error('Download error', e);
+  }
 }
 
 async function llwizSave(){
-  if(!_llwGet('llw-ll-name')||!_llwGet('llw-tn-name')||!_llwGet('llw-rent')||!_llwGet('llw-start')||!_llwGet('llw-end')){
-    _llwizShowErr('Zaroor fields: Landlord name, Tenant name, Rent, Start/End dates.'); return;
-  }
-  const llSig=_llwizGetSig('ll'), tnSig=_llwizGetSig('tn');
-  const user=JSON.parse(localStorage.getItem('tms_user')||'{}');
-  const landlordId=user._id||user.id||'';
-  const fullHtml=_llwizBuildDoc(llSig,tnSig);
-  const payload={
-    tenantName:_llwGet('llw-tn-name'), tenantCnic:_llwGet('llw-tn-cnic'), tenantAddress:_llwGet('llw-tn-addr'),
-    tenantPhone:_llwGet('llw-tn-phone'), tenantOccupation:_llwGet('llw-tn-occ'),
-    landlordName:_llwGet('llw-ll-name'), landlordCnic:_llwGet('llw-ll-cnic'), landlordAddress:_llwGet('llw-ll-addr'),
-    landlordPhone:_llwGet('llw-ll-phone'), landlordEmail:_llwGet('llw-ll-email'),
-    propertyAddress:_llwGet('llw-prop-addr'), propertyTitle:(_llWizPropObj?.title||_llwGet('llw-prop-addr')),
-    propertyType:_llwGet('llw-prop-type'), propertyArea:_llwGet('llw-prop-area'),
-    propertyRooms:_llwGet('llw-prop-rooms'), propertyPlot:_llwGet('llw-prop-plot'),
-    rent:Number(_llwGet('llw-rent'))||0, deposit:_llwGet('llw-deposit'), advance:_llwGet('llw-advance'),
-    startDate:_llwGet('llw-start'), endDate:_llwGet('llw-end'), duration:_llwGet('llw-dur')||'11 months',
-    dueDay:_llwGet('llw-dueday'), annualIncrease:_llwGet('llw-incpct'), city:_llwGet('llw-city'),
-    specialConditions:_llwGet('llw-special'), landlordSignature:llSig, tenantSignature:tnSig,
-    fullAgreementHtml:fullHtml, locked:true, terms:'Punjab Rented Premises Act 2009 — Standard Terms Applied',
-  };
-  if(landlordId) payload.landlordId=landlordId;
-  if(_llWizPropId) payload.propertyId=_llWizPropId;
-  const btn=document.getElementById('llwiz-save-btn');
-  if(btn){btn.disabled=true;btn.textContent='⏳ Saving…';}
-  try{
+  try {
+    alert('llwizSave called');
+    if(!_llwGet('llw-ll-name')||!_llwGet('llw-tn-name')||!_llwGet('llw-rent')||!_llwGet('llw-start')||!_llwGet('llw-end')){
+      _llwizShowErr('Zaroor fields: Landlord name, Tenant name, Rent, Start/End dates.');
+      alert('Missing required fields');
+      return;
+    }
+    const llSig=_llwizGetSig('ll'), tnSig=_llwizGetSig('tn');
+    const user=JSON.parse(localStorage.getItem('tms_user')||'{}');
+    const landlordId=user._id||user.id||'';
+    const fullHtml=_llwizBuildDoc(llSig,tnSig);
+    const payload={
+      tenantName:_llwGet('llw-tn-name'), tenantCnic:_llwGet('llw-tn-cnic'), tenantAddress:_llwGet('llw-tn-addr'),
+      tenantPhone:_llwGet('llw-tn-phone'), tenantOccupation:_llwGet('llw-tn-occ'),
+      landlordName:_llwGet('llw-ll-name'), landlordCnic:_llwGet('llw-ll-cnic'), landlordAddress:_llwGet('llw-ll-addr'),
+      landlordPhone:_llwGet('llw-ll-phone'), landlordEmail:_llwGet('llw-ll-email'),
+      propertyAddress:_llwGet('llw-prop-addr'), propertyTitle:(_llWizPropObj?.title||_llwGet('llw-prop-addr')),
+      propertyType:_llwGet('llw-prop-type'), propertyArea:_llwGet('llw-prop-area'),
+      propertyRooms:_llwGet('llw-prop-rooms'), propertyPlot:_llwGet('llw-prop-plot'),
+      rent:Number(_llwGet('llw-rent'))||0, deposit:_llwGet('llw-deposit'), advance:_llwGet('llw-advance'),
+      startDate:_llwGet('llw-start'), endDate:_llwGet('llw-end'), duration:_llwGet('llw-dur')||'11 months',
+      dueDay:_llwGet('llw-dueday'), annualIncrease:_llwGet('llw-incpct'), city:_llwGet('llw-city'),
+      specialConditions:_llwGet('llw-special'), landlordSignature:llSig, tenantSignature:tnSig,
+      fullAgreementHtml:fullHtml, locked:true, terms:'Punjab Rented Premises Act 2009 — Standard Terms Applied',
+    };
+    if(landlordId) payload.landlordId=landlordId;
+    if(_llWizPropId) payload.propertyId=_llWizPropId;
+    const btn=document.getElementById('llwiz-save-btn');
+    if(btn){btn.disabled=true;btn.textContent='⏳ Saving…';}
+    console.log('llwizSave payload', payload);
     const r=await lFetch('/leases','POST',payload);
+    console.log('llwizSave response', r);
     if(r.success){
       // Lock locally
       const lockData={...payload,savedAt:new Date().toISOString()};
@@ -4196,10 +4153,13 @@ async function llwizSave(){
     } else {
       _llwizShowErr(r.message||'Save failed.');
       if(btn){btn.disabled=false;btn.textContent='💾 Save & Lock Agreement';}
+      alert('Save failed: ' + (r.message||'Unknown error'));
     }
   } catch(e){
     _llwizShowErr('Server se connect nahi ho saka.');
     if(btn){btn.disabled=false;btn.textContent='💾 Save & Lock Agreement';}
+    alert('Save error: ' + e);
+    console.error('llwizSave error', e);
   }
 }
 
@@ -4275,6 +4235,164 @@ function getStandardLeaseTerms(){return 'Punjab Rented Premises Act 2009 — Sta
 async function llCreateLease(){}
 </script>
 
-</body>
+<script>
+// ═════════════════════════════════════════════════════=
+// LEASE WIZARD — Per-property, one-time lock
+// ═════════════════════════════════════════════════════=
+let _llWizPropId = null;
+let _llWizPropObj = null;
+let _llWizCurStep = 1;
+const _llWizSigPads = {};
 
+function openLLWizard(propId) {
+  const prop = propId ? myProps.find(p => (p._id||'').toString() === propId) : null;
+  _llWizPropId = propId || null;
+  _llWizPropObj = prop || null;
+  const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
+  // Pre-fill landlord fields (only if empty)
+  _llwSet('llw-ll-name', user.name||'');
+  _llwSet('llw-ll-email', user.email||'');
+  _llwSet('llw-ll-phone', user.phone||'');
+  // Clear all fields first for fresh form
+  ['llw-ll-name','llw-ll-cnic','llw-ll-addr','llw-ll-phone','llw-ll-email',
+   'llw-tn-name','llw-tn-cnic','llw-tn-addr','llw-tn-phone','llw-tn-occ',
+   'llw-prop-addr','llw-prop-type','llw-prop-area','llw-prop-rooms','llw-prop-plot',
+   'llw-rent','llw-deposit','llw-advance','llw-start','llw-end','llw-dueday',
+   'llw-incpct','llw-city','llw-dur','llw-special'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('llw-dur').value = '11 months';
+  // Pre-fill from user + prop
+  const u = document.getElementById('llw-ll-name'); if(u) u.value = user.name||'';
+  const ue = document.getElementById('llw-ll-email'); if(ue) ue.value = user.email||'';
+  const up = document.getElementById('llw-ll-phone'); if(up) up.value = user.phone||'';
+  if (prop) {
+    const pa = document.getElementById('llw-prop-addr'); if(pa) pa.value = prop.address||prop.propertyAddress||prop.title||'';
+    const pc = document.getElementById('llw-city'); if(pc) pc.value = prop.city||'';
+    const pr = document.getElementById('llw-rent'); if(pr) pr.value = prop.rent||'';
+    document.getElementById('llwiz-prop-title').textContent = prop.title||'New Lease Agreement';
+    document.getElementById('llwiz-prop-sub').textContent = prop.address||prop.title||'Fill in all details and sign';
+  } else {
+    document.getElementById('llwiz-prop-title').textContent = 'New Lease Agreement';
+    document.getElementById('llwiz-prop-sub').textContent = 'Fill in all details and sign';
+  }
+  _llWizSigPads['ll'] = null;
+  _llWizSigPads['tn'] = null;
+  _llwizGoTo(1);
+  document.getElementById('llwiz-save-btn').disabled = false;
+  document.getElementById('llwiz-save-btn').textContent = '💾 Save & Lock Agreement';
+  document.getElementById('llwiz-save-err').style.display = 'none';
+  document.getElementById('ll-lease-wizard-modal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLLWizard() {
+  document.getElementById('ll-lease-wizard-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function _llwSet(id, val) { const el=document.getElementById(id); if(el&&!el.value) el.value=val; }
+function _llwGet(id) { const el=document.getElementById(id); return el?(el.value||'').trim():''; }
+
+function llwizNext(n) {
+  if (n > _llWizCurStep) {
+    if (_llWizCurStep===1 && (!_llwGet('llw-ll-name')||!_llwGet('llw-tn-name'))) {
+      alert('Landlord aur Tenant ka naam zaroor bharo.'); return;
+    }
+    if (_llWizCurStep===3 && (!_llwGet('llw-rent')||!_llwGet('llw-start')||!_llwGet('llw-end'))) {
+      alert('Rent, Start Date aur End Date zaroor bharo.'); return;
+    }
+  }
+  _llwizGoTo(n);
+}
+
+function _llwizGoTo(n) {
+  [1,2,3,4].forEach(i => {
+    const panel=document.getElementById('llwiz-panel'+i);
+    if(panel) panel.style.display = i===n?'block':'none';
+    const c=document.getElementById('llwiz-c'+i), l=document.getElementById('llwiz-l'+i), line=document.getElementById('llwiz-line'+i);
+    if(!c) return;
+    if(i<n){ c.style.cssText='width:28px;height:28px;border-radius:50%;border:1.5px solid #1D9E75;background:#1D9E75;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;margin:0 auto 5px'; c.textContent='✓'; if(l){l.style.color='var(--muted)';l.style.fontWeight='400';} if(line)line.style.background='#1D9E75'; }
+    else if(i===n){ c.style.cssText='width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(201,169,110,0.6);background:rgba(201,169,110,0.12);color:#C9A96E;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;margin:0 auto 5px'; c.textContent=String(i); if(l){l.style.color='#C9A96E';l.style.fontWeight='600';} if(line)line.style.background='var(--border)'; }
+    else{ c.style.cssText='width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:var(--input-bg);color:var(--muted);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;margin:0 auto 5px'; c.textContent=String(i); if(l){l.style.color='var(--muted)';l.style.fontWeight='400';} if(line)line.style.background='var(--border)'; }
+  });
+  _llWizCurStep=n;
+  if(n===4){ _llwizInitPads(); _llwizBuildPreview(); }
+}
+
+function _llwizInitPads() {
+  ['ll','tn'].forEach(id => {
+    if(_llWizSigPads[id]) return;
+    const canvas=document.getElementById('llw-'+id+'-canvas'); if(!canvas) return;
+    const dpr=window.devicePixelRatio||1, w=canvas.offsetWidth||600;
+    canvas.width=w*dpr; canvas.height=100*dpr;
+    const ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr);
+    ctx.strokeStyle='#1a2744'; ctx.lineWidth=2; ctx.lineCap='round'; ctx.lineJoin='round';
+    let drawing=false, drawn=false;
+    const pos=e=>{const r=canvas.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return{x:s.clientX-r.left,y:s.clientY-r.top};};
+    canvas.addEventListener('mousedown',e=>{e.preventDefault();drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});
+    canvas.addEventListener('mousemove',e=>{e.preventDefault();if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();drawn=true;_llwizShowOk(id);});
+    canvas.addEventListener('mouseup',()=>drawing=false);
+    canvas.addEventListener('mouseleave',()=>drawing=false);
+    canvas.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
+    canvas.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();drawn=true;_llwizShowOk(id);},{passive:false});
+    canvas.addEventListener('touchend',()=>drawing=false);
+    _llWizSigPads[id]={ctx,canvas,hasDrawn:()=>drawn,reset:()=>{ctx.clearRect(0,0,canvas.width/dpr,canvas.height/dpr);drawn=false;}};
+  });
+}
+
+function _llwizShowOk(id){const el=document.getElementById('llw-'+id+'-ok');if(el)el.style.display='flex';_llwizBuildPreview();}
+
+function llwizClearSig(id){
+  const pad=_llWizSigPads[id]; if(pad)pad.reset();
+  const img=document.getElementById('llw-'+id+'-img'), canvas=document.getElementById('llw-'+id+'-canvas');
+  if(img){img.style.display='none';img.src='';} if(canvas)canvas.style.display='block';
+  const ok=document.getElementById('llw-'+id+'-ok'); if(ok)ok.style.display='none';
+}
+
+function llwizUploadSig(id,input){
+  if(!input.files||!input.files[0])return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=document.getElementById('llw-'+id+'-img'), canvas=document.getElementById('llw-'+id+'-canvas');
+    if(img){img.src=e.target.result;img.style.display='block';} if(canvas)canvas.style.display='none';
+    _llwizShowOk(id);
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function _llwizGetSig(id){
+  const img=document.getElementById('llw-'+id+'-img');
+  if(img&&img.src&&img.style.display!=='none')return img.src;
+  const pad=_llWizSigPads[id]; if(pad&&pad.hasDrawn())return pad.canvas.toDataURL();
+  return '';
+}
+
+function _llwizBuildPreview(){
+  const llSig=_llwizGetSig('ll'), tnSig=_llwizGetSig('tn');
+  const el=document.getElementById('llwiz-preview'); if(!el)return;
+  el.innerHTML=`<strong style="font-size:13px">Lease Agreement — Summary</strong>
+    <table style="width:100%;font-size:12px;border-collapse:collapse;margin-top:8px">
+      <tr><td style="color:var(--muted);padding:3px 0;width:45%">Landlord</td><td>${_llwGet('llw-ll-name')} <span style="color:var(--muted)">${_llwGet('llw-ll-cnic')}</span></td></tr>
+      <tr><td style="color:var(--muted);padding:3px 0">Tenant</td><td>${_llwGet('llw-tn-name')} <span style="color:var(--muted)">${_llwGet('llw-tn-cnic')}</span></td></tr>
+      <tr><td style="color:var(--muted);padding:3px 0">Property</td><td>${_llwGet('llw-prop-addr')}</td></tr>
+      <tr><td style="color:var(--muted);padding:3px 0">Monthly Rent</td><td style="font-weight:600;color:var(--gold)">Rs. ${_llwGet('llw-rent')}</td></tr>
+      <tr><td style="color:var(--muted);padding:3px 0">Lease Period</td><td>${_llwGet('llw-start')} → ${_llwGet('llw-end')}</td></tr>
+      <tr><td style="color:var(--muted);padding:3px 0">Deposit</td><td>${_llwGet('llw-deposit')}</td></tr>
+    </table>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px">
+      <div style="border-top:1.5px solid #1a2744;padding-top:8px;text-align:center">
+        ${llSig?`<img src="${llSig}" style="height:60px;object-fit:contain;display:block;margin:0 auto 4px">`:'<div style="height:60px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px">Not signed yet</div>'}
+        <div style="font-size:11px;color:var(--muted)">Landlord</div><div style="font-size:12px;font-weight:600">${_llwGet('llw-ll-name')}</div>
+      </div>
+      <div style="border-top:1.5px solid #1a2744;padding-top:8px;text-align:center">
+        ${tnSig?`<img src="${tnSig}" style="height:60px;object-fit:contain;display:block;margin:0 auto 4px">`:'<div style="height:60px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px">Not signed yet</div>'}
+        <div style="font-size:11px;color:var(--muted)">Tenant</div><div style="font-size:12px;font-weight:600">${_llwGet('llw-tn-name')}</div>
+      </div>
+    </div>`;
+}
+
+// ...existing code...
+</script>
+</body>
 </html>

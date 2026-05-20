@@ -1,4 +1,3 @@
-// ─── rentalRequests Routes ─────────────────────────────────────────────────────────────
 const express  = require('express');
 const RentalRequest = require('../models/RentalRequest');
 const Property = require('../models/Property');
