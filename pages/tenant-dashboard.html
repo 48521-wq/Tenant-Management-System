@@ -14,10 +14,10 @@
 }
 
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--blue);border-radius:10px}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;transition:background 0.3s,color 0.3s}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;overflow-y:hidden;transition:background 0.3s,color 0.3s}
 .bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 10% 15%,rgba(201,169,110,0.07) 0%,transparent 55%),radial-gradient(ellipse 60% 50% at 90% 80%,rgba(78,205,196,0.04) 0%,transparent 55%),linear-gradient(160deg,#000000 0%,#07090D 100%)}
 /* TOPNAV */
-.topnav{position:sticky;top:0;z-index:200;background:var(--sidebar-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;height:62px;gap:12px}
+.topnav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--sidebar-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;height:62px;gap:12px}
 .topnav-logo{display:flex;align-items:center;gap:10px;margin-right:auto}
 .logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--blue),var(--blue-l));border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(201,169,110,0.3)}
 .logo-icon svg{width:18px;height:18px;fill:#fff;stroke:none}
@@ -31,9 +31,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .logout-btn:hover{background:rgba(255,107,107,0.15)}
 .logout-btn svg{width:14px;height:14px;stroke:currentColor;fill:none}
 /* BODY */
-.body-wrap{display:flex;flex:1;position:relative;z-index:1}
+.body-wrap{display:flex;flex:1;position:relative;z-index:1;padding-top:62px;min-height:calc(100vh - 62px);overflow:visible}
 /* SIDEBAR */
-.sidebar{width:220px;flex-shrink:0;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto}
+.sidebar{width:220px;flex-shrink:0;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:62px;min-height:calc(100vh - 62px);overflow-y:auto;overflow-x:hidden}
 .sidebar-section{padding:16px 12px 6px}
 .sidebar-label{font-size:10px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;padding:0 10px 8px}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.18s;margin-bottom:2px;border:none;background:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left}
@@ -46,7 +46,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .uav{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-l));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
 .u-name{font-size:12px;font-weight:600;color:var(--text)}.u-role{font-size:10px;color:var(--muted)}
 /* MAIN */
-.main{flex:1;min-width:0}
+.main{flex:1;min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;height:100%}
 .page{display:none;padding:28px 32px 48px;animation:fadeUp 0.3s ease both}
 .page.active{display:block}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -67,10 +67,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .search-btn{padding:9px 22px;border-radius:9px;border:none;background:linear-gradient(135deg,var(--blue),var(--blue-l));color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;height:40px;align-self:flex-end;box-shadow:0 4px 14px rgba(201,169,110,0.28);transition:all 0.2s}
 .search-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(201,169,110,0.38)}
 /* PROPS GRID */
-.props-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
-.pcard{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:transform 0.22s,box-shadow 0.22s,border-color 0.22s}
+.props-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;align-items:stretch;}
+.pcard{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:visible;cursor:pointer;transition:transform 0.22s,box-shadow 0.22s,border-color 0.22s;display:flex;flex-direction:column;height:auto;min-height:100%;}
 .pcard:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(0,0,0,0.25);border-color:rgba(201,169,110,0.35)}
-.pcard-thumb{height:170px;background:linear-gradient(135deg,rgba(201,169,110,0.1),rgba(201,169,110,0.03));position:relative;display:flex;align-items:center;justify-content:center;font-size:56px}
+.pcard-thumb{object-fit:cover;min-height:170px;max-height:220px;background:linear-gradient(135deg,rgba(201,169,110,0.1),rgba(201,169,110,0.03));position:relative;display:flex;align-items:center;justify-content:center;font-size:56px}
 .pcard-body{padding:14px 16px}
 .pcard-price{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold);margin-bottom:12px}
 .pcard-price span{font-size:11px;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:400}
@@ -667,10 +667,19 @@ tr:hover td {
 
 /* ─── MAIN PAGE PADDING ─── */
 .page {
-  padding: 30px 36px 60px !important;
+  padding: 24px 28px 48px !important;
+}
+#page-dashboard {
+  padding: 18px 20px 40px !important;
+}
+#page-dashboard .stats-row {
+  gap: 10px;
+}
+#page-dashboard .stat-card {
+  padding: 12px 14px;
 }
 @media (max-width: 900px) {
-  .page { padding: 20px 18px 40px !important; }
+  .page { padding: 18px 14px 36px !important; }
   .stats-row { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
@@ -1131,6 +1140,28 @@ async function tFetch(url, method='GET', body=null) {
   return data;
 }
 
+function enforceLettersInput(el) {
+  if (!el) return;
+  el.value = el.value.replace(/[^A-Za-z ]+/g, '');
+}
+function enforceDigitsInput(el) {
+  if (!el) return;
+  el.value = el.value.replace(/[^0-9]/g, '');
+}
+function isValidEnglishName(value) {
+  return /^[A-Za-z ]+$/.test((value||'').trim());
+}
+function isDigitsOnly(value) {
+  return /^[0-9]+$/.test((value||'').trim());
+}
+function attachNumericOnlyInputs() {
+  document.querySelectorAll('input[type=number]').forEach(el => {
+    el.addEventListener('input', () => {
+      el.value = el.value.replace(/[^0-9]/g, '');
+    });
+  });
+}
+
 function tmsLogout() { localStorage.clear(); sessionStorage.clear(); window.location.replace('../index.html'); }
 
 // ── THEME ─────────────────────────────────────────────
@@ -1209,6 +1240,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const pct=document.getElementById('pct'); if(pct) pct.value=user.city||'';
   const pcn=document.getElementById('pcn'); if(pcn) pcn.value=user.cnic||'';
 
+  attachNumericOnlyInputs();
   await loadProperties();
   // Update notification badges on load
   if (typeof tmsUpdateStats === 'function') tmsUpdateStats();
@@ -1228,11 +1260,7 @@ async function loadProperties() {
     const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
     const userId = (user._id || user.id || '').toString();
 
-    // Load available properties
-    const availData = await tFetch('/properties?status=available');
-    const availProps = availData.properties || [];
-
-    // Load ALL properties to find rented ones assigned to this tenant
+    // Load ALL properties and filter only those rented by this tenant
     let rentedProps = [];
     try {
       const allData = await tFetch('/properties');
@@ -1243,14 +1271,7 @@ async function loadProperties() {
       });
     } catch(e2) { /* ignore if endpoint restricted */ }
 
-    // Combine: rented first (deduplicated)
-    const seen = new Set();
-    const combined = [];
-    [...rentedProps, ...availProps].forEach(p => {
-      if (!seen.has(p._id)) { seen.add(p._id); combined.push(p); }
-    });
-
-    allProps = combined;
+    allProps = rentedProps;
 
     // Update shared prop map
     window._tenantPropMap = {};
@@ -1325,17 +1346,21 @@ function renderProps(list, rentedIds) {
   const myRented = new Set(rentedIds || []);
 
   const statusColors={available:'rgba(78,205,196,0.9)',rented:'rgba(255,179,71,0.9)',suspended:'rgba(255,107,107,0.9)'};
+  const premiumFallbacks={
+    'Villa':     'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1600&q=90&fit=crop&auto=format',
+    'House':     'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&q=90&fit=crop&auto=format',
+    'Apartment': 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1600&q=90&fit=crop&auto=format',
+    'Flat':      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1600&q=90&fit=crop&auto=format',
+    'Room':      'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1600&q=90&fit=crop&auto=format',
+  };
   grid.innerHTML = list.map(p => {
     const pid = p._id;
     const isMine = myRented.has(pid);
     const panoramaUrl = getProperty360Url(p);
     const has360 = !!panoramaUrl;
-    const coverImage = p.frontImage || (Array.isArray(p.images) && p.images.length ? p.images[0] : (typeof p.images === 'string' ? p.images : ''));
-    const thumbnail = coverImage
-      ? `<img src="${coverImage}" alt="${p.title||'Property'}">`
-      : has360
-        ? `<iframe src="${normalizePanoramaUrl(panoramaUrl)}" title="${p.title||'Property'} 360 preview" loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" style="width:100%;height:100%;border:0;background:#111;pointer-events:none"></iframe>`
-        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.7);font-size:13px;background:#111">Front image unavailable</div>`;
+    const fallbackSrc = premiumFallbacks[p.type] || premiumFallbacks['House'];
+    const coverImage = p.frontImage || (Array.isArray(p.images) && p.images.length ? p.images[0] : (typeof p.images === 'string' ? p.images : '')) || fallbackSrc;
+    const thumbnail = `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.onerror=null;this.src='${fallbackSrc}'">`;
     const btnBaseStyle = 'flex:1;min-width:120px';
     const viewButton = has360
       ? `<button class="btn btn-gold btn-sm" style="${btnBaseStyle}" onclick="tenantView3D('${pid}')">View 360</button>`
@@ -1681,7 +1706,7 @@ async function loadRentalRequests() {
             <div class="li-title">${req.propertyTitle} - ${req.propertyAddress}</div>
             <div class="li-sub">📍 Rent: Rs. ${Number(req.propertyRent||0).toLocaleString()}/month · Landlord: ${req.landlordName}</div>
             <div style="font-size:11px;color:var(--muted);margin-top:4px">Requested: ${new Date(req.requestedAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>
-            ${req.proposedRent ? `<div style="font-size:12px;color:var(--blue);font-weight:600;margin-top:4px">🏷️ Aapki offer: Rs. ${Number(req.proposedRent).toLocaleString()}/mo</div>` : ''}
+            ${req.proposedRent ? `<div style="font-size:12px;color:var(--blue);font-weight:600;margin-top:4px">🏷️ Your offer: Rs. ${Number(req.proposedRent).toLocaleString()}/mo</div>` : ''}
             ${req.agreedRent ? `<div style="font-size:12px;color:var(--green);font-weight:600;margin-top:4px">🤝 Agreed rent: Rs. ${Number(req.agreedRent).toLocaleString()}/mo</div>` : ''}
             ${lastMsg ? `<div style="font-size:12px;color:var(--muted);margin-top:6px;padding:8px;background:var(--input-bg);border-left:2px solid var(--blue);border-radius:4px">${lastMsg.senderRole==='landlord'?'🏠 Landlord':'Aap'}: ${lastMsg.text||''}${lastMsg.proposedRent?' · Rs. '+Number(lastMsg.proposedRent).toLocaleString()+'/mo':''}</div>` : (req.message?`<div style="font-size:12px;color:var(--text);margin-top:6px;padding:8px;background:var(--input-bg);border-left:2px solid var(--blue);border-radius:4px">"${req.message}"</div>`:'')}
           </div>
@@ -1825,14 +1850,14 @@ async function loadLease() {
     const data = await tFetch('/leases');
     const leases = data.leases || [];
     const activeLeases = leases.filter(x => x.status === 'active');
-    const pendingLeases = leases.filter(x => x.status === 'pending');
+    const pendingLeases = leases.filter(x => x.status === 'pending_tenant_signature' || x.status === 'pending');
     const l = activeLeases.length ? activeLeases[0] : pendingLeases.length ? pendingLeases[0] : null;
 
     if (l) {
       // Store current lease in window for editing
       window._currentLease = l;
       const signedDate = new Date(l.signedAt||l.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'long',year:'numeric'});
-      const statusColor = l.status==='active' ? '#22c55e' : l.status==='pending' ? '#f59e0b' : '#6b7280';
+      const statusColor = l.status==='active' ? '#22c55e' : (l.status==='pending_tenant_signature'||l.status==='pending') ? '#f59e0b' : '#6b7280';
       
       box.innerHTML = `
         <div class="lease-box" style="border:none;padding:0">
@@ -1897,13 +1922,18 @@ async function loadLease() {
                 <div style="font-size:11px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">${l.tenantName||user.name||'Tenant'}</div>
               </div>
             </div>
-            ${!l.tenantSignature ? `<button onclick="openSignaturePad('${l._id}')" style="width:100%;margin-top:12px;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--blue),#2563eb);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.1px">✍️ Sign This Agreement</button>` : `<div style="margin-top:10px;padding:10px 14px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:9px;font-size:12px;color:#22c55e;font-weight:600;text-align:center">✅ Agreement Digitally Signed by Tenant on ${signedDate}</div>`}
+            ${!l.tenantSignature ? `
+              <div style="margin-top:12px;padding:12px 14px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;font-size:12px;color:#f59e0b;font-weight:600">
+                ⚠️ The landlord has sent the agreement. Add your signature now — once signed the agreement will be locked permanently.
+              </div>
+              <button onclick="openSignaturePad('${l._id}')" style="width:100%;margin-top:10px;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--blue),#2563eb);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.1px">✍️ Sign This Agreement</button>
+            ` : `<div style="margin-top:10px;padding:10px 14px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:9px;font-size:12px;color:#22c55e;font-weight:600;text-align:center">✅ Agreement Digitally Signed & Locked on ${signedDate}</div>`}
           </div>
 
           <!-- Action Buttons -->
           <div style="display:flex;gap:10px;flex-wrap:wrap">
             <button class="submit-btn" style="flex:1;min-width:130px" onclick="openLeaseDocumentModal()">📄 View Full Agreement</button>
-            <button class="submit-btn" style="flex:1;min-width:130px;background:rgba(255,255,255,0.06);color:var(--text);box-shadow:none;border:1px solid var(--border)" onclick="toggleLeaseEdit()">✏️ Edit Details</button>
+            ${l.fullAgreementHtml ? `<button onclick="tenantDownloadLease()" style="padding:11px 18px;border-radius:11px;border:1px solid rgba(29,158,117,0.25);background:rgba(29,158,117,0.08);color:#1D9E75;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">⬇ Download</button>` : ''}
             <button onclick="printLeaseAgreement()" style="padding:11px 18px;border-radius:11px;border:1px solid rgba(201,169,110,0.25);background:rgba(201,169,110,0.08);color:var(--gold);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">🖨️ Print</button>
           </div>
 
@@ -1924,42 +1954,8 @@ async function loadLease() {
         </div>
       `;
     } else {
-      // Show agreement form to sign new
-      box.innerHTML = `
-        <div style="border:1px solid rgba(201,169,110,0.12);border-radius:18px;overflow:hidden">
-          <!-- Header -->
-          <div style="background:linear-gradient(135deg,rgba(201,169,110,0.07),rgba(201,169,110,0.02));padding:24px 26px;border-bottom:1px solid rgba(201,169,110,0.1)">
-            <div style="font-family:'Cormorant Garamond','Playfair Display',serif;font-size:26px;font-weight:700;color:var(--text);margin-bottom:4px">Draft Tenancy Agreement</div>
-            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:600">Punjab Rented Premises Act 2009 — Compliant Template</div>
-          </div>
-          <div style="padding:22px 26px">
-            <!-- Notice Banner -->
-            <div style="background:rgba(74,158,255,0.07);border:1px solid rgba(74,158,255,0.18);border-radius:10px;padding:12px 15px;margin-bottom:20px;display:flex;gap:10px;align-items:flex-start">
-              <span style="font-size:18px;flex-shrink:0">ℹ️</span>
-              <div style="font-size:12px;color:var(--blue);line-height:1.6">This agreement is prepared in accordance with the <strong>Punjab Rented Premises Act 2009</strong>. An 11-month tenancy avoids mandatory registration under the Registration Act 1908. Digital signatures are legally recognized under the <strong>Electronic Transactions Ordinance 2002</strong>.</div>
-            </div>
-            <!-- Form -->
-            <div class="form-grid">
-              <div class="fg"><label>Property Title *</label><input id="la-title" placeholder="e.g. 3-Bed House, DHA Phase 5"></div>
-              <div class="fg"><label>Full Address *</label><input id="la-addr" placeholder="Street, Block, City"></div>
-              <div class="fg"><label>Landlord Full Name *</label><input id="la-ll" placeholder="As per CNIC"></div>
-              <div class="fg"><label>Monthly Rent (Rs.) *</label><input id="la-rent" type="number" placeholder="25000"></div>
-              <div class="fg"><label>Commencement Date *</label><input id="la-start" type="date"></div>
-              <div class="fg"><label>Expiry Date *</label><input id="la-end" type="date"></div>
-              <div class="fg full"><label>Duration</label><input id="la-dur" placeholder="11 months" value="11 months"></div>
-              <div class="fg full"><label>Terms & Conditions (Pakistan Law Compliant)</label><textarea id="la-terms" style="min-height:200px;font-size:12px;line-height:1.7">${getStandardLeaseTerms()}</textarea></div>
-            </div>
-            <!-- Witness Notice -->
-            <div style="background:rgba(201,169,110,0.06);border:1px solid rgba(201,169,110,0.15);border-radius:10px;padding:13px 15px;margin-top:16px;font-size:12px;color:var(--muted);line-height:1.7">
-              <strong style="color:var(--gold)">📋 Legal Requirements:</strong> Under Pakistani tenancy law, this agreement requires signatures from: (1) <strong>Tenant</strong>, (2) <strong>Landlord</strong>, (3) <strong>Tenant's Witness</strong> (with CNIC), (4) <strong>Landlord's Witness</strong> (with CNIC). Both parties should retain a signed original. A Rs. 100 stamp paper is recommended.
-            </div>
-            <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
-              <button class="submit-btn" style="flex:1;min-width:160px" onclick="signLease()">✍️ Create & Sign Agreement</button>
-            </div>
-            <div id="lease-ok" class="toast">✅ Lease agreement created successfully!</div>
-          </div>
-        </div>
-      `;
+      // No agreement to show
+      box.innerHTML = `<div class="loading">No lease agreement available.</div>`;
     }
   } catch { box.innerHTML = '<div class="loading">⚠️ Error loading lease.</div>'; }
 }
@@ -2113,6 +2109,10 @@ async function saveProfile() {
   const cn = document.getElementById('pcn')?.value||'';
   const name = (fn+' '+ln).trim();
   const btn = document.getElementById('save-profile-btn');
+  if (!fn || !ln) { alert('Please enter both first and last name.'); return; }
+  if (!isValidEnglishName(fn) || !isValidEnglishName(ln)) { alert('Names must contain only English letters and spaces.'); return; }
+  if (ph && !isDigitsOnly(ph)) { alert('Phone must contain digits only.'); return; }
+  if (cn && !isDigitsOnly(cn)) { alert('CNIC must contain digits only.'); return; }
   if(btn){btn.disabled=true;btn.textContent='Saving…';}
   try {
     await tFetch('/auth/profile','PUT',{name, phone:ph, city:ct, cnic:cn});
@@ -2227,7 +2227,7 @@ async function saveTenantFurnitureLayout() {
     if (badge) badge.style.display = 'flex';
     // Refresh property list including rented properties so Furnish remains available
     await loadProperties();
-  } catch(e) { alert('Layout save nahi ho saka.'); }
+  } catch(e) { alert('Unable to save layout.'); }
   finally { if(btn){btn.disabled=false;btn.textContent='💾 Save Layout';} }
 }
 function tFurnAddItem(type, color) {
@@ -2288,6 +2288,9 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
     <button class="nav-item" onclick="sp('complaints',this)">
       <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Complaints
     </button>
+    <button class="nav-item" onclick="sp('all-properties',this)">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>All Properties
+    </button>
     <button class="nav-item" onclick="sp('rental-requests',this)">
       <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/><polyline points="9 12 12 15 16 11"/></svg>Rental Requests
       <span class="nb-pill" id="rental-requests-badge" style="display:none">0</span>
@@ -2305,8 +2308,216 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
   </div>
 </aside>
 
+<script>
+async function loadAllProperties() {
+  const grid = document.getElementById('props-grid-all');
+  const rc = document.getElementById('rc-all');
+  if (!grid) return;
+  grid.innerHTML = '<div class="loading"><span class="spinner"></span>Loading properties…</div>';
+  try {
+    const [allData, myReqData] = await Promise.all([
+      tFetch('/properties'),
+      tFetch('/rental-requests/my-requests').catch(() => ({ requests: [] }))
+    ]);
+    const allP = allData.properties || [];
+    const myRequests = myReqData.requests || [];
+
+    // Build a map: propertyId -> request status
+    const reqMap = {};
+    myRequests.forEach(r => {
+      if (r.propertyId) reqMap[r.propertyId._id || r.propertyId] = r.status;
+    });
+
+    if(rc) rc.textContent = allP.length;
+    if (!allP.length) {
+      grid.innerHTML = '<div class="loading">🔍 No properties found.</div>';
+      return;
+    }
+    grid.innerHTML = allP.map(p => {
+      const pid = p._id;
+      const panoramaUrl = getProperty360Url(p);
+      const has360 = !!panoramaUrl;
+      const _pfb={'Villa':'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1600&q=90&fit=crop&auto=format','House':'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&q=90&fit=crop&auto=format','Apartment':'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1600&q=90&fit=crop&auto=format','Flat':'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1600&q=90&fit=crop&auto=format','Room':'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1600&q=90&fit=crop&auto=format'};
+      const _fb = _pfb[p.type] || _pfb['House'];
+      const coverImage = p.frontImage || (Array.isArray(p.images) && p.images.length ? p.images[0] : (typeof p.images === 'string' ? p.images : '')) || _fb;
+      const thumbnail = `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.onerror=null;this.src='${_fb}'">`;
+      const btnBaseStyle = 'flex:1;min-width:120px';
+      const viewButton = has360
+        ? `<button class="btn btn-gold btn-sm" style="${btnBaseStyle}" onclick="tenantView3D('${pid}')">View 360</button>`
+        : `<button class="btn btn-gold btn-sm" style="${btnBaseStyle};opacity:0.65;cursor:not-allowed" disabled>360 Pending</button>`;
+
+      // Rent request button — smart status
+      const reqStatus = reqMap[pid];
+      const isRented = p.status === 'rented';
+      let rentBtn = '';
+      if (isRented && !reqStatus) {
+        rentBtn = `<button class="btn btn-sm" style="${btnBaseStyle};background:rgba(255,179,71,0.1);color:#ffb347;border:1px solid rgba(255,179,71,0.25);cursor:not-allowed" disabled>🔒 Rented</button>`;
+      } else if (reqStatus === 'pending' || reqStatus === 'negotiating') {
+        rentBtn = `<button class="btn btn-sm" style="${btnBaseStyle};background:rgba(78,205,196,0.1);color:#4ecdc4;border:1px solid rgba(78,205,196,0.25);cursor:not-allowed" disabled>⏳ Requested</button>`;
+      } else if (reqStatus === 'approved') {
+        rentBtn = `<button class="btn btn-sm" style="${btnBaseStyle};background:rgba(78,205,196,0.15);color:#4ecdc4;border:1px solid rgba(78,205,196,0.3);cursor:not-allowed" disabled>✅ Approved</button>`;
+      } else {
+        rentBtn = `<button class="btn btn-teal btn-sm" style="${btnBaseStyle}" onclick="openRentalRequestModal('${pid}')">🏠 Request Rent</button>`;
+      }
+
+      return `
+      <div class="pcard">
+        <div class="pcard-thumb" style="padding:0;cursor:pointer" onclick="tenantView3D('${pid}')">
+          ${thumbnail}
+          <span style="position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:${isRented ? 'rgba(255,179,71,0.9)' : 'rgba(78,205,196,0.9)'};color:#fff;pointer-events:none">${p.status||'available'}</span>
+          <span style="position:absolute;bottom:10px;right:10px;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--gold);border:1px solid rgba(201,169,110,0.3);pointer-events:none">${has360 ? '360 View' : 'Details'}</span>
+        </div>
+        <div class="pcard-body">
+          <div class="pcard-title">${p.title||'Untitled'}</div>
+          <div class="pcard-loc">📍 ${p.area||p.address||'—'}, ${p.city||''}</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:5px">🏢 <span style="color:var(--gold)">${p.landlordName||'Landlord'}</span></div>
+          <div style="display:flex;gap:10px;font-size:11.5px;color:var(--muted);margin-bottom:10px">
+            <span>🛏 ${p.beds||'?'} </span><span>🚿 ${p.baths||'?'} </span><span>${p.type||'House'}</span>
+          </div>
+          <div class="pcard-price">Rs. ${Number(p.rent||0).toLocaleString()} <span>/mo</span></div>
+          <div class="pcard-actions" style="flex-wrap:wrap;gap:6px;margin-top:10px">
+            ${viewButton}
+            ${rentBtn}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Save cache for filter
+    window._allPropsCache = allP;
+    window._allReqMap = reqMap;
+  } catch(e) {
+    grid.innerHTML = `<div class="loading">⚠️ Unable to load properties.</div>`;
+  }
+}
+// Show correct page and load data
+const oldSp = window.sp;
+window.sp = function(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  if(id==='all-properties') { document.getElementById('page-all-properties').classList.add('active'); loadAllProperties(); return; }
+  if(typeof oldSp === 'function') return oldSp(id, btn);
+}
+
+function filterAllProps() {
+  const allP = window._allPropsCache || [];
+  const reqMap = window._allReqMap || {};
+  const search = (document.getElementById('all-search')?.value || '').toLowerCase();
+  const type   = document.getElementById('all-type')?.value || '';
+  const status = document.getElementById('all-status')?.value || '';
+  const maxRent= Number(document.getElementById('all-rent')?.value || 0);
+
+  const filtered = allP.filter(p => {
+    if (type   && p.type !== type) return false;
+    if (status && p.status !== status) return false;
+    if (maxRent && Number(p.rent) > maxRent) return false;
+    if (search) {
+      const hay = `${p.title} ${p.area} ${p.city} ${p.landlordName} ${p.type}`.toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  const rc = document.getElementById('rc-all');
+  if (rc) rc.textContent = filtered.length;
+
+  const grid = document.getElementById('props-grid-all');
+  if (!grid) return;
+  if (!filtered.length) { grid.innerHTML = '<div class="loading">🔍 No properties found.</div>'; return; }
+
+  const _pfb={'Villa':'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1600&q=90&fit=crop&auto=format','House':'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&q=90&fit=crop&auto=format','Apartment':'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1600&q=90&fit=crop&auto=format','Flat':'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1600&q=90&fit=crop&auto=format','Room':'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1600&q=90&fit=crop&auto=format'};
+  const btnBaseStyle = 'flex:1;min-width:120px';
+
+  grid.innerHTML = filtered.map(p => {
+    const pid = p._id;
+    const panoramaUrl = getProperty360Url(p);
+    const has360 = !!panoramaUrl;
+    const _fb = _pfb[p.type] || _pfb['House'];
+    const coverImage = p.frontImage || (Array.isArray(p.images) && p.images.length ? p.images[0] : '') || _fb;
+    const thumbnail = `<img src="${coverImage}" alt="${p.title||''}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.onerror=null;this.src='${_fb}'">`;
+    const viewButton = has360
+      ? `<button class="btn btn-gold btn-sm" style="${btnBaseStyle}" onclick="tenantView3D('${pid}')">View 360</button>`
+      : `<button class="btn btn-gold btn-sm" style="${btnBaseStyle};opacity:0.65;cursor:not-allowed" disabled>360 Pending</button>`;
+    const reqStatus = reqMap[pid];
+    const isRented = p.status === 'rented';
+    let rentBtn = '';
+    if (isRented && !reqStatus) {
+      rentBtn = `<button class="btn btn-sm" style="${btnBaseStyle};background:rgba(255,179,71,0.1);color:#ffb347;border:1px solid rgba(255,179,71,0.25);cursor:not-allowed" disabled>🔒 Rented</button>`;
+    } else if (reqStatus === 'pending' || reqStatus === 'negotiating') {
+      rentBtn = `<button class="btn btn-sm" style="${btnBaseStyle};background:rgba(78,205,196,0.1);color:#4ecdc4;border:1px solid rgba(78,205,196,0.25);cursor:not-allowed" disabled>⏳ Requested</button>`;
+    } else if (reqStatus === 'approved') {
+      rentBtn = `<button class="btn btn-sm" style="${btnBaseStyle};background:rgba(78,205,196,0.15);color:#4ecdc4;border:1px solid rgba(78,205,196,0.3);cursor:not-allowed" disabled>✅ Approved</button>`;
+    } else {
+      rentBtn = `<button class="btn btn-teal btn-sm" style="${btnBaseStyle}" onclick="openRentalRequestModal('${pid}')">🏠 Request Rent</button>`;
+    }
+    return `
+    <div class="pcard">
+      <div class="pcard-thumb" style="padding:0;cursor:pointer" onclick="tenantView3D('${pid}')">
+        ${thumbnail}
+        <span style="position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:${isRented?'rgba(255,179,71,0.9)':'rgba(78,205,196,0.9)'};color:#fff;pointer-events:none">${p.status||'available'}</span>
+        <span style="position:absolute;bottom:10px;right:10px;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--gold);border:1px solid rgba(201,169,110,0.3);pointer-events:none">${has360?'360 View':'Details'}</span>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-title">${p.title||'Untitled'}</div>
+        <div class="pcard-loc">📍 ${p.area||p.address||'—'}, ${p.city||''}</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:5px">🏢 <span style="color:var(--gold)">${p.landlordName||'Landlord'}</span></div>
+        <div style="display:flex;gap:10px;font-size:11.5px;color:var(--muted);margin-bottom:10px">
+          <span>🛏 ${p.beds||'?'} </span><span>🚿 ${p.baths||'?'} </span><span>${p.type||'House'}</span>
+        </div>
+        <div class="pcard-price">Rs. ${Number(p.rent||0).toLocaleString()} <span>/mo</span></div>
+        <div class="pcard-actions" style="flex-wrap:wrap;gap:6px;margin-top:10px">
+          ${viewButton}${rentBtn}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+</script>
+
 <!-- MAIN CONTENT -->
 <main class="main">
+
+  <!-- ALL PROPERTIES PAGE -->
+  <div class="page" id="page-all-properties">
+    <div class="pg-head">
+      <div><div class="pg-title">All Properties</div><div class="pg-sub">Browse properties from all landlords in the system</div></div>
+      <span style="background:var(--card);border:1px solid var(--border);padding:6px 14px;border-radius:20px;font-size:13px;color:var(--blue);font-weight:600"><span id="rc-all">0</span> Properties</span>
+    </div>
+    <!-- Filter Bar -->
+    <div class="filter-bar" style="margin-bottom:18px">
+      <div class="fgrp">
+        <span class="flbl">🔍 Search</span>
+        <input class="fsel" id="all-search" type="text" placeholder="Title, area, landlord…" oninput="filterAllProps()" style="min-width:160px">
+      </div>
+      <div class="fgrp">
+        <span class="flbl">🏠 Type</span>
+        <select class="fsel" id="all-type" onchange="filterAllProps()">
+          <option value="">All Types</option>
+          <option>House</option><option>Flat</option><option>Apartment</option><option>Villa</option><option>Room</option>
+        </select>
+      </div>
+      <div class="fgrp">
+        <span class="flbl">✅ Status</span>
+        <select class="fsel" id="all-status" onchange="filterAllProps()">
+          <option value="">All</option>
+          <option value="available">Available</option>
+          <option value="rented">Rented</option>
+        </select>
+      </div>
+      <div class="fgrp">
+        <span class="flbl">💰 Max Rent</span>
+        <select class="fsel" id="all-rent" onchange="filterAllProps()">
+          <option value="">Any</option>
+          <option value="25000">Up to 25,000</option>
+          <option value="50000">Up to 50,000</option>
+          <option value="100000">Up to 1,00,000</option>
+          <option value="200000">Up to 2,00,000</option>
+        </select>
+      </div>
+    </div>
+    <div class="props-grid" id="props-grid-all" style="margin-bottom:40px;"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+  </div>
 
   <!-- FIND PROPERTIES -->
   <div class="page active" id="page-search">
@@ -2359,12 +2570,12 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
       </div>
       <div class="form-card">
         <div class="form-grid">
-          <div class="fg"><label>First Name</label><input id="pfn"></div>
-          <div class="fg"><label>Last Name</label><input id="pln"></div>
+          <div class="fg"><label>First Name</label><input id="pfn" inputmode="text" autocomplete="given-name" oninput="enforceLettersInput(this)"></div>
+          <div class="fg"><label>Last Name</label><input id="pln" inputmode="text" autocomplete="family-name" oninput="enforceLettersInput(this)"></div>
           <div class="fg full"><label>Email</label><input id="pem" disabled style="opacity:0.6"></div>
-          <div class="fg"><label>Phone</label><input id="pph" placeholder="+92 3XX XXXXXXX"></div>
+          <div class="fg"><label>Phone</label><input id="pph" placeholder="e.g. 03123456789" inputmode="numeric" oninput="enforceDigitsInput(this)"></div>
           <div class="fg"><label>City</label><input id="pct" placeholder="Lahore"></div>
-          <div class="fg full"><label>CNIC</label><input id="pcn" placeholder="XXXXX-XXXXXXX-X"></div>
+          <div class="fg full"><label>CNIC</label><input id="pcn" placeholder="e.g. 4210123456789" inputmode="numeric" oninput="enforceDigitsInput(this)"></div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;margin-top:16px">
           <button class="submit-btn" id="save-profile-btn" onclick="saveProfile()">💾 Save Changes</button>
@@ -2823,7 +3034,7 @@ async function furnPageSave() {
     if (toggleBtn) toggleBtn.style.display = hasLandlord ? 'inline-flex' : 'none';
     // Flash success
     if (btn) { btn.textContent='✅ Saved!'; setTimeout(()=>btn.textContent='💾 Save My Layout',2000); }
-  } catch(e) { alert('Save nahi hua. Backend check karein.'); }
+  } catch(e) { alert('Save failed. Please check the backend.'); }
   finally { if(btn) btn.disabled=false; }
 }
 
@@ -2941,7 +3152,7 @@ function furnPageDownloadJSON() {
           </div>
         </div>
         <div style="margin-top:14px;padding:10px 13px;background:rgba(74,158,255,0.06);border:1px solid rgba(74,158,255,0.15);border-radius:9px;font-size:12px;color:var(--muted);line-height:1.6">
-          <strong style="color:var(--text)">Note:</strong> Yeh PDF locally save hogi — download karke dobara dekh sakte hain.
+          <strong style="color:var(--text)">Note:</strong> This PDF is saved locally — download it and view it again later.
         </div>
       </div>
 
@@ -3222,7 +3433,7 @@ async function applyDigitalSignature() {
   try {
     const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
     const tok = () => localStorage.getItem('tms_token') || sessionStorage.getItem('tms_token') || '';
-    const r = await fetch('http://localhost:5000/api/leases/' + _sigLeaseId, {
+    const r = await fetch('http://localhost:5000/api/leases/' + _sigLeaseId + '/tenant-sign', {
       method: 'PUT',
       headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+tok() },
       body: JSON.stringify({
@@ -3442,21 +3653,21 @@ setTimeout(()=>{ if(document.getElementById('sig-canvas')) initSigCanvas(); }, 2
         <div id="teg-original-rent" style="font-size:15px;font-weight:700;color:var(--text);font-family:'Playfair Display',serif"></div>
       </div>
       <div style="flex:1;padding:12px 16px;text-align:center">
-        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Aapki Offer</div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Your Offer</div>
         <div id="teg-proposed-rent" style="font-size:15px;font-weight:700;color:var(--blue);font-family:'Playfair Display',serif"></div>
       </div>
     </div>
     <div id="teg-messages" style="flex:1;padding:16px;overflow-y:auto;max-height:250px;min-height:100px;display:flex;flex-direction:column"></div>
     <div style="border-top:1px solid var(--border);padding:14px 16px">
       <div style="margin-bottom:10px">
-        <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Aapki Proposed Rent (Rs.)</label>
-        <input type="number" id="teg-rent-input" placeholder="Amount likhein..." style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
+        <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Your Proposed Rent (Rs.)</label>
+        <input type="number" id="teg-rent-input" placeholder="Enter amount..." style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
       </div>
       <div style="margin-bottom:10px">
         <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Message (Reason)</label>
-        <textarea id="teg-msg-input" rows="2" placeholder="Apna reason likhein — jaise: Budget kam hai, long-term rehna chahta hoon..." style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none"></textarea>
+        <textarea id="teg-msg-input" rows="2" placeholder="Write your reason — e.g. Budget is tight, I plan to rent long-term..." style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none"></textarea>
       </div>
-      <button onclick="sendTenantNegMsg()" style="width:100%;padding:10px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--blue),var(--blue-l));color:#FFFFFF;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer">🏷️ Negotiate Bhejein</button>
+      <button onclick="sendTenantNegMsg()" style="width:100%;padding:10px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--blue),var(--blue-l));color:#FFFFFF;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer">🏷️ Send Negotiation</button>
     </div>
   </div>
 </div>
@@ -3467,7 +3678,7 @@ function openTenantNegModal(reqId, propTitle, originalRent, currentProposed) {
   _tNegReqId = reqId;
   document.getElementById('teg-modal-title').textContent = propTitle;
   document.getElementById('teg-original-rent').textContent = 'Rs. '+Number(originalRent).toLocaleString()+'/mo';
-  document.getElementById('teg-proposed-rent').textContent = currentProposed ? 'Rs. '+Number(currentProposed).toLocaleString()+'/mo' : 'Abhi tak koi offer nahi';
+  document.getElementById('teg-proposed-rent').textContent = currentProposed ? 'Rs. '+Number(currentProposed).toLocaleString()+'/mo' : 'No offer yet';
   document.getElementById('teg-rent-input').value = currentProposed || originalRent;
   loadTenantNegMessages(reqId);
   const modal = document.getElementById('ov-tenant-neg-modal');
@@ -3484,7 +3695,7 @@ async function loadTenantNegMessages(reqId) {
   try {
     const data = await tFetch('/rental-requests/'+reqId+'/negotiation');
     const msgs = (data.request?.negotiationMessages)||[];
-    if(!msgs.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">💬 Negotiation shuru nahi hui. Apni offer bhejein!</div>';return;}
+    if(!msgs.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">💬 No negotiation started yet. Send your first offer!</div>';return;}
     el.innerHTML = msgs.map(m=>`
       <div style="display:flex;flex-direction:column;align-items:${m.senderRole==='tenant'?'flex-end':'flex-start'};margin-bottom:10px">
         <div style="max-width:78%;padding:10px 14px;border-radius:${m.senderRole==='tenant'?'14px 14px 4px 14px':'14px 14px 14px 4px'};background:${m.senderRole==='tenant'?'rgba(201,169,110,0.15)':'rgba(74,158,255,0.12)'};border:1px solid ${m.senderRole==='tenant'?'rgba(201,169,110,0.25)':'rgba(74,158,255,0.2)'}">
@@ -3502,7 +3713,7 @@ async function loadTenantNegMessages(reqId) {
 async function sendTenantNegMsg() {
   const text = document.getElementById('teg-msg-input')?.value?.trim()||'';
   const proposedRent = document.getElementById('teg-rent-input')?.value;
-  if (!text && !proposedRent) { alert('Pehle apni offer ya message likhein.'); return; }
+  if (!text && !proposedRent) { alert('Please enter an offer or a message first.'); return; }
   try {
     const data = await tFetch('/rental-requests/'+_tNegReqId+'/negotiate','PUT',{
       text, proposedRent: proposedRent ? Number(proposedRent) : undefined
@@ -3512,7 +3723,16 @@ async function sendTenantNegMsg() {
       await loadTenantNegMessages(_tNegReqId);
       await loadRentalRequests();
     } else alert(data.message||'Error');
-  } catch{alert('Server se connect nahi ho saka.');}
+  } catch{alert('Unable to connect to the server.');}
+}
+
+function tenantDownloadLease() {
+  const l = window._currentLease;
+  if(!l || !l.fullAgreementHtml) { alert('Agreement HTML unavailable. Contact Admin or Landlord.'); return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([l.fullAgreementHtml], {type:'text/html'}));
+  a.download = 'lease-agreement.html';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 </script>
 </body>

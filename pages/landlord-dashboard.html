@@ -1,33 +1,3 @@
-  <!-- RENTED PROPERTIES SECTION -->
-  <div class="card" style="margin-top:24px">
-    <h3 style="font-size:15px;font-weight:700;margin-bottom:14px;color:var(--text)">Rented Properties</h3>
-    <div id="rented-props-list"><div class="loading"><span class="spinner"></span>Loading…</div></div>
-  </div>
-<script>
-// Load rented properties for this landlord
-async function loadRentedProperties() {
-  const list = document.getElementById('rented-props-list');
-  if (!list) return;
-  list.innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>';
-  try {
-    const data = await lFetch('/properties/my/rented');
-    const props = data.properties || [];
-    if (!props.length) {
-      list.innerHTML = '<div class="loading">No rented properties yet.</div>';
-      return;
-    }
-    list.innerHTML = `<table style="width:100%;margin-top:10px"><thead><tr><th>Title</th><th>Address</th><th>Tenant Name</th><th>Tenant Email</th><th>Rent</th></tr></thead><tbody>` +
-      props.map(p => {
-        const tenant = p.tenantId || {};
-        return `<tr><td>${p.title||''}</td><td>${p.address||''}</td><td>${tenant.name||p.tenantName||'-'}</td><td>${tenant.email||'-'}</td><td>Rs. ${Number(p.rent||0).toLocaleString()}</td></tr>`;
-      }).join('') + '</tbody></table>';
-  } catch(e) {
-    list.innerHTML = '<div class="loading">⚠️ Error loading rented properties.</div>';
-  }
-}
-// Call on page load
-document.addEventListener('DOMContentLoaded', loadRentedProperties);
-</script>
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
@@ -43,10 +13,11 @@ document.addEventListener('DOMContentLoaded', loadRentedProperties);
 }
 
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(201,169,110,0.3);border-radius:4px}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;transition:background 0.3s,color 0.3s}
+html,body{height:100%}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;overflow-y:auto;transition:background 0.3s,color 0.3s}
 .bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 70% 55% at 5% 12%,rgba(201,169,110,0.05) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 92% 85%,rgba(78,205,196,0.025) 0%,transparent 55%),linear-gradient(168deg,#000000 0%,#07090C 100%)}
 /* TOPNAV */
-.topnav{position:sticky;top:0;z-index:200;background:var(--sidebar-bg);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;height:62px;gap:12px}
+.topnav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--sidebar-bg);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;height:62px;gap:12px}
 .tn-brand{display:flex;align-items:center;gap:10px;margin-right:auto}
 .tn-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--blue),var(--blue-l));display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(37,99,235,0.3)}
 .tn-icon svg{width:17px;height:17px;fill:#fff}
@@ -60,9 +31,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .logout-btn:hover{background:rgba(255,107,107,0.15)}
 .logout-btn svg{width:14px;height:14px;stroke:currentColor;fill:none}
 /* LAYOUT */
-.layout{display:flex;flex:1;position:relative;z-index:1}
+.layout{display:flex;flex:1;position:relative;z-index:1;padding-top:62px;height:calc(100vh - 62px);overflow:visible}
 /* SIDEBAR */
-.sidebar{width:220px;flex-shrink:0;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto}
+.sidebar{
+  width:220px;
+  flex-shrink:0;
+  background:var(--sidebar-bg);
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  position:sticky;
+  top:62px;
+  min-height:calc(100vh - 62px);
+  overflow-y:auto;
+  overflow-x:hidden;
+}
 .sb-sec{padding:16px 12px 6px}
 .sb-lbl{font-size:10px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;padding:0 10px 8px;display:block}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.18s;margin-bottom:2px;border:none;background:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left}
@@ -75,7 +58,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .sb-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-l));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#FFFFFF;flex-shrink:0}
 .sb-uname{font-size:12px;font-weight:600;color:var(--text)}.sb-urole{font-size:10px;color:var(--muted)}
 /* MAIN */
-.main{flex:1;min-width:0}
+.main{flex:1;min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden}
 .page{display:none;padding:28px 32px 52px;animation:pgIn 0.27s ease both}
 .page.active{display:block}
 @keyframes pgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -121,10 +104,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .fg select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;background-color:var(--input-bg)}
 .fg select option{background:var(--bg);color:var(--text)}
 .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,110,0.08)}
-.fg textarea{resize:vertical;min-height:80px}
+.fg textarea{resize:vertical;min-height:70px}
 .submit-btn{padding:11px 26px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--blue),var(--blue-l));color:#FFFFFF;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(37,99,235,0.28);transition:all 0.2s}
 .submit-btn:hover{transform:translateY(-1px)}
 .submit-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+#page-add-property{padding:18px 24px 36px}
+#page-add-property .form-card{padding:16px}
+#page-add-property .form-grid{gap:10px}
+#page-add-property .fg input,#page-add-property .fg select,#page-add-property .fg textarea{padding:9px 12px}
+#page-add-property .fg textarea{min-height:60px}
+#page-add-property .submit-btn{padding:10px 22px}
 /* TOAST */
 .toast{display:none;align-items:center;gap:8px;padding:10px 16px;background:rgba(78,205,196,0.1);border:1px solid rgba(78,205,196,0.25);border-radius:10px;color:var(--green);font-size:13px;font-weight:600;margin-top:12px}
 .toast.show{display:flex}
@@ -139,10 +128,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .li-title{font-size:13px;font-weight:600;color:var(--text)}
 .li-sub{font-size:11px;color:var(--muted);margin-top:2px}
 /* PROP CARDS */
-.props-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
-.pcard{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:transform 0.22s,box-shadow 0.22s,border-color 0.22s}
+.props-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;align-items:stretch;}
+.pcard{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:visible;transition:transform 0.22s,box-shadow 0.22s,border-color 0.22s;display:flex;flex-direction:column;height:auto;min-height:100%;}
 .pcard:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(0,0,0,0.3);border-color:rgba(201,169,110,0.35)}
-.pcard-thumb{height:170px;background:linear-gradient(135deg,rgba(201,169,110,0.1),rgba(201,169,110,0.03));position:relative;display:flex;align-items:center;justify-content:center;font-size:54px}
+.pcard-thumb{object-fit:cover;min-height:170px;max-height:220px;background:linear-gradient(135deg,rgba(201,169,110,0.1),rgba(201,169,110,0.03));position:relative;display:flex;align-items:center;justify-content:center;font-size:54px}
 .pcard-body{padding:14px 16px}
 .pcard-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
 .pcard-loc{font-size:12px;color:var(--muted);margin-bottom:8px}
@@ -256,6 +245,7 @@ select {
   width: 232px !important;
   background: rgba(7,9,12,0.98) !important;
   border-right: 1px solid rgba(201,169,110,0.1) !important;
+  height: 100% !important;
 }
 .nav-item {
   padding: 9px 14px !important;
@@ -626,10 +616,50 @@ tr:hover td {
 
 /* ─── MAIN PAGE PADDING ─── */
 .page {
-  padding: 30px 36px 60px !important;
+  padding: 24px 28px 48px !important;
+}
+#page-dashboard,
+#page-rental-requests {
+  padding: 6px 18px 24px !important;
+}
+#page-dashboard .pg-head,
+#page-rental-requests .pg-head {
+  margin-bottom: 8px;
+}
+#page-dashboard .stats-row,
+#page-rental-requests .stats-row {
+  gap: 10px;
+}
+#page-dashboard .props-grid {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+#page-dashboard .stat-card,
+#page-rental-requests .card {
+  padding: 12px 14px;
+}
+#page-rental-requests {
+  padding-top: 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: calc(100vh - 62px - 16px);
+}
+#page-rental-requests .pg-head {
+  margin-bottom: 4px !important;
+}
+#page-rental-requests .card {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+#ll-rental-requests-list {
+  min-height: 0;
 }
 @media (max-width: 900px) {
-  .page { padding: 20px 18px 40px !important; }
+  .page { padding: 18px 14px 32px !important; }
   .stats-row { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
@@ -1053,6 +1083,69 @@ body::after {
 /* ═══════════════════════════════════════════════════════════
    END UNIFIED PROFESSIONAL LIGHT THEME
 ═══════════════════════════════════════════════════════════ */
+
+/* ── Original 3D Negotiation Form Styles ── */
+.neg-locked{text-align:center;padding:2rem 1rem;color:#999;font-size:13px}
+.neg-locked i{font-size:32px;display:block;margin-bottom:10px;color:#ccc}
+.ov3d-chat-outer{border:0.5px solid #e5e5e5;border-radius:10px;overflow:hidden;margin-bottom:12px;background:#fff}
+.ov3d-chat-messages{min-height:180px;max-height:300px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.ov3d-chat-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:160px;color:#bbb;font-size:13px;gap:6px}
+.ov3d-chat-empty i{font-size:28px}
+.ov3d-msg{display:flex;gap:9px;align-items:flex-end}
+.ov3d-msg.right{flex-direction:row-reverse}
+.ov3d-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:600;flex-shrink:0}
+.ov3d-av-admin{background:#dbeafe;color:#1d4ed8}
+.ov3d-av-land{background:#fef3c7;color:#92400e}
+.ov3d-bubble{padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.5;max-width:78%}
+.ov3d-bubble-admin{background:#f3f3f0;color:#111;border-radius:4px 12px 12px 12px}
+.ov3d-bubble-land{background:#eff6ff;border:0.5px solid #bfdbfe;color:#111;border-radius:12px 4px 12px 12px}
+.ov3d-bubble-meta{font-size:11px;color:#aaa;margin-top:4px}
+.ov3d-price-chip{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:4px 10px;background:#fff;border:0.5px solid #ddd;border-radius:99px;font-size:12px;font-weight:500;color:#111}
+.ov3d-price-chip.accepted{background:#d1fae5;border-color:#6ee7b7;color:#065f46}
+.ov3d-price-chip.rejected{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
+.ov3d-compose{border-top:0.5px solid #e5e5e5;padding:12px 14px;background:#fafaf8}
+.ov3d-compose-row{display:flex;gap:8px;align-items:flex-end}
+.ov3d-compose textarea{flex:1;font-size:13px;font-family:inherit;resize:none;border:0.5px solid #ccc;border-radius:8px;padding:9px 12px;outline:none;background:#fff;line-height:1.5;min-height:38px;max-height:100px;overflow-y:auto;color:#111}
+.ov3d-compose textarea:focus{border-color:#888;box-shadow:0 0 0 3px rgba(0,0,0,0.05)}
+.ov3d-compose-price{display:flex;align-items:center;gap:6px;margin-top:8px}
+.ov3d-compose-price label{font-size:11.5px;color:#666;white-space:nowrap}
+.ov3d-compose-price input{width:140px;font-size:13px;font-family:inherit;border:0.5px solid #ccc;border-radius:8px;padding:7px 10px;outline:none;background:#fff;color:#111}
+.ov3d-send-btn{width:36px;height:36px;border-radius:8px;background:#111;color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity 0.15s}
+.ov3d-send-btn:hover{opacity:0.8}
+.ov3d-action-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.ov3d-timeline{display:flex;flex-direction:column;gap:0;background:#f8f8f6;border-radius:8px;padding:14px;border:0.5px solid #e5e5e5}
+.ov3d-tl-title{font-size:12px;font-weight:500;color:#666;margin-bottom:12px}
+.ov3d-tl-item{display:flex;gap:12px;align-items:flex-start}
+.ov3d-tl-left{display:flex;flex-direction:column;align-items:center}
+.ov3d-tl-dot{width:9px;height:9px;border-radius:50%;margin-top:3px;flex-shrink:0}
+.ov3d-tl-line{width:1px;background:#e0ddd6;flex:1;min-height:24px}
+.ov3d-tl-content{padding-bottom:18px;flex:1}
+.ov3d-tl-label{font-size:12px;font-weight:500;color:#111}
+.ov3d-tl-sub{font-size:11.5px;color:#666;margin-top:1px}
+.ov3d-dot-done{background:#10b981}
+.ov3d-dot-active{background:#3b82f6}
+.ov3d-dot-pending{background:#ccc}
+.ov3d-status-row{display:flex;align-items:center;gap:10px;padding:11px 14px;background:#eff6ff;border-radius:8px;margin-bottom:1rem;border:0.5px solid #bfdbfe}
+.ov3d-status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:#3b82f6}
+.ov3d-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:500}
+.ov3d-badge-info{background:#dbeafe;color:#1d4ed8}
+.ov3d-badge-success{background:#d1fae5;color:#065f46}
+.ov3d-field{display:flex;flex-direction:column;gap:6px}
+.ov3d-field label{font-size:12px;font-weight:500;color:#555;letter-spacing:0.2px}
+.ov3d-field input,.ov3d-field select,.ov3d-field textarea{font-size:13.5px;font-family:inherit;color:var(--text);background:var(--input-bg);border:0.5px solid var(--border);border-radius:8px;padding:10px 13px;outline:none;transition:border-color 0.15s,box-shadow 0.15s;width:100%;appearance:none;-webkit-appearance:none}
+.ov3d-field input:focus,.ov3d-field select:focus,.ov3d-field textarea:focus{border-color:#888;box-shadow:0 0 0 3px rgba(0,0,0,0.06)}
+.ov3d-field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+.ov3d-grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:14px}
+.ov3d-divider{height:0.5px;background:#e5e5e5;margin:1rem 0}
+.ov3d-btn-success{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;background:#d1fae5;color:#065f46;border:0.5px solid #6ee7b7;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;font-family:inherit;transition:opacity 0.15s}
+.ov3d-btn-success:hover{opacity:0.85}
+.ov3d-btn-danger{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;background:#fee2e2;color:#991b1b;border:0.5px solid #fca5a5;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;font-family:inherit;transition:opacity 0.15s}
+.ov3d-btn-danger:hover{opacity:0.85}
+.ov3d-toast{padding:10px 14px;border-radius:8px;font-size:13px;font-weight:500;margin-top:10px;border:0.5px solid;display:none;align-items:center;gap:10px}
+.ov3d-toast.ok{background:#d1fae5;color:#065f46;border-color:#6ee7b7}
+.ov3d-toast.err{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
+.ov3d-req{color:#dc2626;margin-left:2px}
+@keyframes ov3d-blink{0%,80%,100%{opacity:0.2}40%{opacity:1}}
 </style>
 
 </head>
@@ -1086,6 +1179,50 @@ async function lFetch(url, method='GET', body=null) {
     throw e;
   }
 }
+function enforceLettersInput(el) {
+  if (!el) return;
+  el.value = el.value.replace(/[^A-Za-z ]+/g, '');
+}
+function enforceDigitsInput(el) {
+  if (!el) return;
+  el.value = el.value.replace(/[^0-9]/g, '');
+}
+function isValidEnglishName(value) {
+  return /^[A-Za-z ]+$/.test((value||'').trim());
+}
+function isDigitsOnly(value) {
+  return /^[0-9]+$/.test((value||'').trim());
+}
+function attachNumericOnlyInputs() {
+  document.querySelectorAll('input[type=number]').forEach(el => {
+    el.addEventListener('input', () => {
+      el.value = el.value.replace(/[^0-9]/g, '');
+    });
+  });
+}
+async function loadRentedProperties() {
+  const list = document.getElementById('rented-props-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>';
+  try {
+    const data = await lFetch('/properties/my/rented');
+    const props = data.properties || [];
+    if (!props.length) {
+      list.innerHTML = '<div class="loading">No rented properties yet.</div>';
+      return;
+    }
+    list.innerHTML = `<table style="width:100%;margin-top:10px"><thead><tr><th>Title</th><th>Address</th><th>Tenant Name</th><th>Tenant Email</th><th>Rent</th></tr></thead><tbody>` +
+      props.map(p => {
+        const tenant = p.tenantId || {};
+        return `<tr><td>${p.title||''}</td><td>${p.address||''}</td><td>${tenant.name||p.tenantName||'-'}</td><td>${tenant.email||'-'}</td><td>Rs. ${Number(p.rent||0).toLocaleString()}</td></tr>`;
+      }).join('') + '</tbody></table>';
+  } catch(e) {
+    list.innerHTML = '<div class="loading">⚠️ Error loading rented properties.</div>';
+  }
+}
+// Call on page load
+document.addEventListener('DOMContentLoaded', loadRentedProperties);
+
 function tmsLogout() { localStorage.clear(); sessionStorage.clear(); window.location.replace('../index.html'); }
 
 // THEME
@@ -1156,7 +1293,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   set('p-fn',parts[0]||'');set('p-ln',parts.slice(1).join(' ')||'');
   set('p-em',email);set('p-ph',user.phone||'');set('p-ct',user.city||'');
 
+  attachNumericOnlyInputs();
   await loadMyProperties();
+  loadRentedProperties();
 });
 
 // ══════════════════════════════════════
@@ -1171,18 +1310,14 @@ async function loadMyProperties() {
   if (grid)  grid.innerHTML  = loading;
   if (grid2) grid2.innerHTML = loading;
   try {
-    const me = await lFetch('/auth/me');
-    const myId = (me.user?._id || me.user?.id || '').toString();
-    if (!myId) throw new Error('No user ID');
-    const data = await lFetch('/properties');
-    const all = data.properties || [];
-    myProps = all.filter(p => (p.landlordId || '').toString() === myId);
+    const data = await lFetch('/properties/my');
+    myProps = data.properties || [];
     renderMyProperties();
     updateStats();
     if (typeof renderLLPropLeaseCards === 'function') renderLLPropLeaseCards();
   } catch(e) {
     console.error('loadMyProperties error:', e);
-    const errHtml = '<div class="loading" style="grid-column:1/-1"><div style="font-size:36px;margin-bottom:10px">⚠️</div><div style="font-weight:600;color:var(--text);margin-bottom:6px">Server se connect nahi ho saka</div><div style="font-size:12px;color:var(--muted)">Backend chal raha hai? Port 5000 check karen</div><button onclick="loadMyProperties()" style="margin-top:14px;padding:8px 20px;border-radius:9px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;font-family:DM Sans,sans-serif;font-size:13px">🔄 Retry</button></div>';
+    const errHtml = '<div class="loading" style="grid-column:1/-1"><div style="font-size:36px;margin-bottom:10px">⚠️</div><div style="font-weight:600;color:var(--text);margin-bottom:6px">Unable to connect to the server</div><div style="font-size:12px;color:var(--muted)">Is the backend running? Check port 5000.</div><button onclick="loadMyProperties()" style="margin-top:14px;padding:8px 20px;border-radius:9px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;font-family:DM Sans,sans-serif;font-size:13px">🔄 Retry</button></div>';
     if (grid)  grid.innerHTML  = errHtml;
     if (grid2) grid2.innerHTML = errHtml;
   }
@@ -1249,16 +1384,20 @@ function renderMyProperties() {
 
   const emojis={House:'🏠',Flat:'🏢',Apartment:'🏙️',Villa:'🏡',Room:'🛏️'};
   const statusColors={available:'rgba(78,205,196,0.9)',rented:'rgba(255,179,71,0.9)',suspended:'rgba(255,107,107,0.9)'};
+  const premiumFallbacks={
+    'Villa':     'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1600&q=90&fit=crop&auto=format',
+    'House':     'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&q=90&fit=crop&auto=format',
+    'Apartment': 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1600&q=90&fit=crop&auto=format',
+    'Flat':      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1600&q=90&fit=crop&auto=format',
+    'Room':      'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1600&q=90&fit=crop&auto=format',
+  };
   const html = myProps.map(p => {
     const id = p._id;
     const panoramaUrl = getProperty360Url(p);
     const has360 = !!panoramaUrl;
-    const coverImage = p.frontImage || (Array.isArray(p.images) && p.images.length ? p.images[0] : (typeof p.images === 'string' ? p.images : ''));
-    const thumbnail = coverImage
-      ? `<img src="${coverImage}" alt="${p.title||'Property'}">`
-      : has360
-        ? `<iframe src="${normalizePanoramaUrl(panoramaUrl)}" title="${p.title||'Property'} 360 preview" loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" style="width:100%;height:100%;border:0;background:#111;pointer-events:none"></iframe>`
-        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.7);font-size:13px;background:#111">Front image unavailable</div>`;
+    const fallbackSrc = premiumFallbacks[p.type] || premiumFallbacks['House'];
+    const coverImage = p.frontImage || (Array.isArray(p.images) && p.images.length ? p.images[0] : (typeof p.images === 'string' ? p.images : '')) || fallbackSrc;
+    const thumbnail = `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.onerror=null;this.src='${fallbackSrc}'">`;
     const viewButton = has360
       ? `<button class="btn btn-gold btn-sm" style="flex:1" onclick="quickView3D('${id}')">View 360</button>`
       : `<button class="btn btn-ghost btn-sm" style="flex:1" onclick="open3DRequestModal('${id}')">Request 360</button>`;
@@ -1285,6 +1424,8 @@ function renderMyProperties() {
       </div>
     </div>
   `}).join('');
+  if (grid)  grid.innerHTML  = html;
+  if (grid2) grid2.innerHTML = html;
 // Lease Agreement Modal logic
 let leasePropId = null;
 async function openLeaseAgreementModal(propId) {
@@ -1419,7 +1560,7 @@ let editingPropId = null; // which property's 3D we're editing
 async function submitAddProp() {
   const g = id => document.getElementById(id)?.value?.trim()||'';
   const title=g('ap-title'),type=g('ap-type'),area=g('ap-area'),addr=g('ap-addr'),rent=g('ap-rent'),beds=g('ap-beds'),baths=g('ap-baths'),sqft=g('ap-sqft'),desc=g('ap-desc');
-  if (!title||!area||!addr||!rent) { showMsg('ap-msg','⚠️ Title, area, address aur rent zaroori hain.','err'); return; }
+  if (!title||!area||!addr||!rent) { showMsg('ap-msg','⚠️ Title, area, address and rent are required.','err'); return; }
   const btn=document.getElementById('ap-btn'); if(btn){btn.disabled=true;btn.textContent='Saving…';}
   try {
     const data = await lFetch('/properties','POST',{
@@ -1434,13 +1575,13 @@ async function submitAddProp() {
           await lFetch('/properties/'+data.property._id+'/front-image','PUT',{ frontImage });
         } catch(e) { console.warn('Image save failed',e); }
       }
-      showMsg('ap-msg','✅ Property successfully list ho gayi!','ok');
+      showMsg('ap-msg','✅ Property listed successfully!','ok');
       ['ap-title','ap-addr','ap-desc'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
       clearPropImage();
       current3DConfig = {viewerMode:'panorama360', panoramaUrl: DEFAULT_PANORAMA_URL};
       await loadMyProperties();
     } else showMsg('ap-msg','⚠️ '+(data.message||'Error'),'err');
-  } catch { showMsg('ap-msg','⚠️ Server se connect nahi ho saka.','err'); }
+  } catch { showMsg('ap-msg','⚠️ Unable to connect to the server.','err'); }
   finally { if(btn){btn.disabled=false;btn.textContent='🏠 Add Property';} }
 }
 
@@ -1573,7 +1714,7 @@ function closeFurnViewer() {
   document.body.style.overflow = '';
 }
 async function saveFurnitureLayout() {
-  if (window._furnShowingTenant) { alert('Tenant layout sirf view kiya ja sakta hai, save nahi.'); return; }
+  if (window._furnShowingTenant) { alert('Tenant layout can only be viewed, not saved.'); return; }
   const sc = window._furnScene;
   if (!sc) return;
   const layout = sc.getLayout();
@@ -1595,7 +1736,7 @@ async function saveFurnitureLayout() {
       const hasTenant = Object.keys((updatedProp||{}).tenantFurnitureLayout||{}).length > 0;
       toggleBtn.style.display = hasTenant ? 'flex' : 'none';
     }
-  } catch(e) { alert('Layout save nahi ho saki. Server check karein.'); }
+  } catch(e) { alert('Unable to save layout. Please check the server.'); }
   finally { if(btn){btn.disabled=false;btn.textContent='💾 Save Layout';} }
 }
 function furnAddItem(type, color) {
@@ -1611,9 +1752,22 @@ function furnDownloadJSON() {
   downloadFurnitureJSON('c3d-furn', window._furnPropTitle, 'landlord');
 }
 async function deleteProp(id) {
-  if (!confirm('Delete this property permanently?')) return;
-  await lFetch('/properties/'+id,'DELETE');
-  await loadMyProperties();
+  if (!confirm('Are you sure you want to delete this property? This action cannot be undone.')) return;
+  try {
+    const res = await lFetch('/properties/'+id, 'DELETE');
+    if (res && res.success) {
+      await loadMyProperties();
+    } else {
+      const msg = res?.message || 'Delete fail ho gayi — server se error aaya.';
+      alert('Error: ' + msg);
+    }
+  } catch(e) {
+    if (e.message === 'Unauthorized') {
+      alert('Session expired. Please log in again.');
+    } else {
+      alert('Delete failed: ' + (e.message || 'Unknown error'));
+    }
+  }
 }
 function showMsg(id, msg, type) {
   const el=document.getElementById(id); if(!el)return;
@@ -1743,7 +1897,7 @@ async function loadLandlordRentalRequests() {
       badge.style.display = pendingCount > 0 ? 'flex' : 'none';
     }
     
-    if(!requests.length){list.innerHTML='<div class="loading" style="padding:20px">Koi rental request nahi mili.</div>';return;}
+    if(!requests.length){list.innerHTML='<div class="loading" style="padding:20px">No rental requests were found.</div>';return;}
     
     const statusBadges = {pending:'b-warn',accepted:'b-green',rejected:'b-red',cancelled:'b-muted',negotiating:'b-blue'};
     const statusEmoji = {pending:'⏳',accepted:'✅',rejected:'❌',cancelled:'🚫',negotiating:'💬'};
@@ -1804,7 +1958,7 @@ function openNegotiationModal(reqId, propTitle, originalRent, currentProposed) {
   _negReqId = reqId;
   document.getElementById('neg-modal-title').textContent = propTitle;
   document.getElementById('neg-original-rent').textContent = 'Rs. '+Number(originalRent).toLocaleString()+'/mo';
-  document.getElementById('neg-proposed-rent').textContent = currentProposed ? 'Rs. '+Number(currentProposed).toLocaleString()+'/mo' : 'Koi offer nahi';
+  document.getElementById('neg-proposed-rent').textContent = currentProposed ? 'Rs. '+Number(currentProposed).toLocaleString()+'/mo' : 'No offer yet';
   document.getElementById('neg-counter-input').value = currentProposed || originalRent;
   loadNegotiationMessages(reqId);
   document.getElementById('ov-neg-modal').classList.add('open');
@@ -1820,7 +1974,7 @@ async function loadNegotiationMessages(reqId) {
   try {
     const data = await lFetch('/rental-requests/'+reqId+'/negotiation');
     const msgs = (data.request?.negotiationMessages)||[];
-    if(!msgs.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">💬 Abhi tak koi message nahi. Negotiation shuru karein!</div>';return;}
+    if(!msgs.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">💬 No messages yet. Start the negotiation!</div>';return;}
     el.innerHTML = msgs.map(m=>`
       <div style="display:flex;flex-direction:column;align-items:${m.senderRole==='landlord'?'flex-end':'flex-start'};margin-bottom:10px">
         <div style="max-width:78%;padding:10px 14px;border-radius:${m.senderRole==='landlord'?'14px 14px 4px 14px':'14px 14px 14px 4px'};background:${m.senderRole==='landlord'?'rgba(201,169,110,0.15)':'rgba(74,158,255,0.12)'};border:1px solid ${m.senderRole==='landlord'?'rgba(201,169,110,0.25)':'rgba(74,158,255,0.2)'}">
@@ -1838,7 +1992,7 @@ async function loadNegotiationMessages(reqId) {
 async function sendNegotiationReply(action) {
   const text = document.getElementById('neg-msg-input')?.value?.trim()||'';
   const counterRent = document.getElementById('neg-counter-input')?.value;
-  if (!text && action!=='accept' && action!=='reject') { alert('Pehle message likhein.'); return; }
+  if (!text && action!=='accept' && action!=='reject') { alert('Please enter a message first.'); return; }
   try {
     const body = { text, action: action||'counter', counterRent: counterRent ? Number(counterRent) : undefined };
     const data = await lFetch('/rental-requests/'+_negReqId+'/negotiate-reply','PUT',body);
@@ -1848,7 +2002,7 @@ async function sendNegotiationReply(action) {
       await loadLandlordRentalRequests();
       if(action==='accept'||action==='reject') closeNegotiationModal();
     } else alert(data.message||'Error');
-  } catch{alert('Server se connect nahi ho saka.');}
+  } catch{alert('Unable to connect to the server.');}
 }
 
 async function acceptRentalRequest(requestId) {
@@ -1859,7 +2013,7 @@ async function acceptRentalRequest(requestId) {
     const r = await lFetch('/rental-requests/'+requestId+'/accept', 'PUT', {});
     if (r.success) { alert('✅ Request accept ho gayi!'); await loadLandlordRentalRequests(); }
     else { alert('⚠️ '+(r.message||'Failed')); btn.disabled=false; btn.textContent='✅ Accept'; }
-  } catch { alert('❌ Server se connect nahi ho saka'); btn.disabled=false; btn.textContent='✅ Accept'; }
+  } catch { alert('❌ Unable to connect to the server'); btn.disabled=false; btn.textContent='✅ Accept'; }
 }
 
 async function rejectRentalRequest(requestId) {
@@ -1870,7 +2024,7 @@ async function rejectRentalRequest(requestId) {
     const r = await lFetch('/rental-requests/'+requestId+'/reject', 'PUT', {});
     if (r.success) { alert('✅ Request reject ho gayi.'); await loadLandlordRentalRequests(); }
     else { alert('⚠️ '+(r.message||'Failed')); btn.disabled=false; btn.textContent='❌ Reject'; }
-  } catch { alert('❌ Server se connect nahi ho saka'); btn.disabled=false; btn.textContent='❌ Reject'; }
+  } catch { alert('❌ Unable to connect to the server'); btn.disabled=false; btn.textContent='❌ Reject'; }
 }
 
 // ══════════════════════════════════════
@@ -1969,8 +2123,8 @@ async function loadLandlordLeases() {
     const isAuth = err.message === 'Unauthorized';
     tbody.innerHTML = `<tr><td colspan="6" class="loading">
       ${isAuth
-        ? '🔒 Session expire ho gayi. <a href="../index.html" style="color:var(--gold)">Dobara login karo</a>.'
-        : '⚠️ Leases load nahi ho sakay. Backend chal raha hai? <button onclick="loadLandlordLeases()" style="margin-left:8px;padding:4px 12px;border-radius:6px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;font-family:DM Sans,sans-serif;font-size:12px">🔄 Retry</button>'}
+        ? '🔒 Session expired. <a href="../index.html" style="color:var(--gold)">Log in again</a>.'
+        : '⚠️ Unable to load leases. Is the backend running? <button onclick="loadLandlordLeases()" style="margin-left:8px;padding:4px 12px;border-radius:6px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;font-family:DM Sans,sans-serif;font-size:12px">🔄 Retry</button>'}
     </td></tr>`;
   }
 }
@@ -2098,6 +2252,9 @@ async function saveProfile() {
   const ph=document.getElementById('p-ph')?.value||'';
   const ct=document.getElementById('p-ct')?.value||'';
   const name=(fn+' '+ln).trim();
+  if (!fn || !ln) { alert('Please enter both first and last name.'); return; }
+  if (!isValidEnglishName(fn) || !isValidEnglishName(ln)) { alert('Names must contain only English letters and spaces.'); return; }
+  if (ph && !isDigitsOnly(ph)) { alert('Phone must contain digits only.'); return; }
   const btn=document.getElementById('save-prof-btn');
   if(btn){btn.disabled=true;btn.textContent='Saving…';}
   try {
@@ -2309,6 +2466,10 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
       <h3 style="font-size:15px;font-weight:700;margin-bottom:14px;color:var(--text)">Your Properties</h3>
       <div class="props-grid" id="prop-grid" style="margin-top:0"><div class="loading"><span class="spinner"></span>Loading…</div></div>
     </div>
+  <div class="card" style="margin-top:24px">
+    <h3 style="font-size:15px;font-weight:700;margin-bottom:14px;color:var(--text)">Rented Properties</h3>
+    <div id="rented-props-list"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+  </div>
   </div>
 
   <!-- FURNITURE PLACEMENT PAGE -->
@@ -2504,6 +2665,14 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
 
       <!-- Panel 1: Parties -->
       <div id="llwiz-panel1">
+        <!-- Property Selector -->
+        <div style="background:rgba(201,169,110,0.06);border:1px solid rgba(201,169,110,0.2);border-radius:12px;padding:14px;margin-bottom:12px">
+          <label style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:.6px;font-weight:700;display:block;margin-bottom:6px">🏠 Property Select Karo (Tenant auto-fill ho ga)</label>
+          <select id="llw-prop-select" onchange="llwizOnPropSelect(this.value)" style="width:100%;border:1px solid rgba(201,169,110,0.3);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);background:var(--card);font-family:'DM Sans',sans-serif;outline:none">
+            <option value="">-- Property choose karo --</option>
+          </select>
+          <div id="llw-tenant-status" style="margin-top:8px;font-size:12px;color:var(--muted)"></div>
+        </div>
         <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px">
           <div style="background:#1a2744;color:#c9a96e;font-size:12px;font-weight:600;padding:10px 14px;letter-spacing:.5px">👤 Landlord</div>
           <div style="padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -2595,21 +2764,10 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
             </div>
           </div>
         </div>
-        <!-- Tenant Sig -->
-        <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px">
-          <div style="background:#1a2744;color:#c9a96e;font-size:12px;font-weight:600;padding:10px 14px;letter-spacing:.5px">✍️ Tenant Signature</div>
-          <div style="padding:14px">
-            <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Draw your signature below, or upload an image</div>
-            <div style="border:0.5px solid var(--border);border-radius:8px;overflow:hidden;background:rgba(255,255,255,0.03)">
-              <canvas id="llw-tn-canvas" height="100" style="display:block;width:100%;height:100px;cursor:crosshair;touch-action:none"></canvas>
-              <img id="llw-tn-img" style="display:none;width:100%;height:100px;object-fit:contain" alt="Tenant sig">
-            </div>
-            <div style="display:flex;gap:8px;padding:8px 0 0">
-              <button onclick="llwizClearSig('tn')" style="font-size:12px;padding:5px 12px;border:0.5px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif">🗑 Clear</button>
-              <label style="font-size:12px;padding:5px 12px;border:0.5px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:5px">📤 Upload<input type="file" accept="image/*" style="display:none" onchange="llwizUploadSig('tn',this)"></label>
-              <span id="llw-tn-ok" style="display:none;font-size:11px;color:#1D9E75;padding:5px 0;align-items:center;gap:4px">✅ Signature added</span>
-            </div>
-          </div>
+        <!-- Tenant will sign separately -->
+        <div style="background:rgba(201,169,110,0.06);border:1px solid rgba(201,169,110,0.2);border-radius:12px;padding:14px;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px">📨 Tenant Signature</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.6">Agreement save hone ke baad, Tenant apne dashboard mein agreement dekhega aur wahan sign karega. Dono signatures ke baad agreement permanently lock ho jayega.</div>
         </div>
         <!-- Preview -->
         <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px">
@@ -2621,7 +2779,7 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
         <div style="display:flex;gap:10px;margin-top:4px">
           <button onclick="llwizNext(3)" style="padding:10px 18px;background:var(--input-bg);color:var(--text);border:1px solid var(--border);border-radius:10px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">← Back</button>
           <button onclick="llwizDownload()" style="padding:10px 18px;background:rgba(29,158,117,0.12);color:#1D9E75;border:1px solid rgba(29,158,117,0.25);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Download</button>
-          <button onclick="llwizSave()" style="flex:1;padding:10px;background:linear-gradient(135deg,#2563EB,#4F7BFE);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif" id="llwiz-save-btn">💾 Save & Lock Agreement</button>
+          <button onclick="llwizSave()" style="flex:1;padding:10px;background:linear-gradient(135deg,#2563EB,#4F7BFE);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif" id="llwiz-save-btn">📨 Save & Send to Tenant for Signing</button>
         </div>
         <div id="llwiz-save-err" style="display:none;margin-top:10px;padding:9px 13px;background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.2);border-radius:8px;color:#FF6B6B;font-size:12px"></div>
       </div>
@@ -2634,7 +2792,7 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
         <div>
           <div style="font-size:16px;font-weight:700;color:var(--text)">Lease Agreement</div>
-          <div style="font-size:12px;color:#1D9E75;margin-top:2px">🔒 Saved & Locked — Changes allowed nahi</div>
+          <div style="font-size:12px;color:#1D9E75;margin-top:2px">🔒 Saved & Locked — Changes not allowed</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <button onclick="llViewDownload()" style="padding:8px 14px;background:rgba(29,158,117,0.12);color:#1D9E75;border:1px solid rgba(29,158,117,0.25);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Download</button>
@@ -2675,10 +2833,10 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
       </div>
       <div class="form-card">
         <div class="form-grid">
-          <div class="fg"><label>First Name</label><input id="p-fn"></div>
-          <div class="fg"><label>Last Name</label><input id="p-ln"></div>
+          <div class="fg"><label>First Name</label><input id="p-fn" inputmode="text" autocomplete="given-name" oninput="enforceLettersInput(this)"></div>
+          <div class="fg"><label>Last Name</label><input id="p-ln" inputmode="text" autocomplete="family-name" oninput="enforceLettersInput(this)"></div>
           <div class="fg full"><label>Email</label><input id="p-em" disabled style="opacity:0.6"></div>
-          <div class="fg"><label>Phone</label><input id="p-ph" placeholder="+92 3XX XXXXXXX"></div>
+          <div class="fg"><label>Phone</label><input id="p-ph" placeholder="e.g. 03123456789" inputmode="numeric" oninput="enforceDigitsInput(this)"></div>
           <div class="fg"><label>City</label><input id="p-ct" placeholder="Lahore"></div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;margin-top:16px">
@@ -3551,7 +3709,7 @@ async function lFurnSave() {
     const toggleBtn = document.getElementById('lfurn-toggle-btn');
     if (toggleBtn) toggleBtn.style.display = hasTenant ? 'inline-flex' : 'none';
     if (btn) { btn.textContent='✅ Saved!'; setTimeout(()=>btn.textContent='💾 Save My Layout',2000); }
-  } catch(e) { alert('Save nahi hua.'); }
+  } catch(e) { alert('Save failed.'); }
   finally { if(btn) btn.disabled=false; }
 }
 
@@ -3570,94 +3728,145 @@ function lFurnDownloadJSON() {
 <!-- ══════════════════════════════════════════════════════
      3D MODEL REQUEST MODAL
 ══════════════════════════════════════════════════════ -->
-<div class="ov" id="ov-3dreq" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;padding:20px">
-  <div style="background:var(--card);border-radius:18px;border:1px solid var(--border);width:min(680px,97vw);max-height:90vh;overflow-y:auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 0">
-      <span style="font-size:17px;font-weight:700;color:var(--text)" id="req3d-modal-title">Request 3D Model</span>
-      <button onclick="close3DRequestModal()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,107,107,0.12);color:#FF6B6B;font-size:16px;cursor:pointer">✕</button>
+<div class="ov" id="ov-3dreq" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--card);border-radius:18px;border:1px solid var(--border);width:min(680px,97vw);max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,0.5)">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:36px;height:36px;border-radius:9px;background:rgba(59,130,246,0.12);display:flex;align-items:center;justify-content:center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--text)" id="req3d-modal-title">3D model request</div>
+          <div style="font-size:12px;color:#3b82f6;margin-top:1px">Admin will create a 3D model — price negotiated after submission</div>
+        </div>
+      </div>
+      <button onclick="close3DRequestModal()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,107,107,0.12);color:#FF6B6B;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
-    <div style="padding:20px 24px 24px">
-      <div style="margin-bottom:14px">
-        <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Select Property *</label>
-        <select id="req3d-prop" style="width:100%;margin-top:6px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-size:13px;outline:none">
+
+    <div style="padding:20px 24px 24px;display:flex;flex-direction:column;gap:16px">
+
+      <!-- Select Property -->
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:12px;font-weight:500;color:#555;letter-spacing:0.2px">Select property <span style="color:#dc2626">*</span></label>
+        <select id="req3d-prop" style="font-size:13.5px;font-family:inherit;color:var(--text);background:var(--input-bg);border:0.5px solid var(--border);border-radius:8px;padding:10px 13px;outline:none;width:100%;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px">
           <option value="">-- Choose your property --</option>
         </select>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">House Type</label>
-          <select id="req3d-type" style="width:100%;margin-top:6px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-size:13px;outline:none">
-            <option value="standard">Standard</option>
-            <option value="modern">Modern</option>
-            <option value="villa">Villa</option>
-            <option value="bungalow">Bungalow</option>
+
+      <!-- 3 dropdowns: Model type, Urgency, Floor plan -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label style="font-size:12px;font-weight:500;color:#555;letter-spacing:0.2px">Model type <span style="color:#dc2626">*</span></label>
+          <select id="req3d-type" style="font-size:13.5px;font-family:inherit;color:var(--text);background:var(--input-bg);border:0.5px solid var(--border);border-radius:8px;padding:10px 13px;outline:none;width:100%;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px">
+            <option value="">Select</option>
+            <option value="basic">Basic walkthrough</option>
+            <option value="detailed">Detailed interior</option>
+            <option value="full">Full exterior + interior</option>
+            <option value="virtual">Virtual tour (360°)</option>
           </select>
         </div>
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Floors</label>
-          <input id="req3d-floors" type="number" min="1" max="5" value="1" style="width:100%;margin-top:6px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-size:13px;outline:none;box-sizing:border-box">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label style="font-size:12px;font-weight:500;color:#555;letter-spacing:0.2px">Urgency</label>
+          <select id="req3d-floors" style="font-size:13.5px;font-family:inherit;color:var(--text);background:var(--input-bg);border:0.5px solid var(--border);border-radius:8px;padding:10px 13px;outline:none;width:100%;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px">
+            <option value="standard">Standard (5–7 days)</option>
+            <option value="express">Express (2–3 days)</option>
+            <option value="rush">Rush (24 hrs)</option>
+          </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label style="font-size:12px;font-weight:500;color:#555;letter-spacing:0.2px">Floor plan available?</label>
+          <select id="req3d-wall" style="font-size:13.5px;font-family:inherit;color:var(--text);background:var(--input-bg);border:0.5px solid var(--border);border-radius:8px;padding:10px 13px;outline:none;width:100%;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px">
+            <option value="yes">Yes — will share</option>
+            <option value="no">No — admin will measure</option>
+          </select>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px">
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Wall Color</label>
-          <input id="req3d-wall" type="color" value="#C9A96E" style="width:100%;margin-top:6px;height:40px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;background:var(--input-bg)">
-        </div>
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Roof Color</label>
-          <input id="req3d-roof" type="color" value="#7A4F2A" style="width:100%;margin-top:6px;height:40px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;background:var(--input-bg)">
-        </div>
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Floor Color</label>
-          <input id="req3d-floor" type="color" value="#D2B48C" style="width:100%;margin-top:6px;height:40px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;background:var(--input-bg)">
-        </div>
+
+      <!-- Special instructions -->
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:12px;font-weight:500;color:#555;letter-spacing:0.2px">Special instructions for the 3D model</label>
+        <textarea id="req3d-notes" rows="3" placeholder="e.g. include the garden, show the rooftop, specific camera angles required…" style="font-size:13.5px;font-family:inherit;color:var(--text);background:var(--input-bg);border:0.5px solid var(--border);border-radius:8px;padding:10px 13px;outline:none;width:100%;box-sizing:border-box;resize:vertical;line-height:1.6;min-height:80px"></textarea>
       </div>
-      <div style="display:flex;gap:20px;margin-bottom:14px">
-        <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text);cursor:pointer"><input id="req3d-garden" type="checkbox"> 🌿 Garden</label>
-        <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text);cursor:pointer"><input id="req3d-pool" type="checkbox"> 🏊 Pool</label>
-        <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text);cursor:pointer"><input id="req3d-garage" type="checkbox"> 🚗 Garage</label>
+
+      <!-- Submit row -->
+      <div style="display:flex;gap:10px;align-items:center;padding-top:4px">
+        <button onclick="submit3DRequest()" style="display:inline-flex;align-items:center;gap:8px;padding:11px 24px;background:var(--gold,#C9A96E);color:#1a1a1a;border:none;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit">
+          📤 Submit Request
+        </button>
+        <div id="req3d-msg" style="display:none;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600"></div>
       </div>
-      <div style="margin-bottom:18px">
-        <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Additional Requirements / Notes</label>
-        <textarea id="req3d-notes" rows="3" placeholder="Describe any special requirements for your 3D model..." style="width:100%;margin-top:6px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-size:13px;outline:none;resize:vertical;box-sizing:border-box"></textarea>
-      </div>
-      <div style="display:flex;gap:10px;align-items:center">
-        <button onclick="submit3DRequest()" style="padding:10px 28px;border-radius:9px;border:none;background:var(--gold,#C9A96E);color:#1a1a1a;font-size:13px;font-weight:700;cursor:pointer">📤 Submit Request</button>
-        <div id="req3d-msg" style="display:none;padding:8px 14px;border-radius:9px;font-size:13px;font-weight:600"></div>
-      </div>
+
     </div>
   </div>
 </div>
 
 <!-- 3D REQUEST CHAT/DETAIL MODAL -->
-<div class="ov" id="ov-3dreq-detail" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;padding:20px">
-  <div style="background:var(--card);border-radius:18px;border:1px solid var(--border);width:min(640px,97vw);max-height:90vh;display:flex;flex-direction:column">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)">
-      <div>
-        <div style="font-size:15px;font-weight:700;color:var(--text)" id="detail3d-title">Request Detail</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px" id="detail3d-status-label"></div>
+<div class="ov" id="ov-3dreq-detail" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--card);border-radius:20px;border:1px solid var(--border);width:min(660px,98vw);max-height:92vh;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,0.5)">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:38px;height:38px;border-radius:10px;background:rgba(201,169,110,0.15);display:flex;align-items:center;justify-content:center;font-size:18px">🏗️</div>
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--text)" id="detail3d-title">3D Request Detail</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:8px">
+            <span id="detail3d-status-label"></span>
+            <span id="detail3d-date-label" style="color:var(--muted)"></span>
+          </div>
+        </div>
       </div>
-      <button onclick="closeDetail3DModal()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,107,107,0.12);color:#FF6B6B;font-size:16px;cursor:pointer">✕</button>
+      <button onclick="closeDetail3DModal()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,107,107,0.12);color:#FF6B6B;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
-    <!-- Info bar -->
-    <div id="detail3d-info" style="padding:12px 22px;background:var(--input-bg);border-bottom:1px solid var(--border);font-size:12px;color:var(--muted)"></div>
-    <!-- Chat messages -->
-    <div id="detail3d-msgs" style="flex:1;overflow-y:auto;padding:16px 22px;display:flex;flex-direction:column;gap:10px;min-height:180px;max-height:320px"></div>
-    <!-- Reply input (only in negotiating state) -->
-    <div id="detail3d-reply-area" style="padding:14px 22px;border-top:1px solid var(--border);display:none">
-      <div style="display:flex;gap:8px;align-items:flex-end">
-        <textarea id="detail3d-reply-text" rows="2" placeholder="Type your message or counter-offer..." style="flex:1;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 13px;color:var(--text);font-size:13px;outline:none;resize:none"></textarea>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <input id="detail3d-counter" type="number" placeholder="Counter Rs." style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:8px 10px;color:var(--text);font-size:12px;outline:none;width:110px">
-          <button onclick="sendLandlordMessage()" style="padding:8px 14px;border-radius:9px;border:none;background:var(--gold,#C9A96E);color:#1a1a1a;font-size:12px;font-weight:700;cursor:pointer">Send</button>
+
+    <!-- Requirements summary bar -->
+    <div id="detail3d-info" style="padding:10px 22px;background:var(--input-bg);border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px;flex-shrink:0"></div>
+
+    <!-- Price highlight bar (shown when proposed/agreed) -->
+    <div id="detail3d-price-bar" style="display:none;padding:12px 22px;border-bottom:1px solid var(--border);flex-shrink:0">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px" id="detail3d-price-label">Admin's Proposed Price</div>
+          <div style="font-size:22px;font-weight:800;color:var(--gold,#C9A96E)" id="detail3d-price-value">—</div>
+        </div>
+        <div id="detail3d-accept-area" style="display:none;gap:8px;align-items:center;flex-wrap:wrap">
+          <button onclick="acceptProposedAmount()" style="padding:10px 22px;border-radius:10px;border:none;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(34,197,94,0.3)">
+            ✅ Accept &amp; Confirm Deal
+          </button>
+          <button onclick="focusCounter()" style="padding:10px 18px;border-radius:10px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--text);font-size:13px;font-weight:600;cursor:pointer">
+            💬 Counter Offer
+          </button>
         </div>
       </div>
     </div>
-    <!-- Accept amount button (negotiating state) -->
-    <div id="detail3d-accept-area" style="padding:14px 22px;border-top:1px solid var(--border);display:none;gap:10px;align-items:center">
-      <span style="font-size:13px;color:var(--text)" id="detail3d-accept-label"></span>
-      <button onclick="acceptProposedAmount()" style="padding:9px 22px;border-radius:9px;border:none;background:#22c55e;color:#fff;font-size:13px;font-weight:700;cursor:pointer">✅ Accept Amount</button>
+
+    <!-- Chat messages -->
+    <div id="detail3d-msgs" style="flex:1;overflow-y:auto;padding:16px 22px;display:flex;flex-direction:column;gap:12px;min-height:160px;max-height:320px">
+      <div style="text-align:center;color:var(--muted);font-size:13px;padding:30px 0">
+        <div style="font-size:32px;margin-bottom:8px">💬</div>
+        No messages yet — Admin will respond soon.
+      </div>
     </div>
+
+    <!-- Compose area (negotiating state only) -->
+    <div id="detail3d-reply-area" style="display:none;padding:14px 22px;border-top:1px solid var(--border);flex-shrink:0;background:var(--input-bg)">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px">Your Reply</div>
+      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+        <textarea id="detail3d-reply-text" rows="2" placeholder="Type your message..." style="flex:1;min-width:180px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:9px 13px;color:var(--text);font-size:13px;outline:none;resize:none;transition:border-color 0.15s" onfocus="this.style.borderColor='var(--gold,#C9A96E)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <input id="detail3d-counter" type="number" placeholder="Counter Rs. (optional)" style="background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text);font-size:12px;outline:none;width:150px">
+          <button onclick="sendLandlordMessage()" style="padding:9px 16px;border-radius:10px;border:none;background:var(--gold,#C9A96E);color:#1a1a1a;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;justify-content:center">
+            📤 Send
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Completed / Rejected state footer -->
+    <div id="detail3d-closed-bar" style="display:none;padding:14px 22px;border-top:1px solid var(--border);text-align:center;font-size:13px;color:var(--muted);flex-shrink:0"></div>
+
   </div>
 </div>
 
@@ -3727,15 +3936,26 @@ function render3DRequestList() {
   `).join('');
 }
 
+// Sync color swatch background when picker changes
+function syncReq3dSwatch(part, val) {
+  const map = { wall:'req3d-wall-swatch', roof:'req3d-roof-swatch', floor:'req3d-floor-swatch' };
+  const el = document.getElementById(map[part]);
+  if(el) el.style.background = val;
+}
+
 // Open new request modal
 function open3DRequestModal(preselectedPropId) {
   // Fill property dropdown with landlord's properties
   const sel = document.getElementById('req3d-prop');
   if(sel) {
-    const props = window._myProperties || (typeof myProps !== 'undefined' ? myProps : []);
+    const props = (typeof myProps !== 'undefined' && myProps.length) ? myProps : (window._myProperties || []);
     sel.innerHTML = '<option value="">-- Choose your property --</option>';
     props.forEach(p => {
-      sel.innerHTML += `<option value="${p._id}" ${p._id===preselectedPropId?'selected':''}>${p.title}</option>`;
+      const opt = document.createElement('option');
+      opt.value = (p._id||'').toString();
+      opt.textContent = (p.title||'Property') + ' — ' + (p.address||'');
+      if(preselectedPropId && (p._id||'').toString() === preselectedPropId) opt.selected = true;
+      sel.appendChild(opt);
     });
   }
   const msg = document.getElementById('req3d-msg');
@@ -3747,21 +3967,33 @@ function open3DRequestModal(preselectedPropId) {
 function close3DRequestModal() {
   const modal = document.getElementById('ov-3dreq');
   if(modal) { modal.style.display='none'; document.body.style.overflow=''; }
+  // Reset swatches to defaults
+  syncReq3dSwatch('wall','#C9A96E');
+  syncReq3dSwatch('roof','#7A4F2A');
+  syncReq3dSwatch('floor','#D2B48C');
+  const w=document.getElementById('req3d-wall'); if(w) w.value='#C9A96E';
+  const r=document.getElementById('req3d-roof'); if(r) r.value='#7A4F2A';
+  const fl=document.getElementById('req3d-floor'); if(fl) fl.value='#D2B48C';
 }
 
 async function submit3DRequest() {
   const propId = document.getElementById('req3d-prop')?.value;
   if(!propId) { showMsg('req3d-msg','⚠️ Please select a property.','err'); return; }
+  const modelType  = document.getElementById('req3d-type')?.value || '';
+  if(!modelType) { showMsg('req3d-msg','⚠️ Please select a model type.','err'); return; }
   const requirements = {
-    houseType:  document.getElementById('req3d-type')?.value  || 'standard',
-    floors:     parseInt(document.getElementById('req3d-floors')?.value)||1,
-    wallColor:  document.getElementById('req3d-wall')?.value  || '#C9A96E',
-    roofColor:  document.getElementById('req3d-roof')?.value  || '#7A4F2A',
-    floorColor: document.getElementById('req3d-floor')?.value || '#D2B48C',
-    hasGarden:  document.getElementById('req3d-garden')?.checked || false,
-    hasPool:    document.getElementById('req3d-pool')?.checked   || false,
-    hasGarage:  document.getElementById('req3d-garage')?.checked || false,
-    extraNotes: document.getElementById('req3d-notes')?.value   || '',
+    modelType:     modelType,
+    houseType:     modelType,          // kept for compatibility
+    urgency:       document.getElementById('req3d-floors')?.value || 'standard',
+    floorPlanAvailable: document.getElementById('req3d-wall')?.value || 'yes',
+    extraNotes:    document.getElementById('req3d-notes')?.value || '',
+    // colour/amenity fields kept as defaults (not in this form)
+    wallColor:  '#C9A96E',
+    roofColor:  '#7A4F2A',
+    floorColor: '#D2B48C',
+    hasGarden:  false,
+    hasPool:    false,
+    hasGarage:  false,
   };
   try {
     const data = await lFetch('/3d-requests','POST',{ propertyId:propId, requirements });
@@ -3779,44 +4011,100 @@ function openDetail3DModal(reqId) {
   _viewing3dReqId = reqId;
   const req = _my3dRequests.find(r=>r._id===reqId);
   if(!req) return;
+
   document.getElementById('detail3d-title').textContent = req.propertyTitle || 'Request Detail';
   document.getElementById('detail3d-status-label').innerHTML = req3dBadge(req.status);
+  const dl = document.getElementById('detail3d-date-label');
+  if(dl) dl.textContent = '· ' + new Date(req.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'});
 
-  // Info bar
+  // Info bar — pill-style tags
   const info = document.getElementById('detail3d-info');
-  info.innerHTML = [
-    `🏠 ${req.requirements?.houseType||'standard'}`,
-    `🏢 ${req.requirements?.floors||1} floor(s)`,
+  const tags = [
+    `🏠 ${(req.requirements?.houseType||'standard').charAt(0).toUpperCase()+(req.requirements?.houseType||'standard').slice(1)}`,
+    `🏢 ${req.requirements?.floors||1} Floor${(req.requirements?.floors||1)>1?'s':''}`,
     req.requirements?.hasGarden ? '🌿 Garden' : '',
     req.requirements?.hasPool   ? '🏊 Pool'   : '',
     req.requirements?.hasGarage ? '🚗 Garage' : '',
-    req.requirements?.extraNotes ? `📝 "${req.requirements.extraNotes}"` : '',
-    req.agreedAmount ? `🤝 Agreed: Rs. ${req.agreedAmount.toLocaleString()}` : (req.proposedAmount ? `💰 Proposed: Rs. ${req.proposedAmount.toLocaleString()}` : ''),
-  ].filter(Boolean).join(' &nbsp;|&nbsp; ');
+    req.requirements?.wallColor ? `<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:${req.requirements.wallColor};display:inline-block;border:1px solid rgba(0,0,0,0.2)"></span>Wall</span>` : '',
+    req.requirements?.roofColor ? `<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:${req.requirements.roofColor};display:inline-block;border:1px solid rgba(0,0,0,0.2)"></span>Roof</span>` : '',
+    req.requirements?.extraNotes ? `📝 "${req.requirements.extraNotes.slice(0,40)}${req.requirements.extraNotes.length>40?'…':''}"` : '',
+  ].filter(Boolean);
+  info.innerHTML = tags.map(t=>`<span style="padding:3px 10px;border-radius:99px;background:var(--card);border:1px solid var(--border)">${t}</span>`).join('');
+
+  // Price bar
+  const priceBar = document.getElementById('detail3d-price-bar');
+  const priceVal = document.getElementById('detail3d-price-value');
+  const priceLbl = document.getElementById('detail3d-price-label');
+  const acceptArea = document.getElementById('detail3d-accept-area');
+  if(req.agreedAmount) {
+    priceBar.style.display = 'block';
+    priceBar.style.background = 'rgba(34,197,94,0.06)';
+    priceBar.style.borderBottom = '1px solid rgba(34,197,94,0.2)';
+    priceLbl.textContent = '🤝 Agreed Price';
+    priceVal.style.color = '#22c55e';
+    priceVal.textContent = 'Rs. ' + req.agreedAmount.toLocaleString();
+    acceptArea.style.display = 'none';
+  } else if(req.proposedAmount && req.status==='negotiating') {
+    priceBar.style.display = 'block';
+    priceBar.style.background = 'rgba(201,169,110,0.06)';
+    priceBar.style.borderBottom = '1px solid rgba(201,169,110,0.2)';
+    priceLbl.textContent = '💰 Admin\'s Proposed Price';
+    priceVal.style.color = 'var(--gold,#C9A96E)';
+    priceVal.textContent = 'Rs. ' + req.proposedAmount.toLocaleString();
+    acceptArea.style.display = 'flex';
+  } else {
+    priceBar.style.display = 'none';
+    acceptArea.style.display = 'none';
+  }
 
   // Messages
   const msgsEl = document.getElementById('detail3d-msgs');
-  msgsEl.innerHTML = (req.messages||[]).length ? (req.messages||[]).map(m => `
-    <div style="display:flex;flex-direction:column;align-items:${m.from==='landlord'?'flex-end':'flex-start'}">
-      <div style="max-width:80%;padding:9px 13px;border-radius:12px;background:${m.from==='landlord'?'var(--gold,#C9A96E)22':'var(--input-bg)'};border:1px solid ${m.from==='landlord'?'var(--gold,#C9A96E)44':'var(--border)'};font-size:13px;color:var(--text)">
-        ${m.text}
-        ${m.amount ? `<div style="font-size:11px;font-weight:700;color:var(--gold,#C9A96E);margin-top:4px">💰 Rs. ${m.amount.toLocaleString()}</div>` : ''}
-      </div>
-      <div style="font-size:10px;color:var(--muted);margin-top:3px">${m.from==='landlord'?'You':'Admin'} · ${new Date(m.createdAt||Date.now()).toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'})}</div>
-    </div>
-  `).join('') : '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">No messages yet. Admin will respond soon.</div>';
+  if((req.messages||[]).length) {
+    msgsEl.innerHTML = (req.messages||[]).map(m => {
+      const isLandlord = m.from==='landlord';
+      return `
+      <div style="display:flex;flex-direction:column;align-items:${isLandlord?'flex-end':'flex-start'}">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;${isLandlord?'flex-direction:row-reverse':''}">
+          <div style="width:26px;height:26px;border-radius:50%;background:${isLandlord?'rgba(201,169,110,0.2)':'rgba(59,130,246,0.15)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:${isLandlord?'var(--gold,#C9A96E)':'#3b82f6'}">${isLandlord?'LO':'AD'}</div>
+          <span style="font-size:10px;color:var(--muted)">${isLandlord?'You':'Admin'} · ${new Date(m.createdAt||Date.now()).toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'})}</span>
+        </div>
+        <div style="max-width:82%;padding:10px 14px;border-radius:${isLandlord?'14px 4px 14px 14px':'4px 14px 14px 14px'};background:${isLandlord?'rgba(201,169,110,0.12)':'var(--input-bg)'};border:1px solid ${isLandlord?'rgba(201,169,110,0.3)':'var(--border)'};font-size:13px;color:var(--text);line-height:1.5">
+          ${m.text}
+          ${m.amount ? `<div style="margin-top:6px;display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;background:rgba(201,169,110,0.15);border:1px solid rgba(201,169,110,0.3);font-size:12px;font-weight:700;color:var(--gold,#C9A96E)">💰 Rs. ${Number(m.amount).toLocaleString()}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    msgsEl.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:30px 0"><div style="font-size:32px;margin-bottom:8px">💬</div>No messages yet — Admin will respond soon.</div>';
+  }
   msgsEl.scrollTop = msgsEl.scrollHeight;
 
-  // Show reply + accept areas based on status
-  const replyArea  = document.getElementById('detail3d-reply-area');
-  const acceptArea = document.getElementById('detail3d-accept-area');
-  const acceptLbl  = document.getElementById('detail3d-accept-label');
-  replyArea.style.display  = req.status==='negotiating' ? 'flex' : 'none';
-  acceptArea.style.display = req.status==='negotiating' && req.proposedAmount ? 'flex' : 'none';
-  if(req.proposedAmount && acceptLbl) acceptLbl.textContent = `Admin proposed Rs. ${req.proposedAmount.toLocaleString()}`;
+  // Reply area
+  const replyArea = document.getElementById('detail3d-reply-area');
+  replyArea.style.display = req.status==='negotiating' ? 'block' : 'none';
+
+  // Closed bar
+  const closedBar = document.getElementById('detail3d-closed-bar');
+  if(req.status==='completed') {
+    closedBar.style.display='block';
+    closedBar.innerHTML='<span style="color:#22c55e;font-weight:600">✅ 3D model has been completed and attached to your property!</span>';
+  } else if(req.status==='rejected') {
+    closedBar.style.display='block';
+    closedBar.innerHTML=`<span style="color:#ef4444;font-weight:600">❌ Request was rejected${req.rejectionReason?' — '+req.rejectionReason:''}</span>`;
+  } else if(req.status==='agreed') {
+    closedBar.style.display='block';
+    closedBar.innerHTML='<span style="color:#f59e0b;font-weight:600">🏗️ Amount agreed — Admin is building your 3D model. Please wait.</span>';
+  } else {
+    closedBar.style.display='none';
+  }
 
   const modal = document.getElementById('ov-3dreq-detail');
   if(modal) { modal.style.display='flex'; document.body.style.overflow='hidden'; }
+}
+
+function focusCounter() {
+  const el = document.getElementById('detail3d-counter');
+  if(el) { el.scrollIntoView({behavior:'smooth',block:'center'}); el.focus(); }
 }
 
 function closeDetail3DModal() {
@@ -3846,16 +4134,18 @@ async function sendLandlordMessage() {
 async function acceptProposedAmount() {
   const req = _my3dRequests.find(r=>r._id===_viewing3dReqId);
   if(!req) return;
+  const btn = document.querySelector('#detail3d-accept-area button');
+  if(btn) { btn.disabled=true; btn.textContent='Accepting…'; }
   try {
     const data = await lFetch('/3d-requests/'+_viewing3dReqId+'/accept','PUT',{ amount: req.proposedAmount });
     if(data.success) {
       const idx = _my3dRequests.findIndex(r=>r._id===_viewing3dReqId);
       if(idx>=0) _my3dRequests[idx] = data.request;
-      closeDetail3DModal();
+      // Re-open to reflect agreed state
+      openDetail3DModal(_viewing3dReqId);
       render3DRequestList();
-      alert('✅ Amount accepted! Admin will now build your 3D model.');
     }
-  } catch(e) { console.error(e); }
+  } catch(e) { console.error(e); if(btn){btn.disabled=false;btn.textContent='✅ Accept & Confirm Deal';} }
 }
 
 // Close modals on backdrop click
@@ -3909,7 +4199,7 @@ setTimeout(()=>{
       </div>
       <div style="margin-bottom:10px">
         <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Message</label>
-        <textarea id="neg-msg-input" rows="2" placeholder="Apna jawab likhein..." style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none"></textarea>
+        <textarea id="neg-msg-input" rows="2" placeholder="Type your reply..." style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none"></textarea>
       </div>
       <div style="display:flex;gap:8px">
         <button onclick="sendNegotiationReply('accept')" style="flex:1;padding:9px;border-radius:9px;border:none;background:rgba(78,205,196,0.12);color:var(--green);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">✅ Offer Accept</button>
@@ -3934,11 +4224,7 @@ function openLLWizard(propId) {
   _llWizPropId = propId || null;
   _llWizPropObj = prop || null;
   const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
-  // Pre-fill landlord fields (only if empty)
-  _llwSet('llw-ll-name', user.name||'');
-  _llwSet('llw-ll-email', user.email||'');
-  _llwSet('llw-ll-phone', user.phone||'');
-  // Clear all fields first for fresh form
+  // Clear all fields first
   ['llw-ll-name','llw-ll-cnic','llw-ll-addr','llw-ll-phone','llw-ll-email',
    'llw-tn-name','llw-tn-cnic','llw-tn-addr','llw-tn-phone','llw-tn-occ',
    'llw-prop-addr','llw-prop-type','llw-prop-area','llw-prop-rooms','llw-prop-plot',
@@ -3947,28 +4233,90 @@ function openLLWizard(propId) {
     const el = document.getElementById(id); if(el) el.value='';
   });
   document.getElementById('llw-dur').value = '11 months';
-  // Pre-fill from user + prop
-  const u = document.getElementById('llw-ll-name'); if(u) u.value = user.name||'';
-  const ue = document.getElementById('llw-ll-email'); if(ue) ue.value = user.email||'';
-  const up = document.getElementById('llw-ll-phone'); if(up) up.value = user.phone||'';
+  // Pre-fill landlord from user
+  const setF = (id,val) => { const el=document.getElementById(id); if(el) el.value=val||''; };
+  setF('llw-ll-name', user.name||'');
+  setF('llw-ll-email', user.email||'');
+  setF('llw-ll-phone', user.phone||'');
+
+  // Populate property dropdown
+  const sel = document.getElementById('llw-prop-select');
+  if(sel) {
+    sel.innerHTML = '<option value="">-- Property choose karo --</option>';
+    (myProps||[]).forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = (p._id||'').toString();
+      opt.textContent = (p.title||'Property') + ' — ' + (p.address||'');
+      if(propId && (p._id||'').toString() === propId) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+  const statusEl = document.getElementById('llw-tenant-status');
+  if(statusEl) statusEl.textContent = '';
+
   if (prop) {
-    const pa = document.getElementById('llw-prop-addr'); if(pa) pa.value = prop.address||prop.propertyAddress||prop.title||'';
-    const pc = document.getElementById('llw-city'); if(pc) pc.value = prop.city||'';
-    const pr = document.getElementById('llw-rent'); if(pr) pr.value = prop.rent||'';
+    setF('llw-prop-addr', prop.address||prop.propertyAddress||prop.title||'');
+    setF('llw-city', prop.city||'');
+    setF('llw-rent', prop.rent||'');
     document.getElementById('llwiz-prop-title').textContent = prop.title||'New Lease Agreement';
     document.getElementById('llwiz-prop-sub').textContent = prop.address||prop.title||'Fill in all details and sign';
+    if(propId) llwizOnPropSelect(propId);
   } else {
     document.getElementById('llwiz-prop-title').textContent = 'New Lease Agreement';
-    document.getElementById('llwiz-prop-sub').textContent = 'Fill in all details and sign';
+    document.getElementById('llwiz-prop-sub').textContent = 'Property dropdown se select karo';
   }
   _llWizSigPads['ll'] = null;
   _llWizSigPads['tn'] = null;
   _llwizGoTo(1);
   document.getElementById('llwiz-save-btn').disabled = false;
-  document.getElementById('llwiz-save-btn').textContent = '💾 Save & Lock Agreement';
+  document.getElementById('llwiz-save-btn').textContent = '📨 Save & Send to Tenant for Signing';
   document.getElementById('llwiz-save-err').style.display = 'none';
   document.getElementById('ll-lease-wizard-modal').style.display = 'flex';
   document.body.style.overflow = 'hidden';
+}
+
+// Called when landlord selects a property from dropdown
+async function llwizOnPropSelect(propId) {
+  if(!propId) return;
+  _llWizPropId = propId;
+  _llWizPropObj = myProps.find(p => (p._id||'').toString() === propId) || null;
+  const prop = _llWizPropObj;
+  const statusEl = document.getElementById('llw-tenant-status');
+  const setF = (id,val) => { const el=document.getElementById(id); if(el) el.value=val||''; };
+
+  if(prop) {
+    document.getElementById('llwiz-prop-title').textContent = prop.title||'Lease Agreement';
+    document.getElementById('llwiz-prop-sub').textContent = prop.address||'';
+    setF('llw-prop-addr', prop.address||prop.propertyAddress||'');
+    setF('llw-city', prop.city||'');
+    setF('llw-rent', prop.rent||'');
+  }
+
+  if(statusEl) statusEl.innerHTML = '<span style="color:var(--muted)">⏳ Tenant data load ho raha hai…</span>';
+  try {
+    const data = await lFetch('/rental-requests/received');
+    const requests = data.requests || [];
+    const propRequests = requests.filter(r => {
+      const rid = (r.propertyId?._id || r.propertyId || '').toString();
+      return rid === propId;
+    });
+    const accepted = propRequests.find(r => r.status === 'accepted') || null;
+    if(accepted) {
+      const tn = accepted.tenantId || {};
+      // Store tenantId for lease save
+      window._llwizAcceptedTenantId = (tn._id || tn.id || accepted.tenantId || '');
+      setF('llw-tn-name',  accepted.tenantName || tn.name || '');
+      setF('llw-tn-phone', accepted.tenantPhone || tn.phone || '');
+      const email = accepted.tenantEmail || tn.email || '';
+      const displayInfo = accepted.tenantName || tn.name || '—';
+      const displayContact = email || accepted.tenantPhone || tn.phone || '';
+      if(statusEl) statusEl.innerHTML = '<span style="color:#1D9E75">✅ Tenant auto-fill: <strong>' + displayInfo + '</strong>' + (displayContact ? ' (' + displayContact + ')' : '') + '</span>';
+    } else {
+      if(statusEl) statusEl.innerHTML = '<span style="color:var(--warn)">⚠️ No accepted request found for this property. Please complete tenant data manually.</span>';
+    }
+  } catch(e) {
+    if(statusEl) statusEl.innerHTML = '<span style="color:var(--error)">⚠️ Unable to load tenant data.</span>';
+  }
 }
 
 function closeLLWizard() {
@@ -4096,73 +4444,93 @@ function _llwizBuildDoc(llSig,tnSig){
 }
 
 function llwizDownload(){
-  alert('llwizDownload called');
   try {
     const html=_llwizBuildDoc(_llwizGetSig('ll'),_llwizGetSig('tn'));
     const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
     a.download=`lease-${_llwGet('llw-tn-name')||'agreement'}.html`;
-    a.click();
-    console.log('Download triggered', a.download);
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
   } catch(e) {
     alert('Download error: ' + e);
-    console.error('Download error', e);
   }
 }
 
 async function llwizSave(){
   try {
-    alert('llwizSave called');
     if(!_llwGet('llw-ll-name')||!_llwGet('llw-tn-name')||!_llwGet('llw-rent')||!_llwGet('llw-start')||!_llwGet('llw-end')){
       _llwizShowErr('Zaroor fields: Landlord name, Tenant name, Rent, Start/End dates.');
-      alert('Missing required fields');
       return;
     }
-    const llSig=_llwizGetSig('ll'), tnSig=_llwizGetSig('tn');
-    const user=JSON.parse(localStorage.getItem('tms_user')||'{}');
-    const landlordId=user._id||user.id||'';
-    const fullHtml=_llwizBuildDoc(llSig,tnSig);
-    const payload={
-      tenantName:_llwGet('llw-tn-name'), tenantCnic:_llwGet('llw-tn-cnic'), tenantAddress:_llwGet('llw-tn-addr'),
-      tenantPhone:_llwGet('llw-tn-phone'), tenantOccupation:_llwGet('llw-tn-occ'),
-      landlordName:_llwGet('llw-ll-name'), landlordCnic:_llwGet('llw-ll-cnic'), landlordAddress:_llwGet('llw-ll-addr'),
-      landlordPhone:_llwGet('llw-ll-phone'), landlordEmail:_llwGet('llw-ll-email'),
-      propertyAddress:_llwGet('llw-prop-addr'), propertyTitle:(_llWizPropObj?.title||_llwGet('llw-prop-addr')),
-      propertyType:_llwGet('llw-prop-type'), propertyArea:_llwGet('llw-prop-area'),
-      propertyRooms:_llwGet('llw-prop-rooms'), propertyPlot:_llwGet('llw-prop-plot'),
-      rent:Number(_llwGet('llw-rent'))||0, deposit:_llwGet('llw-deposit'), advance:_llwGet('llw-advance'),
-      startDate:_llwGet('llw-start'), endDate:_llwGet('llw-end'), duration:_llwGet('llw-dur')||'11 months',
-      dueDay:_llwGet('llw-dueday'), annualIncrease:_llwGet('llw-incpct'), city:_llwGet('llw-city'),
-      specialConditions:_llwGet('llw-special'), landlordSignature:llSig, tenantSignature:tnSig,
-      fullAgreementHtml:fullHtml, locked:true, terms:'Punjab Rented Premises Act 2009 — Standard Terms Applied',
+    if(!_llWizPropId){
+      _llwizShowErr('Please select a property first.');
+      return;
+    }
+    const llSig = _llwizGetSig('ll');
+    if(!llSig){
+      _llwizShowErr('Landlord signature zaroor hai. Sign karo ya upload karo.');
+      return;
+    }
+    const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
+    // Build HTML with landlord sig only (tenant sig blank for now)
+    const fullHtml = _llwizBuildDoc(llSig, '');
+    const payload = {
+      landlordName:     _llwGet('llw-ll-name'),
+      landlordCnic:     _llwGet('llw-ll-cnic'),
+      landlordAddr:     _llwGet('llw-ll-addr'),
+      landlordPhone:    _llwGet('llw-ll-phone'),
+      landlordEmail:    _llwGet('llw-ll-email'),
+      landlordSignature: llSig,
+      landlordId:       user._id || user.id || '',
+      tenantName:       _llwGet('llw-tn-name'),
+      tenantCnic:       _llwGet('llw-tn-cnic'),
+      tenantAddr:       _llwGet('llw-tn-addr'),
+      tenantPhone:      _llwGet('llw-tn-phone'),
+      tenantOcc:        _llwGet('llw-tn-occ'),
+      tenantEmail:      _llwGet('llw-tn-email') || '',
+      tenantSignature:  '',
+      propertyTitle:    _llWizPropObj ? _llWizPropObj.title : _llwGet('llw-prop-addr'),
+      propertyAddress:  _llwGet('llw-prop-addr'),
+      propertyType:     _llwGet('llw-prop-type'),
+      propertyArea:     _llwGet('llw-prop-area'),
+      propertyRooms:    _llwGet('llw-prop-rooms'),
+      propertyPlot:     _llwGet('llw-prop-plot'),
+      rent:             Number(_llwGet('llw-rent')) || 0,
+      deposit:          _llwGet('llw-deposit'),
+      advance:          _llwGet('llw-advance'),
+      startDate:        _llwGet('llw-start'),
+      endDate:          _llwGet('llw-end'),
+      duration:         _llwGet('llw-dur') || '11 months',
+      dueDay:           _llwGet('llw-dueday'),
+      annualIncrease:   _llwGet('llw-incpct'),
+      city:             _llwGet('llw-city'),
+      specialConditions:_llwGet('llw-special'),
+      terms:            'Punjab Rented Premises Act 2009 - Standard Terms Applied',
+      fullAgreementHtml: fullHtml,
+      propertyId:       _llWizPropId,
     };
-    if(landlordId) payload.landlordId=landlordId;
-    if(_llWizPropId) payload.propertyId=_llWizPropId;
-    const btn=document.getElementById('llwiz-save-btn');
-    if(btn){btn.disabled=true;btn.textContent='⏳ Saving…';}
-    console.log('llwizSave payload', payload);
-    const r=await lFetch('/leases','POST',payload);
-    console.log('llwizSave response', r);
+    if(window._llwizAcceptedTenantId) payload.tenantId = window._llwizAcceptedTenantId;
+
+    const btn = document.getElementById('llwiz-save-btn');
+    if(btn){ btn.disabled=true; btn.textContent='Saving...'; }
+
+    const r = await lFetch('/leases', 'POST', payload);
     if(r.success){
-      // Lock locally
-      const lockData={...payload,savedAt:new Date().toISOString()};
-      localStorage.setItem('tms_lease_lock_'+_llWizPropId, JSON.stringify(lockData));
+      const lockData = Object.assign({}, payload, { _id: r.lease && r.lease._id, savedAt: new Date().toISOString() });
+      localStorage.setItem('tms_lease_lock_' + _llWizPropId, JSON.stringify(lockData));
       closeLLWizard();
       await loadLandlordLeases();
       renderLLPropLeaseCards();
-      alert('✅ Agreement save aur lock ho gaya! Ab isko change nahi kiya ja sakta.');
+      alert('Agreement saved! It has been sent to the tenant for signature. Once signed, it will be locked for both parties.');
     } else {
-      _llwizShowErr(r.message||'Save failed.');
-      if(btn){btn.disabled=false;btn.textContent='💾 Save & Lock Agreement';}
-      alert('Save failed: ' + (r.message||'Unknown error'));
+      _llwizShowErr(r.message || 'Save failed. Please try again.');
+      if(btn){ btn.disabled=false; btn.textContent='Send to Tenant for Signing'; }
     }
   } catch(e){
-    _llwizShowErr('Server se connect nahi ho saka.');
-    if(btn){btn.disabled=false;btn.textContent='💾 Save & Lock Agreement';}
-    alert('Save error: ' + e);
+    _llwizShowErr('Unable to connect to the server. Is the backend running?');
+    const btn2 = document.getElementById('llwiz-save-btn');
+    if(btn2){ btn2.disabled=false; btn2.textContent='Send to Tenant for Signing'; }
     console.error('llwizSave error', e);
   }
 }
-
 function _llwizShowErr(msg){const el=document.getElementById('llwiz-save-err');if(el){el.textContent=msg;el.style.display='block';}}
 
 function openLLLeaseView(propId){
@@ -4170,57 +4538,115 @@ function openLLLeaseView(propId){
   const modal=document.getElementById('ll-lease-view-modal');
   const content=document.getElementById('ll-lease-view-content');
   if(!modal||!content)return;
-  window._llViewLockData=lock;
+
+  const showHtml=(htmlStr,lockData)=>{
+    window._llViewLockData=lockData;
+    const blob=new Blob([htmlStr],{type:'text/html'});
+    const blobUrl=URL.createObjectURL(blob);
+    content.innerHTML=`<iframe src="${blobUrl}" style="width:100%;height:70vh;border:1px solid var(--border);border-radius:10px;background:#fff"></iframe>`;
+    modal.style.display='flex'; document.body.style.overflow='hidden';
+  };
+
   if(lock&&lock.fullAgreementHtml){
-    const escaped=lock.fullAgreementHtml.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-    content.innerHTML=`<iframe srcdoc="${escaped}" style="width:100%;height:70vh;border:1px solid var(--border);border-radius:10px;background:#fff"></iframe>`;
+    showHtml(lock.fullAgreementHtml,lock);
   } else {
-    content.innerHTML='<div style="color:var(--muted);padding:20px;text-align:center">Agreement data nahi mila.</div>';
+    content.innerHTML='<div style="color:var(--muted);padding:20px;text-align:center"><span class="spinner"></span> Loading…</div>';
+    modal.style.display='flex'; document.body.style.overflow='hidden';
+    lFetch('/leases').then(data=>{
+      const leases=data.leases||[];
+      const found=leases.find(l=>l.propertyId&&(l.propertyId._id||l.propertyId).toString()===propId);
+      if(found&&found.fullAgreementHtml){
+        showHtml(found.fullAgreementHtml,found);
+      } else {
+        content.innerHTML='<div style="color:var(--muted);padding:20px;text-align:center">Agreement HTML not found. Save again from the wizard.</div>';
+      }
+    }).catch(()=>{
+      content.innerHTML='<div style="color:var(--muted);padding:20px;text-align:center">Unable to load data from the server.</div>';
+    });
   }
-  modal.style.display='flex'; document.body.style.overflow='hidden';
 }
 
 function llViewDownload(){
-  const lock=window._llViewLockData; if(!lock||!lock.fullAgreementHtml)return;
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([lock.fullAgreementHtml],{type:'text/html'}));
-  a.download=`lease-${lock.tenantName||'agreement'}.html`; a.click();
+  const lock=window._llViewLockData; if(!lock)return;
+  const html=lock.fullAgreementHtml||'';
+  if(!html){alert('HTML not available. Save again from the wizard.');return;}
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download=`lease-${lock.tenantName||lock.tenantId||'agreement'}.html`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
 function renderLLPropLeaseCards(){
   const container=document.getElementById('ll-prop-lease-cards'); if(!container)return;
-  if(!myProps||!myProps.length){container.innerHTML='<div class="loading" style="text-align:center;padding:24px 0"><div style="font-size:32px;margin-bottom:8px">🏠</div><div style="font-weight:600;color:var(--text);margin-bottom:4px">Koi property nahi mili</div><div style="font-size:12px;color:var(--muted);margin-bottom:14px">Pehle property add karo, ya manual lease banaao</div><button onclick="openLLWizard(null)" style="padding:9px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#2563EB,#4F7BFE);color:#fff;font-family:DM Sans,sans-serif;font-size:13px;font-weight:600;cursor:pointer">+ New Agreement</button></div>';return;}
-  container.innerHTML=myProps.map(p=>{
-    const pid=(p._id||'').toString();
-    const lock=JSON.parse(localStorage.getItem('tms_lease_lock_'+pid)||'null');
-    const isLocked=!!lock;
-    return `<div class="card" style="margin-bottom:12px">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:40px;height:40px;border-radius:10px;background:rgba(37,99,235,0.1);border:1px solid rgba(37,99,235,0.2);display:flex;align-items:center;justify-content:center;font-size:18px">🏠</div>
-          <div>
-            <div style="font-size:14px;font-weight:700;color:var(--text)">${p.title||'Property'}</div>
-            <div style="font-size:12px;color:var(--muted)">${p.address||p.propertyAddress||''}</div>
+  if(!myProps||!myProps.length){
+    container.innerHTML='<div class="loading" style="text-align:center;padding:24px 0"><div style="font-size:32px;margin-bottom:8px">🏠</div><div style="font-weight:600;color:var(--text);margin-bottom:4px">No property found</div><button onclick="openLLWizard(null)" style="padding:9px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#2563EB,#4F7BFE);color:#fff;font-family:DM Sans,sans-serif;font-size:13px;font-weight:600;cursor:pointer">+ New Agreement</button></div>';
+    return;
+  }
+  // Load leases from DB for status
+  lFetch('/leases').then(data => {
+    const dbLeases = (data.leases||[]);
+    container.innerHTML = myProps.map(p => {
+      const pid = (p._id||'').toString();
+      // Find DB lease for this property
+      const dbLease = dbLeases.find(l => (l.propertyId && (l.propertyId._id||l.propertyId).toString()===pid) || (l.landlordId && l.propertyTitle && l.propertyTitle===p.title));
+      // Fallback to localStorage
+      const localLock = JSON.parse(localStorage.getItem('tms_lease_lock_'+pid)||'null');
+      const lease = dbLease || localLock;
+      const status = dbLease ? dbLease.status : (localLock ? 'pending_tenant_signature' : null);
+      const isActive = status === 'active';
+      const isPending = status === 'pending_tenant_signature' || status === 'pending';
+      const hasLease = !!lease;
+
+      let statusBadge = '', actionBtn = '';
+      if(isActive){
+        statusBadge = '<span style="padding:5px 12px;border-radius:20px;background:rgba(29,158,117,0.1);border:1px solid rgba(29,158,117,0.25);color:#1D9E75;font-size:11px;font-weight:600">🔒 Active & Locked</span>';
+        actionBtn = `<button onclick="openLLLeaseView('${pid}')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(37,99,235,0.25);background:rgba(37,99,235,0.08);color:var(--blue);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">👁 View</button>
+                     <button onclick="llDownloadByPropId('${pid}')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(29,158,117,0.25);background:rgba(29,158,117,0.08);color:#1D9E75;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">⬇ Download</button>`;
+      } else if(isPending){
+        statusBadge = '<span style="padding:5px 12px;border-radius:20px;background:rgba(255,179,71,0.1);border:1px solid rgba(255,179,71,0.25);color:var(--warn);font-size:11px;font-weight:600">⏳ Awaiting Tenant Signature</span>';
+        actionBtn = `<button onclick="openLLLeaseView('${pid}')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(37,99,235,0.25);background:rgba(37,99,235,0.08);color:var(--blue);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">👁 View</button>
+                     <button onclick="llDownloadByPropId('${pid}')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(29,158,117,0.25);background:rgba(29,158,117,0.08);color:#1D9E75;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">⬇ Download</button>`;
+      } else {
+        statusBadge = '<span style="padding:5px 12px;border-radius:20px;background:rgba(156,163,175,0.1);border:1px solid rgba(156,163,175,0.25);color:var(--muted);font-size:11px;font-weight:600">No Agreement</span>';
+        actionBtn = `<button onclick="openLLWizard('${pid}')" style="padding:7px 16px;border-radius:8px;border:none;background:linear-gradient(135deg,#2563EB,#4F7BFE);color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ New Agreement</button>`;
+      }
+
+      const leaseInfo = lease ? `<div style="margin-top:10px;padding:10px 12px;background:rgba(29,158,117,0.05);border-radius:8px;border:1px solid rgba(29,158,117,0.12);font-size:12px;color:var(--muted)">
+        Tenant: <strong style="color:var(--text)">${lease.tenantName||'—'}</strong> &nbsp;&middot;&nbsp;
+        Rent: <strong style="color:var(--gold)">Rs. ${Number(lease.rent||0).toLocaleString()}</strong> &nbsp;&middot;&nbsp;
+        ${lease.startDate||''} &rarr; ${lease.endDate||''}
+      </div>` : '';
+
+      return `<div class="card" style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(37,99,235,0.1);border:1px solid rgba(37,99,235,0.2);display:flex;align-items:center;justify-content:center;font-size:18px">🏠</div>
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--text)">${p.title||'Property'}</div>
+              <div style="font-size:12px;color:var(--muted)">${p.address||p.propertyAddress||''}</div>
+            </div>
           </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          ${isLocked
-            ?`<span style="padding:5px 12px;border-radius:20px;background:rgba(29,158,117,0.1);border:1px solid rgba(29,158,117,0.25);color:#1D9E75;font-size:11px;font-weight:600">🔒 Agreement Saved</span>
-               <button onclick="openLLLeaseView('${pid}')" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(37,99,235,0.25);background:rgba(37,99,235,0.08);color:var(--blue);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">👁 View</button>`
-            :`<span style="padding:5px 12px;border-radius:20px;background:rgba(255,179,71,0.1);border:1px solid rgba(255,179,71,0.25);color:var(--warn);font-size:11px;font-weight:600">⏳ No Agreement</span>
-               <button onclick="openLLWizard('${pid}')" style="padding:7px 16px;border-radius:8px;border:none;background:linear-gradient(135deg,#2563EB,#4F7BFE);color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ New Agreement</button>`
-          }
-        </div>
-      </div>
-      ${isLocked?`<div style="margin-top:10px;padding:10px 12px;background:rgba(29,158,117,0.05);border-radius:8px;border:1px solid rgba(29,158,117,0.12);font-size:12px;color:var(--muted)">
-        Tenant: <strong style="color:var(--text)">${lock.tenantName||'—'}</strong> &nbsp;·&nbsp;
-        Rent: <strong style="color:var(--gold)">Rs. ${Number(lock.rent||0).toLocaleString()}</strong> &nbsp;·&nbsp;
-        ${lock.startDate||''} → ${lock.endDate||''} &nbsp;·&nbsp;
-        Saved: ${lock.savedAt?new Date(lock.savedAt).toLocaleDateString('en-PK'):'—'}
-      </div>`:''}
-    </div>`;
-  }).join('');
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${statusBadge}${actionBtn}</div>
+        </div>${leaseInfo}
+      </div>`;
+    }).join('');
+  }).catch(()=>{
+    container.innerHTML = '<div style="color:var(--muted);padding:20px;text-align:center">Unable to load lease data.</div>';
+  });
 }
 
+function llDownloadByPropId(propId){
+  lFetch('/leases').then(data=>{
+    const dbLeases = data.leases||[];
+    const lease = dbLeases.find(l => (l.propertyId && (l.propertyId._id||l.propertyId).toString()===propId));
+    const html = (lease && lease.fullAgreementHtml) || (JSON.parse(localStorage.getItem('tms_lease_lock_'+propId)||'null')||{}).fullAgreementHtml;
+    if(!html){ alert('Agreement HTML not found. Save again from the wizard.'); return; }
+    const name = (lease && lease.tenantName) || 'agreement';
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([html],{type:'text/html'}));
+    a.download = 'lease-' + name + '.html';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  });
+}
 // ── Filter leases table ────────────────────────────────
 function filterLLLeases(){
   const q=(document.getElementById('ll-lease-search')?.value||'').toLowerCase();
@@ -4249,10 +4675,6 @@ function openLLWizard(propId) {
   _llWizPropId = propId || null;
   _llWizPropObj = prop || null;
   const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
-  // Pre-fill landlord fields (only if empty)
-  _llwSet('llw-ll-name', user.name||'');
-  _llwSet('llw-ll-email', user.email||'');
-  _llwSet('llw-ll-phone', user.phone||'');
   // Clear all fields first for fresh form
   ['llw-ll-name','llw-ll-cnic','llw-ll-addr','llw-ll-phone','llw-ll-email',
    'llw-tn-name','llw-tn-cnic','llw-tn-addr','llw-tn-phone','llw-tn-occ',
@@ -4262,25 +4684,42 @@ function openLLWizard(propId) {
     const el = document.getElementById(id); if(el) el.value='';
   });
   document.getElementById('llw-dur').value = '11 months';
-  // Pre-fill from user + prop
+  // Pre-fill from user
   const u = document.getElementById('llw-ll-name'); if(u) u.value = user.name||'';
   const ue = document.getElementById('llw-ll-email'); if(ue) ue.value = user.email||'';
   const up = document.getElementById('llw-ll-phone'); if(up) up.value = user.phone||'';
+
+  // ✅ POPULATE property dropdown with landlord's properties
+  const sel = document.getElementById('llw-prop-select');
+  if(sel) {
+    sel.innerHTML = '<option value="">-- Property choose karo --</option>';
+    (myProps||[]).forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = (p._id||'').toString();
+      opt.textContent = (p.title||'Property') + ' — ' + (p.address||'');
+      if(propId && (p._id||'').toString() === propId) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+  const statusEl = document.getElementById('llw-tenant-status');
+  if(statusEl) statusEl.textContent = '';
+
   if (prop) {
     const pa = document.getElementById('llw-prop-addr'); if(pa) pa.value = prop.address||prop.propertyAddress||prop.title||'';
     const pc = document.getElementById('llw-city'); if(pc) pc.value = prop.city||'';
     const pr = document.getElementById('llw-rent'); if(pr) pr.value = prop.rent||'';
     document.getElementById('llwiz-prop-title').textContent = prop.title||'New Lease Agreement';
     document.getElementById('llwiz-prop-sub').textContent = prop.address||prop.title||'Fill in all details and sign';
+    if(propId) llwizOnPropSelect(propId);
   } else {
     document.getElementById('llwiz-prop-title').textContent = 'New Lease Agreement';
-    document.getElementById('llwiz-prop-sub').textContent = 'Fill in all details and sign';
+    document.getElementById('llwiz-prop-sub').textContent = 'Property dropdown se select karo';
   }
   _llWizSigPads['ll'] = null;
   _llWizSigPads['tn'] = null;
   _llwizGoTo(1);
   document.getElementById('llwiz-save-btn').disabled = false;
-  document.getElementById('llwiz-save-btn').textContent = '💾 Save & Lock Agreement';
+  document.getElementById('llwiz-save-btn').textContent = '📨 Save & Send to Tenant for Signing';
   document.getElementById('llwiz-save-err').style.display = 'none';
   document.getElementById('ll-lease-wizard-modal').style.display = 'flex';
   document.body.style.overflow = 'hidden';
