@@ -1,3 +1,9 @@
+
+const express  = require('express');
+const Property = require('../models/Property');
+const { protect, adminOnly } = require('../middleware/auth');
+const router = express.Router();
+
 // GET all rented properties for this landlord (with tenant info)
 router.get('/my/rented', protect, async (req, res) => {
   try {
@@ -10,10 +16,6 @@ router.get('/my/rented', protect, async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
-const express  = require('express');
-const Property = require('../models/Property');
-const { protect, adminOnly } = require('../middleware/auth');
-const router = express.Router();
 
 // GET landlord's OWN properties (uses JWT — no ID needed in URL)
 router.get('/my', protect, async (req, res) => {

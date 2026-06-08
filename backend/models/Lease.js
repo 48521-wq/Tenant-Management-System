@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const leaseSchema = new mongoose.Schema({
   // Core relations
-  tenantId:       { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  tenantId:       { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   landlordId:     { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   propertyId:     { type: mongoose.Schema.Types.ObjectId, ref: 'Property', default: null },
 
@@ -45,7 +45,10 @@ const leaseSchema = new mongoose.Schema({
 
   // Terms & status
   terms:          { type: String, default: '' },
-  status:         { type: String, enum: ['pending','active','expired','terminated','rejected'], default: 'pending' },
+  fullAgreementHtml: { type: String, default: '' },
+  // pending_tenant_signature = landlord signed, waiting for tenant
+  // active = both signed, locked
+  status:         { type: String, enum: ['pending','pending_tenant_signature','active','expired','terminated','rejected'], default: 'pending' },
   isLocked:       { type: Boolean, default: false },
   acceptedAt:     { type: Date, default: null },
   signedAt:       { type: Date, default: Date.now },
