@@ -124,6 +124,15 @@ function handleForgot() {
 // ═══════════════════════════════════════════════════════
 //  SIGN IN
 // ═══════════════════════════════════════════════════════
+function isValidEnglishName(value) {
+  return /^[A-Za-z ]+$/.test((value||'').trim());
+}
+
+function enforceLettersInput(el) {
+  if (!el) return;
+  el.value = el.value.replace(/[^A-Za-z ]+/g, '');
+}
+
 async function handleSignin() {
   clearErr();
   const email = document.getElementById('signin-email')?.value.trim().toLowerCase();
@@ -155,6 +164,7 @@ async function handleSignup() {
   const pass  = document.getElementById('signup-password')?.value;
   const conf  = document.getElementById('signup-confirm')?.value;
   if (!name||!email||!pass||!conf) { showErr('Fill in all fields.'); return; }
+  if (!isValidEnglishName(name)) { showErr('Full name may only contain letters and spaces.'); return; }
   if (pass !== conf) { showErr('Passwords do not match.'); return; }
   if (pass.length < 6) { showErr('Password must be at least 6 characters.'); return; }
   if (!selRole) {

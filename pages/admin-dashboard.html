@@ -30,7 +30,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 /* LAYOUT */
 .layout{display:flex;flex:1;position:relative;z-index:1}
 /* SIDEBAR */
-.sidebar{width:220px;flex-shrink:0;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto}
+.sidebar{width:220px;flex-shrink:0;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:62px;min-height:calc(100vh - 62px);overflow-y:auto}
 .sb-sec{padding:16px 12px 6px}
 .sb-lbl{font-size:10px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;padding:0 10px 8px;display:block}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.18s;margin-bottom:2px;border:none;background:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left}
@@ -43,7 +43,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .sb-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--red),#FF8E53);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
 .sb-uname{font-size:12px;font-weight:600;color:var(--text)}.sb-urole{font-size:10px;color:var(--muted)}
 /* MAIN */
-.main{flex:1;min-width:0}
+.main{flex:1;min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden}
 .page{display:none;padding:28px 32px 52px;animation:pgIn 0.27s ease both}
 .page.active{display:block}
 @keyframes pgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -558,10 +558,19 @@ tr:hover td {
 
 /* ─── MAIN PAGE PADDING ─── */
 .page {
-  padding: 30px 36px 60px !important;
+  padding: 24px 28px 48px !important;
+}
+#page-dashboard {
+  padding: 18px 20px 40px !important;
+}
+#page-dashboard .stats-row {
+  gap: 10px;
+}
+#page-dashboard .stat-card {
+  padding: 12px 14px;
 }
 @media (max-width: 900px) {
-  .page { padding: 20px 18px 40px !important; }
+  .page { padding: 18px 14px 36px !important; }
   .stats-row { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
@@ -1968,16 +1977,24 @@ function openAdmin3DReqModal(reqId) {
   document.getElementById('adm3d-title').textContent = req.propertyTitle || 'Request Detail';
   document.getElementById('adm3d-status').innerHTML = adm3dBadge(req.status);
 
-  // Info
-  document.getElementById('adm3d-info').innerHTML = [
+  // Info — pill-style tags with color swatches
+  const _infoTags = [
     `👤 ${req.landlordName||'Landlord'}`,
-    `🏠 ${req.requirements?.houseType||'standard'}`,
-    `🏢 ${req.requirements?.floors||1} floor(s)`,
+    `🏠 ${(req.requirements?.houseType||'standard').charAt(0).toUpperCase()+(req.requirements?.houseType||'standard').slice(1)}`,
+    `🏢 ${req.requirements?.floors||1} Floor(s)`,
     req.requirements?.hasGarden ? '🌿 Garden' : '',
     req.requirements?.hasPool   ? '🏊 Pool'   : '',
     req.requirements?.hasGarage ? '🚗 Garage' : '',
-    req.requirements?.extraNotes ? `📝 "${req.requirements.extraNotes}"` : '',
-  ].filter(Boolean).join(' &nbsp;|&nbsp; ');
+    req.requirements?.wallColor  ? `<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:${req.requirements.wallColor};display:inline-block;border:1px solid rgba(0,0,0,0.2)"></span>Wall</span>` : '',
+    req.requirements?.roofColor  ? `<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:${req.requirements.roofColor};display:inline-block;border:1px solid rgba(0,0,0,0.2)"></span>Roof</span>` : '',
+    req.requirements?.floorColor ? `<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:${req.requirements.floorColor};display:inline-block;border:1px solid rgba(0,0,0,0.2)"></span>Floor</span>` : '',
+    req.requirements?.extraNotes ? `📝 "${req.requirements.extraNotes.slice(0,50)}"` : '',
+    req.agreedAmount ? `<span style="color:#22c55e;font-weight:700">🤝 Agreed Rs. ${req.agreedAmount.toLocaleString()}</span>` : (req.proposedAmount ? `<span style="color:var(--gold,#C9A96E);font-weight:700">💰 Proposed Rs. ${req.proposedAmount.toLocaleString()}</span>` : ''),
+  ].filter(Boolean);
+  document.getElementById('adm3d-info').style.display = 'flex';
+  document.getElementById('adm3d-info').style.flexWrap = 'wrap';
+  document.getElementById('adm3d-info').style.gap = '6px';
+  document.getElementById('adm3d-info').innerHTML = _infoTags.map(t=>`<span style="padding:3px 9px;border-radius:99px;background:var(--card);border:1px solid var(--border);white-space:nowrap;font-size:11px">${t}</span>`).join('');
 
   // Pre-fill 3D builder from requirements
   const setVal = (id, val) => { const e=document.getElementById(id); if(e) e.value=val; };
@@ -1992,17 +2009,21 @@ function openAdmin3DReqModal(reqId) {
   setChk('adm3d-build-garage', req.requirements?.hasGarage||false);
   if(req.proposedAmount) setVal('adm3d-finalize-amount', req.proposedAmount);
 
-  // Messages
+  // Messages — improved chat bubbles
   const msgsEl = document.getElementById('adm3d-msgs');
-  msgsEl.innerHTML = (req.messages||[]).length ? (req.messages||[]).map(m => `
-    <div style="display:flex;flex-direction:column;align-items:${m.from==='admin'?'flex-end':'flex-start'}">
-      <div style="max-width:80%;padding:9px 13px;border-radius:12px;background:${m.from==='admin'?'rgba(255,107,107,0.12)':'var(--input-bg)'};border:1px solid ${m.from==='admin'?'rgba(255,107,107,0.3)':'var(--border)'};font-size:13px;color:var(--text)">
-        ${m.text}
-        ${m.amount ? `<div style="font-size:11px;font-weight:700;color:var(--gold,#C9A96E);margin-top:4px">💰 Rs. ${m.amount.toLocaleString()}</div>` : ''}
+  msgsEl.innerHTML = (req.messages||[]).length ? (req.messages||[]).map(m => {
+    const isAdmin = m.from==='admin';
+    return `<div style="display:flex;flex-direction:column;align-items:${isAdmin?'flex-end':'flex-start'}">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;${isAdmin?'flex-direction:row-reverse':''}">
+        <div style="width:26px;height:26px;border-radius:50%;background:${isAdmin?'rgba(255,107,107,0.15)':'rgba(201,169,110,0.15)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:${isAdmin?'#FF6B6B':'var(--gold,#C9A96E)'}">${isAdmin?'AD':'LO'}</div>
+        <span style="font-size:10px;color:var(--muted)">${isAdmin?'You (Admin)':'Landlord'} · ${new Date(m.createdAt||Date.now()).toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'})}</span>
       </div>
-      <div style="font-size:10px;color:var(--muted);margin-top:3px">${m.from==='admin'?'You (Admin)':'Landlord'} · ${new Date(m.createdAt||Date.now()).toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'})}</div>
-    </div>
-  `).join('') : '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">No messages yet. Start by proposing an amount.</div>';
+      <div style="max-width:82%;padding:10px 14px;border-radius:${isAdmin?'14px 4px 14px 14px':'4px 14px 14px 14px'};background:${isAdmin?'rgba(255,107,107,0.08)':'var(--input-bg)'};border:1px solid ${isAdmin?'rgba(255,107,107,0.25)':'var(--border)'};font-size:13px;color:var(--text);line-height:1.5">
+        ${m.text}
+        ${m.amount ? `<div style="margin-top:6px;display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;background:rgba(201,169,110,0.15);border:1px solid rgba(201,169,110,0.3);font-size:12px;font-weight:700;color:var(--gold,#C9A96E)">💰 Rs. ${Number(m.amount).toLocaleString()}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('') : '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px"><div style="font-size:28px;margin-bottom:8px">💬</div>No messages yet. Start by proposing an amount below.</div>';
   msgsEl.scrollTop = msgsEl.scrollHeight;
 
   // Show/hide action panels based on status
