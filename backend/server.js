@@ -22,6 +22,7 @@ app.use('/api/properties',     require('./routes/properties'));
 app.use('/api/complaints',     require('./routes/complaints'));
 app.use('/api/maintenance',    require('./routes/maintenance'));
 app.use('/api/payments',       require('./routes/payments'));
+app.use('/api/notifications',  require('./routes/notifications'));
 app.use('/api/leases',         require('./routes/leases'));
 app.use('/api/lease-agreements', require('./routes/leaseAgreements'));
 app.use('/api/rental-requests', require('./routes/rentalRequests'));
