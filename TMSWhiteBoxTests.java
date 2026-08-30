@@ -4,18 +4,18 @@ import java.lang.reflect.*;
 
 /**
  * ╔══════════════════════════════════════════════════════════════════════╗
- * ║         TMS - WHITE BOX TESTING SUITE                               ║
+ * ║         TMS - WHITE BOX TESTING SUITE                                ║
  * ║         Tenant Management System                                     ║
- * ║         Tool: JUnit-style (Self-contained, no external jars)        ║
+ * ║         Tool: JUnit-style (Self-contained, no external jars)         ║
  * ║                                                                      ║
  * ║  Modules:                                                            ║
- * ║   1. Auth      (register, login, token)                             ║
- * ║   2. Property  (CRUD, authorization, filters)                       ║
- * ║   3. Payment   (create, roles, validation)                          ║
- * ║   4. Lease     (create, date validation, roles)                     ║
- * ║   5. Maintenance (submit, status update, roles)                     ║
- * ║   6. Complaints  (file, status update, roles)                       ║
- * ║   7. Users      (block, verify, delete - admin only)                ║
+ * ║   1. Auth      (register, login, token)                              ║
+ * ║   2. Property  (CRUD, authorization, filters)                        ║
+ * ║   3. Payment   (create, roles, validation)                           ║
+ * ║   4. Lease     (create, date validation, roles)                      ║
+ * ║   5. Maintenance (submit, status update, roles)                      ║
+ * ║   6. Complaints  (file, status update, roles)                        ║
+ * ║   7. Users      (block, verify, delete - admin only)                 ║
  * ╚══════════════════════════════════════════════════════════════════════╝
  */
 public class TMSWhiteBoxTests {

@@ -20,7 +20,9 @@ router.get('/my/rented', protect, async (req, res) => {
 // GET landlord's OWN properties (uses JWT — no ID needed in URL)
 router.get('/my', protect, async (req, res) => {
   try {
-    const props = await Property.find({ landlordId: req.user._id }).sort({ createdAt: -1 });
+    const props = await Property.find({ landlordId: req.user._id })
+      .sort({ createdAt: -1 })
+      .populate('tenantId', 'name email phone cnic address');
     res.json({ success: true, count: props.length, properties: props });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
@@ -42,7 +44,26 @@ router.get('/', async (req, res) => {
         filter.landlordId = req.query.landlordId;
       }
     }
-    const props = await Property.find(filter).sort({ createdAt: -1 });
+
+    let query = Property.find(filter).sort({ createdAt: -1 });
+    if (req.query.full === 'true' || req.query.fields === 'all') {
+      // Return full document when explicitly requested
+    } else {
+      const defaultFields = [
+        '_id', 'title', 'type', 'area', 'address', 'city', 'rent', 'beds', 'baths', 'sqft',
+        'description', 'status', 'landlordName', 'tenantId', 'tenantName',
+        'model3d', 'tenantFurnitureLayout', 'frontImage', 'createdAt'
+      ].join(' ');
+      if (req.query.fields) {
+        const allowed = req.query.fields.split(',').map(f => f.trim()).filter(Boolean);
+        const safe = Array.from(new Set(allowed.concat(['_id']))).join(' ');
+        query = query.select(safe);
+      } else {
+        query = query.select(defaultFields);
+      }
+    }
+
+    const props = await query;
     res.json({ success: true, count: props.length, properties: props });
   } catch (e) { console.error(e); res.status(500).json({ success: false, message: 'Server error.' }); }
 });

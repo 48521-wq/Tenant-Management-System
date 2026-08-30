@@ -14,7 +14,6 @@ const TMS = {
     properties: 'tms_properties',
     complaints: 'tms_complaints',
     maintenance: 'tms_maintenance',
-    agreements: 'tms_agreements',
     logs: 'tms_logs',
     notifications: 'tms_notifications',
     users: 'tms_users',
@@ -168,19 +167,6 @@ const TMS = {
     this.saveMaintenance(list);
   },
 
-  // ─────────────────── AGREEMENTS ────────────────────
-  getAgreements() { return this.get(this.KEYS.agreements); },
-  saveAgreements(d) { this.save(this.KEYS.agreements, d); },
-
-  addAgreement(data) {
-    const list = this.getAgreements();
-    const a = { id: this.newId('AGR'), ...data, status: data.status || 'active', createdAt: new Date().toLocaleDateString('en-PK', { day: 'numeric', month: 'long', year: 'numeric' }) };
-    list.push(a);
-    this.saveAgreements(list);
-    this.addLog('success', `Lease agreement created: ${a.id}`, 'admin');
-    return a;
-  },
-
   // ─────────────────── LOGS ──────────────────────────
   getLogs() { return this.get(this.KEYS.logs); },
 
@@ -227,7 +213,7 @@ const TMS = {
     });
     // Also refresh list if notifications page is currently visible
     const notifPageEl = document.getElementById('page-notifications');
-    if (notifPageEl && notifPageEl.classList.contains('active')) {
+    if (notifPageEl && notifPageEl.classList.contains('active') && !window.TMS_SKIP_LEGACY_NOTIFS) {
       if (typeof tmsRenderNotifs === 'function') tmsRenderNotifs();
     }
   },
@@ -260,11 +246,9 @@ const TMS = {
     const properties = this.getProperties();
     const complaints = this.getComplaints();
     const maintenance = this.getMaintenance();
-    const agreements = this.getAgreements();
     const users = (() => { try { return Object.keys(JSON.parse(localStorage.getItem('tms_users') || '{}')); } catch (e) { return []; } })();
 
     const openIssues = complaints.filter(c => c.status === 'open').length + maintenance.filter(m => m.status === 'pending').length;
-    const activeLeases = agreements.filter(a => a.status === 'active').length;
     const pendingLandlords = landlords.filter(l => l.status === 'pending').length;
     const openComplaints = complaints.filter(c => c.status === 'open').length;
     const unreadNotifs = this.getNotifs().filter(n => !n.read && this._isNotifForUser(n)).length;
@@ -274,7 +258,6 @@ const TMS = {
       properties: properties.length,
       tenants: tenants.length,
       landlords: landlords.length,
-      activeLeases,
       openIssues,
       openComplaints,
       pendingLandlords,
@@ -539,47 +522,6 @@ function tmsRenderMaintenance() {
     </tr>`).join('');
 }
 
-// ── Render Agreements ───────────────────────────────────
-function tmsRenderAgreements() {
-  const container = document.getElementById('agreements-list');
-  if (!container) return;
-  const list = TMS.getAgreements();
-  if (!list.length) {
-    container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">No lease agreements created yet.</div>`;
-    return;
-  }
-  container.innerHTML = list.map(a => `
-    <div class="agr-card">
-      <div class="agr-top">
-        <div class="agr-icon">📄</div>
-        <div class="agr-info"><h4>${a.id} — ${a.property || 'Property'}</h4><p>Generated ${a.createdAt}</p></div>
-        <span class="badge ${a.status === 'active' ? 'b-green' : 'b-muted'}" style="margin-left:auto">${a.status || 'active'}</span>
-      </div>
-      <div class="agr-details">
-        <div class="agr-det"><div class="agr-det-lbl">Tenant</div><div class="agr-det-val">${a.tenant || '—'}</div></div>
-        <div class="agr-det"><div class="agr-det-lbl">Landlord</div><div class="agr-det-val">${a.landlord || '—'}</div></div>
-        <div class="agr-det"><div class="agr-det-lbl">Monthly Rent</div><div class="agr-det-val" style="color:var(--gold)">Rs. ${Number(a.rent || 0).toLocaleString()}</div></div>
-        <div class="agr-det"><div class="agr-det-lbl">Start Date</div><div class="agr-det-val">${a.startDate || '—'}</div></div>
-        <div class="agr-det"><div class="agr-det-lbl">End Date</div><div class="agr-det-val">${a.endDate || '—'}</div></div>
-        <div class="agr-det"><div class="agr-det-lbl">Duration</div><div class="agr-det-val">${a.duration || '—'}</div></div>
-      </div>
-      <div style="display:flex;gap:8px">
-        ${a.status === 'active' ? `<button class="btn btn-warn btn-sm" onclick="tmsTerminateAgreement('${a.id}')">Terminate</button>` : ''}
-        <button class="btn btn-danger btn-sm" onclick="tmsDeleteAgreement('${a.id}')">Delete</button>
-      </div>
-    </div>`).join('');
-}
-
-function tmsTerminateAgreement(id) {
-  const list = TMS.getAgreements().map(a => a.id === id ? { ...a, status: 'terminated' } : a);
-  TMS.saveAgreements(list); tmsRenderAgreements(); tmsUpdateStats();
-}
-function tmsDeleteAgreement(id) {
-  if (!confirm('Delete this agreement?')) return;
-  const list = TMS.getAgreements().filter(a => a.id !== id);
-  TMS.saveAgreements(list); tmsRenderAgreements(); tmsUpdateStats();
-}
-
 // ── Render Logs ─────────────────────────────────────────
 function tmsRenderLogs() {
   const container = document.getElementById('logs-container');
@@ -746,24 +688,6 @@ function tmsSubmitAddMaintenance() {
   tmsRenderMaintenance(); tmsUpdateStats();
 }
 
-// ── Add Agreement Form Handler ───────────────────────────
-function tmsSubmitAddAgreement() {
-  const tenant = document.getElementById('add-a-tenant')?.value.trim();
-  const landlord = document.getElementById('add-a-landlord')?.value.trim();
-  const property = document.getElementById('add-a-property')?.value.trim();
-  const rent = document.getElementById('add-a-rent')?.value.trim();
-  const startDate = document.getElementById('add-a-start')?.value;
-  const endDate = document.getElementById('add-a-end')?.value;
-  const duration = document.getElementById('add-a-duration')?.value.trim();
-
-  if (!tenant || !landlord) { tmsShowFormMsg('add-agr-msg', 'Tenant and landlord are required.', false); return; }
-
-  TMS.addAgreement({ tenant, landlord, property, rent: Number(rent), startDate, endDate, duration, status: 'active' });
-  document.getElementById('add-agreement-form')?.reset();
-  tmsShowFormMsg('add-agr-msg', '✅ Agreement created successfully!', true);
-  tmsRenderAgreements(); tmsUpdateStats();
-}
-
 // ── Form message helper ──────────────────────────────────
 function tmsShowFormMsg(elId, msg, success) {
   const el = document.getElementById(elId);
@@ -864,7 +788,6 @@ function tmsOnPageChange(pageId) {
     case 'properties': tmsRenderProperties(); break;
     case 'complaints': tmsRenderComplaints(); break;
     case 'maintenance': tmsRenderMaintenance(); break;
-    case 'agreements': tmsRenderAgreements(); break;
     case 'logs': tmsRenderLogs(); break;
     case 'notifications': tmsRenderNotifs(); break;
     case 'verification': tmsRenderVerification(); break;
@@ -884,6 +807,7 @@ try {
   window._tmsBroadcast = new BroadcastChannel('tms_notifications_channel');
   window._tmsBroadcast.onmessage = (e) => {
     if (e.data && e.data.type === 'tms_notif_update') {
+      if (window.TMS_SKIP_LEGACY_NOTIFS) return;
       if (typeof TMS !== 'undefined') {
         TMS._refreshNotifBadge();
         if (typeof tmsUpdateStats === 'function') tmsUpdateStats();
@@ -899,20 +823,17 @@ try {
 // Method 2: storage event (cross-tab fallback)
 window.addEventListener('storage', (e) => {
   if (e.key === 'tms_notifications') {
-    if (typeof TMS !== 'undefined') {
-      TMS._refreshNotifBadge();
-      if (typeof tmsUpdateStats === 'function') tmsUpdateStats();
-      if (typeof tmsRenderNotifs === 'function') {
-        const notifPage = document.getElementById('notifs-list');
-        if (notifPage) tmsRenderNotifs();
-      }
-    }
+    if (window.TMS_SKIP_LEGACY_NOTIFS) return;
+    const notifPage = document.getElementById('notifs-list');
+    if (notifPage) tmsRenderNotifs();
   }
 });
 
 // Method 3: Polling every 3 seconds as safety net
 setInterval(() => {
   if (typeof TMS !== 'undefined' && typeof TMS._refreshNotifBadge === 'function') {
-    TMS._refreshNotifBadge();
+    if (!window.TMS_SKIP_LEGACY_NOTIFS) {
+      TMS._refreshNotifBadge();
+    }
   }
 }, 3000);

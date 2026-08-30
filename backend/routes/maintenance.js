@@ -101,8 +101,52 @@ router.put('/:id/done', protect, async (req, res) => {
     if (!request.landlordId && request.landlordName !== req.user.name) {
       return res.status(403).json({ success: false, message: 'Not authorized.' });
     }
+    if (request.status !== 'in_progress') {
+      return res.status(400).json({ success: false, message: 'Request must be in progress to mark done.' });
+    }
+    request.status = 'pending_confirmation';
+    request.resolvedAt = null;
+    await request.save();
+    res.json({ success: true, request });
+  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
+});
+
+const pendingConfirmationStates = ['pending_confirmation','pending-confirmation','awaiting_confirmation','awaiting-confirmation'];
+const isPendingConfirmation = status => pendingConfirmationStates.includes(status);
+
+// PUT tenant confirm completion
+router.put('/:id/confirm', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'tenant') return res.status(403).json({ success: false, message: 'Not authorized.' });
+    const request = await Maintenance.findById(req.params.id);
+    if (!request) return res.status(404).json({ success: false, message: 'Request not found.' });
+    if (!request.tenantId || request.tenantId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized.' });
+    }
+    if (!isPendingConfirmation(request.status)) {
+      return res.status(400).json({ success: false, message: 'This request is not awaiting confirmation.' });
+    }
     request.status = 'resolved';
     request.resolvedAt = new Date();
+    await request.save();
+    res.json({ success: true, request });
+  } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
+});
+
+// PUT tenant reject completion
+router.put('/:id/reject', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'tenant') return res.status(403).json({ success: false, message: 'Not authorized.' });
+    const request = await Maintenance.findById(req.params.id);
+    if (!request) return res.status(404).json({ success: false, message: 'Request not found.' });
+    if (!request.tenantId || request.tenantId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized.' });
+    }
+    if (!isPendingConfirmation(request.status)) {
+      return res.status(400).json({ success: false, message: 'This request is not awaiting confirmation.' });
+    }
+    request.status = 'in_progress';
+    request.resolvedAt = null;
     await request.save();
     res.json({ success: true, request });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
