@@ -5,7 +5,7 @@ const uri = process.env.MONGODB_URI;
   try {
     await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
     const db = mongoose.connection.db;
-    const names = ['payments','complaints','maintenances','leases'];
+    const names = ['payments','complaints','maintenances'];
     for (const name of names) {
       const coll = db.collection(name);
       const count = await coll.countDocuments();

@@ -1,18 +1,18 @@
 # 🏠 TMS - Rental Request System  
-## مکمل راہنمائی
+## Complete Guide
 
 ---
 
-## ✅ **وہ کیا بنایا گیا:**
+## ✅ **What Was Built:**
 
 ### **1. DATABASE MODEL** ✨
 - **File:** `backend/models/RentalRequest.js`
 - **Features:**
-  - Tenant اور Landlord کی معلومات محفوظ کرتا ہے
-  - Property کی تفصیلات store کرتا ہے
-  - Request کا status (pending, accepted, rejected, cancelled)
-  - Tenant کا optional message/reason
-  - یادیں (requestedAt, respondedAt)
+  - Stores Tenant and Landlord information
+  - Stores Property details
+  - Request status (pending, accepted, rejected, cancelled)
+  - Tenant's optional message/reason
+  - Timestamps (requestedAt, respondedAt)
 
 ---
 
@@ -24,33 +24,33 @@
 #### **TENANT Routes:**
 ```
 GET  /api/rental-requests/my-requests
-- اپنی تمام requests دیکھیں (status اور تفصیلات کے ساتھ)
+- View all your requests (with status and details)
 
 POST /api/rental-requests/request
-- Available property کے لیے request بھیجیں
+- Send request for an available property
 - Body: { propertyId, message }
 
 PUT  /api/rental-requests/:id/cancel
-- اپنی pending request منسوخ کریں
+- Cancel your pending request
 ```
 
 #### **LANDLORD Routes:**
 ```
 GET  /api/rental-requests/received
-- آپ کی تمام received requests دیکھیں
+- View all your received requests
 
 PUT  /api/rental-requests/:id/accept
-- Request قبول کریں (property automatic assign ہوتی ہے)
-- دوسری pending requests خود بخود reject ہو جاتی ہیں
+- Accept a request (property is automatically assigned)
+- Other pending requests are automatically rejected
 
 PUT  /api/rental-requests/:id/reject
-- Request مسترد کریں
+- Reject a request
 ```
 
 #### **ADMIN Route:**
 ```
 GET  /api/rental-requests/
-- تمام requests دیکھیں (admin access)
+- View all requests (admin access)
 ```
 
 ---
@@ -58,35 +58,35 @@ GET  /api/rental-requests/
 ## **3. TENANT DASHBOARD** 👨‍💼
 - **File:** `pages/tenant-dashboard.html`
 
-### **نئے Features:**
+### **New Features:**
 
-#### **Property Cards میں "Request" Button:**
+#### **"Request" Button on Property Cards:**
 ```html
 🤝 Request Button
-- ہر property card پر دوپہلو buttons:
+- Two action buttons on each property card:
   • "View 3D Model" 
-  • "Request" (نیا!)
+  • "Request" (New!)
 ```
 
-#### **نیا "Rental Requests" Page:**
+#### **New "Rental Requests" Page:**
 ```
 📍 Location: Sidebar > Support > Rental Requests
 
-دکھائے جانے والی معلومات:
-✓ Request کی status (⏳ Pending, ✅ Accepted, ❌ Rejected, 🚫 Cancelled)
-✓ Property کی تفصیلات (نام، منتقل، کرایہ)
-✓ Landlord کا نام
-✓ Request بھیجنے کی تاریخ
-✓ Landlord کا جواب (اگر موصول ہو)
-✓ Tenant کا message (اگر دیا گیا ہو)
+Information Displayed:
+✓ Request status (⏳ Pending, ✅ Accepted, ❌ Rejected, 🚫 Cancelled)
+✓ Property details (name, location, rent)
+✓ Landlord's name
+✓ Request sent date
+✓ Landlord's response (if received)
+✓ Tenant's message (if provided)
 
 Actions:
-- Pending requests کو منسوخ کریں
+- Cancel pending requests
 ```
 
-#### **نیا Request Modal:**
+#### **New Request Modal:**
 ```
-کیا دیکھائے جاتے ہیں:
+What is Displayed:
 • Property title
 • Monthly rent amount
 • Location/Address
@@ -94,8 +94,8 @@ Actions:
 • Optional message box (180 characters)
 
 Actions:
-• "Send Request" - request بھیجیں
-• "Cancel" - بند کریں
+• "Send Request" - send the request
+• "Cancel" - close the dialog
 ```
 
 ---
@@ -103,107 +103,107 @@ Actions:
 ## **4. LANDLORD DASHBOARD** 👨‍🏫
 - **File:** `pages/landlord-dashboard.html`
 
-### **نئے Features:**
+### **New Features:**
 
-#### **نیا "Rental Requests" Page:**
+#### **New "Rental Requests" Page:**
 ```
 📍 Location: Sidebar > Tenant Issues > Rental Requests
 
-Requests کو Status کے حساب سے دکھایا جاتا ہے:
-✓ Pending (⏳) - فی الوقت
-✓ Accepted (✅) - قبول شدہ
-✓ Rejected (❌) - مسترد
-✓ Cancelled (🚫) - منسوخ
+Requests displayed by status:
+✓ Pending (⏳) - Awaiting response
+✓ Accepted (✅) - Approved
+✓ Rejected (❌) - Declined
+✓ Cancelled (🚫) - Cancelled
 
-ہر Request میں:
-• Property کی تفصیلات
-• Tenant کا نام اور email
-• Request کی تاریخ
-• Tenant کا message (اگر موجود ہو)
+Each Request shows:
+• Property details
+• Tenant's name and email
+• Request sent date
+• Tenant's message (if provided)
 
-Pending Requests کے لیے Actions:
-• "✅ Accept" - قبول کریں (property assign ہوتی ہے)
-• "❌ Reject" - مسترد کریں
+Actions for Pending Requests:
+• "✅ Accept" - Approve the request (property is assigned)
+• "❌ Reject" - Decline the request
 ```
 
 #### **Badge Updates:**
 ```
-Rental Requests nav item پر سرخ badge دکھاتا ہے:
-- Pending requests کی تعداد
-- خودکار اپڈیٹ ہوتا ہے
+Red badge on Rental Requests nav item:
+- Shows count of pending requests
+- Updates automatically
 ```
 
 ---
 
-## 🚀 **کیسے استعمال کریں:**
+## 🚀 **How to Use:**
 
-### **STEP 1: Server شروع کریں**
+### **STEP 1: Start the Server**
 ```bash
 cd backend
-npm install          # (پہلی بار صرف)
-npm start            # یا double-click START_SERVER.bat
+npm install          # (first time only)
+npm start            # or double-click START_SERVER.bat
 ```
-✓ http://localhost:5000 پر چل رہا ہے
+✓ Running on http://localhost:5000
 
-### **STEP 2: Frontend کھولیں**
+### **STEP 2: Open Frontend**
 ```
-index.html کھولیں (یا http://localhost:3000)
+Open index.html (or http://localhost:3000)
 ```
 
 ---
 
-## **📋 WORKFLOW - کیسے کام کرتا ہے:**
+## **📋 WORKFLOW - How It Works:**
 
-### **STEP 1️⃣: Tenant Property Browse کرتا ہے**
+### **STEP 1️⃣: Tenant Browses Properties**
 ```
 Tenant Dashboard → "Find Properties"
-→ Available properties دیکھتا ہے
+→ Views available properties
 ```
 
-### **STEP 2️⃣: Tenant Request بھیجتا ہے**
+### **STEP 2️⃣: Tenant Sends Request**
 ```
-Property card پر 🤝 "Request" button دبایا
-→ Modal کھلتا ہے
-→ Optional Message لکھ سکتا ہے
-→ "Send Request" دبایا
-→ ✅ Request Landlord تک پہنچتا ہے
+Clicks 🤝 "Request" button on property card
+→ Modal opens
+→ Can write optional message
+→ Clicks "Send Request"
+→ ✅ Request reaches Landlord
 ```
 
-### **STEP 3️⃣: Landlord Request دیکھتا ہے**
+### **STEP 3️⃣: Landlord Views Request**
 ```
 Landlord Dashboard → "Rental Requests" 
-→ Pending requests دیکھتے ہیں
-→ Tenant کی معلومات اور message دیکھتے ہیں
+→ Views pending requests
+→ Sees Tenant's information and message
 ```
 
-### **STEP 4️⃣: Landlord Accept یا Reject کرتا ہے**
+### **STEP 4️⃣: Landlord Accepts or Rejects**
 
-**اگر ACCEPT:**
+**If ACCEPT:**
 ```
-"✅ Accept" button دبایا
-→ Property -> tenantId assign ہوتی ہے
-→ Property status "available" → "rented" ہوتی ہے
-→ دوسری pending requests خود منسوخ ہو جاتی ہیں
-→ ✅ Request "accepted" status میں آتی ہے
-→ Tenant کو property دیکھتے ہیں: "✅ Accepted"
-```
-
-**اگر REJECT:**
-```
-"❌ Reject" button دبایا
-→ Request "rejected" status میں آتی ہے
-→ Tenant کو الرٹ ملتی ہے
-→ Property دستیاب رہتی ہے دوسرے tenants کے لیے
+Clicks "✅ Accept" button
+→ Property tenantId is assigned
+→ Property status changes "available" → "rented"
+→ Other pending requests are automatically rejected
+→ ✅ Request status becomes "accepted"
+→ Tenant sees property marked: "✅ Accepted"
 ```
 
-### **STEP 5️⃣: Tenant اپنا Request دیکھتا ہے**
+**If REJECT:**
+```
+Clicks "❌ Reject" button
+→ Request status becomes "rejected"
+→ Tenant is notified
+→ Property remains available for other tenants
+```
+
+### **STEP 5️⃣: Tenant Views Their Request**
 ```
 Tenant Dashboard → "Rental Requests"
-→ تمام requests کی status دیکھتے ہیں:
-  • ⏳ Pending → ہنوز موصول نہیں
-  • ✅ Accepted → Property assign ہو گئی! 🎉
-  • ❌ Rejected → دوبارہ request کا فیصلہ
-  • 🚫 Cancelled → منسوخ
+→ Views status of all requests:
+  • ⏳ Pending → Still awaiting response
+  • ✅ Accepted → Property assigned! 🎉
+  • ❌ Rejected → Try another property
+  • 🚫 Cancelled → Cancelled request
 ```
 
 ---
@@ -212,54 +212,54 @@ Tenant Dashboard → "Rental Requests"
 
 ### **Test 1: Simple Request**
 ```
-1. Tenant Register کریں
-2. "Find Properties" میں جائیں
-3. کوئی property select کریں
-4. 🤝 "Request" دبائیں
-5. "Send Request" کریں
-6. Tenant Dashboard → Rental Requests میں ⏳ Pending دیکھیں
+1. Register as a Tenant
+2. Go to "Find Properties"
+3. Select a property
+4. Click 🤝 "Request"
+5. Click "Send Request"
+6. Tenant Dashboard → Rental Requests - should show ⏳ Pending
 ```
 
 ### **Test 2: Accept Request**
 ```
-1. دوسرے browser میں Landlord login کریں
-2. "Rental Requests" میں جائیں
-3. ✅ "Accept" دبائیں
-4. Tenant کو "✅ Accepted" دیکھنی چاہیے
-5. Property "rented" status میں ہونی چاہیے
+1. Login as Landlord in another browser
+2. Go to "Rental Requests"
+3. Click ✅ "Accept"
+4. Tenant should see "✅ Accepted"
+5. Property should be in "rented" status
 ```
 
 ### **Test 3: Reject Request**
 ```
-1. نیا Tenant بنائیں
-2. Request بھیجیں (دوسری property)
-3. Landlord "❌ Reject" دبائے
-4. Tenant کو "❌ Rejected" دیکھنی چاہیے
-5. Property دستیاب رہے
+1. Create a new Tenant account
+2. Send a request (for another property)
+3. Landlord clicks "❌ Reject"
+4. Tenant should see "❌ Rejected"
+5. Property should remain available
 ```
 
-### **Test 4: Message Include کریں**
+### **Test 4: Include Message**
 ```
-1. Request modal میں message لکھیں
-2. Landlord کو یہ message Request میں نظر آنی چاہیے
-3. Accepted/Rejected ہونے کے بعد بھی message رہے
+1. Write a message in the request modal
+2. Landlord should see this message in the request
+3. Message should persist even after Accept/Reject
 ```
 
 ### **Test 5: Multiple Requests**
 ```
-1. ایک property کے لیے 3 tenants سے requests
-2. Landlord ایک ✅ Accept کرے
-3. دوسری 2 خود محدود ❌ Rejected ہو جانی چاہیں
-4. صرف 1 "✅ Accepted" رہے
+1. Get 3 requests from tenants for same property
+2. Landlord accepts one ✅
+3. Other 2 should auto-reject ❌
+4. Only 1 remains "✅ Accepted"
 ```
 
 ---
 
 ## **📊 Database Changes:**
 
-### **نیا Model:**
+### **New Model:**
 ```
-✓ RentalRequest collection بنایا
+✓ Created RentalRequest collection
   - tenantId, tenantName, tenantEmail, tenantPhone
   - propertyId, propertyTitle, propertyAddress, propertyRent
   - landlordId, landlordName, landlordEmail
@@ -271,9 +271,9 @@ Tenant Dashboard → "Rental Requests"
 ### **Existing Models Updated:**
 ```
 ✓ Property model:
-  - tenantId (null initially, request قبول ہونے پر assign)
+  - tenantId (null initially, assigned when request is accepted)
   - tenantName (stored for reference)
-  - status field "available" → "rented" (accept کے بعد)
+  - status field "available" → "rented" (after acceptance)
 ```
 
 ---
@@ -286,9 +286,9 @@ Tenant Dashboard → "Rental Requests"
 ├─────────────────────────────────────────────────────────────────┤
 │ Find Properties → Click "🤝 Request" → Send Message → Submit   │
 │                                                                   │
-│ ✓ RentalRequest create ہوتا ہے                                  │
+│ ✓ RentalRequest is created                                      │
 │ ✓ Status: "pending"                                             │
-│ ✓ Landlord کو notification ملتی ہے                              │
+│ ✓ Landlord receives notification                                │
 └─────────────────────────────────────────────────────────────────┘
                             ⬇️
 ┌─────────────────────────────────────────────────────────────────┐
@@ -306,7 +306,7 @@ Tenant Dashboard → "Rental Requests"
         │ ✓ Request status │   │ ✓ Request status │
         │   → "accepted"   │   │   → "rejected"   │
         │ ✓ Property.tenant│   │ ✓ Property stays │
-        │   ← tenantId     │   │   "available"    │
+        │   assigned       │   │   "available"    │
         │ ✓ Property.status│   │ ✓ Tenant notified│
         │   → "rented"     │   └──────────────────┘
         │ ✓ Other requests │
@@ -320,52 +320,52 @@ Tenant Dashboard → "Rental Requests"
 │ Dashboard → "Rental Requests" → See ✅ Accepted or ❌ Rejected │
 │                                                                   │
 │ If Accepted: Property is now RENTED to Tenant! 🎉               │
-│ If Rejected: Try Different Property                             │
+│ If Rejected: Try a different property                           │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## **📝 نوٹس:**
+## **📝 Notes:**
 
-1. ✅ **Real-time:** تمام معلومات MongoDB میں محفوظ ہیں
-2. ✅ **Validation:** Duplicate pending requests نہیں بن سکتے
-3. ✅ **Automatic:** Accept پر دوسری requests خود منسوخ ہوتی ہیں
-4. ✅ **Secure:** JWT authentication سے محفوظ
-5. ✅ **User Friendly:** سادہ UI اور clear status badges
-6. ✅ **Messages:** Tenants اپنا پیغام شامل کر سکتے ہیں
-7. ✅ **History:** Request history محفوظ رہتی ہے
-
----
-
-## **🎯 مکمل فیچرز:**
-
-### **Tenant کے لیے:**
-- ✅ Properties کو browse کریں
-- ✅ Property کے لیے "Request to Rent" دبائیں  
-- ✅ Optional message شامل کریں
-- ✅ اپنی requests کی status ٹریک کریں
-- ✅ Pending requests منسوخ کر سکتے ہیں
-- ✅ Accepted requests دیکھ سکتے ہیں
-
-### **Landlord کے لیے:**
-- ✅ Pending requests دیکھیں
-- ✅ Tenant کی معلومات دیکھیں
-- ✅ Accept یا Reject کریں
-- ✅ Request history دیکھیں
-- ✅ Property خودکار assign ہوتی ہے
-- ✅ Multiple requests میں سے ایک select کریں
+1. ✅ **Real-time:** All information is stored in MongoDB
+2. ✅ **Validation:** Duplicate pending requests cannot be created
+3. ✅ **Automatic:** Other requests auto-reject when one is accepted
+4. ✅ **Secure:** Protected with JWT authentication
+5. ✅ **User Friendly:** Simple UI with clear status badges
+6. ✅ **Messages:** Tenants can include their message
+7. ✅ **History:** Request history is preserved
 
 ---
 
-## **❓ سوالات؟**
+## **🎯 Complete Features:**
 
-اگر کچھ غلط ہو تو:
-1. Browser console دیکھیں (F12)
-2. Network tab میں API calls ٹیسٹ کریں
-3. MongoDB Atlas میں RentalRequest collection چیک کریں
-4. Backend logs دیکھیں (npm start output)
+### **For Tenants:**
+- ✅ Browse properties
+- ✅ Click "Request to Rent" on a property  
+- ✅ Include optional message
+- ✅ Track status of your requests
+- ✅ Cancel pending requests
+- ✅ View accepted requests
+
+### **For Landlords:**
+- ✅ View pending requests
+- ✅ See Tenant's information
+- ✅ Accept or Reject requests
+- ✅ View request history
+- ✅ Property is automatically assigned
+- ✅ Select one from multiple requests
 
 ---
 
-**🎉 آپ کا TMS اب مکمل Rental Request System کے ساتھ تیار ہے!**
+## **❓ Questions?**
+
+If something goes wrong:
+1. Check browser console (F12)
+2. Test API calls in Network tab
+3. Check MongoDB Atlas for RentalRequest collection
+4. Review backend logs (npm start output)
+
+---
+
+**🎉 Your TMS is now ready with a complete Rental Request System!**

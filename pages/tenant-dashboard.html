@@ -26,6 +26,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .nav-pill{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:rgba(201,169,110,0.08);color:var(--blue);font-size:12px;font-weight:600}
 .icon-btn{position:relative;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:var(--input-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.2s;flex-shrink:0;color:var(--text)}
 .icon-btn:hover{background:rgba(201,169,110,0.12);border-color:var(--blue)}
+.tn-search{flex:1;max-width:340px;position:relative;display:flex;align-items:center}
+.tn-search svg{position:absolute;left:12px;width:14px;height:14px;color:var(--muted);pointer-events:none}
+.tn-search input{width:100%;padding:8px 12px 8px 34px;border-radius:20px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none}
+.tn-search input::placeholder{color:var(--muted)}
+.gs-results{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 28px rgba(0,0,0,0.35);max-height:340px;overflow-y:auto;z-index:500}
+.gs-sec-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);padding:10px 14px 4px}
+.gs-item{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;font-size:13px;color:var(--text)}
+.gs-item:hover{background:rgba(201,169,110,0.1)}
+.gs-item small{display:block;color:var(--muted);font-size:11px;margin-top:1px}
+.gs-empty{padding:14px;text-align:center;color:var(--muted);font-size:12px}
+.welcome-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.welcome-head h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--text);margin:0}
+.welcome-head p{color:var(--muted);font-size:13px;margin-top:4px}
 .notif-badge{position:absolute;top:-2px;right:-2px;width:17px;height:17px;border-radius:50%;background:var(--error);font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
 .logout-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:9px;background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.2);color:#FF6B6B;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
 .logout-btn:hover{background:rgba(255,107,107,0.15)}
@@ -122,6 +135,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .b-red{background:rgba(255,107,107,0.1);color:#FF6B6B;border:1px solid rgba(255,107,107,0.2)}
 .b-blue{background:rgba(201,169,110,0.1);color:#C9A96E;border:1px solid rgba(201,169,110,0.2)}
 .b-muted{background:var(--input-bg);color:var(--muted);border:1px solid var(--border)}
+.b-gold{background:rgba(212,175,55,0.15);color:#D4AF37;border:1px solid rgba(212,175,55,0.35)}
 /* PROFILE */
 .profile-header{display:flex;align-items:center;gap:18px;margin-bottom:22px;padding:22px;background:var(--card);border:1px solid var(--border);border-radius:16px}
 .profile-av{width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-l));display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#fff;flex-shrink:0}
@@ -131,14 +145,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .notif-item.unread{border-color:rgba(201,169,110,0.25);background:rgba(201,169,110,0.04)}
 .notif-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:5px}
 .notif-text{font-size:13px;color:var(--text)}.notif-time{font-size:11px;color:var(--muted);margin-top:3px}
-/* LEASE */
-.lease-box{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:28px}
-.lease-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;text-align:center;margin-bottom:4px;color:var(--text)}
-.lease-sub{font-size:12px;color:var(--muted);text-align:center;margin-bottom:22px}
-.lease-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
-.lease-row:last-of-type{border-bottom:none}
-.lease-key{color:var(--muted);font-weight:600}.lease-val{font-weight:600;color:var(--text)}
-.sign-area{margin-top:20px;padding-top:20px;border-top:1px dashed var(--border);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 /* PAYMENT TABLE */
 .tbl-wrap{overflow-x:auto;margin-top:16px}
 table{width:100%;border-collapse:collapse;font-size:13px}
@@ -152,8 +158,8 @@ tr:hover td{background:rgba(201,169,110,0.03)}
 @keyframes spin{to{transform:rotate(360deg)}}
 /* STAT CARDS */
 .stat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:22px}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;transition:border-color 0.2s}
-.stat-card:hover{border-color:rgba(201,169,110,0.3)}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;width:100%}
+.stat-card:hover{border-color:var(--border)}
 .stat-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--blue)}
 .stat-lbl{font-size:11px;color:var(--muted);margin-top:4px;font-weight:600}
 /* 3D MODAL */
@@ -181,42 +187,6 @@ select {
   background-position: right 10px center;
   padding-right: 30px !important;
 }
-
-/* ═══ PROFESSIONAL LEASE AGREEMENT STYLES ═══ */
-.lease-box {
-  border: none !important;
-  padding: 0 !important;
-  background: transparent !important;
-}
-.lease-title {
-  font-family: 'Cormorant Garamond', 'Playfair Display', serif !important;
-  font-size: 28px !important;
-  font-weight: 700 !important;
-}
-.lease-row {
-  padding: 11px 0 !important;
-  border-bottom: 1px solid rgba(201,169,110,0.08) !important;
-  font-size: 13px;
-}
-.lease-key {
-  font-size: 10px !important;
-  font-weight: 700 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.6px !important;
-  color: var(--muted) !important;
-}
-.lease-val {
-  font-weight: 600 !important;
-  font-size: 13px !important;
-}
-.sign-area {
-  background: rgba(201,169,110,0.04);
-  border: 1px solid rgba(201,169,110,0.12);
-  border-radius: 12px;
-  padding: 16px;
-  margin-top: 16px !important;
-}
-
 
 /* ── Light theme: Furniture catalog buttons ── */
 /* Furniture page: ADD label */
@@ -847,7 +817,6 @@ body::after {
 [data-theme="light"] .list-item,
 [data-theme="light"] .pcard,
 [data-theme="light"] .notif-item,
-[data-theme="light"] .lease-box,
 [data-theme="light"] .filter-bar,
 [data-theme="light"] .ov-box,
 [data-theme="light"] .action-item,
@@ -870,7 +839,6 @@ body::after {
 /* ── Specific text classes ── */
 [data-theme="light"] .li-title,
 [data-theme="light"] .pcard-title,
-[data-theme="light"] .lease-title,
 [data-theme="light"] .ov-title,
 [data-theme="light"] .action-label,
 [data-theme="light"] .stat-val,
@@ -881,17 +849,11 @@ body::after {
 }
 [data-theme="light"] .li-sub,
 [data-theme="light"] .pcard-loc,
-[data-theme="light"] .lease-key,
-[data-theme="light"] .lease-sub,
 [data-theme="light"] .stat-lbl,
 [data-theme="light"] .stat-label,
 [data-theme="light"] .action-sub,
 [data-theme="light"] .notif-time {
   color: #4B5563 !important;
-}
-[data-theme="light"] .lease-val {
-  color: #0D1117 !important;
-  font-weight: 600 !important;
 }
 
 /* ── Table ── */
@@ -1034,11 +996,6 @@ body::after {
   color: #374151 !important;
 }
 
-/* ── Sign area ── */
-[data-theme="light"] .sign-area {
-  border-top-color: rgba(0,0,0,0.10) !important;
-}
-
 /* ── Filter bar ── */
 [data-theme="light"] .filter-bar {
   background: #FFFFFF !important;
@@ -1105,6 +1062,69 @@ body::after {
 /* ═══════════════════════════════════════════════════════════
    END UNIFIED PROFESSIONAL LIGHT THEME
 ═══════════════════════════════════════════════════════════ */
+
+/* ── LEASE AGREEMENT WIZARD ── */
+.lw-wrap{padding:0;overflow:hidden}
+.lw-tabs{display:flex;flex-wrap:wrap;gap:8px;padding:16px 20px;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)}
+.lw-tab{padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:var(--input-bg);color:var(--muted);font-size:12px;font-weight:600;cursor:default;font-family:'DM Sans',sans-serif}
+.lw-tab.active{background:linear-gradient(135deg,var(--gold),var(--gold-l));color:#1a1400;border-color:transparent}
+.lw-body{padding:22px}
+.lw-section-lbl{font-size:11px;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:14px}
+.lw-hint{font-size:12px;color:var(--muted);line-height:1.5}
+.lw-warn{background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.4);color:#FF8A8A;font-size:12.5px;padding:10px 14px;border-radius:10px;margin-bottom:14px;line-height:1.5}
+.lw-date-lbl{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
+.lw-date-input{width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text);font-family:inherit;font-size:13px}
+.lw-blk-lbl{font-size:11px;letter-spacing:0.4px;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:8px}
+.lw-grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.lw-kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--border);font-size:13px}
+.lw-kv span{color:var(--muted)}
+.lw-kv b{color:var(--text)}
+.lw-prop-row{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--input-bg);margin-bottom:12px;flex-wrap:wrap}
+.lw-prop-icon{width:38px;height:38px;border-radius:10px;background:rgba(37,99,235,0.12);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.lw-prop-info{flex:1;min-width:160px}
+.lw-prop-title{font-weight:700;font-size:14px;color:var(--text)}
+.lw-prop-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.lw-terms-box{max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:12px;padding:12px;background:var(--input-bg)}
+.lw-term{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:start;padding:8px 0;border-bottom:1px dashed var(--border)}
+.lw-term:last-child{border-bottom:none}
+.lw-term-title{grid-column:1;font-weight:700;background:transparent;border:1px solid transparent;color:var(--text);font-size:13px;padding:4px 6px;border-radius:6px;font-family:inherit}
+.lw-term-title:focus{border-color:var(--border);background:var(--card)}
+.lw-term-text{grid-column:1;background:transparent;border:1px solid transparent;color:var(--muted);font-size:12.5px;padding:4px 6px;border-radius:6px;font-family:inherit;resize:vertical}
+.lw-term-text:focus{border-color:var(--border);background:var(--card);color:var(--text)}
+.lw-term-del{grid-column:2;grid-row:1/3;align-self:center;width:24px;height:24px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:11px}
+.lw-term-del:hover{color:#FF6B6B;border-color:#FF6B6B}
+.lw-special{width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;padding:10px 13px;color:var(--text);font-family:inherit;font-size:13px}
+.lw-sig-area{min-height:70px;display:flex;align-items:center;padding:10px 14px;border:1px dashed var(--border);border-radius:10px;background:var(--input-bg)}
+.lw-sig-empty{color:var(--muted);font-size:13px}
+.lw-sig-img{max-height:64px}
+.lw-sig-typed{font-family:'Brush Script MT',cursive,serif;font-size:26px;color:var(--blue-l)}
+.lw-sig-final{font-size:22px}
+.lw-actions{display:flex;justify-content:space-between;gap:10px;margin-top:22px}
+.lw-paper{border:1px solid var(--border);border-radius:14px;padding:20px;background:var(--input-bg)}
+.lw-paper-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;text-align:center;color:var(--text)}
+.lw-paper-sub{text-align:center;color:var(--muted);font-size:12px;margin-bottom:14px}
+.lw-terms-readonly{max-height:280px;overflow-y:auto;padding-right:6px}
+.lw-term-ro{font-size:12.5px;margin-bottom:10px;color:var(--text)}
+.lw-term-ro p{color:var(--muted);margin-top:3px;line-height:1.5}
+.lw-special-ro{font-size:12.5px;color:var(--text);background:rgba(201,169,110,0.06);border:1px solid var(--border);border-radius:10px;padding:10px 13px;line-height:1.6}
+.lw-sig-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
+.lw-locked{text-align:center;padding:20px 10px}
+.lw-lock-icon{font-size:40px;margin-bottom:8px}
+.lw-lock-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px}
+@media (max-width:640px){.lw-grid2,.lw-sig-cols{grid-template-columns:1fr}}
+
+/* Signature modal */
+.lw-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(3px)}
+.lw-modal-overlay.open{display:flex}
+.lw-modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;width:min(520px,92vw)}
+.lw-modal-head{display:flex;justify-content:space-between;align-items:center;font-weight:700;color:var(--text);margin-bottom:14px;font-family:'Playfair Display',serif;font-size:16px}
+.lw-modal-x{background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer}
+.lw-sig-tabs{display:flex;gap:8px;margin-bottom:12px}
+.lw-sig-tab{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--input-bg);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.lw-sig-tab.active{background:linear-gradient(135deg,var(--blue),var(--blue-l));color:#fff;border-color:transparent}
+#lw-sig-canvas{width:100%;height:160px;border-radius:10px;border:1.5px dashed var(--border);background:#fff;touch-action:none;cursor:crosshair}
+.lw-sig-type-input{width:100%;padding:10px 13px;border-radius:10px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:14px;margin-bottom:12px}
+.lw-sig-type-preview{font-family:'Brush Script MT',cursive,serif;font-size:32px;color:var(--blue-l);min-height:44px;padding:6px 4px;border-bottom:1px solid var(--border)}
 </style>
 
 </head>
@@ -1118,11 +1138,12 @@ body::after {
 })();
 const API = 'http://localhost:5000/api';
 const tok = () => localStorage.getItem('tms_token');
-let agreementSyncTimer = null;
 
 async function tFetch(url, method='GET', body=null) {
   const fullUrl = API + url;
-  const opts = { method, headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+tok() } };
+  const opts = { method, headers: { 'Content-Type':'application/json' } };
+  const token = tok();
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
   if (body) opts.body = JSON.stringify(body);
   const r = await fetch(fullUrl, opts);
   const data = await r.json().catch(() => null);
@@ -1189,26 +1210,10 @@ function sp(id, el) {
   if(id==='maintenance')       loadMaintenance();
   if(id==='complaints')        loadComplaints();
   if(id==='payments')          loadPayments();
-  if(id==='agreement') {       loadLease(); startAgreementSync(); }
-  else { stopAgreementSync(); }
-  if(id==='rental-requests')   loadRentalRequests();
+  if(id==='requests')          loadRentalRequests();
+  if(id==='my-rentals')        loadMyRentals();
+  if(id==='lease-agreements')  initLeaseAgreements('tenant', tFetch);
   if(id==='notifications')     loadNotifications();
-}
-
-function startAgreementSync() {
-  stopAgreementSync();
-  agreementSyncTimer = setInterval(() => {
-    if (document.getElementById('page-agreement')?.classList.contains('active')) {
-      loadLease();
-    }
-  }, 20000);
-}
-
-function stopAgreementSync() {
-  if (agreementSyncTimer) {
-    clearInterval(agreementSyncTimer);
-    agreementSyncTimer = null;
-  }
 }
 
 // ── DOMContentLoaded ──────────────────────────────────
@@ -1228,7 +1233,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Set names
   ['pav','sav'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=init; });
-  ['pdn','sdn'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=name; });
+  ['pdn','sdn','welcome-name-t'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=name; });
   ['pde','sde'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=email; });
 
   // Profile form
@@ -1241,11 +1246,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const pcn=document.getElementById('pcn'); if(pcn) pcn.value=user.cnic||'';
 
   attachNumericOnlyInputs();
-  await loadProperties();
+  await loadAllProperties();
   // Update notification badges on load
   if (typeof tmsUpdateStats === 'function') tmsUpdateStats();
-  // Refresh notification badge every 5 seconds (for same-browser multi-tab)
-  setInterval(() => { if (typeof tmsUpdateStats === 'function') tmsUpdateStats(); }, 5000);
+  tmsUpdateNotifBadge();
+  // Refresh notification badge every 5 seconds
+  setInterval(() => {
+    if (typeof tmsUpdateStats === 'function') tmsUpdateStats();
+    tmsUpdateNotifBadge();
+  }, 5000);
 });
 
 // ═══════════════════════════════════════════════════════
@@ -1260,10 +1269,10 @@ async function loadProperties() {
     const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
     const userId = (user._id || user.id || '').toString();
 
-    // Load ALL properties and filter only those rented by this tenant
+    // Load rented properties only and keep the payload small
     let rentedProps = [];
     try {
-      const allData = await tFetch('/properties');
+      const allData = await tFetch('/properties?status=rented&fields=_id,status,tenantId,title,area,city,rent,beds,baths,type,frontImage,model3d,tenantFurnitureLayout');
       const allP = allData.properties || [];
       rentedProps = allP.filter(p => {
         const tid = (p.tenantId || p.tenant || '').toString();
@@ -1346,21 +1355,13 @@ function renderProps(list, rentedIds) {
   const myRented = new Set(rentedIds || []);
 
   const statusColors={available:'rgba(78,205,196,0.9)',rented:'rgba(255,179,71,0.9)',suspended:'rgba(255,107,107,0.9)'};
-  const premiumFallbacks={
-    'Villa':     'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1600&q=90&fit=crop&auto=format',
-    'House':     'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&q=90&fit=crop&auto=format',
-    'Apartment': 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1600&q=90&fit=crop&auto=format',
-    'Flat':      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1600&q=90&fit=crop&auto=format',
-    'Room':      'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1600&q=90&fit=crop&auto=format',
-  };
   grid.innerHTML = list.map(p => {
     const pid = p._id;
     const isMine = myRented.has(pid);
     const panoramaUrl = getProperty360Url(p);
     const has360 = !!panoramaUrl;
-    const fallbackSrc = premiumFallbacks[p.type] || premiumFallbacks['House'];
-    const coverImage = p.frontImage || (Array.isArray(p.images) && p.images.length ? p.images[0] : (typeof p.images === 'string' ? p.images : '')) || fallbackSrc;
-    const thumbnail = `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.onerror=null;this.src='${fallbackSrc}'">`;
+    const coverImage = p.frontImage || '';
+    const thumbnail = coverImage ? `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">` : '';
     const btnBaseStyle = 'flex:1;min-width:120px';
     const viewButton = has360
       ? `<button class="btn btn-gold btn-sm" style="${btnBaseStyle}" onclick="tenantView3D('${pid}')">View 360</button>`
@@ -1419,24 +1420,24 @@ async function populatePropertyDropdowns() {
     const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
     const userId = user._id || user.id || '';
     
-    // Get available properties
-    const availData = await tFetch('/properties?status=available');
+    // Get available properties with a smaller payload for dropdowns
+    const availData = await tFetch('/properties?status=available&fields=_id,title,area,city,rent,status,landlordName,address');
     const availProps = availData.properties || [];
     
-    // Get tenant's rented/assigned properties (use global allProps which already has them)
+    // Get tenant's rented/assigned properties (use global map first)
     const globalProps = window._tenantPropMap ? Object.values(window._tenantPropMap) : [];
     let rentedProps = globalProps.filter(p => {
       const tid = (p.tenantId || p.tenant || '').toString();
       return p.status === 'rented' && tid && tid === userId;
     });
-    // Fallback: fetch all if globalProps empty
+    // Fallback: fetch rented properties only
     if (!rentedProps.length && userId) {
       try {
-        const allPropsData = await tFetch('/properties');
+        const allPropsData = await tFetch('/properties?status=rented&fields=_id,status,tenantId,title,area,city,rent,beds,baths,type,frontImage,model3d,tenantFurnitureLayout,address');
         const allPropsArr = allPropsData.properties || [];
         rentedProps = allPropsArr.filter(p => {
           const tid = (p.tenantId || p.tenant || '').toString();
-          return p.status === 'rented' && tid === userId;
+          return p.status === 'rented' && tid && tid === userId;
         });
       } catch(e2) {}
     }
@@ -1498,18 +1499,42 @@ async function loadMaintenance() {
     const data = await tFetch('/maintenance');
     const items = data.requests || [];
     if (!items.length) { list.innerHTML = '<div class="loading" style="padding:20px">No maintenance requests yet.</div>'; return; }
-    const statusMap = {pending:'b-warn',in_progress:'b-blue',resolved:'b-green',cancelled:'b-muted'};
+    const statusMap = {pending:'b-warn',in_progress:'b-blue',pending_confirmation:'b-gold',resolved:'b-green',cancelled:'b-muted'};
+    const needsConfirmation = status => ['pending_confirmation','pending-confirmation','awaiting_confirmation','awaiting-confirmation'].includes(status);
     list.innerHTML = items.map(r => `
-      <div class="list-item">
+      <div class="list-item" style="${needsConfirmation(r.status) ? 'border:1px solid var(--gold);background:rgba(212,175,55,0.06);' : ''}">
         <div style="flex:1">
-          <div class="li-title">${r.type||'Request'}</div>
+          <div class="li-title">${r.type||'Request'}${needsConfirmation(r.status) ? ' <span style="font-size:11px;color:var(--gold);font-weight:600;background:rgba(212,175,55,0.15);padding:2px 7px;border-radius:10px;margin-left:6px">⚡ Action Required</span>' : ''}</div>
           <div class="li-sub">${r.description?.slice(0,80)}${r.description?.length>80?'…':''} · ${new Date(r.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>
+          ${needsConfirmation(r.status) ? `<div style="font-size:11px;color:var(--gold);margin-top:4px">🔔 Landlord has marked this as done — please confirm or reject below.</div>` : ''}
           ${r.adminNote?`<div style="font-size:11px;color:var(--blue);margin-top:3px">Admin: ${r.adminNote}</div>`:''}
         </div>
-        <span class="badge ${statusMap[r.status]||'b-muted'}">${r.status?.replace('_',' ')||'pending'}</span>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span class="badge ${statusMap[r.status]|| (needsConfirmation(r.status)?'b-gold':'b-muted')}">${needsConfirmation(r.status) ? '⏳ Confirm?' : (r.status?.replace(/[_-]/g,' ')||'pending')}</span>
+          ${needsConfirmation(r.status) ? `<button class="submit-btn" style="padding:6px 14px;font-size:12px;background:rgba(78,205,196,0.15);color:var(--green)" onclick="confirmMaintenance('${r._id}', this)">✔ Yes, Done</button>` : ''}
+          ${needsConfirmation(r.status) ? `<button class="submit-btn" style="padding:6px 14px;font-size:12px;background:rgba(255,107,107,0.12);color:var(--error)" onclick="rejectMaintenance('${r._id}', this)">✖ Not Fixed</button>` : ''}
+        </div>
       </div>
     `).join('');
   } catch { list.innerHTML = '<div class="loading">⚠️ Error loading. Is backend running?</div>'; }
+}
+async function confirmMaintenance(id, btn) {
+  if (!confirm('Confirm that this maintenance request has been completed?')) return;
+  btn.disabled=true; btn.textContent='Confirming…';
+  try {
+    const r = await tFetch('/maintenance/'+id+'/confirm','PUT',{});
+    if (r.success) { await loadMaintenance(); }
+    else { alert(r.message||'Failed.'); btn.disabled=false; btn.textContent='✔ Confirm Completed'; }
+  } catch { alert('Cannot connect to server.'); btn.disabled=false; btn.textContent='✔ Confirm Completed'; }
+}
+async function rejectMaintenance(id, btn) {
+  if (!confirm('Reject completion and send it back to the landlord as still in progress?')) return;
+  btn.disabled=true; btn.textContent='Rejecting…';
+  try {
+    const r = await tFetch('/maintenance/'+id+'/reject','PUT',{});
+    if (r.success) { await loadMaintenance(); }
+    else { alert(r.message||'Failed.'); btn.disabled=false; btn.textContent='✖ Reject Completion'; }
+  } catch { alert('Cannot connect to server.'); btn.disabled=false; btn.textContent='✖ Reject Completion'; }
 }
 async function submitMaint() {
   const type = document.getElementById('mt')?.value;
@@ -1632,6 +1657,10 @@ function showRequestModal(propertyId) {
         </div>
       </div>
 
+      <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px">
+        <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px">Your Offer (Optional)</label>
+        <input id="request-offer" type="number" min="1" placeholder="Enter a higher rent offer" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
+      </div>
       <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:16px">
         <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px">Message (Optional)</label>
         <textarea id="request-message" placeholder="Tell the landlord why you're interested..." style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:vertical;min-height:80px;width:100%;transition:border-color 0.2s" onFocus="this.style.borderColor='var(--blue)'" onBlur="this.style.borderColor='var(--border)'"></textarea>
@@ -1639,21 +1668,23 @@ function showRequestModal(propertyId) {
 
       <div style="display:flex;gap:10px">
         <button onclick="this.parentElement.parentElement.parentElement.remove()" style="flex:1;padding:10px;border-radius:9px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Cancel</button>
-        <button onclick="submitRentalRequest('${propertyId}', this.parentElement.parentElement)" style="flex:1;padding:10px;border-radius:9px;border:none;background:linear-gradient(135deg,#4ECDC4,#45B7A8);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Send Request</button>
+        <button onclick="submitRentalRequest('${propertyId}', this)" style="flex:1;padding:10px;border-radius:9px;border:none;background:linear-gradient(135deg,#4ECDC4,#45B7A8);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Send Request</button>
       </div>
     </div>
   `;
   document.body.appendChild(modal);
 }
 
-async function submitRentalRequest(propertyId, modalEl) {
+async function submitRentalRequest(propertyId, btn) {
   const message = document.getElementById('request-message')?.value?.trim() || '';
-  const btn = event.target;
-  btn.disabled = true;
-  btn.textContent = 'Sending…';
+  const proposedRent = document.getElementById('request-offer')?.value?.trim() || '';
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+  }
   
   try {
-    const r = await tFetch('/rental-requests/request', 'POST', { propertyId, message });
+    const r = await tFetch('/rental-requests/request', 'POST', { propertyId, message, proposedRent: proposedRent ? Number(proposedRent) : undefined });
     if (r.success) {
       alert('✅ Request sent to landlord!');
       // Close all request modals
@@ -1663,13 +1694,13 @@ async function submitRentalRequest(propertyId, modalEl) {
       await loadRentalRequests();
     } else {
       alert('⚠️ ' + (r.message || 'Failed to send request'));
-      btn.disabled = false;
-      btn.textContent = 'Send Request';
+      if (btn) { btn.disabled = false; btn.textContent = 'Send Request'; }
     }
   } catch(e) {
-    alert('❌ Cannot connect to server');
-    btn.disabled = false;
-    btn.textContent = 'Send Request';
+    console.error('submitRentalRequest error', e);
+    const message = e?.message || 'Unable to connect to the server.';
+    alert('❌ ' + message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Send Request'; }
   }
 }
 
@@ -1681,7 +1712,11 @@ async function loadRentalRequests() {
     const data = await tFetch('/rental-requests/my-requests');
     const requests = data.requests || [];
     
-    // Update badge
+    // Update page counts
+    const countLabel = document.getElementById('requests-count');
+    if (countLabel) {
+      countLabel.textContent = requests.length;
+    }
     const badge = document.getElementById('rental-requests-badge');
     const pendingCount = requests.filter(r => r.status === 'pending' || r.status === 'negotiating').length;
     if (badge) {
@@ -1694,8 +1729,10 @@ async function loadRentalRequests() {
       return;
     }
     
-    const statusBadges = {pending:'b-warn',accepted:'b-green',rejected:'b-red',cancelled:'b-muted',negotiating:'b-blue'};
-    const statusEmoji = {pending:'⏳',accepted:'✅',rejected:'❌',cancelled:'🚫',negotiating:'💬'};
+    const statusBadges = {pending:'b-warn',accepted:'b-green',rejected:'b-red',cancelled:'b-muted',negotiating:'b-blue',docs_pending:'b-warn',docs_submitted:'b-blue',docs_rejected:'b-red',docs_expired:'b-red'};
+    const statusEmoji  = {pending:'⏳',accepted:'✅',rejected:'❌',cancelled:'🚫',negotiating:'💬',docs_pending:'📄',docs_submitted:'🔍',docs_rejected:'❌',docs_expired:'⏰'};
+    const statusLabel  = {pending:'Pending',accepted:'Approved',rejected:'Rejected',cancelled:'Cancelled',negotiating:'Negotiating',docs_pending:'Documents Required',docs_submitted:'Docs Under Review',docs_rejected:'Documents Rejected',docs_expired:'Deadline Expired'};
+    window._myRequests = requests;
     
     list.innerHTML = requests.map(req => {
       const lastMsg = (req.negotiationMessages||[]).slice(-1)[0];
@@ -1708,14 +1745,36 @@ async function loadRentalRequests() {
             <div style="font-size:11px;color:var(--muted);margin-top:4px">Requested: ${new Date(req.requestedAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>
             ${req.proposedRent ? `<div style="font-size:12px;color:var(--blue);font-weight:600;margin-top:4px">🏷️ Your offer: Rs. ${Number(req.proposedRent).toLocaleString()}/mo</div>` : ''}
             ${req.agreedRent ? `<div style="font-size:12px;color:var(--green);font-weight:600;margin-top:4px">🤝 Agreed rent: Rs. ${Number(req.agreedRent).toLocaleString()}/mo</div>` : ''}
-            ${lastMsg ? `<div style="font-size:12px;color:var(--muted);margin-top:6px;padding:8px;background:var(--input-bg);border-left:2px solid var(--blue);border-radius:4px">${lastMsg.senderRole==='landlord'?'🏠 Landlord':'Aap'}: ${lastMsg.text||''}${lastMsg.proposedRent?' · Rs. '+Number(lastMsg.proposedRent).toLocaleString()+'/mo':''}</div>` : (req.message?`<div style="font-size:12px;color:var(--text);margin-top:6px;padding:8px;background:var(--input-bg);border-left:2px solid var(--blue);border-radius:4px">"${req.message}"</div>`:'')}
+            ${lastMsg ? `<div style="font-size:12px;color:var(--muted);margin-top:6px;padding:8px;background:var(--input-bg);border-left:2px solid var(--blue);border-radius:4px">${lastMsg.senderRole==='landlord'?'🏠 Landlord':'You'}: ${lastMsg.text||''}${lastMsg.proposedRent?' · Rs. '+Number(lastMsg.proposedRent).toLocaleString()+'/mo':''}</div>` : (req.message?`<div style="font-size:12px;color:var(--text);margin-top:6px;padding:8px;background:var(--input-bg);border-left:2px solid var(--blue);border-radius:4px">"${req.message}"</div>`:'')}
           </div>
-          <span class="badge ${statusBadges[req.status]||'b-warn'}">${statusEmoji[req.status]||''} ${req.status}</span>
+          <span class="badge ${statusBadges[req.status]||'b-warn'}">${statusEmoji[req.status]||''} ${statusLabel[req.status]||req.status}</span>
         </div>
-        <div style="display:flex;gap:8px;margin-top:10px;width:100%">
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;width:100%">
           ${(req.status==='pending'||req.status==='negotiating') ? `
-            <button onclick="openTenantNegModal('${req._id}','${(req.propertyTitle||'').replace(/'/g,"\\'")}',${req.propertyRent||0},${req.proposedRent||0})" style="flex:1;padding:7px 12px;border-radius:7px;border:none;background:rgba(74,158,255,0.12);color:var(--blue);font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">💬 ${(req.negotiationMessages||[]).length?'Chat':'Negotiate'}</button>
-            <button onclick="cancelRentalRequest('${req._id}')" style="flex:1;padding:7px 12px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Cancel</button>
+            <div style="display:flex;gap:8px">
+              <button onclick="openTenantNegModal('${req._id}','${(req.propertyTitle||'').replace(/'/g,"\\'")}',${req.propertyRent||0},${req.proposedRent||0})" style="flex:1;padding:7px 12px;border-radius:7px;border:none;background:rgba(74,158,255,0.12);color:var(--blue);font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">💬 ${(req.negotiationMessages||[]).length?'Chat':'Negotiate'}</button>
+              <button onclick="cancelRentalRequest('${req._id}')" style="flex:1;padding:7px 12px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Cancel</button>
+            </div>
+          ` : ''}
+          ${req.status==='docs_pending' ? `
+            <div style="padding:10px 12px;background:rgba(255,179,71,0.08);border:1px solid rgba(255,179,71,0.3);border-radius:9px">
+              <div style="font-size:12px;font-weight:700;color:#ffb347;margin-bottom:2px">⚠️ Upload Your Documents</div>
+              <div style="font-size:11px;color:var(--muted)">Deadline: <strong style="color:#ff6b6b">${req.docsDeadline ? new Date(req.docsDeadline).toLocaleString('en-PK',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '48 hours'}</strong></div>
+            </div>
+            <button onclick="openTenantDocsModal('${req._id}')" style="width:100%;padding:9px;border-radius:8px;border:none;background:linear-gradient(135deg,#c9a96e,#a07840);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">📄 Submit Documents</button>
+          ` : ''}
+          ${req.status==='docs_submitted' ? `
+            <div style="padding:10px 12px;background:rgba(74,158,255,0.08);border:1px solid rgba(74,158,255,0.2);border-radius:9px;font-size:12px;color:var(--blue);font-weight:600">🔍 Documents are being verified — please wait</div>
+          ` : ''}
+          ${req.status==='docs_rejected' ? `
+            <div style="padding:10px 12px;background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);border-radius:9px">
+              <div style="font-size:12px;font-weight:700;color:var(--error)">❌ Documents were rejected</div>
+              ${req.docsRejectReason ? `<div style="font-size:11px;color:var(--muted);margin-top:3px">Reason: ${req.docsRejectReason}</div>` : ''}
+            </div>
+            <button onclick="openTenantDocsModal('${req._id}')" style="width:100%;padding:9px;border-radius:8px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:var(--error);font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">📄 Resubmit Documents</button>
+          ` : ''}
+          ${req.status==='docs_expired' ? `
+            <div style="padding:10px 12px;background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);border-radius:9px;font-size:12px;color:var(--error);font-weight:600">⏰ Documents were not submitted within 48 hours — property was returned</div>
           ` : ''}
         </div>
       </div>`;
@@ -1778,9 +1837,23 @@ async function loadPayments() {
     </tr>`).join('');
   } catch { tbody.innerHTML = '<tr><td colspan="7" class="loading">⚠️ Error loading.</td></tr>'; }
 }
+// Converts a native <input type="month"> value ("2026-08") into the
+// canonical "Month YYYY" label used everywhere else (payment records,
+// landlord's filter, etc.), so month text always matches exactly.
+function monthInputToLabel(v) {
+  if (!v) return '';
+  const m = /^(\d{4})-(\d{2})$/.exec(v.trim());
+  if (!m) return v.trim(); // already a plain label, e.g. from old data
+  const names = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const idx = parseInt(m[2], 10) - 1;
+  if (idx < 0 || idx > 11) return v.trim();
+  return `${names[idx]} ${m[1]}`;
+}
+
 async function submitPayment() {
   const amount = document.getElementById('pamt')?.value;
-  const month  = document.getElementById('pmon')?.value?.trim();
+  const monthRaw = document.getElementById('pmon')?.value?.trim();
+  const month = monthInputToLabel(monthRaw);
   const method = document.getElementById('pmth')?.value;
   const note   = document.getElementById('pnot')?.value?.trim();
   const propId = document.getElementById('pprop')?.value?.trim();
@@ -1804,15 +1877,17 @@ async function submitPayment() {
       }
     }
     
-    // Fallback to lease data if no property selected or property not found
+    // Fallback to the tenant's rented property if no property was selected or found
     if (!landlordId || !landlordName) {
-      const leaseData = await tFetch('/leases');
-      const leases = leaseData.leases || [];
-      if (leases.length) {
-        if (!landlordId) landlordId = leases[0].landlordId || '';
-        if (!landlordName) landlordName = leases[0].landlordName || '';
-        if (!propertyId) propertyId = leases[0].propertyId || '';
-        if (!propertyTitle) propertyTitle = leases[0].propertyTitle || '';
+      const user = JSON.parse(localStorage.getItem('tms_user') || '{}');
+      const userId = (user._id || user.id || '').toString();
+      const propertyData = await tFetch('/properties?status=rented&fields=_id,status,tenantId,title,landlordId,landlordName').catch(() => ({ properties: [] }));
+      const myProperty = (propertyData.properties || []).find(p => (p.tenantId || p.tenant || '').toString() === userId);
+      if (myProperty) {
+        if (!landlordId) landlordId = myProperty.landlordId || '';
+        if (!landlordName) landlordName = myProperty.landlordName || '';
+        if (!propertyId) propertyId = myProperty._id || '';
+        if (!propertyTitle) propertyTitle = myProperty.title || '';
       }
     }
     
@@ -1840,235 +1915,84 @@ async function submitPayment() {
 }
 
 // ═══════════════════════════════════════════════════════
-//  LEASE AGREEMENT
-// ═══════════════════════════════════════════════════════
-async function loadLease() {
-  const box = document.getElementById('lease-display');
-  if (!box) return;
-  const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
-  try {
-    const data = await tFetch('/leases');
-    const leases = data.leases || [];
-    const activeLeases = leases.filter(x => x.status === 'active');
-    const pendingLeases = leases.filter(x => x.status === 'pending_tenant_signature' || x.status === 'pending');
-    const l = activeLeases.length ? activeLeases[0] : pendingLeases.length ? pendingLeases[0] : null;
-
-    if (l) {
-      // Store current lease in window for editing
-      window._currentLease = l;
-      const signedDate = new Date(l.signedAt||l.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'long',year:'numeric'});
-      const statusColor = l.status==='active' ? '#22c55e' : (l.status==='pending_tenant_signature'||l.status==='pending') ? '#f59e0b' : '#6b7280';
-      
-      box.innerHTML = `
-        <div class="lease-box" style="border:none;padding:0">
-          <!-- Document Header -->
-          <div style="background:linear-gradient(135deg,rgba(201,169,110,0.08) 0%,rgba(201,169,110,0.02) 100%);border:1px solid rgba(201,169,110,0.15);border-radius:18px;padding:28px 30px;margin-bottom:16px">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px">
-              <div>
-                <div style="font-family:'Cormorant Garamond','Playfair Display',serif;font-size:28px;font-weight:700;color:var(--text);letter-spacing:-0.3px">Tenancy Agreement</div>
-                <div style="font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:0.8px;text-transform:uppercase;font-weight:600">Punjab Rented Premises Act 2009 — TMS Platform</div>
-              </div>
-              <div style="text-align:right">
-                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;font-weight:700">Agreement Status</div>
-                <div style="margin-top:4px;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;background:${statusColor}18;color:${statusColor};border:1px solid ${statusColor}33;display:inline-block">${(l.status||'active').toUpperCase()}</div>
-                <div style="font-size:11px;color:var(--muted);margin-top:6px">Executed: ${signedDate}</div>
-              </div>
-            </div>
-            <!-- Parties Grid -->
-            <div style="display:grid;grid-template-columns:1fr 1px 1fr;gap:0;background:var(--card);border:1px solid rgba(201,169,110,0.12);border-radius:12px;overflow:hidden">
-              <div style="padding:16px 18px">
-                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:700;margin-bottom:8px">🔑 LANDLORD (Lessor)</div>
-                <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px">${l.landlordName||'—'}</div>
-                <div style="font-size:12px;color:var(--muted)">Property Owner</div>
-              </div>
-              <div style="background:rgba(201,169,110,0.12)"></div>
-              <div style="padding:16px 18px">
-                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:700;margin-bottom:8px">TENANT (Lessee)</div>
-                <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px">${l.tenantName||user.name||'—'}</div>
-                <div style="font-size:12px;color:var(--muted)">Resident Occupant</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Key Terms Summary -->
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:16px">
-            ${[
-              {icon:'📍',label:'Property',val:l.propertyTitle||'—'},
-              {icon:'🗺️',label:'Address',val:l.propertyAddress||'—'},
-              {icon:'💰',label:'Monthly Rent',val:'Rs. '+Number(l.rent||0).toLocaleString(),highlight:true},
-              {icon:'📅',label:'Commencement',val:l.startDate||'—'},
-              {icon:'📅',label:'Expiry',val:l.endDate||'—'},
-              {icon:'⏱️',label:'Duration',val:l.duration||'11 months'},
-            ].map(item=>`
-              <div style="background:var(--card);border:1px solid rgba(201,169,110,0.1);border-radius:12px;padding:14px 15px">
-                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;font-weight:700;margin-bottom:6px">${item.icon} ${item.label}</div>
-                <div style="font-size:14px;font-weight:700;color:${item.highlight?'var(--blue)':'var(--text)'}">${item.val}</div>
-              </div>
-            `).join('')}
-          </div>
-
-          <!-- Signature Section -->
-          <div style="background:var(--card);border:1px solid rgba(201,169,110,0.12);border-radius:14px;padding:20px;margin-bottom:16px">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:14px">✍️ Execution & Signatures</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-              <div style="border:1px dashed rgba(201,169,110,0.25);border-radius:10px;padding:14px;text-align:center">
-                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;font-weight:700;margin-bottom:8px">Landlord Signature</div>
-                ${l.landlordSignature ? `<img src="${l.landlordSignature}" style="max-width:160px;max-height:60px;object-fit:contain">` : `<div style="height:55px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px">Pending signature</div>`}
-                <div style="font-size:11px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">${l.landlordName||'Landlord'}</div>
-              </div>
-              <div style="border:1px dashed rgba(74,158,255,0.3);border-radius:10px;padding:14px;text-align:center">
-                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;font-weight:700;margin-bottom:8px">Tenant Signature</div>
-                ${l.tenantSignature ? `<img src="${l.tenantSignature}" style="max-width:160px;max-height:60px;object-fit:contain">` : `<div style="height:55px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px">Not yet signed</div>`}
-                <div style="font-size:11px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">${l.tenantName||user.name||'Tenant'}</div>
-              </div>
-            </div>
-            ${!l.tenantSignature ? `
-              <div style="margin-top:12px;padding:12px 14px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;font-size:12px;color:#f59e0b;font-weight:600">
-                ⚠️ The landlord has sent the agreement. Add your signature now — once signed the agreement will be locked permanently.
-              </div>
-              <button onclick="openSignaturePad('${l._id}')" style="width:100%;margin-top:10px;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--blue),#2563eb);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.1px">✍️ Sign This Agreement</button>
-            ` : `<div style="margin-top:10px;padding:10px 14px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:9px;font-size:12px;color:#22c55e;font-weight:600;text-align:center">✅ Agreement Digitally Signed & Locked on ${signedDate}</div>`}
-          </div>
-
-          <!-- Action Buttons -->
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button class="submit-btn" style="flex:1;min-width:130px" onclick="openLeaseDocumentModal()">📄 View Full Agreement</button>
-            ${l.fullAgreementHtml ? `<button onclick="tenantDownloadLease()" style="padding:11px 18px;border-radius:11px;border:1px solid rgba(29,158,117,0.25);background:rgba(29,158,117,0.08);color:#1D9E75;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">⬇ Download</button>` : ''}
-            <button onclick="printLeaseAgreement()" style="padding:11px 18px;border-radius:11px;border:1px solid rgba(201,169,110,0.25);background:rgba(201,169,110,0.08);color:var(--gold);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">🖨️ Print</button>
-          </div>
-
-          <div id="lease-edit-mode" style="display:none;margin-top:16px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px">
-            <h3 style="margin-bottom:15px;color:var(--text);font-size:15px;font-weight:700">✏️ Edit Lease Details</h3>
-            <div class="form-grid">
-              <div class="fg"><label>Monthly Rent (Rs.)</label><input id="edit-rent" type="number" placeholder="25000" value="${l.rent||0}"></div>
-              <div class="fg"><label>Start Date</label><input id="edit-start" type="date" value="${l.startDate||''}"></div>
-              <div class="fg"><label>End Date</label><input id="edit-end" type="date" value="${l.endDate||''}"></div>
-              <div class="fg"><label>Duration</label><input id="edit-duration" type="text" placeholder="11 months" value="${l.duration||'11 months'}"></div>
-              <div class="fg full"><label>Terms & Conditions</label><textarea id="edit-terms" placeholder="Enter agreement terms..." style="min-height:120px;">${l.terms || getStandardLeaseTerms()}</textarea></div>
-            </div>
-            <div style="display:flex;gap:10px;margin-top:15px;">
-              <button class="submit-btn" style="flex:1" onclick="saveLeaseChanges()">💾 Save Changes</button>
-              <button class="submit-btn" style="flex:1;background:rgba(255,107,107,0.1);color:var(--error);box-shadow:none;border:1px solid rgba(255,107,107,0.2)" onclick="toggleLeaseEdit()">✕ Cancel</button>
-            </div>
-          </div>
-        </div>
-      `;
-    } else {
-      // No agreement to show
-      box.innerHTML = `<div class="loading">No lease agreement available.</div>`;
-    }
-  } catch { box.innerHTML = '<div class="loading">⚠️ Error loading lease.</div>'; }
-}
-
-function toggleLeaseEdit() {
-  const viewMode = document.getElementById('lease-view-mode');
-  const editMode = document.getElementById('lease-edit-mode');
-  if (viewMode && editMode) {
-    const isEditing = editMode.style.display !== 'none';
-    viewMode.style.display = isEditing ? 'block' : 'none';
-    editMode.style.display = isEditing ? 'none' : 'block';
-  }
-}
-
-async function saveLeaseChanges() {
-  const leaseId = window._currentLease?._id || window._currentLease?.id;
-  if (!leaseId) { alert('No lease found to update.'); return; }
-  
-  const rent = document.getElementById('edit-rent')?.value;
-  const startDate = document.getElementById('edit-start')?.value;
-  const endDate = document.getElementById('edit-end')?.value;
-  const duration = document.getElementById('edit-duration')?.value?.trim();
-  const terms = document.getElementById('edit-terms')?.value?.trim();
-  
-  if (!rent || !startDate || !endDate) {
-    alert('Please fill in all required fields (Rent, Start Date, End Date).');
-    return;
-  }
-
-  const existingLease = window._currentLease;
-  if (existingLease?.status === 'active') {
-    const currentEnd = new Date(existingLease.endDate || existingLease.startDate);
-    const newEnd = endDate ? new Date(endDate) : null;
-    if (!newEnd || newEnd <= currentEnd) {
-      alert('Active lease cannot be modified until it expires. To update rent or terms, extend the lease end date first.');
-      return;
-    }
-  }
-  
-  try {
-    const payload = { rent: Number(rent), startDate, endDate, duration, terms };
-    const r = await tFetch('/leases/' + encodeURIComponent(leaseId), 'PUT', payload);
-    if (r.success) {
-      alert('✅ Lease updated successfully!');
-      await loadLease();
-    } else {
-      alert(r.message || 'Failed to update lease.');
-    }
-  } catch (e) {
-    console.error(e);
-    alert(e.message || 'Cannot connect to server.');
-  }
-}
-
-function viewLeaseTerms() {
-  const lease = window._currentLease;
-  if (!lease) return;
-  const terms = lease.terms?.trim() || getStandardLeaseTerms();
-  alert(`Terms & Conditions:\n\n${terms}`);
-}
-function getStandardLeaseTerms() {
-  return `1. Rent Payment\nTenant shall pay rent on time each month, for example by the 5th of every month. Late payments may attract a penalty.\n\n2. Security Deposit\nTenant shall provide a security deposit at the start of the agreement (typically 2–3 months' rent). The deposit will be refunded at the end of the tenancy if there is no damage beyond normal wear and tear.\n\n3. Agreement Duration\nThis agreement shall remain valid for ___ months/years (commonly 11 months). It may be renewed on mutually agreed terms upon expiry.\n\n4. Rent Increase\nRent may be increased by up to ___% at each renewal (usually 5–10%).\n\n5. Utility Bills\nThe tenant is responsible for payment of electricity, gas, water and all other utility bills. Any outstanding utility bills must be cleared by the tenant.\n\n6. Use of Property\nThe property shall be used for residential purposes only. No illegal activity is permitted.\n\n7. Maintenance & Repairs\nMinor repairs are the responsibility of the tenant. Major structural repairs remain the responsibility of the landlord.\n\n8. Subletting\nThe tenant shall not sublet the property without the landlord’s written permission.\n\n9. Damage to Property\nThe tenant shall not damage the property. Any damage caused by the tenant shall be repaired at the tenant’s cost.\n\n10. Inspection Rights\nThe landlord may inspect the property after giving prior notice.\n\n11. Termination Clause\nEither party may terminate this agreement by giving ___ days' notice (usually 30 days).\n\n12. Eviction\nFailure to pay rent or violation of the agreement may result in legal eviction proceedings by the landlord.\n\n13. Handover Condition\nThe tenant shall return the property in the same condition as received, allowing for normal wear and tear.\n\n14. Governing Law\nThis agreement is governed by the relevant rental laws of Pakistan, including applicable provisions of the Punjab Rented Premises Act 2009.\n\n15. Signatures\nSignatures of the landlord and tenant, plus two witnesses (one witness for the landlord and one witness for the tenant), are required.`;
-}
-
-async function signLease() {
-  const title = document.getElementById('la-title')?.value?.trim();
-  const addr  = document.getElementById('la-addr')?.value?.trim();
-  const ll    = document.getElementById('la-ll')?.value?.trim();
-  const rent  = document.getElementById('la-rent')?.value;
-  const start = document.getElementById('la-start')?.value;
-  const end   = document.getElementById('la-end')?.value;
-  const dur   = document.getElementById('la-dur')?.value?.trim();
-  const terms = document.getElementById('la-terms')?.value?.trim();
-  if (!title || !rent || !terms) { alert('Property title, rent, and terms are required.'); return; }
-  try {
-    const payload = { propertyTitle:title, propertyAddress:addr, landlordName:ll, rent:Number(rent), startDate:start, endDate:end, duration:dur, terms };
-    const lookup = (v) => (v||'').trim().toLowerCase();
-    const normalizedTitle = lookup(title);
-    const normalizedAddr = lookup(addr);
-    const normalizedLandlord = lookup(ll);
-    const matched = Object.values(window._tenantPropMap || {}).find(p => {
-      const pTitle = lookup(p.title);
-      const pAddr  = lookup(p.address);
-      const pLand  = lookup(p.landlordName);
-      return pTitle === normalizedTitle || pAddr === normalizedAddr || p._id === title || p._id === addr || (normalizedLandlord && pLand === normalizedLandlord);
-    });
-    if (matched) {
-      payload.landlordId = matched.landlordId;
-      payload.propertyId = matched._id;
-    }
-    const r = await tFetch('/leases','POST', payload);
-    if (r.success) {
-      await loadLease();
-    } else alert(r.message||'Failed.');
-  } catch { alert('Cannot connect to server.'); }
-}
-
-// ═══════════════════════════════════════════════════════
 //  NOTIFICATIONS (static for now — can be extended)
 // ═══════════════════════════════════════════════════════
-function loadNotifications() {
+// ═══════════════════════════════════════════════════════
+//  NOTIFICATIONS — message the landlord of a rented property
+// ═══════════════════════════════════════════════════════
+let _tRentedPropInfo = {}; // propertyId -> { landlordName, landlordEmail, propertyTitle }
+
+async function _tLoadNotifProperties() {
+  const sel = document.getElementById('notif-prop-sel');
+  if (!sel) return;
+  const user = JSON.parse(localStorage.getItem('tms_user') || '{}');
+  const userId = (user._id || user.id || '').toString();
+  const r = await tFetch('/properties?status=rented&fields=_id,status,tenantId,title,landlordId,landlordName').catch(() => ({ properties: [] }));
+  const myProperties = (r.properties || []).filter(p => (p.tenantId || p.tenant || '').toString() === userId);
+  _tRentedPropInfo = {};
+  myProperties.forEach(p => {
+    const pid = (p._id || '').toString();
+    if (!pid) return;
+    _tRentedPropInfo[pid] = {
+      landlordName: p.landlordName || 'Landlord',
+      landlordEmail: p.landlordEmail || '',
+      propertyTitle: p.title || 'Property',
+    };
+  });
+  const entries = Object.entries(_tRentedPropInfo);
+  const current = sel.value;
+  sel.innerHTML = '<option value="">-- Select Property --</option>' +
+    entries.map(([pid, info]) => `<option value="${pid}">${info.propertyTitle}</option>`).join('');
+  if (!entries.length) {
+    sel.innerHTML = '<option value="">You have no rented property yet</option>';
+  } else if (entries.length === 1) {
+    sel.value = entries[0][0];
+  } else {
+    sel.value = current;
+  }
+  tOnNotifPropChange();
+}
+
+function tOnNotifPropChange() {
+  const sel = document.getElementById('notif-prop-sel');
+  const wrap = document.getElementById('notif-landlord-wrap');
+  const nameBox = document.getElementById('notif-landlord-name');
+  const pid = sel?.value || '';
+  const info = _tRentedPropInfo[pid];
+  if (!info) { if (wrap) wrap.style.display = 'none'; return; }
+  if (wrap) wrap.style.display = 'block';
+  if (nameBox) nameBox.textContent = `${info.landlordName}${info.landlordEmail ? ' · ' + info.landlordEmail : ''}`;
+}
+
+async function tSendNotificationToLandlord() {
+  const propertyId = document.getElementById('notif-prop-sel')?.value;
+  const title = document.getElementById('notif-title')?.value.trim();
+  const msg   = document.getElementById('notif-msg')?.value.trim();
+  if (!propertyId) { alert('Please select a property first.'); return; }
+  if (!title || !msg) { alert('Please fill in both the title and message.'); return; }
+  const r = await tFetch('/notifications', 'POST', { title, message: msg, propertyId, color: 'blue' });
+  if (!r || !r.success) { alert(r?.message || 'Could not send message.'); return; }
+  document.getElementById('notif-title').value = '';
+  document.getElementById('notif-msg').value = '';
+  const ok = document.getElementById('notif-ok');
+  if (ok) { ok.classList.add('show'); setTimeout(()=>ok.classList.remove('show'),3000); }
+  await loadNotifications();
+}
+
+async function loadNotifications() {
+  await _tLoadNotifProperties();
   const container = document.getElementById('notifs-list');
   if (!container) return;
-  // Mark read and hide badge
-  if (typeof TMS !== 'undefined') {
-    TMS.markAllNotifsRead();
-    const nb = document.getElementById('nb'); if(nb) nb.style.display='none';
-    const nb2 = document.getElementById('nb2'); if(nb2) nb2.style.display='none';
-  }
-  // Render received notifications for this user
-  const list = (typeof TMS !== 'undefined')
-    ? TMS.getNotifs().filter(n => TMS._isNotifForUser(n))
-    : [];
+  container.innerHTML = '<div class="loading"><span class="spinner"></span>Loading notifications…</div>';
+
+  const r = await tFetch('/notifications');
+  const list = (r && r.success) ? r.notifications : [];
+
+  // Mark read and hide badges
+  await tFetch('/notifications/mark-all-read', 'PUT');
+  const nb = document.getElementById('nb'); if(nb) nb.style.display='none';
+  const nb2 = document.getElementById('nb2'); if(nb2) nb2.style.display='none';
+
   if (!list.length) {
     container.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--muted)">
       <div style="font-size:40px;margin-bottom:12px">🔔</div>
@@ -2080,6 +2004,7 @@ function loadNotifications() {
   const colorMap = { gold: 'var(--gold)', blue: '#4A9EFF', green: '#4ECDC4', red: '#FF6B6B', warn: '#FFB347' };
   container.innerHTML = list.map(n => {
     const dot = colorMap[n.color] || n.color || 'var(--gold)';
+    const time = new Date(n.time).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' });
     return `
       <div style="display:flex;gap:12px;padding:16px;background:var(--card);border:1px solid ${n.read ? 'var(--border)' : 'rgba(201,169,110,0.3)'};border-radius:13px;margin-bottom:10px;${n.read ? '' : 'background:rgba(201,169,110,0.04)'}">
         <div style="width:10px;height:10px;border-radius:50%;background:${dot};flex-shrink:0;margin-top:5px"></div>
@@ -2090,11 +2015,20 @@ function loadNotifications() {
           </div>
           <div style="font-size:13px;color:var(--text);margin-top:6px;line-height:1.6">${n.msg}</div>
           <div style="margin-top:8px;font-size:11px;color:var(--muted)">
-            👤 From: <strong style="color:var(--text)">${n.from || 'System'}</strong> &nbsp;·&nbsp; 🕐 ${n.time}
+            👤 From: <strong style="color:var(--text)">${n.from || 'System'}</strong> &nbsp;·&nbsp; 🕐 ${time}
           </div>
         </div>
       </div>`;
   }).join('');
+}
+
+async function tmsUpdateNotifBadge() {
+  const r = await tFetch('/notifications/unread-count');
+  const unread = (r && r.success) ? r.unread : 0;
+  ['nb','nb2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = unread; el.style.display = unread > 0 ? 'flex' : 'none'; }
+  });
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2120,7 +2054,7 @@ async function saveProfile() {
     localStorage.setItem('tms_user', JSON.stringify(updated));
     const toast = document.getElementById('sok'); if(toast){toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2500);}
     ['pav','sav'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); });
-    ['pdn','sdn'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=name; });
+    ['pdn','sdn','welcome-name-t'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=name; });
   } catch { alert('Error saving profile.'); }
   finally { if(btn){btn.disabled=false;btn.textContent='💾 Save Changes';} }
 }
@@ -2249,6 +2183,7 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
     <span class="logo-text">TMS</span><span class="logo-sep" style="margin:0 4px">/</span><span style="font-size:12px;color:var(--muted)">Tenant</span>
   </div>
   <span class="nav-pill">Tenant Portal</span>
+  <div class="tn-search" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="tn-global-search" placeholder="Search anything…" aria-label="Search" oninput="tnGlobalSearch(this.value)" onfocus="tnGlobalSearch(this.value)" autocomplete="off"><div id="gs-results" class="gs-results"></div></div>
   <button class="icon-btn" onclick="sp('notifications',null)" title="Notifications"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span class="notif-badge" id="nb" style="display:none">0</span></button>
   <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></button>
   <button class="logout-btn" onclick="tmsLogout()">
@@ -2261,11 +2196,11 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
 <aside class="sidebar">
   <div class="sidebar-section">
     <div class="sidebar-label">Main</div>
-    <button class="nav-item active" onclick="sp('search',this)">
-      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Find Properties
-    </button>
     <button class="nav-item" onclick="sp('profile',this)">
       <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>My Profile
+    </button>
+    <button class="nav-item" onclick="sp('all-properties',this)">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>All Properties
     </button>
   </div>
   <div class="sidebar-section">
@@ -2273,11 +2208,22 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
     <button class="nav-item" onclick="sp('furniture',this)">
       <svg viewBox="0 0 24 24"><path d="M2 9V7a2 2 0 012-2h16a2 2 0 012 2v2"/><path d="M2 9h20v11H2z"/><line x1="6" y1="9" x2="6" y2="20"/><line x1="18" y1="9" x2="18" y2="20"/></svg>Furniture Placement
     </button>
-    <button class="nav-item" onclick="sp('agreement',this)">
-      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Lease Agreement
+    <button class="nav-item" onclick="sp('my-rentals',this)">
+      <svg viewBox="0 0 24 24"><path d="M3 5h18v14H3z"/><path d="M3 9h18"/><path d="M8 13h3"/><path d="M8 17h3"/></svg>My Rentals
     </button>
     <button class="nav-item" onclick="sp('payments',this)">
       <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payment Records
+    </button>
+    <button class="nav-item" onclick="sp('requests',this)">
+      <svg viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h10M4 18h16"/></svg>Rental Requests
+      <span class="nb-pill" id="rental-requests-badge" style="display:none">0</span>
+    </button>
+    <button class="nav-item" onclick="sp('documents',this)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documents
+      <span class="nb-pill" id="docs-badge" style="display:none">0</span>
+    </button>
+    <button class="nav-item" onclick="sp('lease-agreements',this)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg>Lease Agreement
     </button>
   </div>
   <div class="sidebar-section">
@@ -2287,13 +2233,6 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
     </button>
     <button class="nav-item" onclick="sp('complaints',this)">
       <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Complaints
-    </button>
-    <button class="nav-item" onclick="sp('all-properties',this)">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>All Properties
-    </button>
-    <button class="nav-item" onclick="sp('rental-requests',this)">
-      <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/><polyline points="9 12 12 15 16 11"/></svg>Rental Requests
-      <span class="nb-pill" id="rental-requests-badge" style="display:none">0</span>
     </button>
     <button class="nav-item" onclick="sp('notifications',this)">
       <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>Notifications
@@ -2316,7 +2255,7 @@ async function loadAllProperties() {
   grid.innerHTML = '<div class="loading"><span class="spinner"></span>Loading properties…</div>';
   try {
     const [allData, myReqData] = await Promise.all([
-      tFetch('/properties'),
+      tFetch('/properties?fields=_id,title,type,area,address,city,rent,beds,baths,sqft,description,status,landlordName,tenantId,tenantName,model3d,tenantFurnitureLayout,frontImage'),
       tFetch('/rental-requests/my-requests').catch(() => ({ requests: [] }))
     ]);
     const allP = allData.properties || [];
@@ -2329,6 +2268,9 @@ async function loadAllProperties() {
     });
 
     if(rc) rc.textContent = allP.length;
+    // Cache all properties for request modal access and filtering
+    window._tenantPropMap = window._tenantPropMap || {};
+    allP.forEach(p => { if (p && p._id) window._tenantPropMap[p._id] = p; });
     if (!allP.length) {
       grid.innerHTML = '<div class="loading">🔍 No properties found.</div>';
       return;
@@ -2337,10 +2279,8 @@ async function loadAllProperties() {
       const pid = p._id;
       const panoramaUrl = getProperty360Url(p);
       const has360 = !!panoramaUrl;
-      const _pfb={'Villa':'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1600&q=90&fit=crop&auto=format','House':'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&q=90&fit=crop&auto=format','Apartment':'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1600&q=90&fit=crop&auto=format','Flat':'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1600&q=90&fit=crop&auto=format','Room':'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1600&q=90&fit=crop&auto=format'};
-      const _fb = _pfb[p.type] || _pfb['House'];
-      const coverImage = p.frontImage || (Array.isArray(p.images) && p.images.length ? p.images[0] : (typeof p.images === 'string' ? p.images : '')) || _fb;
-      const thumbnail = `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.onerror=null;this.src='${_fb}'">`;
+      const coverImage = p.frontImage || '';
+      const thumbnail = coverImage ? `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">` : '';
       const btnBaseStyle = 'flex:1;min-width:120px';
       const viewButton = has360
         ? `<button class="btn btn-gold btn-sm" style="${btnBaseStyle}" onclick="tenantView3D('${pid}')">View 360</button>`
@@ -2397,7 +2337,139 @@ window.sp = function(id, btn) {
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   if(btn) btn.classList.add('active');
   if(id==='all-properties') { document.getElementById('page-all-properties').classList.add('active'); loadAllProperties(); return; }
+  if(id==='documents') { document.getElementById('page-documents').classList.add('active'); loadTenantDocuments(); return; }
   if(typeof oldSp === 'function') return oldSp(id, btn);
+}
+
+async function loadTenantDocuments() {
+  const list = document.getElementById('tenant-documents-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loading"><span class="spinner"></span>Loading documents…</div>';
+  try {
+    const data = await tFetch('/rental-requests/my-requests');
+    const requests = data.requests || [];
+    const hasRentedProperty = requests.some(r => r.status === 'accepted');
+    window._myRequests = requests;
+    const docs = requests.filter(r => ['docs_pending','docs_submitted','docs_rejected','docs_expired'].includes(r.status));
+    const countLabel = document.getElementById('docs-count');
+    if (countLabel) countLabel.textContent = docs.length;
+    const badge = document.getElementById('docs-badge');
+    const uploadBtn = document.getElementById('tenant-doc-upload-btn');
+    const pendingCount = requests.filter(r => ['docs_pending','docs_rejected'].includes(r.status)).length;
+    const uploadRequestStatuses = ['pending','negotiating','docs_pending','docs_rejected'];
+    const showUpload = requests.some(r => uploadRequestStatuses.includes(r.status));
+    if (badge) {
+      badge.textContent = pendingCount;
+      badge.style.display = pendingCount > 0 ? 'flex' : 'none';
+    }
+    if (uploadBtn) {
+      uploadBtn.style.display = showUpload ? 'inline-flex' : 'none';
+      uploadBtn.textContent = hasRentedProperty ? 'Upload docs for rented property' : 'Upload Documents';
+    }
+    if (!docs.length) {
+      if (showUpload && hasRentedProperty) {
+        list.innerHTML = '<div class="loading" style="padding:20px">No documents currently pending, but you can upload documents for your rented property from the upload button above.</div>';
+      } else {
+        list.innerHTML = '<div class="loading" style="padding:20px">No document actions pending. Your rental requests are up to date.</div>';
+      }
+      return;
+    }
+    const statusBadges = {pending:'b-warn',accepted:'b-green',rejected:'b-red',cancelled:'b-muted',negotiating:'b-blue',docs_pending:'b-warn',docs_submitted:'b-blue',docs_rejected:'b-red',docs_expired:'b-red'};
+    const statusEmoji  = {pending:'⏳',accepted:'✅',rejected:'❌',cancelled:'🚫',negotiating:'💬',docs_pending:'📄',docs_submitted:'🔍',docs_rejected:'❌',docs_expired:'⏰'};
+    const statusLabel  = {pending:'Pending',accepted:'Approved',rejected:'Rejected',cancelled:'Cancelled',negotiating:'Negotiating',docs_pending:'Documents Required',docs_submitted:'Docs Under Review',docs_rejected:'Documents Rejected',docs_expired:'Deadline Expired'};
+    list.innerHTML = docs.map(req => {
+      const lastMsg = (req.negotiationMessages||[]).slice(-1)[0];
+      return `
+      <div class="list-item" style="margin-bottom:10px;flex-direction:column;align-items:flex-start;border-color:${req.status==='negotiating'?'rgba(74,158,255,0.3)':'var(--border)'}">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;width:100%;gap:10px">
+          <div style="flex:1">
+            <div class="li-title">${req.propertyTitle} - ${req.propertyAddress}</div>
+            <div class="li-sub">📍 Rent: Rs. ${Number(req.propertyRent||0).toLocaleString()}/month · Landlord: ${req.landlordName}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Requested: ${new Date(req.requestedAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>
+            ${req.agreedRent ? `<div style="font-size:12px;color:var(--green);font-weight:600;margin-top:4px">🤝 Agreed rent: Rs. ${Number(req.agreedRent).toLocaleString()}/mo</div>` : ''}
+            ${lastMsg ? `<div style="font-size:12px;color:var(--muted);margin-top:6px;padding:8px;background:var(--input-bg);border-left:2px solid var(--blue);border-radius:4px">${lastMsg.senderRole==='landlord'?'🏠 Landlord':'You'}: ${lastMsg.text||''}${lastMsg.proposedRent?' · Rs. '+Number(lastMsg.proposedRent).toLocaleString()+'/mo':''}</div>` : (req.message?`<div style="font-size:12px;color:var(--text);margin-top:6px;padding:8px;background:var(--input-bg);border-left:2px solid var(--blue);border-radius:4px">"${req.message}"</div>`:'')}
+          </div>
+          <span class="badge ${statusBadges[req.status]||'b-warn'}">${statusEmoji[req.status]||''} ${statusLabel[req.status]||req.status}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;width:100%">
+          ${req.status==='docs_pending' ? `
+            <div style="padding:10px 12px;background:rgba(255,179,71,0.08);border:1px solid rgba(255,179,71,0.3);border-radius:9px">
+              <div style="font-size:12px;font-weight:700;color:#ffb347;margin-bottom:2px">⚠️ Upload Your Documents</div>
+              <div style="font-size:11px;color:var(--muted)">Deadline: <strong style="color:#ff6b6b">${req.docsDeadline ? new Date(req.docsDeadline).toLocaleString('en-PK',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '48 hours'}</strong></div>
+            </div>
+            <button onclick="openTenantDocsModal('${req._id}')" style="width:100%;padding:9px;border-radius:8px;border:none;background:linear-gradient(135deg,#c9a96e,#a07840);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">📄 Submit Documents</button>
+          ` : ''}
+          ${req.status==='docs_submitted' ? `
+            <div style="padding:10px 12px;background:rgba(74,158,255,0.08);border:1px solid rgba(74,158,255,0.2);border-radius:9px;font-size:12px;color:var(--blue);font-weight:600">🔍 Documents are being verified — please wait</div>
+          ` : ''}
+          ${req.status==='docs_rejected' ? `
+            <div style="padding:10px 12px;background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);border-radius:9px">
+              <div style="font-size:12px;font-weight:700;color:var(--error)">❌ Documents were rejected</div>
+              ${req.docsRejectReason ? `<div style="font-size:11px;color:var(--muted);margin-top:3px">Reason: ${req.docsRejectReason}</div>` : ''}
+            </div>
+            <button onclick="openTenantDocsModal('${req._id}')" style="width:100%;padding:9px;border-radius:8px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:var(--error);font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">📄 Resubmit Documents</button>
+          ` : ''}
+          ${req.status==='docs_expired' ? `
+            <div style="padding:10px 12px;background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);border-radius:9px;font-size:12px;color:var(--error);font-weight:600">⏰ Documents were not submitted within 48 hours — property was returned</div>
+          ` : ''}
+          ${req.status==='accepted' ? `
+            <div style="padding:10px 12px;background:rgba(78,205,196,0.08);border:1px solid rgba(78,205,196,0.2);border-radius:9px;font-size:12px;color:#2d7d6a;font-weight:600">✅ Documents approved — rental is final</div>
+          ` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    list.innerHTML = '<div class="loading">⚠️ Error loading documents.</div>';
+  }
+}
+
+async function loadMyRentals() {
+  const list = document.getElementById('my-rentals-list');
+  const countLabel = document.getElementById('my-rentals-count');
+  if (!list) return;
+  list.innerHTML = '<div class="loading"><span class="spinner"></span>Loading your rented properties…</div>';
+  try {
+    const user = JSON.parse(localStorage.getItem('tms_user') || '{}');
+    const userId = (user._id || user.id || '').toString();
+
+    const propertyData = await tFetch('/properties?status=rented&fields=_id,status,tenantId,title,address,area,city,rent,beds,baths,type,frontImage,landlordName,tenantName').catch(() => ({ properties: [] }));
+
+    const propertyRentals = (propertyData && Array.isArray(propertyData.properties)) ? propertyData.properties.filter(p => {
+      const tid = (p.tenantId || p.tenant || '').toString();
+      return p.status === 'rented' && tid && tid === userId;
+    }) : [];
+
+    const rentals = propertyRentals.map(p => ({
+      _id: p._id,
+      propertyTitle: p.title,
+      propertyAddress: p.address || p.area || '',
+      rent: p.rent,
+      landlordName: p.landlordName || ''
+    }));
+
+    if (countLabel) countLabel.textContent = rentals.length;
+    if (!rentals.length) {
+      list.innerHTML = '<div class="loading" style="padding:20px">You have no rentals yet. Visit Rental Requests to submit a new rental request.</div>';
+      return;
+    }
+
+    list.innerHTML = rentals.map(l => {
+      return `
+      <div class="list-item" style="margin-bottom:12px;flex-direction:column;align-items:flex-start;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;width:100%;gap:10px">
+          <div style="flex:1">
+            <div class="li-title">${l.propertyTitle || 'Rented Property'}</div>
+            <div class="li-sub">📍 ${l.propertyAddress || 'Address not specified'}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:6px">💰 Rent: Rs. ${Number(l.rent || 0).toLocaleString()}/month · Landlord: ${l.landlordName || '—'}</div>
+          </div>
+          <span class="badge b-green">✅ Renting</span>
+        </div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    list.innerHTML = '<div class="loading">⚠️ Unable to load rented properties. Please refresh the page.</div>';
+    if (countLabel) countLabel.textContent = '0';
+  }
 }
 
 function filterAllProps() {
@@ -2426,16 +2498,14 @@ function filterAllProps() {
   if (!grid) return;
   if (!filtered.length) { grid.innerHTML = '<div class="loading">🔍 No properties found.</div>'; return; }
 
-  const _pfb={'Villa':'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1600&q=90&fit=crop&auto=format','House':'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&q=90&fit=crop&auto=format','Apartment':'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1600&q=90&fit=crop&auto=format','Flat':'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1600&q=90&fit=crop&auto=format','Room':'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1600&q=90&fit=crop&auto=format'};
   const btnBaseStyle = 'flex:1;min-width:120px';
 
   grid.innerHTML = filtered.map(p => {
     const pid = p._id;
     const panoramaUrl = getProperty360Url(p);
     const has360 = !!panoramaUrl;
-    const _fb = _pfb[p.type] || _pfb['House'];
-    const coverImage = p.frontImage || (Array.isArray(p.images) && p.images.length ? p.images[0] : '') || _fb;
-    const thumbnail = `<img src="${coverImage}" alt="${p.title||''}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.onerror=null;this.src='${_fb}'">`;
+    const coverImage = p.frontImage || '';
+    const thumbnail = coverImage ? `<img src="${coverImage}" alt="${p.title||''}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">` : '';
     const viewButton = has360
       ? `<button class="btn btn-gold btn-sm" style="${btnBaseStyle}" onclick="tenantView3D('${pid}')">View 360</button>`
       : `<button class="btn btn-gold btn-sm" style="${btnBaseStyle};opacity:0.65;cursor:not-allowed" disabled>360 Pending</button>`;
@@ -2479,7 +2549,14 @@ function filterAllProps() {
 <main class="main">
 
   <!-- ALL PROPERTIES PAGE -->
-  <div class="page" id="page-all-properties">
+  <div class="page active" id="page-all-properties">
+    <div class="welcome-head">
+      <div>
+        <h1>Welcome back, <span id="welcome-name-t">Tenant</span></h1>
+        <p>Here's what's happening with your rentals today.</p>
+      </div>
+      <button class="icon-btn" onclick="sp('search',null)" title="Find a property"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    </div>
     <div class="pg-head">
       <div><div class="pg-title">All Properties</div><div class="pg-sub">Browse properties from all landlords in the system</div></div>
       <span style="background:var(--card);border:1px solid var(--border);padding:6px 14px;border-radius:20px;font-size:13px;color:var(--blue);font-weight:600"><span id="rc-all">0</span> Properties</span>
@@ -2519,8 +2596,55 @@ function filterAllProps() {
     <div class="props-grid" id="props-grid-all" style="margin-bottom:40px;"><div class="loading"><span class="spinner"></span>Loading…</div></div>
   </div>
 
+  <!-- RENTAL REQUESTS -->
+  <div class="page" id="page-requests">
+    <div class="pg-head">
+      <div><div class="pg-title">Rental Requests</div><div class="pg-sub">Upload documents and track your request status</div></div>
+      <span style="background:var(--card);border:1px solid var(--border);padding:6px 14px;border-radius:20px;font-size:13px;color:var(--blue);font-weight:600"><span id="requests-count">0</span> Requests</span>
+    </div>
+    <div id="rental-requests-list" class="list-wrap">
+      <div class="loading">Loading your rental requests…</div>
+    </div>
+  </div>
+
+  <!-- DOCUMENTS -->
+  <div class="page" id="page-documents">
+    <div class="pg-head" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div><div class="pg-title">Documents</div><div class="pg-sub">Manage document uploads and review status for your rentals</div></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button id="tenant-doc-upload-btn" onclick="openFirstTenantDocsModal()" style="display:none;padding:8px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#c9a96e,#a07840);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">📤 Upload Documents</button>
+        <span style="background:var(--card);border:1px solid var(--border);padding:6px 14px;border-radius:20px;font-size:13px;color:var(--blue);font-weight:600"><span id="docs-count">0</span> Documents</span>
+      </div>
+    </div>
+    <div id="tenant-documents-list" class="list-wrap">
+      <div class="loading">Loading documents…</div>
+    </div>
+  </div>
+
+  <!-- LEASE AGREEMENT -->
+  <div class="page" id="page-lease-agreements">
+    <div class="pg-head">
+      <div><div class="pg-title">Lease Agreement</div><div class="pg-sub">Read and sign the tenancy agreement your landlord sends you.</div></div>
+    </div>
+    <div class="lw-wrap card">
+      <div class="lw-tabs" id="lw-tabs"></div>
+      <div class="lw-body" id="lw-body"></div>
+    </div>
+  </div>
+
+  <!-- MY RENTALS -->
+  <div class="page" id="page-my-rentals">
+    <div class="pg-head">
+      <div><div class="pg-title">My Rentals</div><div class="pg-sub">View the properties you have rented</div></div>
+      <span style="background:var(--card);border:1px solid var(--border);padding:6px 14px;border-radius:20px;font-size:13px;color:#4ecdc4;font-weight:600"><span id="my-rentals-count">0</span> Rentals</span>
+    </div>
+    <div id="my-rentals-list" class="list-wrap">
+      <div class="loading">Loading your rented properties…</div>
+    </div>
+  </div>
+
   <!-- FIND PROPERTIES -->
-  <div class="page active" id="page-search">
+  <div class="page" id="page-search">
     <div class="pg-head">
       <div><div class="pg-title">Find Your Perfect Home</div><div class="pg-sub">Browse and filter available properties</div></div>
       <span style="background:var(--card);border:1px solid var(--border);padding:6px 14px;border-radius:20px;font-size:13px;color:var(--blue);font-weight:600"><span id="rc">0</span> Properties</span>
@@ -2605,7 +2729,7 @@ function filterAllProps() {
     <!-- 3D Canvas area -->
     <div id="furn-page-placeholder" style="display:flex;align-items:center;justify-content:center;min-height:420px;border-radius:16px;border:1px dashed var(--border);background:var(--input-bg);color:var(--muted);font-size:14px;flex-direction:column;gap:10px">
       <span style="font-size:48px">🛋️</span>
-      <span>Property select karein upar se</span>
+      <span>Select Property from above</span>
     </div>
 
     <div id="furn-page-main" style="display:none;flex-direction:column;gap:12px">
@@ -2637,12 +2761,6 @@ function filterAllProps() {
     </div>
   </div>
 
-  <!-- LEASE AGREEMENT -->
-  <div class="page" id="page-agreement">
-    <div class="pg-head"><div><div class="pg-title">Lease Agreement</div><div class="pg-sub">Your rental contract</div></div></div>
-    <div id="lease-display"><div class="loading"><span class="spinner"></span>Loading…</div></div>
-  </div>
-
   <!-- PAYMENTS -->
   <div class="page" id="page-payments">
     <div class="pg-head"><div><div class="pg-title">Payment Records</div><div class="pg-sub">Track your rent payments</div></div></div>
@@ -2655,7 +2773,7 @@ function filterAllProps() {
             <option value="">-- Select Property --</option>
           </select>
         </div>
-        <div class="fg"><label>Month</label><input id="pmon" placeholder="e.g. March 2026"></div>
+        <div class="fg"><label>Month</label><input type="month" id="pmon"></div>
         <div class="fg"><label>Amount (Rs.)</label><input id="pamt" type="number" placeholder="25000"></div>
         <div class="fg"><label>Payment Method</label>
           <select id="pmth"><option>Cash</option><option>Bank Transfer</option><option>JazzCash</option><option>EasyPaisa</option><option>Cheque</option><option>Other</option></select>
@@ -2733,25 +2851,43 @@ function filterAllProps() {
     </div>
   </div>
 
-  <!-- RENTAL REQUESTS -->
-  <div class="page" id="page-rental-requests">
-    <div class="pg-head"><div><div class="pg-title">🤝 Rental Requests</div><div class="pg-sub">Track your property rental requests</div></div></div>
-    <div class="card">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:12px;color:var(--text)">My Requests</h3>
-      <div id="rental-requests-list"><div class="loading"><span class="spinner"></span>Loading your rental requests…</div></div>
-    </div>
-  </div>
-
   <!-- NOTIFICATIONS -->
   <div class="page" id="page-notifications">
     <div class="pg-head">
       <div><div class="pg-title">Notifications</div><div class="pg-sub">Messages from your landlord and admin</div></div>
     </div>
 
+    <!-- COMPOSE: message your landlord -->
+    <div class="card" style="margin-bottom:18px">
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;color:var(--text)">✉️ Message Your Landlord</h3>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Select the property and send a message directly to that property's landlord.</div>
+      <div style="display:grid;gap:16px">
+        <div style="display:grid;grid-template-columns:1fr minmax(220px,260px);gap:16px;align-items:end">
+          <div class="fg full" style="margin-bottom:0">
+            <label>Title</label>
+            <input id="notif-title" placeholder="e.g. Rent question, Repair request…">
+          </div>
+          <div class="fg full" style="margin-bottom:0">
+            <label>Property</label>
+            <select id="notif-prop-sel" onchange="tOnNotifPropChange()"><option value="">-- Select Property --</option></select>
+          </div>
+        </div>
+        <div class="fg full" id="notif-landlord-wrap" style="display:none">
+          <label>Sending To</label>
+          <div id="notif-landlord-name" style="padding:10px 14px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;font-size:13px;color:var(--text);font-weight:600"></div>
+        </div>
+        <div class="fg full"><label>Message</label><textarea id="notif-msg" placeholder="Write your message…" rows="3"></textarea></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:14px">
+        <button class="submit-btn" onclick="tSendNotificationToLandlord()">📤 Send Notification</button>
+        <div id="notif-ok" class="toast" style="margin:0">✅ Message sent!</div>
+      </div>
+    </div>
+
     <!-- Received Notifications -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
       <div style="font-size:14px;font-weight:700;color:var(--text)">📥 My Notifications</div>
-      <button onclick="if(typeof TMS!=='undefined'){TMS.markAllNotifsRead();loadNotifications();}" style="font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;padding:4px 8px">Mark all read</button>
+      <button onclick="loadNotifications()" style="font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;padding:4px 8px">Mark all read</button>
     </div>
     <div id="notifs-list"></div>
   </div>
@@ -2842,7 +2978,9 @@ function filterAllProps() {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+<script>window.TMS_SKIP_LEGACY_NOTIFS = true;</script>
 <script src="../js/tms-data.js"></script>
+<script src="../js/lease-agreement.js"></script>
 <script src="../js/house3d.js"></script>
 <script src="../js/furniture3d.js"></script>
 <script>
@@ -2901,6 +3039,12 @@ let _furnPagePropId = null;
 let _furnPageShowingLandlord = false;
 
 function loadFurniturePage() {
+  // Make sure we have the tenant's rented properties loaded, no matter
+  // which page they navigated from (fixes empty dropdown on direct visit)
+  loadProperties().then(populateFurnPropSelect).catch(populateFurnPropSelect);
+}
+
+function populateFurnPropSelect() {
   // Populate property dropdown
   const sel = document.getElementById('furn-prop-select');
   if (!sel) return;
@@ -3050,593 +3194,6 @@ function furnPageDownloadJSON() {
 }
 </script>
 
-<!-- ══════════════════════════════════════════════════════
-     DIGITAL SIGNATURE PAD MODAL
-══════════════════════════════════════════════════════ -->
-<div id="sig-pad-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px)">
-  <div style="background:var(--card);border:1px solid rgba(201,169,110,0.15);border-radius:22px;width:min(560px,97vw);max-height:90vh;overflow-y:auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid rgba(201,169,110,0.1)">
-      <div>
-        <div style="font-family:'Cormorant Garamond','Playfair Display',serif;font-size:20px;font-weight:700;color:var(--text)">Digital Signature</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:0.4px">Recognized under Electronic Transactions Ordinance 2002, Pakistan</div>
-      </div>
-      <button onclick="closeSignaturePad()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,107,107,0.12);color:#FF6B6B;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
-    </div>
-    <div style="padding:22px 24px">
-      <!-- Tabs -->
-      <div style="display:flex;background:rgba(255,255,255,0.04);border-radius:10px;padding:3px;margin-bottom:18px;gap:3px">
-        <button id="sig-tab-draw" onclick="switchSigTab('draw')" style="flex:1;padding:9px;border-radius:8px;border:none;background:rgba(201,169,110,0.15);color:var(--gold);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">✍️ Draw</button>
-        <button id="sig-tab-type" onclick="switchSigTab('type')" style="flex:1;padding:9px;border-radius:8px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer">⌨️ Type</button>
-        <button id="sig-tab-thumb" onclick="switchSigTab('thumb')" style="flex:1;padding:9px;border-radius:8px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer">👆 Thumb</button>
-        <button id="sig-tab-pdf" onclick="switchSigTab('pdf')" style="flex:1;padding:9px;border-radius:8px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer">📄 PDF</button>
-      </div>
-
-      <!-- DRAW TAB -->
-      <div id="sig-panel-draw">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Draw your signature using mouse or touch:</div>
-        <canvas id="sig-canvas" width="510" height="160" style="width:100%;height:160px;background:rgba(255,255,255,0.04);border:2px dashed rgba(201,169,110,0.25);border-radius:12px;cursor:crosshair;touch-action:none"></canvas>
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button onclick="clearSigCanvas()" style="padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer">🗑️ Clear</button>
-          <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
-            <label style="font-size:11px;color:var(--muted)">Color:</label>
-            <input type="color" id="sig-color" value="#1a1a2e" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--border);cursor:pointer;padding:1px">
-          </div>
-        </div>
-      </div>
-
-      <!-- TYPE TAB -->
-      <div id="sig-panel-type" style="display:none">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Type your full name — it will be rendered as a signature:</div>
-        <input id="sig-typed-name" oninput="renderTypedSig()" placeholder="Your full name..." style="width:100%;background:var(--input-bg);border:1.5px solid rgba(201,169,110,0.2);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;margin-bottom:12px">
-        <canvas id="sig-type-canvas" width="510" height="100" style="width:100%;height:100px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,169,110,0.15);border-radius:10px"></canvas>
-        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-          ${['Dancing Script','Pacifico','Great Vibes','Satisfy'].map((f,i)=>`<button onclick="setSigFont('${f}')" style="padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:var(--input-bg);color:var(--muted);font-family:'${f}',cursive;font-size:13px;cursor:pointer">${f}</button>`).join('')}
-        </div>
-      </div>
-
-      <!-- THUMB TAB -->
-      <div id="sig-panel-thumb" style="display:none;text-align:center;padding:20px 0">
-        <div style="font-size:48px;margin-bottom:12px">👆</div>
-        <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px">Fingerprint / Thumb Impression</div>
-        <div style="font-size:12px;color:var(--muted);line-height:1.7;max-width:360px;margin:0 auto">
-          For thumb impression, please physically press your inked thumb onto a paper and scan/photograph it. You can upload the image below, or use it on the printed document.
-        </div>
-        <div style="margin-top:16px">
-          <input type="file" id="thumb-upload" accept="image/*" onchange="loadThumbImage(event)" style="display:none">
-          <button onclick="document.getElementById('thumb-upload').click()" style="padding:10px 24px;border-radius:10px;border:1.5px dashed rgba(201,169,110,0.3);background:rgba(201,169,110,0.06);color:var(--gold);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">📷 Upload Thumb Image</button>
-        </div>
-        <canvas id="sig-thumb-canvas" width="200" height="200" style="margin-top:14px;border-radius:50%;background:rgba(255,255,255,0.04);border:2px dashed rgba(201,169,110,0.2);display:none;max-width:160px;max-height:160px"></canvas>
-        <!-- Simulated fingerprint -->
-        <div id="thumb-sim" style="margin-top:16px;width:120px;height:120px;border-radius:50%;background:rgba(201,169,110,0.06);border:2px dashed rgba(201,169,110,0.2);display:flex;align-items:center;justify-content:center;margin-left:auto;margin-right:auto">
-          <svg width="70" height="90" viewBox="0 0 70 90" style="opacity:0.4">
-            <path d="M35 5 C20 5 8 17 8 32 C8 50 20 65 35 78 C50 65 62 50 62 32 C62 17 50 5 35 5Z" fill="none" stroke="#C9A96E" stroke-width="1.5"/>
-            <path d="M35 12 C24 12 15 21 15 32 C15 47 24 60 35 72 C46 60 55 47 55 32 C55 21 46 12 35 12Z" fill="none" stroke="#C9A96E" stroke-width="1.5"/>
-            <path d="M35 20 C28 20 22 26 22 33 C22 44 28 55 35 65 C42 55 48 44 48 33 C48 26 42 20 35 20Z" fill="none" stroke="#C9A96E" stroke-width="1.5"/>
-            <path d="M35 28 C31 28 28 31 28 35 C28 42 31 50 35 57 C39 50 42 42 42 35 C42 31 39 28 35 28Z" fill="none" stroke="#C9A96E" stroke-width="1.5"/>
-            <circle cx="35" cy="35" r="4" fill="rgba(201,169,110,0.3)"/>
-          </svg>
-        </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:10px">Fingerprint — For Legal Enforceability, Use Physical Stamp on Printed Copy</div>
-      </div>
-
-
-      <!-- PDF UPLOAD TAB -->
-      <div id="sig-panel-pdf" style="display:none;padding:8px 0">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">
-          Upload the signed agreement PDF — it will be attached to the agreement and available for download.
-        </div>
-        <!-- Drop zone -->
-        <div id="pdf-drop-zone" onclick="document.getElementById('sig-pdf-input').click()" 
-             ondragover="event.preventDefault();this.style.borderColor='var(--gold)'" 
-             ondragleave="this.style.borderColor='rgba(201,169,110,0.25)'"
-             ondrop="handlePdfDrop(event)"
-             style="border:2px dashed rgba(201,169,110,0.25);border-radius:14px;padding:36px 20px;text-align:center;cursor:pointer;transition:border-color 0.2s;background:rgba(201,169,110,0.03)">
-          <div style="font-size:36px;margin-bottom:10px">📄</div>
-          <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">PDF File Yahan Drop Karo</div>
-          <div style="font-size:12px;color:var(--muted)">or click to select a file</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:8px">Sirf PDF files • Max 10MB</div>
-        </div>
-        <input type="file" id="sig-pdf-input" accept=".pdf,application/pdf" style="display:none" onchange="handlePdfSelect(event)">
-        <!-- Preview area (hidden until file selected) -->
-        <div id="pdf-preview-area" style="display:none;margin-top:14px;background:var(--input-bg);border:1px solid rgba(201,169,110,0.15);border-radius:12px;padding:14px 16px">
-          <div style="display:flex;align-items:center;gap:12px">
-            <div style="width:42px;height:42px;border-radius:10px;background:rgba(255,107,107,0.12);border:1px solid rgba(255,107,107,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📄</div>
-            <div style="flex:1;min-width:0">
-              <div id="pdf-file-name" style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
-              <div id="pdf-file-size" style="font-size:11px;color:var(--muted);margin-top:2px">—</div>
-            </div>
-            <button onclick="clearPdfSelection()" style="width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,107,107,0.1);color:#FF6B6B;font-size:14px;cursor:pointer;flex-shrink:0">✕</button>
-          </div>
-          <div style="margin-top:12px;padding:10px 12px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.18);border-radius:8px;font-size:12px;color:#22c55e;font-weight:600">
-            ✅ PDF ready — click "Apply Signature" button to save the agreement
-          </div>
-        </div>
-        <div style="margin-top:14px;padding:10px 13px;background:rgba(74,158,255,0.06);border:1px solid rgba(74,158,255,0.15);border-radius:9px;font-size:12px;color:var(--muted);line-height:1.6">
-          <strong style="color:var(--text)">Note:</strong> This PDF is saved locally — download it and view it again later.
-        </div>
-      </div>
-
-      <!-- Confirmation -->
-      <div style="margin-top:18px;background:rgba(201,169,110,0.05);border:1px solid rgba(201,169,110,0.12);border-radius:10px;padding:12px 14px">
-        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
-          <input type="checkbox" id="sig-confirm" style="margin-top:2px;width:15px;height:15px;accent-color:var(--gold);flex-shrink:0">
-          <span style="font-size:12px;color:var(--muted);line-height:1.6">I confirm that I have read and understood the Tenancy Agreement and agree to all terms and conditions. I understand this digital signature is legally binding under the Electronic Transactions Ordinance 2002 of Pakistan.</span>
-        </label>
-      </div>
-      <div style="display:flex;gap:10px;margin-top:14px">
-        <button onclick="applyDigitalSignature()" style="flex:1;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--blue),var(--blue-l));color:#FFFFFF;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.1px">✅ Apply Signature to Agreement</button>
-      </div>
-      <div id="sig-error" style="display:none;margin-top:10px;padding:9px 13px;background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.2);border-radius:8px;color:#FF6B6B;font-size:12px;font-weight:600"></div>
-    </div>
-  </div>
-</div>
-
-<!-- FULL AGREEMENT DOCUMENT MODAL -->
-<div id="lease-doc-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px)">
-  <div style="background:var(--card);border:1px solid rgba(201,169,110,0.15);border-radius:22px;width:min(800px,97vw);max-height:92vh;display:flex;flex-direction:column">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid rgba(201,169,110,0.1)">
-      <div style="font-family:'Cormorant Garamond','Playfair Display',serif;font-size:18px;font-weight:700;color:var(--text)">Full Tenancy Agreement</div>
-      <div style="display:flex;gap:8px">
-        <button onclick="printLeaseAgreement()" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(201,169,110,0.2);background:rgba(201,169,110,0.08);color:var(--gold);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">🖨️ Print</button>
-        <button onclick="closeLeaseDocModal()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,107,107,0.12);color:#FF6B6B;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
-      </div>
-    </div>
-    <div id="lease-doc-body" style="flex:1;overflow-y:auto;padding:30px 36px;font-family:'DM Sans',sans-serif;line-height:1.8;color:var(--text)"></div>
-  </div>
-</div>
-
-<!-- PRINT STYLES -->
-<style id="print-style">
-@media print {
-  body * { visibility: hidden !important; }
-  #print-lease-area, #print-lease-area * { visibility: visible !important; }
-  #print-lease-area {
-    position: absolute !important; left: 0 !important; top: 0 !important;
-    width: 100% !important; background: white !important; color: black !important;
-    font-family: 'Times New Roman', serif !important;
-  }
-}
-</style>
-
-<!-- HIDDEN PRINT AREA -->
-<div id="print-lease-area" style="display:none"></div>
-
-<!-- SIGNATURE SCRIPTS -->
-<script>
-// ══════════════════════════════════════════════════════════
-//  DIGITAL SIGNATURE PAD — TENANT
-// ══════════════════════════════════════════════════════════
-let _sigLeaseId = null;
-let _sigDrawing = false;
-let _sigFont = 'Dancing Script';
-let _sigTab = 'draw';
-let _thumbImageData = null;
-
-// Load signature fonts
-const sigFontLink = document.createElement('link');
-sigFontLink.rel = 'stylesheet';
-sigFontLink.href = 'https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Pacifico&family=Great+Vibes&family=Satisfy&display=swap';
-document.head.appendChild(sigFontLink);
-
-function openSignaturePad(leaseId) {
-  _sigLeaseId = leaseId;
-  clearSigCanvas();
-  document.getElementById('sig-confirm').checked = false;
-  document.getElementById('sig-error').style.display = 'none';
-  const modal = document.getElementById('sig-pad-modal');
-  modal.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-  setTimeout(initSigCanvas, 100);
-}
-
-function closeSignaturePad() {
-  document.getElementById('sig-pad-modal').style.display = 'none';
-  document.body.style.overflow = '';
-}
-
-function switchSigTab(tab) {
-  _sigTab = tab;
-  ['draw','type','thumb','pdf'].forEach(t => {
-    document.getElementById('sig-panel-'+t).style.display = t===tab ? 'block' : 'none';
-    const btn = document.getElementById('sig-tab-'+t);
-    if(btn) {
-      btn.style.background = t===tab ? 'rgba(201,169,110,0.15)' : 'transparent';
-      btn.style.color = t===tab ? 'var(--gold)' : 'var(--muted)';
-      btn.style.fontWeight = t===tab ? '600' : '500';
-    }
-  });
-}
-
-// ── Canvas Signature ──
-function initSigCanvas() {
-  const canvas = document.getElementById('sig-canvas');
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  ctx.strokeStyle = document.getElementById('sig-color')?.value || '#1a1a2e';
-  ctx.lineWidth = 2.5;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-
-  let lastX, lastY;
-
-  function getPos(e) {
-    const r = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / r.width;
-    const scaleY = canvas.height / r.height;
-    if(e.touches) {
-      return [(e.touches[0].clientX - r.left)*scaleX, (e.touches[0].clientY - r.top)*scaleY];
-    }
-    return [(e.clientX - r.left)*scaleX, (e.clientY - r.top)*scaleY];
-  }
-
-  canvas.onmousedown = canvas.ontouchstart = (e) => {
-    e.preventDefault();
-    _sigDrawing = true;
-    [lastX, lastY] = getPos(e);
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-  };
-  canvas.onmousemove = canvas.ontouchmove = (e) => {
-    e.preventDefault();
-    if(!_sigDrawing) return;
-    ctx.strokeStyle = document.getElementById('sig-color')?.value || '#1a1a2e';
-    const [x, y] = getPos(e);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    [lastX, lastY] = [x, y];
-  };
-  canvas.onmouseup = canvas.ontouchend = () => { _sigDrawing = false; };
-  canvas.onmouseleave = () => { _sigDrawing = false; };
-}
-
-function clearSigCanvas() {
-  const canvas = document.getElementById('sig-canvas');
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-// ── Typed Signature ──
-function renderTypedSig() {
-  const name = document.getElementById('sig-typed-name')?.value || '';
-  const canvas = document.getElementById('sig-type-canvas');
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  if(!name) return;
-  ctx.fillStyle = 'transparent';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.font = \`52px '\${_sigFont}', cursive\`;
-  ctx.fillStyle = '#1a3a6a';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(name, canvas.width/2, canvas.height/2);
-}
-
-function setSigFont(font) {
-  _sigFont = font;
-  renderTypedSig();
-}
-
-// ── Thumb Upload ──
-function loadThumbImage(event) {
-  const file = event.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const canvas = document.getElementById('sig-thumb-canvas');
-    canvas.style.display = 'block';
-    document.getElementById('thumb-sim').style.display = 'none';
-    const img = new Image();
-    img.onload = () => {
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      const size = Math.min(img.width,img.height);
-      ctx.drawImage(img, (img.width-size)/2, (img.height-size)/2, size, size, 0, 0, canvas.width, canvas.height);
-      _thumbImageData = canvas.toDataURL('image/png');
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-// ── Apply Signature ──
-
-// ── PDF Upload for Signature ──────────────────────────────
-let _sigPdfDataUrl = null;
-
-function handlePdfDrop(e) {
-  e.preventDefault();
-  document.getElementById('pdf-drop-zone').style.borderColor = 'rgba(201,169,110,0.25)';
-  const file = e.dataTransfer.files[0];
-  if (file) processPdfFile(file);
-}
-
-function handlePdfSelect(e) {
-  const file = e.target.files[0];
-  if (file) processPdfFile(file);
-}
-
-function processPdfFile(file) {
-  if (!file.type.includes('pdf') && !file.name.endsWith('.pdf')) {
-    alert('Sirf PDF file upload ho sakti hai.'); return;
-  }
-  if (file.size > 10 * 1024 * 1024) {
-    alert('PDF file 10MB se choti honi chahiye.'); return;
-  }
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    _sigPdfDataUrl = e.target.result;
-    document.getElementById('pdf-file-name').textContent = file.name;
-    document.getElementById('pdf-file-size').textContent = (file.size / 1024).toFixed(1) + ' KB';
-    document.getElementById('pdf-preview-area').style.display = 'block';
-    document.getElementById('pdf-drop-zone').style.display = 'none';
-  };
-  reader.readAsDataURL(file);
-}
-
-function clearPdfSelection() {
-  _sigPdfDataUrl = null;
-  document.getElementById('sig-pdf-input').value = '';
-  document.getElementById('pdf-preview-area').style.display = 'none';
-  document.getElementById('pdf-drop-zone').style.display = 'block';
-}
-
-async function applyDigitalSignature() {
-  const errEl = document.getElementById('sig-error');
-  errEl.style.display = 'none';
-
-  if(!document.getElementById('sig-confirm')?.checked) {
-    errEl.style.display = 'block';
-    errEl.textContent = '⚠️ Please read and confirm the agreement terms before signing.';
-    return;
-  }
-
-  let sigData = null;
-
-  if(_sigTab === 'draw') {
-    const canvas = document.getElementById('sig-canvas');
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-    const hasData = imageData.data.some((v,i) => i%4!==3 && v>0);
-    if(!hasData) { errEl.style.display='block'; errEl.textContent='⚠️ Please draw your signature.'; return; }
-    sigData = canvas.toDataURL('image/png');
-  } else if(_sigTab === 'type') {
-    const name = document.getElementById('sig-typed-name')?.value?.trim();
-    if(!name) { errEl.style.display='block'; errEl.textContent='⚠️ Please type your name.'; return; }
-    renderTypedSig();
-    sigData = document.getElementById('sig-type-canvas').toDataURL('image/png');
-  } else if(_sigTab === 'thumb') {
-    if(!_thumbImageData) {
-      // Generate fingerprint simulation mark
-      const canvas = document.createElement('canvas');
-      canvas.width = 150; canvas.height = 150;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = 'rgba(201,169,110,0.15)';
-      ctx.beginPath(); ctx.arc(75,75,65,0,Math.PI*2); ctx.fill();
-      ctx.strokeStyle = 'rgba(201,169,110,0.5)'; ctx.lineWidth = 1.5;
-      for(let i=0;i<6;i++){
-        ctx.beginPath();
-        ctx.arc(75,75, 15+(i*9), 0, Math.PI*2);
-        ctx.stroke();
-      }
-      ctx.font = 'bold 10px DM Sans'; ctx.fillStyle='rgba(201,169,110,0.7)';
-      ctx.textAlign='center'; ctx.fillText('THUMB', 75, 140);
-      sigData = canvas.toDataURL('image/png');
-    } else {
-      sigData = _thumbImageData;
-    }
-  }
-
-  // Save signature to backend
-  if(!_sigLeaseId) { errEl.style.display='block'; errEl.textContent='⚠️ No lease found.'; return; }
-  try {
-    const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
-    const tok = () => localStorage.getItem('tms_token') || sessionStorage.getItem('tms_token') || '';
-    const r = await fetch('http://localhost:5000/api/leases/' + _sigLeaseId + '/tenant-sign', {
-      method: 'PUT',
-      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+tok() },
-      body: JSON.stringify({
-        tenantSignature: sigData,
-        signedAt: new Date().toISOString(),
-        signatureMethod: _sigTab
-      })
-    });
-    const data = await r.json();
-    if(data.success) {
-      closeSignaturePad();
-      await loadLease();
-      // Show success toast
-      const toast = document.createElement('div');
-      toast.innerHTML = '✅ Agreement digitally signed successfully!';
-      toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);color:#22c55e;padding:12px 20px;border-radius:12px;font-weight:700;font-size:13px;z-index:99999;animation:fadeIn 0.3s ease';
-      document.body.appendChild(toast);
-      setTimeout(()=>toast.remove(), 4000);
-    } else {
-      errEl.style.display='block';
-      errEl.textContent = '⚠️ ' + (data.message || 'Could not save signature. Please try again.');
-    }
-  } catch(e) {
-    errEl.style.display='block';
-    errEl.textContent = '⚠️ Cannot connect to server.';
-  }
-}
-
-// ── Full Document Modal ──
-function openLeaseDocumentModal() {
-  const l = window._currentLease;
-  if(!l) return;
-  const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
-  const signedDate = new Date(l.signedAt||l.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'long',year:'numeric'});
-  const terms = (l.terms || getStandardLeaseTerms()).replace(/
-/g,'<br>').replace(/ARTICLE /g,'<strong>ARTICLE ').replace(/—/g,'</strong> —');
-
-  document.getElementById('lease-doc-body').innerHTML = \`
-    <div style="max-width:680px;margin:0 auto;color:var(--text)">
-      <!-- Official Header -->
-      <div style="text-align:center;border-bottom:3px double rgba(201,169,110,0.3);padding-bottom:24px;margin-bottom:28px">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);font-weight:700;margin-bottom:8px">Islamic Republic of Pakistan</div>
-        <div style="font-family:'Cormorant Garamond','Playfair Display',serif;font-size:32px;font-weight:700;color:var(--text);margin-bottom:4px">Tenancy Agreement</div>
-        <div style="font-size:12px;color:var(--muted)">In Accordance With Punjab Rented Premises Act 2009 (Act XIX of 2009)</div>
-        <div style="margin-top:10px;font-size:11px;color:var(--muted)">Executed on: <strong>\${signedDate}</strong></div>
-      </div>
-
-      <!-- Parties -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px">
-        <div style="border:1px solid rgba(201,169,110,0.15);border-radius:10px;padding:16px">
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:8px">FIRST PARTY (Lessor / Landlord)</div>
-          <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">\${l.landlordName||'—'}</div>
-          <div style="font-size:12px;color:var(--muted)">Owner of the rented premises</div>
-        </div>
-        <div style="border:1px solid rgba(74,158,255,0.2);border-radius:10px;padding:16px">
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:8px">SECOND PARTY (Lessee / Tenant)</div>
-          <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">\${l.tenantName||user.name||'—'}</div>
-          <div style="font-size:12px;color:var(--muted)">Resident occupant of the premises</div>
-        </div>
-      </div>
-
-      <!-- Property Details -->
-      <div style="border:1px solid rgba(201,169,110,0.12);border-radius:10px;padding:16px;margin-bottom:28px">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:12px">PROPERTY DETAILS</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px">
-          <div><span style="color:var(--muted)">Title:</span> <strong>\${l.propertyTitle||'—'}</strong></div>
-          <div><span style="color:var(--muted)">Address:</span> <strong>\${l.propertyAddress||'—'}</strong></div>
-          <div><span style="color:var(--muted)">Monthly Rent:</span> <strong style="color:var(--blue)">Rs. \${Number(l.rent||0).toLocaleString()}</strong></div>
-          <div><span style="color:var(--muted)">Duration:</span> <strong>\${l.duration||'11 months'}</strong></div>
-          <div><span style="color:var(--muted)">Commencement:</span> <strong>\${l.startDate||'—'}</strong></div>
-          <div><span style="color:var(--muted)">Expiry:</span> <strong>\${l.endDate||'—'}</strong></div>
-        </div>
-      </div>
-
-      <!-- Terms -->
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:14px">TERMS & CONDITIONS</div>
-      <div style="font-size:13px;line-height:2;color:var(--text);border-left:3px solid rgba(201,169,110,0.2);padding-left:16px;margin-bottom:32px">\${terms}</div>
-
-      <!-- Signatures -->
-      <div style="border-top:2px solid rgba(201,169,110,0.2);padding-top:24px;margin-top:24px">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:16px">EXECUTION & SIGNATURES</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
-          <div style="text-align:center;border:1px dashed rgba(201,169,110,0.25);border-radius:10px;padding:16px">
-            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:10px">Landlord Signature / Thumb</div>
-            \${l.landlordSignature ? \`<img src="\${l.landlordSignature}" style="max-width:150px;max-height:60px;object-fit:contain;margin-bottom:8px">\` : \`<div style="height:60px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:8px"></div>\`}
-            <div style="font-size:12px;font-weight:600;color:var(--text)">\${l.landlordName||'Landlord'}</div>
-            <div style="font-size:10px;color:var(--muted)">Date: __________</div>
-          </div>
-          <div style="text-align:center;border:1px dashed rgba(74,158,255,0.25);border-radius:10px;padding:16px">
-            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:10px">Tenant Signature / Thumb</div>
-            \${l.tenantSignature ? \`<img src="\${l.tenantSignature}" style="max-width:150px;max-height:60px;object-fit:contain;margin-bottom:8px">\` : \`<div style="height:60px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:8px"></div>\`}
-            <div style="font-size:12px;font-weight:600;color:var(--text)">\${l.tenantName||user.name||'Tenant'}</div>
-            <div style="font-size:10px;color:var(--muted)">Date: \${l.signedAt ? signedDate : '__________'}</div>
-          </div>
-        </div>
-        <!-- Witnesses -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
-          \${['Landlord\'s Witness','Tenant\'s Witness'].map(w=>\`
-            <div style="border:1px dashed rgba(255,255,255,0.08);border-radius:10px;padding:14px;text-align:center">
-              <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:8px">\${w}</div>
-              <div style="height:50px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:8px"></div>
-              <div style="font-size:11px;color:var(--muted)">Name: __________________</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:4px">CNIC: __________________</div>
-            </div>
-          \`).join('')}
-        </div>
-        \${l.tenantSignature ? \`<div style="margin-top:16px;padding:10px 14px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.18);border-radius:8px;font-size:11px;color:#22c55e;text-align:center">🔐 Digitally Signed via TMS Platform | Electronic Transactions Ordinance 2002, Pakistan | Signed: \${signedDate}</div>\` : ''}
-      </div>
-    </div>
-  \`;
-  document.getElementById('lease-doc-modal').style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-}
-
-function closeLeaseDocModal() {
-  document.getElementById('lease-doc-modal').style.display = 'none';
-  document.body.style.overflow = '';
-}
-
-function printLeaseAgreement() {
-  const body = document.getElementById('lease-doc-body');
-  if(!body?.innerHTML) { openLeaseDocumentModal(); setTimeout(printLeaseAgreement, 400); return; }
-  const printArea = document.getElementById('print-lease-area');
-  const l = window._currentLease || {};
-  const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
-  const signedDate = new Date(l.signedAt||l.createdAt||Date.now()).toLocaleDateString('en-PK',{day:'numeric',month:'long',year:'numeric'});
-  const terms = (l.terms || getStandardLeaseTerms());
-
-  printArea.style.display = 'block';
-  printArea.innerHTML = \`
-    <div style="font-family:'Times New Roman',serif;color:#000;padding:40px;max-width:800px;margin:0 auto">
-      <div style="text-align:center;border-bottom:2px double #000;padding-bottom:20px;margin-bottom:24px">
-        <p style="font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Islamic Republic of Pakistan</p>
-        <h1 style="font-size:26px;font-weight:700;margin:0 0 4px">TENANCY AGREEMENT</h1>
-        <p style="font-size:11px;color:#555">Punjab Rented Premises Act 2009 (Act XIX of 2009)</p>
-        <p style="font-size:11px;margin-top:8px">Executed on: <strong>\${signedDate}</strong></p>
-      </div>
-      <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
-        <tr>
-          <td style="border:1px solid #ccc;padding:12px;width:50%"><strong>Landlord:</strong> \${l.landlordName||'—'}</td>
-          <td style="border:1px solid #ccc;padding:12px;width:50%"><strong>Tenant:</strong> \${l.tenantName||user.name||'—'}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:12px"><strong>Property:</strong> \${l.propertyTitle||'—'}</td>
-          <td style="border:1px solid #ccc;padding:12px"><strong>Address:</strong> \${l.propertyAddress||'—'}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:12px"><strong>Monthly Rent:</strong> Rs. \${Number(l.rent||0).toLocaleString()}</td>
-          <td style="border:1px solid #ccc;padding:12px"><strong>Duration:</strong> \${l.duration||'11 months'}</td>
-        </tr>
-        <tr>
-          <td style="border:1px solid #ccc;padding:12px"><strong>Start Date:</strong> \${l.startDate||'—'}</td>
-          <td style="border:1px solid #ccc;padding:12px"><strong>End Date:</strong> \${l.endDate||'—'}</td>
-        </tr>
-      </table>
-      <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #ccc;padding-bottom:6px;margin-bottom:14px">TERMS & CONDITIONS</h3>
-      <div style="font-size:12px;line-height:1.9;white-space:pre-wrap">\${terms}</div>
-      <div style="margin-top:40px;border-top:2px solid #000;padding-top:20px">
-        <h3 style="font-size:12px;text-transform:uppercase;letter-spacing:1px;margin-bottom:20px">SIGNATURES & WITNESSES</h3>
-        <table style="width:100%;border-collapse:collapse">
-          <tr>
-            <td style="width:50%;padding:12px;vertical-align:top">
-              <p style="font-size:11px;font-weight:bold;text-transform:uppercase;margin-bottom:50px">Landlord Signature / Thumb:</p>
-              <div style="border-bottom:1px solid #000;margin-bottom:6px"></div>
-              <p style="font-size:11px">\${l.landlordName||'Landlord'}</p>
-              <p style="font-size:10px;color:#555">Date: __________________</p>
-            </td>
-            <td style="width:50%;padding:12px;vertical-align:top">
-              <p style="font-size:11px;font-weight:bold;text-transform:uppercase;margin-bottom:50px">Tenant Signature / Thumb:</p>
-              <div style="border-bottom:1px solid #000;margin-bottom:6px"></div>
-              <p style="font-size:11px">\${l.tenantName||user.name||'Tenant'}</p>
-              <p style="font-size:10px;color:#555">Date: __________________</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:12px;vertical-align:top">
-              <p style="font-size:11px;font-weight:bold;text-transform:uppercase;margin-bottom:50px">Landlord's Witness:</p>
-              <div style="border-bottom:1px solid #000;margin-bottom:6px"></div>
-              <p style="font-size:10px;color:#555">Name: __________________<br>CNIC: __________________</p>
-            </td>
-            <td style="padding:12px;vertical-align:top">
-              <p style="font-size:11px;font-weight:bold;text-transform:uppercase;margin-bottom:50px">Tenant's Witness:</p>
-              <div style="border-bottom:1px solid #000;margin-bottom:6px"></div>
-              <p style="font-size:10px;color:#555">Name: __________________<br>CNIC: __________________</p>
-            </td>
-          </tr>
-        </table>
-      </div>
-    </div>
-  \`;
-
-  window.print();
-  setTimeout(() => { printArea.style.display = 'none'; printArea.innerHTML = ''; }, 1500);
-}
-
-// Close modals on backdrop
-document.getElementById('sig-pad-modal').addEventListener('click', function(e){ if(e.target===this) closeSignaturePad(); });
-document.getElementById('lease-doc-modal').addEventListener('click', function(e){ if(e.target===this) closeLeaseDocModal(); });
-
-// Init first tab
-setTimeout(()=>{ if(document.getElementById('sig-canvas')) initSigCanvas(); }, 200);
-</script>
-
 <!-- TENANT NEGOTIATION MODAL -->
 <div class="ov" id="ov-tenant-neg-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
   <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;width:min(500px,96vw);max-height:90vh;overflow:hidden;display:flex;flex-direction:column">
@@ -3699,7 +3256,7 @@ async function loadTenantNegMessages(reqId) {
     el.innerHTML = msgs.map(m=>`
       <div style="display:flex;flex-direction:column;align-items:${m.senderRole==='tenant'?'flex-end':'flex-start'};margin-bottom:10px">
         <div style="max-width:78%;padding:10px 14px;border-radius:${m.senderRole==='tenant'?'14px 14px 4px 14px':'14px 14px 14px 4px'};background:${m.senderRole==='tenant'?'rgba(201,169,110,0.15)':'rgba(74,158,255,0.12)'};border:1px solid ${m.senderRole==='tenant'?'rgba(201,169,110,0.25)':'rgba(74,158,255,0.2)'}">
-          <div style="font-size:10px;color:var(--muted);margin-bottom:4px">${m.senderRole==='tenant'?'🧑 Aap':'🏠 Landlord'}</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px">${m.senderRole==='tenant'?'🧑 You':'🏠 Landlord'}</div>
           <div style="font-size:13px;color:var(--text)">${m.text||''}</div>
           ${m.proposedRent?`<div style="font-size:12px;color:var(--gold);font-weight:700;margin-top:4px">🏷️ Offer: Rs. ${Number(m.proposedRent).toLocaleString()}/mo</div>`:''}
         </div>
@@ -3725,16 +3282,206 @@ async function sendTenantNegMsg() {
     } else alert(data.message||'Error');
   } catch{alert('Unable to connect to the server.');}
 }
-
-function tenantDownloadLease() {
-  const l = window._currentLease;
-  if(!l || !l.fullAgreementHtml) { alert('Agreement HTML unavailable. Contact Admin or Landlord.'); return; }
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([l.fullAgreementHtml], {type:'text/html'}));
-  a.download = 'lease-agreement.html';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-}
 </script>
+
+<!-- ══ TENANT DOCS MODAL ══ -->
+<div id="t-docs-modal" onclick="if(event.target===this) closeTenantDocsModal()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);align-items:center;justify-content:center">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:26px 28px;width:94%;max-width:460px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div>
+        <div style="font-size:16px;font-weight:700;color:var(--text)">📄 Submit Documents</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">All 2 documents are required</div>
+      </div>
+      <button onclick="closeTenantDocsModal()" style="width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:17px;cursor:pointer">×</button>
+    </div>
+    <div id="t-docs-deadline" style="padding:9px 12px;background:rgba(255,179,71,0.08);border:1px solid rgba(255,179,71,0.25);border-radius:9px;font-size:12px;color:#ffb347;margin-bottom:16px"></div>
+
+    <!-- ID Card -->
+    <div style="margin-bottom:14px">
+      <label style="font-size:12px;font-weight:700;color:var(--text);display:block;margin-bottom:6px">🪪 CNIC / ID Card <span style="color:var(--error)">*</span></label>
+      <div id="tdoc-idcard-prev" style="display:none;margin-bottom:6px;border-radius:8px;overflow:hidden;border:1px solid var(--border)"><img id="tdoc-idcard-img" style="width:100%;height:120px;object-fit:cover;display:block"></div>
+      <label style="display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--input-bg);border:1.5px dashed var(--border);border-radius:9px;cursor:pointer">
+        <span style="font-size:20px">📷</span>
+        <div><div style="font-size:12px;font-weight:600;color:var(--text)">Upload ID Card</div><div style="font-size:10px;color:var(--muted)">JPG/PNG max 2MB</div></div>
+        <input id="tdoc-idcard-file" type="file" accept="image/*" style="display:none" onchange="tDocPreview(this,'tdoc-idcard-img','tdoc-idcard-prev','tdoc-idcard-b64')">
+      </label>
+      <input type="hidden" id="tdoc-idcard-b64">
+    </div>
+
+    <!-- Police Cert -->
+    <div style="margin-bottom:14px">
+      <label style="font-size:12px;font-weight:700;color:var(--text);display:block;margin-bottom:6px">🚔 Police Character Certificate <span style="color:var(--error)">*</span></label>
+      <div id="tdoc-police-prev" style="display:none;margin-bottom:6px;border-radius:8px;overflow:hidden;border:1px solid var(--border)"><img id="tdoc-police-img" style="width:100%;height:120px;object-fit:cover;display:block"></div>
+      <label style="display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--input-bg);border:1.5px dashed var(--border);border-radius:9px;cursor:pointer">
+        <span style="font-size:20px">📋</span>
+        <div><div style="font-size:12px;font-weight:600;color:var(--text)">Upload Police Certificate</div><div style="font-size:10px;color:var(--muted)">JPG/PNG max 2MB</div></div>
+        <input id="tdoc-police-file" type="file" accept="image/*" style="display:none" onchange="tDocPreview(this,'tdoc-police-img','tdoc-police-prev','tdoc-police-b64')">
+      </label>
+      <input type="hidden" id="tdoc-police-b64">
+    </div>
+
+
+    <div id="t-docs-err" style="display:none;padding:9px 12px;background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.25);border-radius:8px;font-size:12px;color:var(--error);margin-bottom:12px"></div>
+    <button onclick="tDocsSubmit()" id="t-docs-submit-btn" style="width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#c9a96e,#a07840);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">📤 Submit</button>
+  </div>
+</div>
+
+<script>
+let _tDocsReqId = null;
+async function openTenantDocsModal(reqId) {
+  _tDocsReqId = reqId;
+  let req = (window._myRequests||[]).find(r=>r._id===reqId);
+  if (!req) {
+    try {
+      const data = await tFetch('/rental-requests/'+reqId);
+      req = data.request;
+    } catch (e) {
+      console.error('openTenantDocsModal error', e);
+    }
+  }
+  const dl = document.getElementById('t-docs-deadline');
+  if (dl && req && req.docsDeadline) {
+    const d = new Date(req.docsDeadline);
+    const h = Math.max(0,Math.round((d-new Date())/36e5));
+    dl.innerHTML = '⏰ Deadline: <strong>'+d.toLocaleString('en-PK',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'</strong> — <strong style="color:'+(h<6?'#ff6b6b':'#ffb347')+'">'+h+' hours remaining</strong>';
+  } else if (dl) {
+    dl.innerHTML = '';
+  }
+  ['idcard','police'].forEach(k=>{
+    document.getElementById('tdoc-'+k+'-file').value='';
+    document.getElementById('tdoc-'+k+'-b64').value='';
+    document.getElementById('tdoc-'+k+'-img').src='';
+    document.getElementById('tdoc-'+k+'-prev').style.display='none';
+  });
+  document.getElementById('t-docs-err').style.display='none';
+  document.getElementById('t-docs-modal').style.display='flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeTenantDocsModal(){
+  document.getElementById('t-docs-modal').style.display='none';
+  document.body.style.overflow = '';
+  _tDocsReqId = null;
+}
+function openFirstTenantDocsModal(){
+  const req = (window._myRequests||[]).find(r => ['pending','negotiating','docs_pending','docs_rejected'].includes(r.status));
+  if (req) {
+    openTenantDocsModal(req._id);
+  } else {
+    alert('No document upload action is currently available.');
+  }
+}
+function tDocPreview(input,imgId,prevId,hiddenId){
+  const file=input.files[0]; if(!file) return;
+  if(file.size>2*1024*1024){alert('File must be smaller than 2MB');input.value='';return;}
+  const r=new FileReader();
+  r.onload=e=>{
+    document.getElementById(imgId).src=e.target.result;
+    document.getElementById(prevId).style.display='block';
+    document.getElementById(hiddenId).value=e.target.result;
+  };
+  r.readAsDataURL(file);
+}
+async function tDocsSubmit(){
+  const idCard=document.getElementById('tdoc-idcard-b64').value;
+  const policeCert=document.getElementById('tdoc-police-b64').value;
+  const err=document.getElementById('t-docs-err');
+  err.style.display='none';
+  if(!idCard||!policeCert){
+    err.textContent='⚠️ Please upload both required documents';
+    err.style.display='block'; return;
+  }
+  const btn=document.getElementById('t-docs-submit-btn');
+  btn.disabled=true; btn.textContent='⏳ Submitting…';
+  try {
+    const res=await tFetch('/rental-requests/'+_tDocsReqId+'/submit-docs','PUT',{idCard,policeCert});
+    if(res.success){
+      closeTenantDocsModal();
+      alert('✅ Documents submitted successfully! Landlord and Admin will verify them.');
+      await loadRentalRequests();
+    } else { err.textContent='❌ '+(res.message||'Submission failed'); err.style.display='block'; }
+  } catch (e) {
+    console.error('tDocsSubmit error', e);
+    err.textContent = '❌ ' + (e?.message || 'Could not connect to server');
+    err.style.display = 'block';
+  }
+  btn.disabled=false; btn.textContent='📤 Submit';
+}
+
+// ═════════════════════════════════════════════════════
+// GLOBAL SEARCH (top bar) — searches nav pages + all properties
+// ═════════════════════════════════════════════════════
+const TN_SEARCH_PAGES = [
+  {id:'all-properties', label:'All Properties'},
+  {id:'requests', label:'Rental Requests'},
+  {id:'documents', label:'Documents'},
+  {id:'my-rentals', label:'My Rentals'},
+  {id:'payments', label:'Payment Records'},
+  {id:'maintenance', label:'Maintenance'},
+  {id:'complaints', label:'Complaints'},
+  {id:'furniture', label:'Furniture Placement'},
+  {id:'notifications', label:'Notifications'},
+  {id:'profile', label:'My Profile'}
+];
+
+function tnGlobalSearch(q) {
+  const box = document.getElementById('gs-results');
+  if (!box) return;
+  q = (q || '').trim().toLowerCase();
+  if (!q) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+  const allP = window._allPropsCache || allProps || [];
+  const pageMatches = TN_SEARCH_PAGES.filter(p => p.label.toLowerCase().includes(q));
+  const propMatches = allP.filter(p => {
+    const hay = `${p.title||''} ${p.address||''} ${p.city||''} ${p.area||''} ${p.landlordName||''} ${p.type||''}`.toLowerCase();
+    return hay.includes(q);
+  }).slice(0, 6);
+
+  let html = '';
+  if (propMatches.length) {
+    html += '<div class="gs-sec-lbl">Properties</div>';
+    html += propMatches.map(p => `<div class="gs-item" onclick="tnGoToProperty('${(p._id||'').toString()}')">🏠 <div><div>${p.title||'Property'}</div><small>${p.address||p.area||''}</small></div></div>`).join('');
+  }
+  if (pageMatches.length) {
+    html += '<div class="gs-sec-lbl">Pages</div>';
+    html += pageMatches.map(p => `<div class="gs-item" onclick="tnGoToPage('${p.id}')">📄 ${p.label}</div>`).join('');
+  }
+  if (!html) html = '<div class="gs-empty">No matches found.</div>';
+
+  box.innerHTML = html;
+  box.style.display = 'block';
+}
+
+function tnGoToPage(pageId) {
+  sp(pageId, null);
+  const box = document.getElementById('gs-results'); if (box) box.style.display = 'none';
+  const input = document.getElementById('tn-global-search'); if (input) input.value = '';
+}
+
+function tnGoToProperty(propId) {
+  sp('all-properties', null);
+  const box = document.getElementById('gs-results'); if (box) box.style.display = 'none';
+  const allP = window._allPropsCache || allProps || [];
+  const match = allP.find(p => (p._id||'').toString() === propId);
+  const searchInput = document.getElementById('all-search');
+  const input = document.getElementById('tn-global-search');
+  if (searchInput && match) {
+    searchInput.value = match.title || '';
+    if (typeof filterAllProps === 'function') filterAllProps();
+  }
+  if (input) input.value = '';
+  setTimeout(() => {
+    const grid = document.getElementById('props-grid-all');
+    if (grid) grid.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 100);
+}
+
+document.addEventListener('click', (e) => {
+  const box = document.getElementById('gs-results');
+  const input = document.getElementById('tn-global-search');
+  if (box && input && !input.contains(e.target) && !box.contains(e.target)) box.style.display = 'none';
+});
+</script>
+
 </body>
 
 </html>

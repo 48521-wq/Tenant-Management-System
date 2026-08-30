@@ -4,6 +4,10 @@ const Payment = require('../models/Payment');
 const { protect, adminOnly } = require('../middleware/auth');
 const router = express.Router();
 
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 // GET payments
 router.get('/', protect, async (req, res) => {
   try {
@@ -20,7 +24,7 @@ router.get('/', protect, async (req, res) => {
       const propTitles = props.map(p => p.title).filter(Boolean);
       const escapedName = (req.user.name || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const nameRegex = new RegExp(`^${escapedName}$`, 'i');
-      const titleRegexes = propTitles.map(t => new RegExp(`^${t.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}$`, 'i'));
+      const titleRegexes = propTitles.map(t => new RegExp(`^${escapeRegex(t)}$`, 'i'));
       filter = {
         $or: [
           { landlordId: req.user._id },
@@ -29,7 +33,20 @@ router.get('/', protect, async (req, res) => {
           ...(titleRegexes.length ? [{ propertyTitle: { $in: titleRegexes } }] : []),
         ]
       };
+      if (req.query.status) filter.status = req.query.status;
+      if (req.query.month) {
+        // Substring, case-insensitive — so "Aug", "august", "August 2026"
+        // all find "August 2026" regardless of how it was typed.
+        filter.month = new RegExp(escapeRegex(req.query.month.trim()), 'i');
+      }
+      if (req.query.property) {
+        filter.propertyTitle = new RegExp(escapeRegex(req.query.property.trim()), 'i');
+      }
+      if (req.query.tenant) {
+        filter.tenantName = new RegExp(escapeRegex(req.query.tenant.trim()), 'i');
+      }
     }
+
     const payments = await Payment.find(filter).sort({ createdAt: -1 });
     res.json({ success: true, count: payments.length, payments });
   } catch (e) {

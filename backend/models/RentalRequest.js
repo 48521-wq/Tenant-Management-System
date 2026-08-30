@@ -1,52 +1,52 @@
 const mongoose = require('mongoose');
 
 const rentalRequestSchema = new mongoose.Schema({
-  // Tenant requesting
-  tenantId:      { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  tenantName:    { type: String, default: '' },
-  tenantEmail:   { type: String, default: '' },
-  tenantPhone:   { type: String, default: '' },
+  tenantId:       { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  tenantName:     { type: String, default: '' },
+  tenantEmail:    { type: String, default: '' },
+  tenantPhone:    { type: String, default: '' },
 
-  // Property being requested
-  propertyId:    { type: mongoose.Schema.Types.ObjectId, ref: 'Property', required: true },
-  propertyTitle: { type: String, default: '' },
+  propertyId:     { type: mongoose.Schema.Types.ObjectId, ref: 'Property', required: true },
+  propertyTitle:  { type: String, default: '' },
   propertyAddress:{ type: String, default: '' },
-  propertyRent:  { type: Number, default: 0 },
+  propertyRent:   { type: Number, default: 0 },
 
-  // Landlord owning the property
-  landlordId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  landlordName:  { type: String, default: '' },
-  landlordEmail: { type: String, default: '' },
+  landlordId:     { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  landlordName:   { type: String, default: '' },
+  landlordEmail:  { type: String, default: '' },
 
-  // Request status
-  status:        {
+  status: {
     type: String,
-    enum: ['pending', 'accepted', 'rejected', 'cancelled', 'negotiating'],
+    enum: ['pending','accepted','rejected','cancelled','negotiating',
+           'docs_pending','docs_submitted','docs_rejected','docs_expired'],
     default: 'pending'
   },
 
-  // Optional: Tenant message/reason
-  message:       { type: String, default: '' },
+  message:      { type: String, default: '' },
+  proposedRent: { type: Number, default: null },
 
-  // Negotiation: proposed rent by tenant
-  proposedRent:  { type: Number, default: null },
-
-  // Negotiation chat messages
   negotiationMessages: [{
-    senderId:   { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    senderName: { type: String },
-    senderRole: { type: String, enum: ['tenant', 'landlord'] },
-    text:       { type: String },
+    senderId:     { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    senderName:   { type: String },
+    senderRole:   { type: String, enum: ['tenant','landlord'] },
+    text:         { type: String },
     proposedRent: { type: Number, default: null },
-    sentAt:     { type: Date, default: Date.now }
+    sentAt:       { type: Date, default: Date.now }
   }],
 
-  // Final agreed rent (set when landlord accepts negotiation)
-  agreedRent:    { type: Number, default: null },
+  agreedRent:  { type: Number, default: null },
+  requestedAt: { type: Date, default: Date.now },
+  respondedAt: { type: Date, default: null },
 
-  // Timeline
-  requestedAt:   { type: Date, default: Date.now },
-  respondedAt:   { type: Date, default: null },
+  // ── Document verification ──
+  docsDeadline:  { type: Date, default: null },
+  documents: {
+    idCard:       { type: String, default: '' },
+    policeCert:   { type: String, default: '' },
+    birthCert:    { type: String, default: '' },
+    submittedAt:  { type: Date, default: null }
+  },
+  docsRejectReason: { type: String, default: '' }
 
 }, { timestamps: true });
 

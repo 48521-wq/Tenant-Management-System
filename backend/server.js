@@ -22,11 +22,10 @@ app.use('/api/properties',     require('./routes/properties'));
 app.use('/api/complaints',     require('./routes/complaints'));
 app.use('/api/maintenance',    require('./routes/maintenance'));
 app.use('/api/payments',       require('./routes/payments'));
-app.use('/api/notifications',  require('./routes/notifications'));
-app.use('/api/leases',         require('./routes/leases'));
-app.use('/api/lease-agreements', require('./routes/leaseAgreements'));
 app.use('/api/rental-requests', require('./routes/rentalRequests'));
 app.use('/api/3d-requests',    require('./routes/model3dRequests'));
+app.use('/api/notifications',  require('./routes/notifications'));
+app.use('/api/lease-agreements', require('./routes/leaseAgreements'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'OK', time: new Date().toISOString() }));
 app.use((req, res) => res.status(404).json({ success: false, message: 'Route not found.' }));

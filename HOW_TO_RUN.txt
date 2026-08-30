@@ -81,4 +81,13 @@ DELETE    /api/payments/:id      — Admin removes
 GET/POST  /api/leases            — Tenant signs, Admin views
 DELETE    /api/leases/:id        — Admin removes
 
+GET       /api/notifications              — list notifications for the logged-in user
+GET       /api/notifications/unread-count — unread badge count
+POST      /api/notifications              — Admin/Landlord sends (tenant blocked)
+PUT       /api/notifications/mark-all-read — marks visible notifs as read
+DELETE    /api/notifications/:id          — Admin removes
+
+Notifications now SAVE to MongoDB Atlas (previously they only lived in the
+browser's localStorage and never reached the database or other devices).
+
 ═══════════════════════════════════════════════════════════════

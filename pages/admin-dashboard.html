@@ -24,6 +24,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .tn-pill{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:rgba(255,107,107,0.08);color:var(--red);font-size:12px;font-weight:600}
 .icon-btn{position:relative;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:var(--input-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.2s;flex-shrink:0;color:var(--text)}
 .icon-btn:hover{background:rgba(37,99,235,0.1);border-color:var(--blue)}
+.tn-search{flex:1;max-width:340px;position:relative;display:flex;align-items:center}
+.tn-search svg{position:absolute;left:12px;width:14px;height:14px;color:var(--muted);pointer-events:none}
+.tn-search input{width:100%;padding:8px 12px 8px 34px;border-radius:20px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none}
+.tn-search input::placeholder{color:var(--muted)}
+.welcome-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.welcome-head h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--text);margin:0}
+.welcome-head p{color:var(--muted);font-size:13px;margin-top:4px}
 .logout-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:9px;background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.2);color:var(--red);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
 .logout-btn:hover{background:rgba(255,107,107,0.15)}
 .logout-btn svg{width:14px;height:14px;stroke:currentColor;fill:none}
@@ -68,10 +75,10 @@ button, input[type="button"], input[type="submit"], .btn, .submit-btn{color:#FFF
 .card+.card{margin-top:16px}
 /* STATS */
 .stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px;margin-bottom:22px}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;align-items:center;gap:13px;transition:all 0.2s;cursor:pointer}
-.stat-card:hover{border-color:rgba(255,107,107,0.25);transform:translateY(-2px)}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;align-items:center;gap:13px;min-width:0;width:100%}
+.stat-card:hover{border-color:var(--border);transform:none}
 .stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.stat-val{font-size:26px;font-weight:700;font-family:'Playfair Display',serif;line-height:1;color:var(--text)}
+.stat-val{font-size:20px;font-weight:700;font-family:inherit;line-height:1.1;color:var(--text)}
 .stat-lbl{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:0.4px;font-weight:600}
 /* BADGES */
 .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
@@ -736,7 +743,6 @@ body::after {
 [data-theme="light"] .list-item,
 [data-theme="light"] .pcard,
 [data-theme="light"] .notif-item,
-[data-theme="light"] .lease-box,
 [data-theme="light"] .filter-bar,
 [data-theme="light"] .ov-box,
 [data-theme="light"] .action-item,
@@ -759,7 +765,6 @@ body::after {
 /* ── Specific text classes ── */
 [data-theme="light"] .li-title,
 [data-theme="light"] .pcard-title,
-[data-theme="light"] .lease-title,
 [data-theme="light"] .ov-title,
 [data-theme="light"] .action-label,
 [data-theme="light"] .stat-val,
@@ -770,17 +775,11 @@ body::after {
 }
 [data-theme="light"] .li-sub,
 [data-theme="light"] .pcard-loc,
-[data-theme="light"] .lease-key,
-[data-theme="light"] .lease-sub,
 [data-theme="light"] .stat-lbl,
 [data-theme="light"] .stat-label,
 [data-theme="light"] .action-sub,
 [data-theme="light"] .notif-time {
   color: #4B5563 !important;
-}
-[data-theme="light"] .lease-val {
-  color: #0D1117 !important;
-  font-weight: 600 !important;
 }
 
 /* ── Table ── */
@@ -1007,7 +1006,9 @@ body::after {
 const API = 'http://localhost:5000/api';
 const tok = () => localStorage.getItem('tms_token');
 async function aFetch(url, method='GET', body=null) {
-  const opts = { method, headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+tok() } };
+  const opts = { method, headers: { 'Content-Type':'application/json' } };
+  const token = tok();
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
   if (body) opts.body = JSON.stringify(body);
   const r = await fetch(API + url, opts);
   let data;
@@ -1049,7 +1050,6 @@ function sp(id, el) {
   if(id==='maintenance') loadAdminMaintenance();
   if(id==='complaints')  loadAdminComplaints();
   if(id==='payments')    loadAdminPayments();
-  if(id==='leases')      loadAdminLeases();
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1058,6 +1058,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.documentElement.setAttribute('data-theme', s);
   const tb = document.getElementById('theme-btn'); if(tb) tb.textContent=s==='dark'?'🌙':'☀️';
   const an=document.getElementById('sb-admin-name'); if(an) an.textContent=user.name||'Super Admin';
+  const wn=document.getElementById('welcome-name-a'); if(wn) wn.textContent=user.name||'Super Admin';
   const ae=document.getElementById('sb-admin-email'); if(ae) ae.textContent=user.email||'admin@tms.com';
   await loadDashboardStats();
 });
@@ -1295,29 +1296,6 @@ async function loadAdminPayments() {
 }
 
 // ══════════════════════════════════════
-// LEASES
-// ══════════════════════════════════════
-async function loadAdminLeases() {
-  const tbody=document.getElementById('leases-tbody'); if(!tbody)return;
-  tbody.innerHTML='<tr><td colspan="6" class="loading"><span class="spinner"></span>Loading…</td></tr>';
-  try {
-    const data=await aFetch('/leases');
-    const list=data.leases||[];
-    set_count('leases-count',list.length);
-    if(!list.length){tbody.innerHTML='<tr><td colspan="6" class="loading">No lease agreements yet.</td></tr>';return;}
-    tbody.innerHTML=list.map((l,i)=>`<tr>
-      <td style="color:var(--muted)">${String(i+1).padStart(2,'0')}</td>
-      <td style="font-weight:600">${l.tenantName||'—'}</td>
-      <td>${l.propertyTitle||'—'}</td>
-      <td>${l.landlordName||'—'}</td>
-      <td style="color:var(--gold);font-weight:600">Rs. ${Number(l.rent||0).toLocaleString()}</td>
-      <td>${l.startDate||'—'} → ${l.endDate||'—'}</td>
-      <td><span class="badge ${l.status==='active'?'b-green':l.status==='expired'?'b-muted':'b-red'}">${l.status||'active'}</span></td>
-    </tr>`).join('');
-  } catch{tbody.innerHTML='<tr><td colspan="6" class="loading">⚠️ Error.</td></tr>';}
-}
-
-// ══════════════════════════════════════
 // ACTIONS
 // ══════════════════════════════════════
 async function blockUser(id, role) { await aFetch(`/users/${id}/block`,'PUT'); role==='tenant'?loadTenants():loadLandlords(); }
@@ -1350,6 +1328,7 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
     <span class="tn-name">TMS</span><span style="color:var(--muted);font-size:12px;margin:0 4px">/</span><span style="font-size:12px;color:var(--muted)">Admin</span>
   </div>
   <span class="tn-pill">🛡️ Super Admin</span>
+  <div class="tn-search" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="tn-global-search" placeholder="Search anything…" aria-label="Search" oninput="adminGlobalSearch(this.value)" onfocus="adminGlobalSearch(this.value)" autocomplete="off"><div id="gs-results" class="gs-results"></div></div>
   <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></button>
   <button class="logout-btn" onclick="tmsLogout()">
     <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout
@@ -1381,9 +1360,6 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
     <button class="nav-item" onclick="sp('properties',this)">
       <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>All Properties
     </button>
-    <button class="nav-item" onclick="sp('leases',this)">
-      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Lease Agreements
-    </button>
     <button class="nav-item" onclick="sp('payments',this)">
       <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payments
     </button>
@@ -1393,7 +1369,11 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
     <button class="nav-item" onclick="sp('maintenance',this)">
       <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Maintenance
     </button>
-    <button class="nav-item" onclick="sp('complaints',this)">
+    <button class="nav-item" onclick="sp('docs-review',this)">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>Docs Review
+        <span class="nb-pill" id="docs-review-badge" style="display:none">0</span>
+      </button>
+      <button class="nav-item" onclick="sp('complaints',this)">
       <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Complaints
     </button>
     <button class="nav-item" onclick="sp('3d-requests',this);adminLoad3DRequests()">
@@ -1421,6 +1401,12 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
 
   <!-- DASHBOARD -->
   <div class="page active" id="page-dashboard">
+    <div class="welcome-head">
+      <div>
+        <h1>Welcome back, <span id="welcome-name-a">Super Admin</span></h1>
+        <p>Here's what's happening across the TMS platform today.</p>
+      </div>
+    </div>
     <div class="pg-head">
       <div><div class="pg-title">Admin Dashboard</div><div class="pg-sub">System overview — TMS Platform</div></div>
       <button class="btn btn-red" onclick="loadDashboardStats()">
@@ -1588,21 +1574,6 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
     </div>
   </div>
 
-  <!-- LEASES -->
-  <div class="page" id="page-leases">
-    <div class="pg-head">
-      <div><div class="pg-title">Lease Agreements</div><div class="pg-sub" id="leases-count">Loading…</div></div>
-    </div>
-    <div class="card">
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>#</th><th>Tenant</th><th>Property</th><th>Landlord</th><th>Rent</th><th>Period</th><th>Status</th></tr></thead>
-          <tbody id="leases-tbody"><tr><td colspan="7" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
   <div class="page" id="page-notifications">
     <div style="margin-bottom:24px">
       <div style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px">🔔 Notifications</div>
@@ -1610,22 +1581,24 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
     </div>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px">
       <div style="display:grid;gap:14px">
-        <div style="display:grid;grid-template-columns:1fr 180px;gap:14px;align-items:end">
+        <div style="display:grid;grid-template-columns:1fr minmax(180px, 300px);gap:14px;align-items:end">
           <div style="display:flex;flex-direction:column;gap:6px">
             <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Title</label>
             <input id="notif-title" placeholder="Notification title" type="text" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
           </div>
-          <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;flex-direction:column;gap:6px;width:100%">
             <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Send To</label>
-            <select id="notif-to" onchange="tmsOnNotifToChange()" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
+            <select id="notif-to" onchange="tmsOnNotifToChange()" style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
               <option value="all">Everyone</option>
               <option value="tenant">Tenants</option>
               <option value="landlord">Landlords</option>
               <option value="admin">Admin</option>
+              <option value="specific">Specific Person…</option>
             </select>
-              <div class="fg" id="notif-specific-wrap" style="margin-bottom:0;display:none">
-                <label>Specific Person (Optional)</label>
-                <select id="notif-specific">
+              <div class="fg" id="notif-specific-wrap" style="width:100%;margin-bottom:0;display:none">
+                <label>Specific Person</label>
+                <select id="notif-specific" style="width:100%;box-sizing:border-box">
+                  <option value="">— Choose a person —</option>
                 </select>
               </div>
           </div>
@@ -1663,6 +1636,16 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
     <div id="admin-3dreq-list" style="display:grid;gap:14px"><div class="loading">Loading…</div></div>
   </div>
 
+
+  <!-- DOCS REVIEW PAGE (ADMIN) -->
+  <div class="page" id="page-docs-review">
+    <div class="pg-head">
+      <div><div class="pg-title">Documents Review</div><div class="pg-sub">Tenant document verification — approve, reject, or block fraud</div></div>
+      <button onclick="aLoadDocsReview()" style="padding:8px 16px;border-radius:9px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">🔄 Refresh</button>
+    </div>
+    <div id="a-docs-list" style="display:grid;gap:14px"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+  </div>
+
 </main>
 </div>
 
@@ -1685,6 +1668,14 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
   </div>
 </div>
 
+<style>
+.gs-results{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 28px rgba(0,0,0,0.35);max-height:340px;overflow-y:auto;z-index:500}
+.gs-item{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;transition:background 0.2s}
+.gs-item:hover{background:rgba(201,169,110,0.08)}
+.gs-sec-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.9px;color:var(--muted);padding:10px 14px 6px}
+.gs-empty{padding:12px 14px;color:var(--muted);font-size:13px}
+</style>
+
 <script src="../js/tms-data.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="../js/house3d.js"></script>
@@ -1692,21 +1683,71 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
 // Fix admin 3D modal - use propMap to avoid JSON-in-HTML issues
 document.getElementById('ov-admin3d').style.display = 'none';
 
-// Admin notifications
-window.adminSendNotification = function() {
+// Admin notifications — now backed by the real /api/notifications API
+let _adminUsersCache = null;
+async function tmsOnNotifToChange() {
+  const to = document.getElementById('notif-to')?.value;
+  const wrap = document.getElementById('notif-specific-wrap');
+  if (!wrap) return;
+  if (to !== 'specific') { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  const sel = document.getElementById('notif-specific');
+  if (!sel) return;
+  if (!_adminUsersCache) {
+    const r = await aFetch('/users');
+    _adminUsersCache = (r && r.success) ? r.users : [];
+  }
+  sel.innerHTML = '<option value="">— Choose a person —</option>' +
+    _adminUsersCache.map(u => `<option value="${u.email}">${u.name} — ${u.email} (${u.role})</option>`).join('');
+}
+
+window.adminSendNotification = async function() {
   const title = document.getElementById('notif-title')?.value.trim();
   const msg   = document.getElementById('notif-msg')?.value.trim();
   const to    = document.getElementById('notif-to')?.value || 'all';
   if (!title || !msg) { alert('Title and message required.'); return; }
-  if (typeof TMS === 'undefined') { alert('Notification system not loaded.'); return; }
-  TMS.addNotif(title, msg, 'red', to, 'admin');
+  const body = { title, message: msg, to };
+  if (to === 'specific') {
+    const specificEmail = document.getElementById('notif-specific')?.value;
+    if (!specificEmail) { alert('Please choose a specific person.'); return; }
+    body.specificEmail = specificEmail;
+  }
+  const r = await aFetch('/notifications', 'POST', body);
+  if (!r || !r.success) { alert(r?.message || 'Could not send notification.'); return; }
   document.getElementById('notif-title').value = '';
   document.getElementById('notif-msg').value   = '';
   document.getElementById('notif-to').value    = 'all';
-  if (typeof tmsRenderNotifs === 'function') tmsRenderNotifs();
+  tmsOnNotifToChange();
+  await tmsRenderNotifs();
   const ok = document.getElementById('notif-ok');
   if (ok) { ok.style.opacity='1'; setTimeout(()=>ok.style.opacity='0',3000); }
 };
+
+// Fetch + render notifications list from the backend
+async function tmsRenderNotifs() {
+  const container = document.getElementById('notifs-list');
+  if (!container) return;
+  const r = await aFetch('/notifications');
+  const list = (r && r.success) ? r.notifications : [];
+  if (!list.length) {
+    container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">No notifications yet.</div>`;
+    return;
+  }
+  container.innerHTML = list.map(n => {
+    const colorStyle = n.color && n.color.startsWith('#') ? n.color : `var(--${n.color || 'blue'})`;
+    const time = new Date(n.time).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' });
+    return `
+      <div class="notif-item ${n.read ? '' : 'unread'}">
+        <div class="notif-dot" style="background:${colorStyle}"></div>
+        <div>
+          <div class="notif-text" style="font-weight:700">${n.title}</div>
+          <div class="notif-text" style="margin-top:4px">${n.msg}</div>
+          <div class="notif-time" style="margin-top:8px">From: ${n.from} (${n.fromRole||'admin'}) · To: ${n.toLabel}</div>
+        </div>
+        <span class="notif-time">${time}</span>
+      </div>`;
+  }).join('');
+}
 
 // Add notifications page to sp handler
 const _origSp = window.sp;
@@ -1714,30 +1755,24 @@ if (typeof _origSp === 'function') {
   window.sp = function(id, el) {
     _origSp(id, el);
     if (id === 'notifications') {
-      if (typeof tmsRenderNotifs === 'function') tmsRenderNotifs();
-      if (typeof TMS !== 'undefined') {
-        TMS.markAllNotifsRead();
+      tmsRenderNotifs();
+      aFetch('/notifications/mark-all-read', 'PUT').then(() => {
         const nb = document.getElementById('nb-notifs-admin');
         if (nb) nb.style.display = 'none';
-      }
+      });
     }
   };
 }
-// Update notification badge on load
+// Update notification badge on load + poll every 5s
+async function updateAdminNotifBadge() {
+  const r = await aFetch('/notifications/unread-count');
+  const unread = (r && r.success) ? r.unread : 0;
+  const nb = document.getElementById('nb-notifs-admin');
+  if (nb) { nb.textContent = unread; nb.style.display = unread > 0 ? 'flex' : 'none'; }
+}
 setTimeout(() => {
   if (typeof tmsUpdateStats === 'function') tmsUpdateStats();
   setInterval(() => { if (typeof tmsUpdateStats === 'function') tmsUpdateStats(); }, 5000);
-  // Update admin-specific badge
-  function updateAdminNotifBadge() {
-    if (typeof TMS === 'undefined') return;
-    const notifs = TMS.getNotifs ? TMS.getNotifs() : [];
-    const unread = notifs.filter(n => {
-      const r = Array.isArray(n.to) ? n.to : [n.to||'all'];
-      return !n.read && (r.includes('all') || r.includes('admin'));
-    }).length;
-    const nb = document.getElementById('nb-notifs-admin');
-    if (nb) { nb.textContent = unread; nb.style.display = unread > 0 ? 'flex' : 'none'; }
-  }
   updateAdminNotifBadge();
   setInterval(updateAdminNotifBadge, 5000);
 }, 500);
@@ -1755,59 +1790,52 @@ window.adminView3DById = function(propId) {
 
 window.closeAdmin3D = function() {
   document.getElementById('ov-admin3d').style.display = 'none';
-
-// Admin notifications
-window.adminSendNotification = function() {
-  const title = document.getElementById('notif-title')?.value.trim();
-  const msg   = document.getElementById('notif-msg')?.value.trim();
-  const to    = document.getElementById('notif-to')?.value || 'all';
-  if (!title || !msg) { alert('Title and message required.'); return; }
-  if (typeof TMS === 'undefined') { alert('Notification system not loaded.'); return; }
-  TMS.addNotif(title, msg, 'red', to, 'admin');
-  document.getElementById('notif-title').value = '';
-  document.getElementById('notif-msg').value   = '';
-  document.getElementById('notif-to').value    = 'all';
-  if (typeof tmsRenderNotifs === 'function') tmsRenderNotifs();
-  const ok = document.getElementById('notif-ok');
-  if (ok) { ok.style.opacity='1'; setTimeout(()=>ok.style.opacity='0',3000); }
-};
-
-// Add notifications page to sp handler
-const _origSp = window.sp;
-if (typeof _origSp === 'function') {
-  window.sp = function(id, el) {
-    _origSp(id, el);
-    if (id === 'notifications') {
-      if (typeof tmsRenderNotifs === 'function') tmsRenderNotifs();
-      if (typeof TMS !== 'undefined') {
-        TMS.markAllNotifsRead();
-        const nb = document.getElementById('nb-notifs-admin');
-        if (nb) nb.style.display = 'none';
-      }
-    }
-  };
-}
-// Update notification badge on load
-setTimeout(() => {
-  if (typeof tmsUpdateStats === 'function') tmsUpdateStats();
-  setInterval(() => { if (typeof tmsUpdateStats === 'function') tmsUpdateStats(); }, 5000);
-  // Update admin-specific badge
-  function updateAdminNotifBadge() {
-    if (typeof TMS === 'undefined') return;
-    const notifs = TMS.getNotifs ? TMS.getNotifs() : [];
-    const unread = notifs.filter(n => {
-      const r = Array.isArray(n.to) ? n.to : [n.to||'all'];
-      return !n.read && (r.includes('all') || r.includes('admin'));
-    }).length;
-    const nb = document.getElementById('nb-notifs-admin');
-    if (nb) { nb.textContent = unread; nb.style.display = unread > 0 ? 'flex' : 'none'; }
-  }
-  updateAdminNotifBadge();
-  setInterval(updateAdminNotifBadge, 5000);
-}, 500);
-
   document.body.style.overflow = '';
 };
+
+function adminGlobalSearch(q) {
+  const box = document.getElementById('gs-results');
+  if (!box) return;
+  q = (q || '').trim().toLowerCase();
+  if (!q) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+  const pages = [
+    {id:'dashboard', label:'Dashboard'},
+    {id:'tenants', label:'Tenants'},
+    {id:'landlords', label:'Landlords'},
+    {id:'properties', label:'All Properties'},
+    {id:'payments', label:'Payments'},
+    {id:'maintenance', label:'Maintenance'},
+    {id:'complaints', label:'Complaints'},
+    {id:'docs-review', label:'Docs Review'},
+    {id:'3d-requests', label:'3D Requests'},
+    {id:'notifications', label:'Notifications'}
+  ];
+
+  const pageMatches = pages.filter(p => p.label.toLowerCase().includes(q));
+  let html = '';
+  if (pageMatches.length) {
+    html += '<div class="gs-sec-lbl">Pages</div>';
+    html += pageMatches.map(p => `<div class="gs-item" onclick="adminGoToPage('${p.id}')">📄 ${p.label}</div>`).join('');
+  }
+  if (!html) html = '<div class="gs-empty">No matches found.</div>';
+
+  box.innerHTML = html;
+  box.style.display = 'block';
+}
+
+function adminGoToPage(pageId) {
+  sp(pageId, null);
+  const box = document.getElementById('gs-results'); if (box) box.style.display = 'none';
+  const input = document.getElementById('tn-global-search'); if (input) input.value = '';
+}
+
+document.addEventListener('click', (e) => {
+  const box = document.getElementById('gs-results');
+  const input = document.getElementById('tn-global-search');
+  if (box && input && !input.contains(e.target) && !box.contains(e.target)) box.style.display = 'none';
+});
+
 // Close on backdrop click
 document.getElementById('ov-admin3d').addEventListener('click', function(e) {
   if (e.target === this) closeAdmin3D();
@@ -2048,9 +2076,10 @@ async function adminSend3DMessage() {
   const amount = document.getElementById('adm3d-amount')?.value;
   if(!text && !amount) return;
   const body = { text: text || (amount ? `Admin proposes Rs. ${amount} for your 3D model.` : 'Message from admin.') };
+  const url = amount ? '/3d-requests/'+_adminViewing3dId+'/review' : '/3d-requests/'+_adminViewing3dId+'/admin-message';
   if(amount) body.proposedAmount = Number(amount);
   try {
-    const data = await aFetch('/3d-requests/'+_adminViewing3dId+'/review','PUT', body);
+    const data = await aFetch(url,'PUT', body);
     if(data.success) {
       document.getElementById('adm3d-msg-text').value = '';
       document.getElementById('adm3d-amount').value   = '';
@@ -2059,7 +2088,7 @@ async function adminSend3DMessage() {
       openAdmin3DReqModal(_adminViewing3dId);
       adminRender3DRequests();
     }
-  } catch(e) { console.error(e); }
+  } catch(e) { console.error(e); alert(e.message || 'Unable to send admin message.'); }
 }
 
 async function adminFinalize3D() {
@@ -2137,6 +2166,121 @@ setInterval(()=>{ if(typeof adminLoad3DRequests==='function' && document.getElem
   }).catch(()=>{});
 }}, 15000);
 </script>
-</body>
 
+<script>
+// ── Admin: Load docs review ──
+async function aLoadDocsReview() {
+  const list = document.getElementById('a-docs-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>';
+  try {
+    const data = await aFetch('/rental-requests/admin/docs-review');
+    const reqs = data.requests || [];
+    // Update badge
+    const badge = document.getElementById('docs-review-badge');
+    const pending = reqs.filter(r=>r.status==='docs_submitted').length;
+    if(badge){ badge.textContent=pending; badge.style.display=pending>0?'flex':'none'; }
+    if(!reqs.length){ list.innerHTML='<div class="loading">Koi pending docs nahi hain.</div>'; return; }
+    const statusBadge={docs_pending:'b-warn',docs_submitted:'b-blue',docs_rejected:'b-red',docs_expired:'b-red',accepted:'b-green'};
+    const statusLabel={docs_pending:'Docs Awaited',docs_submitted:'Docs Submitted',docs_rejected:'Docs Rejected',docs_expired:'Expired',accepted:'Accepted'};
+    list.innerHTML = reqs.map(r=>`
+    <div style="background:var(--card);border:1px solid ${r.status==='docs_submitted'?'rgba(74,158,255,0.3)':'var(--border)'};border-radius:14px;padding:16px 18px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:14px;font-weight:700;color:var(--text)">${r.tenantName||'Tenant'} <span style="font-size:11px;color:var(--muted);font-weight:400">${r.tenantEmail||''}</span></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px">🏠 ${r.propertyTitle||''} · Landlord: ${r.landlordName||''}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">Rent: Rs. ${Number(r.propertyRent||0).toLocaleString()}/mo</div>
+          ${r.docsDeadline?`<div style="font-size:11px;color:#ffb347;margin-top:3px">⏰ Deadline: ${new Date(r.docsDeadline).toLocaleString('en-PK',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>`:''}
+          ${r.docsRejectReason?`<div style="font-size:11px;color:var(--error);margin-top:3px">Reject reason: ${r.docsRejectReason}</div>`:''}
+        </div>
+        <span class="badge ${statusBadge[r.status]||'b-warn'}">${statusLabel[r.status]||r.status}</span>
+      </div>
+      ${r.documents&&r.documents.idCard?`
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px">
+        <div><div style="font-size:10px;color:var(--muted);margin-bottom:5px;font-weight:700;text-transform:uppercase">🪪 ID Card</div><img src="${r.documents.idCard}" style="width:100%;height:100px;cursor:pointer;object-fit:cover;border-radius:8px;border:1px solid var(--border)" onclick="openDocPreview(this.src,'ID Card')" onerror="this.style.opacity=0.2"></div>
+        <div><div style="font-size:10px;color:var(--muted);margin-bottom:5px;font-weight:700;text-transform:uppercase">🚔 Police Cert</div><img src="${r.documents.policeCert||''}" style="width:100%;height:100px;cursor:pointer;object-fit:cover;border-radius:8px;border:1px solid var(--border)" onclick="openDocPreview(this.src,'Police Certificate')" onerror="this.style.opacity=0.2"></div>
+      </div>
+      ${r.documents.submittedAt?`<div style="font-size:11px;color:var(--muted);margin-top:8px">Submitted: ${new Date(r.documents.submittedAt).toLocaleString('en-PK',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>`:''}
+      `:r.status==='docs_pending'?`<div style="margin-top:12px;padding:10px 12px;background:rgba(255,179,71,0.06);border-radius:8px;font-size:12px;color:#ffb347">⏳ Tenant ne abhi documents submit nahi kiye</div>`:`<div style="margin-top:12px;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:8px;font-size:12px;color:var(--muted)">Documents available nahi hain</div>`}
+      ${r.status==='docs_submitted'?`
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+        <button onclick="aDocsAction('${r._id}','approve')" style="flex:1;min-width:120px;padding:9px;border-radius:9px;border:none;background:linear-gradient(135deg,#4ecdc4,#2bb5ac);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">✅ Approve</button>
+        <button onclick="aDocsRejectPrompt('${r._id}')" style="flex:1;min-width:120px;padding:9px;border-radius:9px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:var(--error);font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">❌ Reject</button>
+        <button onclick="aBlockTenant('${r.tenantId&&(r.tenantId._id||r.tenantId)}')" style="flex:1;min-width:120px;padding:9px;border-radius:9px;border:1px solid rgba(255,107,107,0.5);background:rgba(255,50,50,0.12);color:#ff4444;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">🚫 Fraud — Block Tenant</button>
+      </div>`:''}
+    </div>`).join('');
+  } catch(e){ list.innerHTML='<div class="loading">⚠️ Error: '+e.message+'</div>'; }
+}
+
+async function aDocsAction(reqId, action) {
+  let rejectReason = '';
+  if(action==='reject'){
+    rejectReason = prompt('Reject reason likhen (tenant ko dikhega):','');
+    if(!rejectReason) return;
+  } else {
+    if(!confirm('Documents approve kar ke property assign karen?')) return;
+  }
+  try {
+    const r = await aFetch('/rental-requests/'+reqId+'/verify-docs','PUT',{action,rejectReason});
+    if(r.success){ alert(action==='approve'?'✅ Approved! Tenant onboarded.':'⚠️ Rejected.'); await aLoadDocsReview(); }
+    else alert('❌ '+(r.message||'Failed'));
+  } catch { alert('❌ Server error'); }
+}
+
+function aDocsRejectPrompt(reqId){ aDocsAction(reqId,'reject'); }
+function openDocPreview(src, title) {
+  if (!src) return;
+  const overlay = document.getElementById('doc-preview-overlay');
+  const img = document.getElementById('doc-preview-img');
+  const caption = document.getElementById('doc-preview-title');
+  if (!overlay || !img || !caption) return;
+  img.src = src;
+  caption.textContent = title || 'Document Preview';
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeDocPreview() {
+  const overlay = document.getElementById('doc-preview-overlay');
+  const img = document.getElementById('doc-preview-img');
+  if (overlay) overlay.style.display = 'none';
+  if (img) img.src = '';
+  document.body.style.overflow = '';
+}
+
+async function aBlockTenant(tenantId) {
+  if(!tenantId){ alert('Tenant ID nahi mili'); return; }
+  if(!confirm('⚠️ Is tenant ko BLOCK karen? Woh login nahi kar sakega.')) return;
+  try {
+    const r = await aFetch('/users/'+tenantId+'/block','PUT');
+    if(r.success) alert('🚫 Tenant block ho gaya!');
+    else alert('❌ '+(r.message||'Block failed'));
+    await aLoadDocsReview();
+  } catch { alert('❌ Server error'); }
+}
+
+// Hook sp for docs-review page
+const _origAdminSp = window.sp;
+window.sp = function(id, btn) {
+  if(id==='docs-review'){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+    const pg=document.getElementById('page-docs-review');
+    if(pg) pg.classList.add('active');
+    if(btn) btn.classList.add('active');
+    aLoadDocsReview();
+    return;
+  }
+  if(typeof _origAdminSp==='function') return _origAdminSp(id,btn);
+};
+</script>
+
+<div id="doc-preview-overlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.86);align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)">
+  <div style="position:relative;max-width:95%;max-height:95%;width:100%;">
+    <button onclick="closeDocPreview()" style="position:absolute;top:-12px;right:-12px;width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,0.12);color:#fff;font-size:22px;cursor:pointer;z-index:10">×</button>
+    <div style="font-size:12px;color:#ddd;margin-bottom:10px;text-align:center" id="doc-preview-title">Document Preview</div>
+    <img id="doc-preview-img" src="" style="width:100%;height:auto;max-height:85vh;display:block;margin:0 auto;border-radius:12px;object-fit:contain;box-shadow:0 0 35px rgba(0,0,0,0.4)">
+  </div>
+</div>
+
+</body>
 </html>

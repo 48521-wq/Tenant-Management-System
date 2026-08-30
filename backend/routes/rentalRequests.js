@@ -1,14 +1,17 @@
 const express  = require('express');
 const RentalRequest = require('../models/RentalRequest');
 const Property = require('../models/Property');
-const Lease = require('../models/Lease');
 const User = require('../models/User');
 const { protect } = require('../middleware/auth');
+const { canCreateFollowUpRequest } = require('../utils/rentalRequestPolicy');
 const router = express.Router();
 
 // ─── TENANT: Get all requests by this tenant ───
 router.get('/my-requests', protect, async (req, res) => {
   try {
+    if (req.user.role !== 'tenant')
+      return res.status(403).json({ success: false, message: 'Tenant access required.' });
+
     const requests = await RentalRequest.find({ tenantId: req.user._id })
       .populate('propertyId')
       .populate('landlordId')
@@ -23,7 +26,7 @@ router.get('/my-requests', protect, async (req, res) => {
 // ─── TENANT: Submit rental request for a property ───
 router.post('/request', protect, async (req, res) => {
   try {
-    const { propertyId, message } = req.body;
+    const { propertyId, message, proposedRent } = req.body;
 
     // Validate property exists and is available
     const property = await Property.findById(propertyId);
@@ -34,14 +37,23 @@ router.post('/request', protect, async (req, res) => {
       return res.status(400).json({ success: false, message: 'This property is not available.' });
     }
 
-    // Check if tenant already has pending request for this property
     const existing = await RentalRequest.findOne({
       tenantId: req.user._id,
       propertyId,
-      status: 'pending'
+      status: { $in: ['pending', 'negotiating', 'rejected', 'cancelled'] }
+    }).sort({ createdAt: -1 });
+
+    console.log('[RentalRequest] submit', {
+      userId: req.user._id.toString(),
+      propertyId,
+      proposedRent,
+      existingStatus: existing?.status,
+      existingProposedRent: existing?.proposedRent,
+      existingId: existing?._id
     });
-    if (existing) {
-      return res.status(400).json({ success: false, message: 'You already have a pending request for this property.' });
+
+    if (existing && !canCreateFollowUpRequest(existing, proposedRent)) {
+      return res.status(400).json({ success: false, message: 'A higher offer is required to submit another request for this property.' });
     }
 
     // Get landlord info
@@ -61,6 +73,7 @@ router.post('/request', protect, async (req, res) => {
       landlordName: landlord?.name || 'Unknown',
       landlordEmail: landlord?.email || '',
       message: message || '',
+      proposedRent: proposedRent ? Number(proposedRent) : null,
       status: 'pending'
     });
 
@@ -91,6 +104,41 @@ router.get('/received', protect, async (req, res) => {
   }
 });
 
+// ─── Get a rental request by ID (tenant, landlord, or admin) ───
+router.get('/:id', protect, async (req, res) => {
+  try {
+    const rentalRequest = await RentalRequest.findById(req.params.id)
+      .populate('tenantId')
+      .populate('landlordId')
+      .populate('propertyId');
+    if (!rentalRequest) {
+      return res.status(404).json({ success: false, message: 'Request not found.' });
+    }
+
+    const landlordOwnerId = rentalRequest.landlordId && rentalRequest.landlordId._id
+      ? rentalRequest.landlordId._id.toString()
+      : String(rentalRequest.landlordId);
+    const tenantOwnerId = rentalRequest.tenantId && rentalRequest.tenantId._id
+      ? rentalRequest.tenantId._id.toString()
+      : String(rentalRequest.tenantId);
+    const propertyOwnerId = rentalRequest.propertyId && rentalRequest.propertyId.landlordId
+      ? String(rentalRequest.propertyId.landlordId)
+      : null;
+    const isOwner = landlordOwnerId === String(req.user._id);
+    const isPropertyOwner = propertyOwnerId === String(req.user._id);
+    const isTenant = tenantOwnerId === String(req.user._id);
+    const isAdmin = req.user.isAdmin || req.user.role === 'admin';
+    if (!isOwner && !isPropertyOwner && !isTenant && !isAdmin) {
+      return res.status(403).json({ success: false, message: 'Not authorized.' });
+    }
+
+    res.json({ success: true, request: rentalRequest });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+});
+
 // ─── LANDLORD: Accept rental request ───
 router.put('/:id/accept', protect, async (req, res) => {
   try {
@@ -111,45 +159,14 @@ router.put('/:id/accept', protect, async (req, res) => {
       { status: 'rejected', respondedAt: new Date() }
     );
 
-    // Update this request to accepted
-    rentalRequest.status = 'accepted';
-    rentalRequest.respondedAt = new Date();
+    // Set docs_pending — 48h deadline, property NOT assigned until docs verified
+    const deadline = new Date();
+    deadline.setHours(deadline.getHours() + 48);
+    rentalRequest.status       = 'docs_pending';
+    rentalRequest.respondedAt  = new Date();
+    rentalRequest.docsDeadline = deadline;
     await rentalRequest.save();
-
-    // Update property - assign tenant and change status to 'rented'
-    await Property.findByIdAndUpdate(rentalRequest.propertyId, {
-      tenantId: rentalRequest.tenantId,
-      tenantName: rentalRequest.tenantName,
-      status: 'rented'
-    });
-
-    // Automatically create a lease agreement
-    // First, remove all old leases for this tenant
-    await Lease.deleteMany({
-      tenantId: rentalRequest.tenantId,
-      status: { $in: ['pending', 'active'] }
-    });
-
-    await Lease.create({
-      tenantId: rentalRequest.tenantId,
-      tenantName: rentalRequest.tenantName,
-      tenantEmail: rentalRequest.tenantEmail,
-      landlordId: property.landlordId,
-      landlordName: property.landlordName || req.user.name,
-      propertyId: rentalRequest.propertyId,
-      propertyTitle: rentalRequest.propertyTitle,
-      propertyAddress: rentalRequest.propertyAddress,
-      rent: rentalRequest.propertyRent || property.rent || 0,
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: new Date(new Date().getFullYear() + 1, new Date().getMonth(), new Date().getDate()).toISOString().split('T')[0],
-      duration: '12 months',
-      terms: 'Standard rental agreement',
-      status: 'active',
-      acceptedAt: new Date(),
-      signedAt: new Date()
-    });
-
-    res.json({ success: true, message: 'Request accepted! Property assigned to tenant. Lease created automatically.', request: rentalRequest });
+    res.json({ success: true, message: 'Accepted! Tenant must submit documents within 48 hours.', request: rentalRequest, docsDeadline: deadline });
   } catch (e) {
     console.error(e);
     res.status(500).json({ success: false, message: 'Server error.' });
@@ -203,9 +220,12 @@ router.put('/:id/cancel', protect, async (req, res) => {
   }
 });
 
-// ─── ADMIN: Get all requests (optional) ───
-router.get('/', async (req, res) => {
+// ─── ADMIN: Get all requests (admin only) ───
+router.get('/', protect, async (req, res) => {
   try {
+    if (!req.user.isAdmin && req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Not authorized.' });
+    }
     const requests = await RentalRequest.find()
       .populate('tenantId')
       .populate('landlordId')
@@ -216,6 +236,78 @@ router.get('/', async (req, res) => {
     console.error(e);
     res.status(500).json({ success: false, message: 'Server error.' });
   }
+});
+
+
+// ── TENANT: Submit documents ──
+router.put('/:id/submit-docs', protect, async (req, res) => {
+  try {
+    const r = await RentalRequest.findById(req.params.id);
+    if (!r) return res.status(404).json({ success:false, message:'Not found.' });
+    if (r.tenantId.toString() !== req.user._id.toString())
+      return res.status(403).json({ success:false, message:'Not authorized.' });
+    const allowedStatuses = ['pending','negotiating','docs_pending','docs_rejected'];
+    if (!allowedStatuses.includes(r.status))
+      return res.status(400).json({ success:false, message:'Documents cannot be uploaded at this stage.' });
+    if (r.docsDeadline && new Date() > new Date(r.docsDeadline)) {
+      r.status = 'docs_expired';
+      await r.save();
+      return res.status(400).json({ success:false, message:'48-hour deadline passed. Property is no longer reserved.' });
+    }
+    const { idCard, policeCert } = req.body;
+    if (!idCard || !policeCert)
+      return res.status(400).json({ success:false, message:'Tamam 2 documents required: ID Card, Police Certificate.' });
+    r.documents = { idCard, policeCert, submittedAt: new Date() };
+    r.status = 'docs_submitted';
+    r.docsRejectReason = '';
+    await r.save();
+    res.json({ success:true, message:'Documents submitted! Landlord/Admin will verify.', request: r });
+  } catch(e) { console.error(e); res.status(500).json({ success:false, message:'Server error.' }); }
+});
+
+// ── LANDLORD or ADMIN: Verify docs ──
+router.put('/:id/verify-docs', protect, async (req, res) => {
+  try {
+    const r = await RentalRequest.findById(req.params.id);
+    if (!r) return res.status(404).json({ success:false, message:'Not found.' });
+    const property = await Property.findById(r.propertyId);
+    const isLandlord = property && property.landlordId.toString() === req.user._id.toString();
+    const isAdmin = req.user.isAdmin || req.user.role === 'admin';
+    if (!isLandlord && !isAdmin)
+      return res.status(403).json({ success:false, message:'Not authorized.' });
+    if (r.status !== 'docs_submitted')
+      return res.status(400).json({ success:false, message:'No submitted documents.' });
+
+    const { action, rejectReason } = req.body;
+
+    if (action === 'reject') {
+      r.status = 'docs_rejected';
+      r.docsRejectReason = rejectReason || 'Documents rejected.';
+      await r.save();
+      return res.json({ success:true, message:'Documents rejected.', request: r });
+    }
+
+    // APPROVE — finalize rental
+    r.status = 'accepted';
+    r.docsRejectReason = '';
+    await r.save();
+    await Property.findByIdAndUpdate(r.propertyId, {
+      tenantId: r.tenantId, tenantName: r.tenantName, status: 'rented'
+    });
+    res.json({ success:true, message:'Documents approved! Tenant onboarded.', request: r });
+  } catch(e) { console.error(e); res.status(500).json({ success:false, message:'Server error.' }); }
+});
+
+// ── ADMIN: Get all pending doc submissions ──
+router.get('/admin/docs-review', protect, async (req, res) => {
+  try {
+    if (!req.user.isAdmin && req.user.role !== 'admin')
+      return res.status(403).json({ success:false, message:'Admin only.' });
+    const requests = await RentalRequest.find({
+      status: { $in: ['docs_submitted','docs_pending','docs_rejected','docs_expired'] }
+    }).sort({ updatedAt: -1 });
+    res.json({ success:true, requests });
+  } catch(e) { res.status(500).json({ success:false, message:'Server error.' }); }
 });
 
 module.exports = router;
@@ -260,15 +352,22 @@ router.put('/:id/negotiate-reply', protect, async (req, res) => {
     const { text, counterRent, action } = req.body;
 
     if (action === 'accept') {
-      // Accept the proposed rent
-      rentalRequest.status = 'accepted';
+      // Accept the proposed rent, but require tenant documents before final approval
+      rentalRequest.status = 'docs_pending';
       rentalRequest.agreedRent = rentalRequest.proposedRent;
       rentalRequest.respondedAt = new Date();
+      const deadline = new Date();
+      deadline.setHours(deadline.getHours() + 48);
+      rentalRequest.docsDeadline = deadline;
+      await RentalRequest.updateMany(
+        { propertyId: rentalRequest.propertyId, status: 'pending', _id: { $ne: rentalRequest._id } },
+        { status: 'rejected', respondedAt: new Date() }
+      );
       rentalRequest.negotiationMessages.push({
         senderId:   req.user._id,
         senderName: req.user.name,
         senderRole: 'landlord',
-        text: text || 'Offer accepted! Welcome.',
+        text: text || 'Offer accepted! Tenant must submit documents within 48 hours.',
         sentAt: new Date()
       });
     } else if (action === 'reject') {
