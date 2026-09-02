@@ -19,6 +19,44 @@ function isTenantOf(lease, userId) {
   return lease.tenantId.toString() === userId.toString();
 }
 
+function agreementSnapshot(lease) {
+  return {
+    property: lease.property?.toObject ? lease.property.toObject() : lease.property,
+    landlord: lease.landlord?.toObject ? lease.landlord.toObject() : lease.landlord,
+    tenant: lease.tenant?.toObject ? lease.tenant.toObject() : lease.tenant,
+    terms: (lease.terms || []).map(term => term.toObject ? term.toObject() : { title: term.title, text: term.text }),
+    specialConditions: lease.specialConditions || '',
+    startDate: lease.startDate,
+    endDate: lease.endDate,
+    landlordSignature: lease.landlordSignature?.toObject ? lease.landlordSignature.toObject() : lease.landlordSignature,
+    tenantSignature: lease.tenantSignature?.toObject ? lease.tenantSignature.toObject() : lease.tenantSignature,
+    status: lease.status
+  };
+}
+
+function agreementChanges(before, after) {
+  const changes = [];
+  const beforeTerms = JSON.stringify(before.terms || []);
+  const afterTerms = JSON.stringify(after.terms || []);
+  if (beforeTerms !== afterTerms) {
+    const beforeByTitle = new Map((before.terms || []).map(term => [term.title, term.text]));
+    const afterByTitle = new Map((after.terms || []).map(term => [term.title, term.text]));
+    (after.terms || []).forEach(term => {
+      if (!beforeByTitle.has(term.title)) changes.push(`Clause added: ${term.title}`);
+      else if (beforeByTitle.get(term.title) !== term.text) changes.push(`Clause changed: ${term.title}`);
+    });
+    (before.terms || []).forEach(term => {
+      if (!afterByTitle.has(term.title)) changes.push(`Clause removed: ${term.title}`);
+    });
+  }
+  if ((before.specialConditions || '') !== (after.specialConditions || '')) changes.push('Special conditions changed');
+  if (String(before.startDate || '') !== String(after.startDate || '')) changes.push('Start date changed');
+  if (String(before.endDate || '') !== String(after.endDate || '')) changes.push('End date changed');
+  if ((before.landlord?.cnic || '') !== (after.landlord?.cnic || '')) changes.push('Landlord CNIC changed');
+  if ((before.tenant?.cnic || '') !== (after.tenant?.cnic || '')) changes.push('Tenant CNIC changed');
+  return changes.length ? changes : ['Agreement reviewed by landlord'];
+}
+
 // ─── LANDLORD or TENANT: my agreements ───
 router.get('/my', protect, async (req, res) => {
   try {
@@ -198,10 +236,11 @@ router.put('/:id', protect, async (req, res) => {
     if (!isLandlordOf(lease, req.user._id)) return res.status(403).json({ success: false, message: 'Not authorized.' });
     if (lease.status !== 'draft') return res.status(400).json({ success: false, message: 'Agreement is already sent and can no longer be edited.' });
 
-    // Terms & conditions are fixed Pakistan tenancy clauses — they cannot be
-    // added to, removed, or reworded, by design. Only special conditions,
-    // duration and CNIC can be changed here while the agreement is a draft.
-    const { specialConditions, startDate, endDate, landlordCnic, tenantCnic } = req.body;
+    const before = agreementSnapshot(lease);
+    const { terms, specialConditions, startDate, endDate, landlordCnic, tenantCnic } = req.body;
+    if (Array.isArray(terms)) {
+      lease.terms = terms.filter(term => term && String(term.title || '').trim() && String(term.text || '').trim());
+    }
     if (typeof specialConditions === 'string') {
       lease.specialConditions = specialConditions;
     }
@@ -219,6 +258,13 @@ router.put('/:id', protect, async (req, res) => {
     }
     if (lease.startDate && lease.endDate && lease.endDate <= lease.startDate) {
       return res.status(400).json({ success: false, message: 'Agreement end date must be after the start date.' });
+    }
+    const changes = agreementChanges(before, agreementSnapshot(lease));
+    if (lease.agreementVersions?.length) {
+      const currentVersion = lease.agreementVersions[lease.agreementVersions.length - 1];
+      currentVersion.changes = changes;
+      const latestEdit = lease.editHistory?.[lease.editHistory.length - 1];
+      if (latestEdit) latestEdit.note = changes.join('; ');
     }
     await lease.save();
     res.json({ success: true, lease });
@@ -386,6 +432,13 @@ router.put('/:id/unlock', protect, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Only a fully signed and locked agreement can be unlocked for editing.' });
     }
 
+    // Capture the exact signed copy before refreshing profile details or
+    // clearing signatures. This also works for agreements created earlier,
+    // before agreementVersions existed in the schema.
+    const signedSnapshot = agreementSnapshot(lease);
+    if (!Array.isArray(lease.editHistory)) lease.editHistory = [];
+    if (!Array.isArray(lease.agreementVersions)) lease.agreementVersions = [];
+
     const landlordUser = await User.findById(lease.landlordId);
     const tenantUser = await User.findById(lease.tenantId);
     if (landlordUser) {
@@ -407,9 +460,16 @@ router.put('/:id/unlock', protect, async (req, res) => {
 
     const note = String(req.body?.note || '').trim() || 'Agreement unlocked and revised by landlord.';
     lease.editHistory.push({ at: new Date(), note });
+    lease.agreementVersions.push({
+      version: (lease.agreementVersions?.length || 0) + 1,
+      savedAt: new Date(),
+      changedBy: 'landlord',
+      changes: [],
+      snapshot: signedSnapshot
+    });
 
-    lease.landlordSignature = { type: undefined, data: '', signedAt: null };
-    lease.tenantSignature = { type: undefined, data: '', signedAt: null };
+    lease.landlordSignature = { data: '', signedAt: null };
+    lease.tenantSignature = { data: '', signedAt: null };
     lease.status = 'draft';
     lease.sentAt = null;
     lease.signedAt = null;

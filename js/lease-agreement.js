@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════
 //  TMS — Lease Agreement Wizard (shared: landlord + tenant)
-//  Flow: 1. Select property → 2. Landlord fills & signs →
-//        3. Tenant reads & signs → 4. Locked & ready
+//  Tabs: All agreements | 1. Select property → 2. Landlord
+//        fills & signs → 3. Tenant reads & signs → 4. Locked & ready
 // ═══════════════════════════════════════════════════════
 
 const LW = {
@@ -35,16 +35,17 @@ async function initLeaseAgreements(role, fetchFn) {
 function renderTabs() {
   const el = document.getElementById('lw-tabs');
   if (!el) return;
-  const labels = ['1. Select property', '2. Landlord fills and signs', '3. Tenant reads and signs', '4. Locked and ready'];
+  const labels = ['All agreements', '1. Select property', '2. Landlord fills and signs', '3. Tenant reads and signs', '4. Locked and ready'];
   el.innerHTML = labels.map((l, i) => {
-    const n = i + 1;
+    const n = i; // 0 = All agreements (both roles), 1-4 = wizard steps (landlord jump only)
     const active = LW.step === n ? ' active' : '';
-    const clickable = (LW.role === 'landlord' && n <= 4) ? ` onclick="lwJumpTab(${n})"` : '';
+    const clickable = (n === 0 || LW.role === 'landlord') ? ` onclick="lwJumpTab(${n})"` : '';
     return `<button class="lw-tab${active}"${clickable}>${l}</button>`;
   }).join('');
 }
 
 function lwJumpTab(n) {
+  if (n === 0) { lwShowAllAgreements(); return; }
   if (LW.role !== 'landlord') return;
   // Only allow navigating to steps that make sense given current lease state.
   if (n === 1) { LW.step = 1; renderTabs(); lwLoadPropertiesList(); return; }
@@ -52,6 +53,76 @@ function lwJumpTab(n) {
   if (n === 2 && LW.lease.status === 'draft') { LW.step = 2; renderTabs(); renderStep2(); return; }
   if (n === 3 && (LW.lease.status === 'sent' || LW.lease.status === 'signed')) { LW.step = 3; renderTabs(); renderStep3(); return; }
   if (n === 4 && LW.lease.status === 'signed') { LW.step = 4; renderTabs(); renderStep4(); return; }
+}
+
+// ═══════════════════════════════════════════════════════
+//  "All agreements" — overview tab (landlord + tenant)
+// ═══════════════════════════════════════════════════════
+async function lwShowAllAgreements() {
+  LW.step = 0;
+  renderTabs();
+  const body = document.getElementById('lw-body');
+  if (body) body.innerHTML = '<div class="loading"><span class="spinner"></span>Loading agreements…</div>';
+  try {
+    if (LW.role === 'landlord') {
+      const [propData, leaseData] = await Promise.all([
+        LW.fetch('/properties/my'),
+        LW.fetch('/lease-agreements/my')
+      ]);
+      const all = propData.properties || [];
+      LW.properties = all;
+      LW.leasesByProp = {};
+      (leaseData.leases || []).forEach(l => { LW.leasesByProp[l.propertyId] = l; });
+      const withLease = all.filter(p => LW.leasesByProp[p._id]);
+      if (!body) return;
+      body.innerHTML = `
+        <div class="lw-section-lbl">ALL LEASE AGREEMENTS</div>
+        ${withLease.length ? withLease.map(p => `
+          <div class="lw-prop-row">
+            <div>
+              <div style="font-weight:600">${esc(p.title || p.address || 'Property')}</div>
+              <div style="font-size:12px;color:var(--muted)">${esc(p.address || '')}</div>
+            </div>
+            ${lwStatusBadge(LW.leasesByProp[p._id])}
+            ${lwRevisionBadge(LW.leasesByProp[p._id])}
+            ${(LW.leasesByProp[p._id].agreementVersions || []).length ? `<button class="btn btn-ghost btn-sm" onclick="lwOpenAgreementHistory('${p._id}')">History</button>` : ''}
+            <button class="btn btn-gold btn-sm" onclick="lwSelectProperty('${p._id}')">View</button>
+          </div>`).join('') : '<div class="loading">No lease agreements yet.</div>'}
+      `;
+    } else {
+      const user = JSON.parse(localStorage.getItem('tms_user') || '{}');
+      const userId = (user._id || user.id || '').toString();
+      const propData = await LW.fetch('/properties?status=rented');
+      const myProp = (propData.properties || []).find(p => (p.tenantId || '').toString() === userId);
+      if (!myProp) {
+        if (body) body.innerHTML = `<div class="lw-section-lbl">ALL LEASE AGREEMENTS</div><div class="loading">You don't have any lease agreements yet.</div>`;
+        return;
+      }
+      const leaseData = await LW.fetch(`/lease-agreements/property/${myProp._id}`);
+      const lease = leaseData.lease;
+      if (!lease) {
+        if (body) body.innerHTML = `<div class="lw-section-lbl">ALL LEASE AGREEMENTS</div><div class="loading">Your landlord hasn't started the tenancy agreement yet.</div>`;
+        return;
+      }
+      LW.lease = lease;
+      const goStep = lease.status === 'signed' ? 4 : 3;
+      body.innerHTML = `
+        <div class="lw-section-lbl">ALL LEASE AGREEMENTS</div>
+        <div class="lw-prop-row">
+          <div>
+            <div style="font-weight:600">${esc(myProp.title || myProp.address || 'Property')}</div>
+            <div style="font-size:12px;color:var(--muted)">${esc(myProp.address || '')}</div>
+          </div>
+          ${lwStatusBadge(lease)}
+          ${lwRevisionBadge(lease)}
+          ${(lease.agreementVersions || []).length ? '<button class="btn btn-ghost btn-sm" onclick="LW.step=4;renderTabs();renderStep4()">History</button>' : ''}
+          <button class="btn btn-gold btn-sm" onclick="LW.step=${goStep};renderTabs();${goStep === 4 ? 'renderStep4()' : 'renderStep3()'}">View</button>
+        </div>
+      `;
+    }
+  } catch (e) {
+    if (body) body.innerHTML = `<div class="loading">⚠️ ${esc(e.message || 'Unable to load agreements.')}</div>`;
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -81,6 +152,20 @@ function lwStatusBadge(lease) {
   if (lease.status === 'sent') return '<span class="badge b-blue">Sent — awaiting tenant</span>';
   if (lease.status === 'signed') return '<span class="badge b-green">Signed & locked</span>';
   return '';
+}
+
+function lwRevisionBadge(lease) {
+  const count = (lease?.agreementVersions || []).length;
+  return count ? `<span class="badge b-warn">Revised ${count} time${count === 1 ? '' : 's'}</span>` : '';
+}
+
+function lwOpenAgreementHistory(propertyId) {
+  const lease = LW.leasesByProp?.[propertyId];
+  if (!lease) return;
+  LW.lease = lease;
+  LW.step = 4;
+  renderTabs();
+  renderStep4();
 }
 
 function renderStep1() {
@@ -410,6 +495,28 @@ function lwEditHistoryBanner(l) {
   return `<div class="lw-warn" style="background:rgba(79,123,254,0.1);border-color:rgba(79,123,254,0.4);color:#8FB4FF">✏️ This agreement was revised by the landlord on ${fmtDate(last.at)}${l.editHistory.length > 1 ? ` (revised ${l.editHistory.length} times in total)` : ''}. ${last.note ? esc(last.note) : ''} Please review the updated terms carefully.</div>`;
 }
 
+function lwAgreementVersionHistoryHtml(l) {
+  const versions = l.agreementVersions || [];
+  if (!versions.length) return '';
+  return `
+    <div style="text-align:left;margin:22px auto 0;max-width:760px">
+      <div class="lw-blk-lbl">Agreement version history</div>
+      <div class="lw-hint" style="margin:4px 0 10px">Older signed copies remain saved separately from the current agreement.</div>
+      ${versions.map((version, i) => `
+        <div class="lw-prop-row" style="margin-top:8px">
+          <div>
+            <div style="font-weight:600">Previous agreement v${version.version || i + 1}</div>
+            <div style="font-size:12px;color:var(--muted)">${fmtDate(version.savedAt)} · ${esc((version.changes || []).join('; ') || 'Original signed version')}</div>
+          </div>
+          <div class="lw-actions" style="margin:0;gap:6px">
+            <button class="btn btn-ghost btn-sm" onclick="lwViewAgreementVersion(${i})">View</button>
+            <button class="btn btn-gold btn-sm" onclick="lwCompareAgreementVersion(${i})">Compare</button>
+          </div>
+        </div>`).join('')}
+    </div>
+  `;
+}
+
 function renderStep4() {
   const l = LW.lease;
   const body = document.getElementById('lw-body');
@@ -432,9 +539,11 @@ function renderStep4() {
         </div>
       </div>
       <div class="lw-actions" style="justify-content:center;margin-top:22px">
+        <button class="btn btn-gold" onclick="lwViewAgreement()">👁 View</button>
         <button class="btn btn-teal" onclick="lwDownloadAgreement()">⬇ Download</button>
         <button class="btn btn-ghost" onclick="lwPrintAgreement()">🖨 Print</button>
       </div>
+      ${lwAgreementVersionHistoryHtml(l)}
       ${LW.role === 'landlord' ? `<button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="lwUnlockAgreement()">🔓 Unlock &amp; edit this agreement</button>` : ''}
       <button class="btn btn-ghost btn-sm" style="margin-top:16px" onclick="${backFn}()">Back</button>
     </div>
@@ -628,6 +737,53 @@ function lwPrintAgreement() {
   win.document.write(`<html><head><title>Tenancy Agreement</title></head><body>${lwBuildAgreementPlainHtml(LW.lease)}</body></html>`);
   win.document.close();
   setTimeout(() => { win.focus(); win.print(); }, 300);
+}
+
+function lwViewAgreementVersion(index) {
+  const version = LW.lease?.agreementVersions?.[index];
+  if (!version || !version.snapshot) return;
+  const win = window.open('', '_blank');
+  if (!win) { alert('Please allow pop-ups to view the agreement.'); return; }
+  win.document.write(`<html><head><meta charset="UTF-8"><title>Tenancy Agreement v${version.version}</title></head><body>${lwBuildAgreementPlainHtml(version.snapshot)}</body></html>`);
+  win.document.close();
+}
+
+function lwCompareAgreementVersion(index) {
+  const version = LW.lease?.agreementVersions?.[index];
+  if (!version || !version.snapshot) return;
+  const oldLease = version.snapshot;
+  const currentLease = LW.lease;
+  const same = (a, b) => String(a ?? '') === String(b ?? '');
+  const cell = (label, oldValue, newValue) => {
+    const changed = !same(oldValue, newValue);
+    return `<div style="padding:10px 12px;border-bottom:1px solid #e5e7eb;${changed ? 'background:#fff3bf;border-left:4px solid #e0a400' : ''}"><b>${esc(label)}</b><div style="margin-top:4px">${esc(oldValue || '—')}</div><div style="margin-top:3px;color:#15803d">${changed ? `New: ${esc(newValue || '—')}` : 'Unchanged'}</div></div>`;
+  };
+  const currentCell = (label, oldValue, newValue) => {
+    const changed = !same(oldValue, newValue);
+    return `<div style="padding:10px 12px;border-bottom:1px solid #e5e7eb;${changed ? 'background:#dcfce7;border-left:4px solid #16a34a' : ''}"><b>${esc(label)}</b><div style="margin-top:4px">${esc(newValue || '—')}</div><div style="margin-top:3px;color:#526078">${changed ? `Previous: ${esc(oldValue || '—')}` : 'Unchanged'}</div></div>`;
+  };
+  const termRows = (oldLease.terms || []).map((oldTerm, i) => {
+    const newTerm = currentLease.terms?.[i];
+    const changed = !newTerm || oldTerm.title !== newTerm.title || oldTerm.text !== newTerm.text;
+    return `<div style="padding:10px 12px;border-bottom:1px solid #e5e7eb;${changed ? 'background:#fff3bf;border-left:4px solid #e0a400' : ''}"><b>${i + 1}. ${esc(oldTerm.title)}</b><p style="margin:4px 0">${esc(oldTerm.text)}</p>${changed ? `<div style="color:#15803d"><b>New:</b> ${esc(newTerm ? `${newTerm.title}: ${newTerm.text}` : 'Clause removed')}</div>` : '<div style="color:#15803d">Unchanged</div>'}</div>`;
+  }).join('');
+  const currentTermRows = (currentLease.terms || []).map((newTerm, i) => {
+    const oldTerm = oldLease.terms?.[i];
+    const changed = !oldTerm || oldTerm.title !== newTerm.title || oldTerm.text !== newTerm.text;
+    return `<div style="padding:10px 12px;border-bottom:1px solid #e5e7eb;${changed ? 'background:#dcfce7;border-left:4px solid #16a34a' : ''}"><b>${i + 1}. ${esc(newTerm.title)}</b><p style="margin:4px 0">${esc(newTerm.text)}</p>${changed ? `<div style="color:#526078"><b>Previous:</b> ${esc(oldTerm ? `${oldTerm.title}: ${oldTerm.text}` : 'Clause added')}</div>` : '<div style="color:#15803d">Unchanged</div>'}</div>`;
+  }).join('');
+  const newTerms = (currentLease.terms || []).slice((oldLease.terms || []).length).map(term => `<div style="padding:10px 12px;background:#dcfce7;border-left:4px solid #16a34a;border-bottom:1px solid #e5e7eb"><b>Added: ${esc(term.title)}</b><p style="margin:4px 0">${esc(term.text)}</p></div>`).join('');
+  const win = window.open('', '_blank');
+  if (!win) { alert('Please allow pop-ups to compare agreements.'); return; }
+  win.document.write(`<html><head><meta charset="UTF-8"><title>Agreement comparison</title><style>body{font-family:Arial,sans-serif;color:#172033;background:#f5f7fb;margin:0}.wrap{max-width:1100px;margin:24px auto;background:#fff;padding:24px;border-radius:12px}h1{margin:0 0 6px;font-size:22px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{border:1px solid #d9dee8;border-radius:8px;overflow:hidden}.head{padding:12px;background:#eef2f7;font-weight:bold}.label{font-size:12px;color:#526078;margin-top:16px;text-transform:uppercase;font-weight:bold}@media(max-width:700px){.grid{grid-template-columns:1fr}}</style></head><body><div class="wrap"><h1>Agreement comparison</h1><p>Previous signed version v${version.version} compared with the current agreement.</p><div class="grid"><div class="panel"><div class="head">Previous · ${fmtDate(version.savedAt)}</div>${cell('Duration', fmtDate(oldLease.startDate) + ' to ' + fmtDate(oldLease.endDate), fmtDate(currentLease.startDate) + ' to ' + fmtDate(currentLease.endDate))}${cell('Special conditions', oldLease.specialConditions || 'None specified.', currentLease.specialConditions || 'None specified.')}<div class="label">Terms and conditions</div>${termRows}</div><div class="panel"><div class="head">Current agreement</div>${currentCell('Duration', fmtDate(oldLease.startDate) + ' to ' + fmtDate(oldLease.endDate), fmtDate(currentLease.startDate) + ' to ' + fmtDate(currentLease.endDate))}${currentCell('Special conditions', oldLease.specialConditions || 'None specified.', currentLease.specialConditions || 'None specified.')}<div class="label">Terms and conditions</div>${currentTermRows}${newTerms}</div></div></div></body></html>`);
+  win.document.close();
+}
+
+function lwViewAgreement() {
+  const win = window.open('', '_blank');
+  if (!win) { alert('Please allow pop-ups to view the agreement.'); return; }
+  win.document.write(`<html><head><meta charset="UTF-8"><title>Tenancy Agreement</title></head><body>${lwBuildAgreementPlainHtml(LW.lease)}</body></html>`);
+  win.document.close();
 }
 
 function lwDownloadAgreement() {

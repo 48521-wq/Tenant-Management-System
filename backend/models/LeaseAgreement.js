@@ -61,6 +61,14 @@ const termSchema = new mongoose.Schema({
   text:  { type: String, required: true }
 }, { _id: false });
 
+const agreementVersionSchema = new mongoose.Schema({
+  version: { type: Number, required: true },
+  savedAt: { type: Date, default: Date.now },
+  changedBy: { type: String, default: 'landlord' },
+  changes: { type: [String], default: [] },
+  snapshot: { type: mongoose.Schema.Types.Mixed, required: true }
+}, { _id: true });
+
 const leaseAgreementSchema = new mongoose.Schema({
   propertyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Property', required: true },
   landlordId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -106,6 +114,13 @@ const leaseAgreementSchema = new mongoose.Schema({
       at:   { type: Date, default: Date.now },
       note: { type: String, default: '' }
     }],
+    default: []
+  },
+
+  // Complete, immutable copies of every signed version. The current lease
+  // remains the active version while these records preserve older terms.
+  agreementVersions: {
+    type: [agreementVersionSchema],
     default: []
   }
 }, { timestamps: true });
