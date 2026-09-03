@@ -18,6 +18,8 @@
 
 5. Lease Agreements → Now SAVES to MongoDB Atlas
    Tenant signs → stored in DB → Admin can view all leases
+  Signed agreements keep landlord revisions with dates, old versions,
+  and highlighted changes for comparison
 
 6. Admin Dashboard → Shows REAL data from DB (not zeros)
    - Total Tenants, Landlords, Properties all live from MongoDB
