@@ -756,26 +756,70 @@ function lwCompareAgreementVersion(index) {
   const same = (a, b) => String(a ?? '') === String(b ?? '');
   const cell = (label, oldValue, newValue) => {
     const changed = !same(oldValue, newValue);
-    return `<div style="padding:10px 12px;border-bottom:1px solid #e5e7eb;${changed ? 'background:#fff3bf;border-left:4px solid #e0a400' : ''}"><b>${esc(label)}</b><div style="margin-top:4px">${esc(oldValue || '—')}</div><div style="margin-top:3px;color:#15803d">${changed ? `New: ${esc(newValue || '—')}` : 'Unchanged'}</div></div>`;
+    const highlight = changed ? 'background:#fff3bf;border-left:4px solid #e0a400' : '';
+    const update = changed ? `New: ${esc(newValue || '—')}` : 'Unchanged';
+    return `<div style="padding:10px 12px;border-bottom:1px solid #e5e7eb;${highlight}"><b>${esc(label)}</b><div style="margin-top:4px">${esc(oldValue || '—')}</div><div style="margin-top:3px;color:#15803d">${update}</div></div>`;
   };
   const currentCell = (label, oldValue, newValue) => {
     const changed = !same(oldValue, newValue);
-    return `<div style="padding:10px 12px;border-bottom:1px solid #e5e7eb;${changed ? 'background:#dcfce7;border-left:4px solid #16a34a' : ''}"><b>${esc(label)}</b><div style="margin-top:4px">${esc(newValue || '—')}</div><div style="margin-top:3px;color:#526078">${changed ? `Previous: ${esc(oldValue || '—')}` : 'Unchanged'}</div></div>`;
+    const highlight = changed ? 'background:#dcfce7;border-left:4px solid #16a34a' : '';
+    const update = changed ? `Previous: ${esc(oldValue || '—')}` : 'Unchanged';
+    return `<div style="padding:10px 12px;border-bottom:1px solid #e5e7eb;${highlight}"><b>${esc(label)}</b><div style="margin-top:4px">${esc(newValue || '—')}</div><div style="margin-top:3px;color:#526078">${update}</div></div>`;
   };
   const termRows = (oldLease.terms || []).map((oldTerm, i) => {
     const newTerm = currentLease.terms?.[i];
     const changed = !newTerm || oldTerm.title !== newTerm.title || oldTerm.text !== newTerm.text;
-    return `<div style="padding:10px 12px;border-bottom:1px solid #e5e7eb;${changed ? 'background:#fff3bf;border-left:4px solid #e0a400' : ''}"><b>${i + 1}. ${esc(oldTerm.title)}</b><p style="margin:4px 0">${esc(oldTerm.text)}</p>${changed ? `<div style="color:#15803d"><b>New:</b> ${esc(newTerm ? `${newTerm.title}: ${newTerm.text}` : 'Clause removed')}</div>` : '<div style="color:#15803d">Unchanged</div>'}</div>`;
+    const highlight = changed ? 'background:#fff3bf;border-left:4px solid #e0a400' : '';
+    const update = changed
+      ? `<div style="color:#15803d"><b>New:</b> ${esc(newTerm ? `${newTerm.title}: ${newTerm.text}` : 'Clause removed')}</div>`
+      : '<div style="color:#15803d">Unchanged</div>';
+    return `<div style="padding:10px 12px;border-bottom:1px solid #e5e7eb;${highlight}"><b>${i + 1}. ${esc(oldTerm.title)}</b><p style="margin:4px 0">${esc(oldTerm.text)}</p>${update}</div>`;
   }).join('');
   const currentTermRows = (currentLease.terms || []).map((newTerm, i) => {
     const oldTerm = oldLease.terms?.[i];
     const changed = !oldTerm || oldTerm.title !== newTerm.title || oldTerm.text !== newTerm.text;
-    return `<div style="padding:10px 12px;border-bottom:1px solid #e5e7eb;${changed ? 'background:#dcfce7;border-left:4px solid #16a34a' : ''}"><b>${i + 1}. ${esc(newTerm.title)}</b><p style="margin:4px 0">${esc(newTerm.text)}</p>${changed ? `<div style="color:#526078"><b>Previous:</b> ${esc(oldTerm ? `${oldTerm.title}: ${oldTerm.text}` : 'Clause added')}</div>` : '<div style="color:#15803d">Unchanged</div>'}</div>`;
+    const highlight = changed ? 'background:#dcfce7;border-left:4px solid #16a34a' : '';
+    const update = changed
+      ? `<div style="color:#526078"><b>Previous:</b> ${esc(oldTerm ? `${oldTerm.title}: ${oldTerm.text}` : 'Clause added')}</div>`
+      : '<div style="color:#15803d">Unchanged</div>';
+    return `<div style="padding:10px 12px;border-bottom:1px solid #e5e7eb;${highlight}"><b>${i + 1}. ${esc(newTerm.title)}</b><p style="margin:4px 0">${esc(newTerm.text)}</p>${update}</div>`;
   }).join('');
-  const newTerms = (currentLease.terms || []).slice((oldLease.terms || []).length).map(term => `<div style="padding:10px 12px;background:#dcfce7;border-left:4px solid #16a34a;border-bottom:1px solid #e5e7eb"><b>Added: ${esc(term.title)}</b><p style="margin:4px 0">${esc(term.text)}</p></div>`).join('');
+  const newTerms = (currentLease.terms || [])
+    .slice((oldLease.terms || []).length)
+    .map(term => `<div style="padding:10px 12px;background:#dcfce7;border-left:4px solid #16a34a;border-bottom:1px solid #e5e7eb">
+      <b>Added: ${esc(term.title)}</b>
+      <p style="margin:4px 0">${esc(term.text)}</p>
+    </div>`)
+    .join('');
   const win = window.open('', '_blank');
   if (!win) { alert('Please allow pop-ups to compare agreements.'); return; }
-  win.document.write(`<html><head><meta charset="UTF-8"><title>Agreement comparison</title><style>body{font-family:Arial,sans-serif;color:#172033;background:#f5f7fb;margin:0}.wrap{max-width:1100px;margin:24px auto;background:#fff;padding:24px;border-radius:12px}h1{margin:0 0 6px;font-size:22px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{border:1px solid #d9dee8;border-radius:8px;overflow:hidden}.head{padding:12px;background:#eef2f7;font-weight:bold}.label{font-size:12px;color:#526078;margin-top:16px;text-transform:uppercase;font-weight:bold}@media(max-width:700px){.grid{grid-template-columns:1fr}}</style></head><body><div class="wrap"><h1>Agreement comparison</h1><p>Previous signed version v${version.version} compared with the current agreement.</p><div class="grid"><div class="panel"><div class="head">Previous · ${fmtDate(version.savedAt)}</div>${cell('Duration', fmtDate(oldLease.startDate) + ' to ' + fmtDate(oldLease.endDate), fmtDate(currentLease.startDate) + ' to ' + fmtDate(currentLease.endDate))}${cell('Special conditions', oldLease.specialConditions || 'None specified.', currentLease.specialConditions || 'None specified.')}<div class="label">Terms and conditions</div>${termRows}</div><div class="panel"><div class="head">Current agreement</div>${currentCell('Duration', fmtDate(oldLease.startDate) + ' to ' + fmtDate(oldLease.endDate), fmtDate(currentLease.startDate) + ' to ' + fmtDate(currentLease.endDate))}${currentCell('Special conditions', oldLease.specialConditions || 'None specified.', currentLease.specialConditions || 'None specified.')}<div class="label">Terms and conditions</div>${currentTermRows}${newTerms}</div></div></div></body></html>`);
+  const comparisonStyles = `
+    body{font-family:Arial,sans-serif;color:#172033;background:#f5f7fb;margin:0}
+    .wrap{max-width:1100px;margin:24px auto;background:#fff;padding:24px;border-radius:12px} h1{margin:0 0 6px;font-size:22px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px} .panel{border:1px solid #d9dee8;border-radius:8px;overflow:hidden}
+    .head{padding:12px;background:#eef2f7;font-weight:bold} .label{font-size:12px;color:#526078;margin-top:16px;text-transform:uppercase;font-weight:bold}
+    @media(max-width:700px){.grid{grid-template-columns:1fr}}
+  `;
+  const comparisonBody = `
+    <div class="wrap"><h1>Agreement comparison</h1>
+      <p>Previous signed version v${version.version} compared with the current agreement.</p>
+      <div class="grid">
+        <div class="panel"><div class="head">Previous · ${fmtDate(version.savedAt)}</div>
+          ${cell('Duration', fmtDate(oldLease.startDate) + ' to ' + fmtDate(oldLease.endDate), fmtDate(currentLease.startDate) + ' to ' + fmtDate(currentLease.endDate))}
+          ${cell('Special conditions', oldLease.specialConditions || 'None specified.', currentLease.specialConditions || 'None specified.')}
+          <div class="label">Terms and conditions</div>
+          ${termRows}
+        </div><div class="panel"><div class="head">Current agreement</div>
+          ${currentCell('Duration', fmtDate(oldLease.startDate) + ' to ' + fmtDate(oldLease.endDate), fmtDate(currentLease.startDate) + ' to ' + fmtDate(currentLease.endDate))}
+          ${currentCell('Special conditions', oldLease.specialConditions || 'None specified.', currentLease.specialConditions || 'None specified.')}
+          <div class="label">Terms and conditions</div>
+          ${currentTermRows}
+          ${newTerms}
+        </div>
+      </div>
+    </div>
+  `;
+  win.document.write(`<html><head><meta charset="UTF-8"><title>Agreement comparison</title><style>${comparisonStyles}</style></head><body>${comparisonBody}</body></html>`);
   win.document.close();
 }
 
