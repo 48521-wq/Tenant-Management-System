@@ -128,6 +128,10 @@ function isValidEnglishName(value) {
   return /^[A-Za-z ]+$/.test((value||'').trim());
 }
 
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((value || '').trim());
+}
+
 function enforceLettersInput(el) {
   if (!el) return;
   el.value = el.value.replace(/[^A-Za-z ]+/g, '');
@@ -138,6 +142,7 @@ async function handleSignin() {
   const email = document.getElementById('signin-email')?.value.trim().toLowerCase();
   const pass  = document.getElementById('signin-password')?.value;
   if (!email || !pass) { showErr('Enter email and password.'); return; }
+  if (!isValidEmail(email)) { showErr('Enter a valid email address.'); return; }
   setBtnLoad('signin-btn', true, 'Sign In');
   try {
     const { ok, data } = await api('/auth/login', 'POST', { email, password: pass });

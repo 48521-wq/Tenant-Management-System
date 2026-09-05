@@ -59,10 +59,10 @@ public class TMSBlackBoxTest {
     }
 
     void fillLogin(String email, String pw) {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("loginEmail")));
-        WebElement e = driver.findElement(By.id("loginEmail"));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("signin-email")));
+        WebElement e = driver.findElement(By.id("signin-email"));
         e.clear(); e.sendKeys(email);
-        WebElement p = driver.findElement(By.id("loginPassword"));
+        WebElement p = driver.findElement(By.id("signin-password"));
         p.clear(); p.sendKeys(pw);
         driver.findElement(By.id("signin-btn")).click();
     }
@@ -115,22 +115,22 @@ public class TMSBlackBoxTest {
     }
 
     @Test @Order(2)
-    @DisplayName("TC-AUTH-BB-002: Sign In tab shows login form (loginModal visible)")
+    @DisplayName("TC-AUTH-BB-002: Sign In tab shows login form")
     void authBB002() {
         driver.get(BASE);
         clickTab("Sign In");
-        WebElement modal = waitVisible(By.id("loginModal"));
-        assertTrue(modal.isDisplayed(), "loginModal must be visible after clicking Sign In tab");
+        WebElement form = waitVisible(By.id("form-signin"));
+        assertTrue(form.isDisplayed(), "Sign In form must be visible after clicking Sign In tab");
     }
 
     @Test @Order(3)
-    @DisplayName("TC-AUTH-BB-003: Login form has loginEmail and loginPassword fields")
+    @DisplayName("TC-AUTH-BB-003: Login form has email and password fields")
     void authBB003() {
         driver.get(BASE);
         clickTab("Sign In");
-        waitVisible(By.id("loginModal"));
-        assertTrue(driver.findElement(By.id("loginEmail")).isDisplayed(),   "loginEmail field must exist");
-        assertTrue(driver.findElement(By.id("loginPassword")).isDisplayed(),"loginPassword field must exist");
+        waitVisible(By.id("form-signin"));
+        assertTrue(driver.findElement(By.id("signin-email")).isDisplayed(), "signin-email field must exist");
+        assertTrue(driver.findElement(By.id("signin-password")).isDisplayed(), "signin-password field must exist");
     }
 
     @Test @Order(4)
@@ -138,10 +138,10 @@ public class TMSBlackBoxTest {
     void authBB004() {
         driver.get(BASE);
         clickTab("Sign In");
-        waitVisible(By.id("loginModal"));
+        waitVisible(By.id("form-signin"));
         assertEquals("password",
-            driver.findElement(By.id("loginPassword")).getAttribute("type"),
-            "loginPassword must be type=password to mask text");
+            driver.findElement(By.id("signin-password")).getAttribute("type"),
+            "signin-password must be type=password to mask text");
     }
 
     @Test @Order(5)
@@ -180,12 +180,12 @@ public class TMSBlackBoxTest {
     }
 
     @Test @Order(9)
-    @DisplayName("TC-AUTH-BB-009: Sign Up tab shows register form (registerModal visible)")
+    @DisplayName("TC-AUTH-BB-009: Sign Up tab shows registration form")
     void authBB009() {
         driver.get(BASE);
         clickTab("Sign Up");
-        WebElement modal = waitVisible(By.id("registerModal"));
-        assertTrue(modal.isDisplayed(), "registerModal must be visible after clicking Sign Up tab");
+        WebElement form = waitVisible(By.id("form-signup"));
+        assertTrue(form.isDisplayed(), "Sign Up form must be visible after clicking Sign Up tab");
     }
 
     @Test @Order(10)
@@ -193,11 +193,11 @@ public class TMSBlackBoxTest {
     void authBB010() {
         driver.get(BASE);
         clickTab("Sign Up");
-        waitVisible(By.id("registerModal"));
-        assertTrue(driver.findElement(By.id("registerName")).isDisplayed(),     "registerName must exist");
-        assertTrue(driver.findElement(By.id("registerEmail")).isDisplayed(),    "registerEmail must exist");
-        assertTrue(driver.findElement(By.id("registerPassword")).isDisplayed(), "registerPassword must exist");
-        assertTrue(driver.findElement(By.id("registerRole")).isDisplayed()
+        waitVisible(By.id("form-signup"));
+        assertTrue(driver.findElement(By.id("signup-name")).isDisplayed(), "signup-name must exist");
+        assertTrue(driver.findElement(By.id("signup-email")).isDisplayed(), "signup-email must exist");
+        assertTrue(driver.findElement(By.id("signup-password")).isDisplayed(), "signup-password must exist");
+        assertTrue(exists(By.id("role-tenant"))
                 || exists(By.id("role-tenant")),  "role selection must exist");
     }
 
@@ -206,19 +206,13 @@ public class TMSBlackBoxTest {
     void authBB011() {
         driver.get(BASE);
         clickTab("Sign Up");
-        waitVisible(By.id("registerModal"));
+        waitVisible(By.id("form-signup"));
         // Role cards
         assertTrue(exists(By.id("role-tenant")),   "role-tenant card must exist");
         assertTrue(exists(By.id("role-landlord")), "role-landlord card must exist");
-        // registerRole select (hidden) has tenant/landlord options
-        Select sel = new Select(driver.findElement(By.id("registerRole")));
-        List<WebElement> opts = sel.getOptions();
-        boolean hasTenant   = opts.stream().anyMatch(o -> "tenant".equals(o.getAttribute("value")));
-        boolean hasLandlord = opts.stream().anyMatch(o -> "landlord".equals(o.getAttribute("value")));
-        boolean noAdmin     = opts.stream().noneMatch(o -> "admin".equals(o.getAttribute("value")));
-        assertTrue(hasTenant,   "registerRole must have tenant option");
-        assertTrue(hasLandlord, "registerRole must have landlord option");
-        assertTrue(noAdmin,     "registerRole must NOT have admin option");
+        assertTrue(driver.findElement(By.id("role-tenant")).getText().contains("Tenant"), "Tenant role must be visible");
+        assertTrue(driver.findElement(By.id("role-landlord")).getText().contains("Landlord"), "Landlord role must be visible");
+        assertFalse(exists(By.id("role-admin")), "Admin role must not be available");
     }
 
     @Test @Order(12)
@@ -226,11 +220,11 @@ public class TMSBlackBoxTest {
     void authBB012() {
         driver.get(BASE);
         clickTab("Sign Up");
-        waitVisible(By.id("registerModal"));
-        driver.findElement(By.id("registerName")).sendKeys("Test User");
-        driver.findElement(By.id("registerEmail")).sendKeys("newuser" + System.currentTimeMillis() + "@test.com");
-        driver.findElement(By.id("registerPassword")).sendKeys("abc"); // only 3 chars
-        driver.findElement(By.id("registerConfirm")).sendKeys("abc");
+        waitVisible(By.id("form-signup"));
+            driver.findElement(By.id("signup-name")).sendKeys("Test User");
+            driver.findElement(By.id("signup-email")).sendKeys("newuser" + System.currentTimeMillis() + "@test.com");
+            driver.findElement(By.id("signup-password")).sendKeys("abc"); // only 3 chars
+            driver.findElement(By.id("signup-confirm")).sendKeys("abc");
         // Click tenant role
         driver.findElement(By.id("role-tenant")).click();
         driver.findElement(By.id("signup-btn")).click();

@@ -1,8 +1,8 @@
 // ═══════════════════════════════════════════════════════
 //  TMS DATA LAYER — tms-data.js
 //  Sab data LocalStorage mein save hota hai
-//  Koi hardcoded fake data nahi
-//  Jab MongoDB connect ho, sirf API calls badalni hain
+//  No hardcoded fake data
+//  When MongoDB is connected, only the API calls need to change
 // ═══════════════════════════════════════════════════════
 
 const TMS = {

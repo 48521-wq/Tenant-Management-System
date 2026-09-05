@@ -256,7 +256,7 @@ router.put('/:id/submit-docs', protect, async (req, res) => {
     }
     const { idCard, policeCert } = req.body;
     if (!idCard || !policeCert)
-      return res.status(400).json({ success:false, message:'Tamam 2 documents required: ID Card, Police Certificate.' });
+      return res.status(400).json({ success:false, message:'Both documents are required: ID Card and Police Certificate.' });
     r.documents = { idCard, policeCert, submittedAt: new Date() };
     r.status = 'docs_submitted';
     r.docsRejectReason = '';
@@ -271,7 +271,8 @@ router.put('/:id/verify-docs', protect, async (req, res) => {
     const r = await RentalRequest.findById(req.params.id);
     if (!r) return res.status(404).json({ success:false, message:'Not found.' });
     const property = await Property.findById(r.propertyId);
-    const isLandlord = property && property.landlordId.toString() === req.user._id.toString();
+    if (!property) return res.status(404).json({ success:false, message:'Property not found.' });
+    const isLandlord = property.landlordId && property.landlordId.toString() === req.user._id.toString();
     const isAdmin = req.user.isAdmin || req.user.role === 'admin';
     if (!isLandlord && !isAdmin)
       return res.status(403).json({ success:false, message:'Not authorized.' });
@@ -279,6 +280,8 @@ router.put('/:id/verify-docs', protect, async (req, res) => {
       return res.status(400).json({ success:false, message:'No submitted documents.' });
 
     const { action, rejectReason } = req.body;
+    if (!['approve', 'reject'].includes(action))
+      return res.status(400).json({ success:false, message:'Invalid document review action.' });
 
     if (action === 'reject') {
       r.status = 'docs_rejected';

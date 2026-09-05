@@ -134,8 +134,11 @@ public class TMSWhiteBoxTests {
         Map<String, Object> r = new HashMap<>();
         // Branch 1: Missing fields
         if (isBlank(email) || isBlank(password)) return fail(r, 400, "Enter email and password.");
+        String normalizedEmail = email.trim().toLowerCase();
+        if (!normalizedEmail.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))
+            return fail(r, 400, "Enter a valid email address.");
         // Branch 2: Admin shortcut
-        if (email.equalsIgnoreCase("admin@tms.com")) {
+        if (normalizedEmail.equals("admin@tms.com")) {
             return "admin123".equals(password)
                 ? ok(r, 200, "role", "admin")
                 : fail(r, 401, "Incorrect password.");
@@ -367,70 +370,82 @@ public class TMSWhiteBoxTests {
             assertFalse((Boolean)r.get("success"), "Null password should fail");
             assertEquals("Enter email and password.", r.get("message"));
         }
-        @Test @DisplayName("TC-AUTH-WB-016: Admin login success with correct credentials")
+        @Test @DisplayName("TC-AUTH-WB-016: Login fails - malformed email")
+        void t016MalformedEmail() {
+            var r = authLogin("not-an-email", "pass123", "pass123", "active");
+            assertFalse((Boolean)r.get("success"), "Malformed email should fail");
+            assertEquals(400, r.get("status"));
+            assertEquals("Enter a valid email address.", r.get("message"));
+        }
+        @Test @DisplayName("TC-AUTH-WB-017: Login accepts uppercase and surrounding spaces in email")
+        void t017NormalizedEmail() {
+            var r = authLogin("  USER+tag@Example.COM  ", "p@ss!12", "p@ss!12", "active");
+            assertTrue((Boolean)r.get("success"), "A valid email with case and spaces normalized should pass");
+        }
+        @Test @DisplayName("TC-AUTH-WB-018: Admin login success with correct credentials")
         void t016() {
             var r = authLogin("admin@tms.com", "admin123", null, null);
             assertTrue((Boolean)r.get("success"), "Admin login should succeed");
             assertEquals("admin", r.get("role"));
             assertEquals(200, r.get("status"));
         }
-        @Test @DisplayName("TC-AUTH-WB-017: Admin login fails - wrong password → 401")
+        @Test @DisplayName("TC-AUTH-WB-019: Admin login fails - wrong password → 401")
         void t017() {
             var r = authLogin("admin@tms.com", "wrongpass", null, null);
             assertFalse((Boolean)r.get("success"), "Wrong admin password should fail");
             assertEquals("Incorrect password.", r.get("message"));
             assertEquals(401, r.get("status"));
         }
-        @Test @DisplayName("TC-AUTH-WB-018: Login fails - user not found → 401")
+        @Test @DisplayName("TC-AUTH-WB-020: Login fails - user not found → 401")
         void t018() {
             var r = authLogin("ghost@g.com", "pass123", null, "active");
             assertFalse((Boolean)r.get("success"), "Unknown user should fail");
             assertEquals("No account found. Please sign up first.", r.get("message"));
             assertEquals(401, r.get("status"));
         }
-        @Test @DisplayName("TC-AUTH-WB-019: Login fails - wrong password → 401")
+        @Test @DisplayName("TC-AUTH-WB-021: Login fails - wrong password → 401")
         void t019() {
             var r = authLogin("user@g.com", "badpass", "correctpass", "active");
             assertFalse((Boolean)r.get("success"), "Wrong password should fail");
             assertEquals("Incorrect password.", r.get("message"));
             assertEquals(401, r.get("status"));
         }
-        @Test @DisplayName("TC-AUTH-WB-020: Login fails - account blocked → 403")
+        @Test @DisplayName("TC-AUTH-WB-022: Login fails - account blocked → 403")
         void t020() {
             var r = authLogin("user@g.com", "pass123", "pass123", "blocked");
             assertFalse((Boolean)r.get("success"), "Blocked user should be denied");
             assertEquals("Account suspended. Contact admin.", r.get("message"));
             assertEquals(403, r.get("status"));
         }
-        @Test @DisplayName("TC-AUTH-WB-021: Login success - active user, correct password")
+        @Test @DisplayName("TC-AUTH-WB-023: Login success - active user, correct password")
         void t021() {
             var r = authLogin("user@g.com", "pass123", "pass123", "active");
             assertTrue((Boolean)r.get("success"), "Active user with correct password should login");
             assertEquals(200, r.get("status"));
         }
-        @Test @DisplayName("TC-AUTH-WB-022: Blocked user with correct password still denied")
+        @Test @DisplayName("TC-AUTH-WB-024: Blocked user with correct password still denied")
         void t022() {
             var r = authLogin("user@g.com", "pass123", "pass123", "blocked");
             assertFalse((Boolean)r.get("success"), "Blocked user must still be denied");
             assertEquals(403, r.get("status"));
         }
-        @Test @DisplayName("TC-AUTH-WB-023: Valid JWT token - exactly 3 dot-separated parts")
+        @Test @DisplayName("TC-AUTH-WB-024: Valid JWT token - exactly 3 dot-separated parts")
         void t023() {
             assertTrue(validJWT("abc.def.ghi"), "JWT with three parts should be valid");
         }
-        @Test @DisplayName("TC-AUTH-WB-024: Invalid JWT - only 2 parts")
+        @Test @DisplayName("TC-AUTH-WB-025: Invalid JWT - only 2 parts")
         void t024() {
             assertFalse(validJWT("abc.def"), "JWT with two parts should be invalid");
         }
-        @Test @DisplayName("TC-AUTH-WB-025: Invalid JWT - null")
+        @Test @DisplayName("TC-AUTH-WB-026: Invalid JWT - null")
         void t025() {
             assertFalse(validJWT(null), "Null JWT should be invalid");
         }
-        @Test @DisplayName("TC-AUTH-WB-026: Invalid JWT - empty string")
+        @Test @DisplayName("TC-AUTH-WB-027: Invalid JWT - empty string")
         void t026() {
             assertFalse(validJWT(""), "Empty JWT should be invalid");
         }
-        @Test @DisplayName("TC-AUTH-WB-027: Invalid JWT - 4 parts (too many segments)")
+        @Test @DisplayName("TC-AUTH-WB-028: Invalid JWT - 4 parts (too many segments)")
         void t027() {
             assertFalse(validJWT("a.b.c.d"), "JWT with four parts should be invalid");
         }
@@ -871,3 +886,4 @@ public class TMSWhiteBoxTests {
         printSummary();
         System.exit(failed > 0 ? 1 : 0);
     }
+}

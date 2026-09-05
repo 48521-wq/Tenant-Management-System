@@ -1545,7 +1545,7 @@ function handleImgDrop(e) {
   if (file && file.type.startsWith('image/')) loadImgFile(file);
 }
 function loadImgFile(file) {
-  if (file.size > 5*1024*1024) { alert('Image 5MB se choti honi chahiye!'); return; }
+  if (file.size > 5*1024*1024) { alert('Image must be smaller than 5 MB.'); return; }
   const reader = new FileReader();
   reader.onload = function(ev) {
     window._apFrontImage = ev.target.result;
@@ -1575,7 +1575,7 @@ async function promptFrontImageUpload(propId) {
       document.body.removeChild(input);
       return;
     }
-    if (file.size > 5 * 1024 * 1024) { alert('Image 5MB se choti honi chahiye!'); document.body.removeChild(input); return; }
+    if (file.size > 5 * 1024 * 1024) { alert('Image must be smaller than 5 MB.'); document.body.removeChild(input); return; }
     const reader = new FileReader();
     reader.onload = async function(ev) {
       const frontImage = ev.target.result;
@@ -1741,7 +1741,7 @@ async function deleteProp(id) {
     if (res && res.success) {
       await loadMyProperties();
     } else {
-      const msg = res?.message || 'Delete fail ho gayi — server se error aaya.';
+      const msg = res?.message || 'Delete failed because of a server error.';
       alert('Error: ' + msg);
     }
   } catch(e) {
@@ -1923,7 +1923,7 @@ async function loadLandlordRentalRequests() {
           ${lastMsg ? `<div style="margin:8px 0;padding:8px 10px;background:rgba(201,169,110,0.07);border-radius:8px;font-size:12px;color:var(--text)"><span style="color:var(--muted);font-size:11px">${lastMsg.senderRole==='tenant'?'🧑 Tenant':'🏠 Aap'}:</span> ${lastMsg.text||''}${lastMsg.proposedRent?` <span style="color:var(--blue);font-weight:700">Rs. ${Number(lastMsg.proposedRent).toLocaleString()}/mo</span>`:''}</div>` : ''}
           <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
             ${req.status === 'docs_submitted' ? `
-              <button onclick="llOpenVerifyDocs('${req._id}')" style="flex:1;min-width:70px;padding:8px 12px;border-radius:9px;border:none;background:rgba(201,169,110,0.15);color:var(--gold);font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">🔍 Docs Verify Karen</button>
+              <button onclick="llOpenVerifyDocs('${req._id}')" style="flex:1;min-width:70px;padding:8px 12px;border-radius:9px;border:none;background:rgba(201,169,110,0.15);color:var(--gold);font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">🔍 Verify Documents</button>
             ` : req.status === 'docs_pending' ? `
               <div style="flex:1;padding:8px 12px;border-radius:9px;background:rgba(255,179,71,0.06);border:1px solid rgba(255,179,71,0.2);font-size:11px;color:#ffb347;font-weight:600;text-align:center">⏳ Docs ka intezaar</div>
             ` : ['pending','negotiating'].includes(req.status) ? `
@@ -2047,23 +2047,23 @@ async function sendNegotiationReply(action) {
 }
 
 async function acceptRentalRequest(requestId) {
-  if (!confirm('Property is tenant ko assign ho jaye gi aur baaki requests reject ho jain gi. Jaari rakhein?')) return;
+  if (!confirm('This property will be assigned to the tenant and all other requests will be rejected. Continue?')) return;
   const btn = event.target;
   btn.disabled = true; btn.textContent = '⏳ Processing…';
   try {
     const r = await lFetch('/rental-requests/'+requestId+'/accept', 'PUT', {});
-    if (r.success) { alert('✅ Request accept ho gayi!'); await loadLandlordRentalRequests(); }
+    if (r.success) { alert('✅ Request accepted.'); await loadLandlordRentalRequests(); }
     else { alert('⚠️ '+(r.message||'Failed')); btn.disabled=false; btn.textContent='✅ Accept'; }
   } catch { alert('❌ Unable to connect to the server'); btn.disabled=false; btn.textContent='✅ Accept'; }
 }
 
 async function rejectRentalRequest(requestId) {
-  if (!confirm('Is rental request ko reject karein?')) return;
+  if (!confirm('Reject this rental request?')) return;
   const btn = event.target;
   btn.disabled = true; btn.textContent = '⏳ Processing…';
   try {
     const r = await lFetch('/rental-requests/'+requestId+'/reject', 'PUT', {});
-    if (r.success) { alert('✅ Request reject ho gayi.'); await loadLandlordRentalRequests(); }
+    if (r.success) { alert('✅ Request rejected.'); await loadLandlordRentalRequests(); }
     else { alert('⚠️ '+(r.message||'Failed')); btn.disabled=false; btn.textContent='❌ Reject'; }
   } catch { alert('❌ Unable to connect to the server'); btn.disabled=false; btn.textContent='❌ Reject'; }
 }
@@ -2741,7 +2741,7 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
           <label>360 URL</label>
           <input type="url" id="b3d-panorama-url" onchange="previewBuilderModel()" placeholder="https://share.example.com/360/..." style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%">
         </div>
-        <div style="font-size:12px;line-height:1.55;color:var(--muted);margin-bottom:18px">Is property ka purana 3D model remove karke yahan same exact full opening 360 panorama save hoga.</div>
+        <div style="font-size:12px;line-height:1.55;color:var(--muted);margin-bottom:18px">The existing 3D model will be replaced with this full 360-degree panorama.</div>
         <div style="display:flex;align-items:center;gap:10px">
           <button class="submit-btn" id="b3d-save-btn" onclick="save3DModel()">Save 360 View</button>
         </div>
@@ -3397,7 +3397,7 @@ function lFurnToggleView() {
 }
 
 async function lFurnSave() {
-  if (_lFurnShowingTenant) { alert('Tenant layout sirf view mode mein hai.'); return; }
+  if (_lFurnShowingTenant) { alert('The tenant layout is view-only.'); return; }
   const sc = window._lFurnScene; if (!sc || !_lFurnPropId) return;
   const layout = sc.getLayout();
   const btn = document.getElementById('lfurn-save-btn');
@@ -3919,7 +3919,7 @@ setTimeout(()=>{
   <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:26px 28px;width:96%;max-width:500px;max-height:90vh;overflow-y:auto">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
       <div>
-        <div style="font-size:16px;font-weight:700;color:var(--text)">🔍 Documents Verify Karen</div>
+        <div style="font-size:16px;font-weight:700;color:var(--text)">🔍 Verify Documents</div>
         <div id="ll-vd-tname" style="font-size:11px;color:var(--muted);margin-top:2px"></div>
       </div>
       <button onclick="closeLlVdModal()" style="width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:17px;cursor:pointer">×</button>
@@ -3945,7 +3945,7 @@ setTimeout(()=>{
     <!-- Reject reason input -->
     <div id="ll-vd-reject-wrap" style="display:none;margin-bottom:14px">
       <label style="font-size:12px;font-weight:700;color:var(--text);display:block;margin-bottom:6px">Reject Reason *</label>
-      <textarea id="ll-vd-reject-reason" placeholder="Kya masla hai documents mein..." style="width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;min-height:70px;resize:none;outline:none"></textarea>
+      <textarea id="ll-vd-reject-reason" placeholder="Explain the issue with these documents..." style="width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;min-height:70px;resize:none;outline:none"></textarea>
     </div>
     <div style="display:flex;gap:10px">
       <button onclick="llVdToggleReject()" id="ll-vd-reject-btn" style="flex:1;padding:10px;border-radius:9px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:var(--error);font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">❌ Reject</button>
@@ -3990,7 +3990,7 @@ async function llOpenVerifyDocs(reqId) {
   try {
     const data = await lFetch('/rental-requests/'+reqId);
     const r = data.request;
-    if (!r) return alert('Request nahi mili');
+    if (!r) return alert('Request not found.');
     document.getElementById('ll-vd-tname').textContent = 'Tenant: '+(r.tenantName||'')+' · '+(r.tenantEmail||'');
     const idCardSrc = r.documents?.idCard || '';
     const policeSrc = r.documents?.policeCert || '';
@@ -4006,7 +4006,7 @@ async function llOpenVerifyDocs(reqId) {
       modal.style.display = 'flex';
       document.body.style.overflow = 'hidden';
     }
-  } catch (e) { console.error('llOpenVerifyDocs error', e); alert('Documents load nahi ho sake'); }
+  } catch (e) { console.error('llOpenVerifyDocs error', e); alert(e.message || 'Unable to load documents.'); }
 }
 function updateLlVdDoc(fieldId, src) {
   const img = document.getElementById(fieldId);
@@ -4030,20 +4030,23 @@ async function llVdAction(action){
   let rejectReason='';
   if(action==='reject'){
     rejectReason=document.getElementById('ll-vd-reject-reason').value.trim();
-    if(!rejectReason){alert('Reject reason likhna zaroori hai');return;}
-    if(!confirm('Documents reject karen?')) return;
+    if(!rejectReason){alert('A rejection reason is required.');return;}
+    if(!confirm('Reject these documents?')) return;
   } else {
-    if(!confirm('Documents approve karke property tenant ko assign karen?')) return;
+    if(!confirm('Approve these documents and assign the property to the tenant?')) return;
   }
   try {
     const r=await lFetch('/rental-requests/'+_llVdReqId+'/verify-docs','PUT',{action,rejectReason});
     if(r.success){
       closeLlVdModal();
-      alert(action==='approve'?'✅ Approved! Property assigned. Tenant onboarded.':'⚠️ Rejected. Tenant ko reason bata diya gaya.');
+      alert(action==='approve'?'✅ Approved. Property assigned and tenant onboarded.':'⚠️ Rejected. The tenant has been notified with the reason.');
       await loadLandlordRentalRequests();
       await loadLandlordDocuments();
     } else alert('❌ '+(r.message||'Failed'));
-  } catch { alert('❌ Server se connect nahi ho saka'); }
+  } catch (e) {
+    console.error('llVdAction error', e);
+    alert('❌ ' + (e.message || 'Unable to connect to the server.'));
+  }
 }
 function closeLlVdModal() {
   const modal = document.getElementById('ll-vd-modal');
