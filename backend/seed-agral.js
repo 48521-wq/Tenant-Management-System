@@ -15,7 +15,7 @@ async function seedAgral() {
     // Pehla landlord find karo
     const landlord = await User.findOne({ role: 'landlord' });
     if (!landlord) {
-      console.log('⚠️  Koi landlord nahi mila. Pehle ek landlord register karo phir ye script chalao.');
+      console.log('⚠️  No landlord found. Register a landlord before running this script.');
       process.exit(1);
     }
     console.log(`🏠 Landlord mila: ${landlord.name} (${landlord._id})`);

@@ -144,6 +144,8 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ success: false, message: 'Enter email and password.' });
     const lEmail = email.toLowerCase().trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lEmail))
+      return res.status(400).json({ success: false, message: 'Enter a valid email address.' });
 
     // Admin
     if (lEmail === process.env.ADMIN_EMAIL.toLowerCase()) {

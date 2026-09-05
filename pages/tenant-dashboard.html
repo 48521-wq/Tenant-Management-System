@@ -3161,7 +3161,7 @@ function furnPageToggleView() {
 }
 
 async function furnPageSave() {
-  if (_furnPageShowingLandlord) { alert('Landlord layout sirf view mode mein hai.'); return; }
+  if (_furnPageShowingLandlord) { alert('The landlord layout is view-only.'); return; }
   const sc = window._furnPageScene;
   if (!sc || !_furnPagePropId) return;
   const layout = sc.getLayout();

@@ -85,7 +85,7 @@ async function lwShowAllAgreements() {
             </div>
             ${lwStatusBadge(LW.leasesByProp[p._id])}
             ${lwRevisionBadge(LW.leasesByProp[p._id])}
-            ${(LW.leasesByProp[p._id].agreementVersions || []).length ? `<button class="btn btn-ghost btn-sm" onclick="lwOpenAgreementHistory('${p._id}')">History</button>` : ''}
+            <button class="btn btn-ghost btn-sm" onclick="lwOpenAgreementHistory('${p._id}')">Change history</button>
             <button class="btn btn-gold btn-sm" onclick="lwSelectProperty('${p._id}')">View</button>
           </div>`).join('') : '<div class="loading">No lease agreements yet.</div>'}
       `;
@@ -115,7 +115,7 @@ async function lwShowAllAgreements() {
           </div>
           ${lwStatusBadge(lease)}
           ${lwRevisionBadge(lease)}
-          ${(lease.agreementVersions || []).length ? '<button class="btn btn-ghost btn-sm" onclick="LW.step=4;renderTabs();renderStep4()">History</button>' : ''}
+          <button class="btn btn-ghost btn-sm" onclick="lwTenantShowHistory()">Change history</button>
           <button class="btn btn-gold btn-sm" onclick="LW.step=${goStep};renderTabs();${goStep === 4 ? 'renderStep4()' : 'renderStep3()'}">View</button>
         </div>
       `;
@@ -228,6 +228,13 @@ function fmtDate(d) {
   const dt = new Date(d);
   if (isNaN(dt.getTime())) return '—';
   return dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function fmtDateTime(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return '—';
+  return dt.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 function renderStep2() {
@@ -464,7 +471,7 @@ function renderStep3() {
     }
   }
 
-  body.innerHTML = `<div class="lw-section-lbl">${heading}</div>${lwEditHistoryBanner(l)}${lwAgreementReadOnlyHtml(l)}${footer}`;
+  body.innerHTML = `<div class="lw-section-lbl">${heading}</div>${lwEditHistoryBanner(l)}${lwAgreementReadOnlyHtml(l)}${lwChangeTimelineHtml(l)}${footer}`;
 }
 
 async function lwRefreshCurrent() {
@@ -493,6 +500,50 @@ function lwEditHistoryBanner(l) {
   if (!l.editHistory || !l.editHistory.length) return '';
   const last = l.editHistory[l.editHistory.length - 1];
   return `<div class="lw-warn" style="background:rgba(79,123,254,0.1);border-color:rgba(79,123,254,0.4);color:#8FB4FF">✏️ This agreement was revised by the landlord on ${fmtDate(last.at)}${l.editHistory.length > 1 ? ` (revised ${l.editHistory.length} times in total)` : ''}. ${last.note ? esc(last.note) : ''} Please review the updated terms carefully.</div>`;
+}
+
+function lwChangeTimelineHtml(l) {
+  const versions = l.agreementVersions || [];
+  const edits = l.editHistory || [];
+  if (!versions.length && !edits.length) {
+    return `<div style="text-align:left;margin:22px auto 0;max-width:760px">
+      <div class="lw-blk-lbl">Change history</div>
+      <div class="lw-hint" style="margin-top:4px">No landlord revisions have been recorded yet. This section will show the date and details after the agreement is changed.</div>
+    </div>`;
+  }
+  const entries = versions.map((version, i) => ({ version, edit: edits[i] }));
+  edits.slice(versions.length).forEach(edit => entries.push({ version: null, edit }));
+  const changeHtml = change => {
+    const parts = String(change).split(' | ');
+    return `<li style="margin-bottom:6px"><div style="font-weight:700">${esc(parts[0])}</div>${parts.slice(1).map(part => `<div style="white-space:pre-wrap;margin-top:2px;padding-left:8px;color:var(--muted)">${esc(part)}</div>`).join('')}</li>`;
+  };
+  const rows = entries.map((entry, i) => {
+    const version = entry.version;
+    const edit = entry.edit;
+    const changes = version?.changes || [];
+    const note = edit?.note || '';
+    const items = changes.length ? changes : (note ? [note] : ['Agreement revised by landlord.']);
+    return `<div style="border-left:3px solid var(--gold);padding:10px 14px;margin:8px 0;background:rgba(201,169,110,0.06);border-radius:0 9px 9px 0">
+      <div style="font-weight:700;color:var(--text)">Revision ${version?.version || i + 1} · ${fmtDateTime(version?.savedAt || edit?.at)}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:3px">Changed by: ${esc(version?.changedBy || 'landlord')}</div>
+      <ul style="margin:7px 0 0 18px;padding:0;color:var(--text);font-size:12px;line-height:1.6">${items.map(changeHtml).join('')}</ul>
+      ${!version ? '<div style="font-size:11px;color:var(--muted);margin-top:7px">Exact previous and new text was not stored for this older revision.</div>' : ''}
+      ${version?.snapshot ? `<div style="margin-top:8px"><button class="btn btn-ghost btn-sm" onclick="lwCompareAgreementVersion(${i})">Compare with current agreement</button></div>` : ''}
+    </div>`;
+  });
+  return `<div style="text-align:left;margin:22px auto 0;max-width:760px">
+    <div class="lw-blk-lbl">Change history</div>
+    <div class="lw-hint" style="margin:4px 0 10px">Every landlord revision is recorded with its date and the fields that changed. Older signed versions remain available for comparison.</div>
+    ${rows.join('')}
+  </div>`;
+}
+
+function lwTenantShowHistory() {
+  if (!LW.lease) return;
+  LW.step = LW.lease.status === 'signed' ? 4 : 3;
+  renderTabs();
+  if (LW.step === 4) renderStep4();
+  else renderStep3();
 }
 
 function lwAgreementVersionHistoryHtml(l) {
@@ -538,6 +589,7 @@ function renderStep4() {
           <div class="lw-sig-typed lw-sig-final">${esc(l.tenant.name)}</div>
         </div>
       </div>
+      ${lwChangeTimelineHtml(l)}
       <div class="lw-actions" style="justify-content:center;margin-top:22px">
         <button class="btn btn-gold" onclick="lwViewAgreement()">👁 View</button>
         <button class="btn btn-teal" onclick="lwDownloadAgreement()">⬇ Download</button>

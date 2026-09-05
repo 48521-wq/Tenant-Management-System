@@ -2180,7 +2180,7 @@ async function aLoadDocsReview() {
     const badge = document.getElementById('docs-review-badge');
     const pending = reqs.filter(r=>r.status==='docs_submitted').length;
     if(badge){ badge.textContent=pending; badge.style.display=pending>0?'flex':'none'; }
-    if(!reqs.length){ list.innerHTML='<div class="loading">Koi pending docs nahi hain.</div>'; return; }
+    if(!reqs.length){ list.innerHTML='<div class="loading">There are no pending document reviews.</div>'; return; }
     const statusBadge={docs_pending:'b-warn',docs_submitted:'b-blue',docs_rejected:'b-red',docs_expired:'b-red',accepted:'b-green'};
     const statusLabel={docs_pending:'Docs Awaited',docs_submitted:'Docs Submitted',docs_rejected:'Docs Rejected',docs_expired:'Expired',accepted:'Accepted'};
     list.innerHTML = reqs.map(r=>`
@@ -2201,7 +2201,7 @@ async function aLoadDocsReview() {
         <div><div style="font-size:10px;color:var(--muted);margin-bottom:5px;font-weight:700;text-transform:uppercase">🚔 Police Cert</div><img src="${r.documents.policeCert||''}" style="width:100%;height:100px;cursor:pointer;object-fit:cover;border-radius:8px;border:1px solid var(--border)" onclick="openDocPreview(this.src,'Police Certificate')" onerror="this.style.opacity=0.2"></div>
       </div>
       ${r.documents.submittedAt?`<div style="font-size:11px;color:var(--muted);margin-top:8px">Submitted: ${new Date(r.documents.submittedAt).toLocaleString('en-PK',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>`:''}
-      `:r.status==='docs_pending'?`<div style="margin-top:12px;padding:10px 12px;background:rgba(255,179,71,0.06);border-radius:8px;font-size:12px;color:#ffb347">⏳ Tenant ne abhi documents submit nahi kiye</div>`:`<div style="margin-top:12px;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:8px;font-size:12px;color:var(--muted)">Documents available nahi hain</div>`}
+      `:r.status==='docs_pending'?`<div style="margin-top:12px;padding:10px 12px;background:rgba(255,179,71,0.06);border-radius:8px;font-size:12px;color:#ffb347">⏳ The tenant has not submitted documents yet.</div>`:`<div style="margin-top:12px;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:8px;font-size:12px;color:var(--muted)">Documents are not available.</div>`}
       ${r.status==='docs_submitted'?`
       <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
         <button onclick="aDocsAction('${r._id}','approve')" style="flex:1;min-width:120px;padding:9px;border-radius:9px;border:none;background:linear-gradient(135deg,#4ecdc4,#2bb5ac);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">✅ Approve</button>
@@ -2215,10 +2215,10 @@ async function aLoadDocsReview() {
 async function aDocsAction(reqId, action) {
   let rejectReason = '';
   if(action==='reject'){
-    rejectReason = prompt('Reject reason likhen (tenant ko dikhega):','');
+    rejectReason = prompt('Enter a rejection reason (visible to the tenant):','');
     if(!rejectReason) return;
   } else {
-    if(!confirm('Documents approve kar ke property assign karen?')) return;
+    if(!confirm('Approve these documents and assign the property?')) return;
   }
   try {
     const r = await aFetch('/rental-requests/'+reqId+'/verify-docs','PUT',{action,rejectReason});
@@ -2248,8 +2248,8 @@ function closeDocPreview() {
 }
 
 async function aBlockTenant(tenantId) {
-  if(!tenantId){ alert('Tenant ID nahi mili'); return; }
-  if(!confirm('⚠️ Is tenant ko BLOCK karen? Woh login nahi kar sakega.')) return;
+  if(!tenantId){ alert('Tenant ID not found.'); return; }
+  if(!confirm('⚠️ Block this tenant? They will not be able to log in.')) return;
   try {
     const r = await aFetch('/users/'+tenantId+'/block','PUT');
     if(r.success) alert('🚫 Tenant block ho gaya!');

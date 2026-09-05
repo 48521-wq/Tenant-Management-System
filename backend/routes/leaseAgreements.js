@@ -36,24 +36,25 @@ function agreementSnapshot(lease) {
 
 function agreementChanges(before, after) {
   const changes = [];
+  const value = item => String(item || '').trim() || 'None';
   const beforeTerms = JSON.stringify(before.terms || []);
   const afterTerms = JSON.stringify(after.terms || []);
   if (beforeTerms !== afterTerms) {
     const beforeByTitle = new Map((before.terms || []).map(term => [term.title, term.text]));
     const afterByTitle = new Map((after.terms || []).map(term => [term.title, term.text]));
     (after.terms || []).forEach(term => {
-      if (!beforeByTitle.has(term.title)) changes.push(`Clause added: ${term.title}`);
-      else if (beforeByTitle.get(term.title) !== term.text) changes.push(`Clause changed: ${term.title}`);
+      if (!beforeByTitle.has(term.title)) changes.push(`Clause added: ${term.title} -> ${value(term.text)}`);
+      else if (beforeByTitle.get(term.title) !== term.text) changes.push(`Clause changed: ${term.title} | Previous: ${value(beforeByTitle.get(term.title))} | New: ${value(term.text)}`);
     });
     (before.terms || []).forEach(term => {
-      if (!afterByTitle.has(term.title)) changes.push(`Clause removed: ${term.title}`);
+      if (!afterByTitle.has(term.title)) changes.push(`Clause removed: ${term.title} | Previous: ${value(term.text)}`);
     });
   }
-  if ((before.specialConditions || '') !== (after.specialConditions || '')) changes.push('Special conditions changed');
-  if (String(before.startDate || '') !== String(after.startDate || '')) changes.push('Start date changed');
-  if (String(before.endDate || '') !== String(after.endDate || '')) changes.push('End date changed');
-  if ((before.landlord?.cnic || '') !== (after.landlord?.cnic || '')) changes.push('Landlord CNIC changed');
-  if ((before.tenant?.cnic || '') !== (after.tenant?.cnic || '')) changes.push('Tenant CNIC changed');
+  if ((before.specialConditions || '') !== (after.specialConditions || '')) changes.push(`Special conditions | Previous: ${value(before.specialConditions)} | New: ${value(after.specialConditions)}`);
+  if (String(before.startDate || '') !== String(after.startDate || '')) changes.push(`Start date | Previous: ${value(before.startDate)} | New: ${value(after.startDate)}`);
+  if (String(before.endDate || '') !== String(after.endDate || '')) changes.push(`End date | Previous: ${value(before.endDate)} | New: ${value(after.endDate)}`);
+  if ((before.landlord?.cnic || '') !== (after.landlord?.cnic || '')) changes.push(`Landlord CNIC | Previous: ${value(before.landlord?.cnic)} | New: ${value(after.landlord?.cnic)}`);
+  if ((before.tenant?.cnic || '') !== (after.tenant?.cnic || '')) changes.push(`Tenant CNIC | Previous: ${value(before.tenant?.cnic)} | New: ${value(after.tenant?.cnic)}`);
   return changes.length ? changes : ['Agreement reviewed by landlord'];
 }
 
@@ -263,6 +264,7 @@ router.put('/:id', protect, async (req, res) => {
     if (lease.agreementVersions?.length) {
       const currentVersion = lease.agreementVersions[lease.agreementVersions.length - 1];
       currentVersion.changes = changes;
+      if (changes[0] !== 'Agreement reviewed by landlord') currentVersion.savedAt = new Date();
       const latestEdit = lease.editHistory?.[lease.editHistory.length - 1];
       if (latestEdit) latestEdit.note = changes.join('; ');
     }
