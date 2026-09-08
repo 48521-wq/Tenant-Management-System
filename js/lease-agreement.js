@@ -528,7 +528,7 @@ function lwChangeTimelineHtml(l) {
       <div style="font-size:11px;color:var(--muted);margin-top:3px">Changed by: ${esc(version?.changedBy || 'landlord')}</div>
       <ul style="margin:7px 0 0 18px;padding:0;color:var(--text);font-size:12px;line-height:1.6">${items.map(changeHtml).join('')}</ul>
       ${!version ? '<div style="font-size:11px;color:var(--muted);margin-top:7px">Exact previous and new text was not stored for this older revision.</div>' : ''}
-      ${version?.snapshot ? `<div style="margin-top:8px"><button class="btn btn-ghost btn-sm" onclick="lwCompareAgreementVersion(${i})">Compare with current agreement</button></div>` : ''}
+      ${version?.snapshot ? `<div style="margin-top:8px;display:flex;gap:6px"><button class="btn btn-ghost btn-sm" onclick="lwViewAgreementVersion(${i})">View</button><button class="btn btn-ghost btn-sm" onclick="lwCompareAgreementVersion(${i})">Compare with current agreement</button></div>` : ''}
     </div>`;
   });
   return `<div style="text-align:left;margin:22px auto 0;max-width:760px">
@@ -544,28 +544,6 @@ function lwTenantShowHistory() {
   renderTabs();
   if (LW.step === 4) renderStep4();
   else renderStep3();
-}
-
-function lwAgreementVersionHistoryHtml(l) {
-  const versions = l.agreementVersions || [];
-  if (!versions.length) return '';
-  return `
-    <div style="text-align:left;margin:22px auto 0;max-width:760px">
-      <div class="lw-blk-lbl">Agreement version history</div>
-      <div class="lw-hint" style="margin:4px 0 10px">Older signed copies remain saved separately from the current agreement.</div>
-      ${versions.map((version, i) => `
-        <div class="lw-prop-row" style="margin-top:8px">
-          <div>
-            <div style="font-weight:600">Previous agreement v${version.version || i + 1}</div>
-            <div style="font-size:12px;color:var(--muted)">${fmtDate(version.savedAt)} · ${esc((version.changes || []).join('; ') || 'Original signed version')}</div>
-          </div>
-          <div class="lw-actions" style="margin:0;gap:6px">
-            <button class="btn btn-ghost btn-sm" onclick="lwViewAgreementVersion(${i})">View</button>
-            <button class="btn btn-gold btn-sm" onclick="lwCompareAgreementVersion(${i})">Compare</button>
-          </div>
-        </div>`).join('')}
-    </div>
-  `;
 }
 
 function renderStep4() {
@@ -595,7 +573,6 @@ function renderStep4() {
         <button class="btn btn-teal" onclick="lwDownloadAgreement()">⬇ Download</button>
         <button class="btn btn-ghost" onclick="lwPrintAgreement()">🖨 Print</button>
       </div>
-      ${lwAgreementVersionHistoryHtml(l)}
       ${LW.role === 'landlord' ? `<button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="lwUnlockAgreement()">🔓 Unlock &amp; edit this agreement</button>` : ''}
       <button class="btn btn-ghost btn-sm" style="margin-top:16px" onclick="${backFn}()">Back</button>
     </div>
