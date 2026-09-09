@@ -143,8 +143,10 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ success: false, message: 'Enter email and password.' });
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const lEmail = email.toLowerCase().trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lEmail))
+    if (!emailPattern.test(lEmail))
       return res.status(400).json({ success: false, message: 'Enter a valid email address.' });
 
     // Admin
