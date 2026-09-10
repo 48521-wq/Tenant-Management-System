@@ -142,16 +142,17 @@ router.post('/verify-otp', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ success: false, message: 'Enter email and password.' });
+    const trimmedPassword = typeof password === 'string' ? password.trim() : '';
+    if (!email || !trimmedPassword) return res.status(400).json({ success: false, message: 'Enter email and password.' });
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const lEmail = email.toLowerCase().trim();
+    const lEmail = String(email).toLowerCase().trim();
     if (!emailPattern.test(lEmail))
       return res.status(400).json({ success: false, message: 'Enter a valid email address.' });
 
     // Admin
     if (lEmail === process.env.ADMIN_EMAIL.toLowerCase()) {
-      if (password !== process.env.ADMIN_PASSWORD)
+      if (trimmedPassword !== process.env.ADMIN_PASSWORD)
         return res.status(401).json({ success: false, message: 'Incorrect password.' });
       return res.json({ success: true, token: adminTok(), user: { id:'admin', name:'Super Admin', email: process.env.ADMIN_EMAIL, role:'admin', isAdmin:true } });
     }
@@ -160,7 +161,7 @@ router.post('/login', async (req, res) => {
     if (!user) return res.status(401).json({ success: false, message: 'No account found. Please sign up first.' });
     if (user.authProvider === 'google' && !user.password)
       return res.status(400).json({ success: false, message: 'This account uses Google Sign-In.' });
-    if (!(await user.comparePassword(password)))
+    if (!(await user.comparePassword(trimmedPassword)))
       return res.status(401).json({ success: false, message: 'Incorrect password.' });
     if (user.status === 'blocked')
       return res.status(403).json({ success: false, message: 'Account suspended. Contact admin.' });
