@@ -90,16 +90,20 @@ router.post('/', protect, async (req, res) => {
     let toList = [];
     let toLabel = '';
 
+    const normalizeRecipients = (recipients = []) => Array.from(new Set((recipients || [])
+      .map(item => typeof item === 'string' ? item.trim() : '')
+      .filter(Boolean)));
+
     if (id.role === 'admin') {
       const { to, specificEmail } = req.body;
       if (to === 'specific') {
         if (!specificEmail) return res.status(400).json({ success: false, message: 'Select a recipient.' });
         const u = await User.findOne({ email: specificEmail });
-        toList = [specificEmail];
-        toLabel = u ? `${u.name} (${u.role})` : specificEmail;
+        toList = [String(specificEmail).trim()];
+        toLabel = u ? `${u.name} (${u.role})` : String(specificEmail).trim();
       } else {
         const labels = { all: 'Everyone', tenant: 'All Tenants', landlord: 'All Landlords', admin: 'Admin' };
-        toList = [to || 'all'];
+        toList = [String(to || 'all').trim() || 'all'];
         toLabel = labels[to] || 'Everyone';
       }
     } else if (id.role === 'landlord') {
@@ -108,10 +112,10 @@ router.post('/', protect, async (req, res) => {
         toList = ['admin'];
         toLabel = 'Admin';
       } else {
-        if (!Array.isArray(recipients) || !recipients.length) {
+        toList = normalizeRecipients(recipients);
+        if (!toList.length) {
           return res.status(400).json({ success: false, message: 'Choose at least one recipient.' });
         }
-        toList = recipients;
         toLabel = recipientLabel || (toList.includes('all') ? 'Everyone' : `${toList.length} tenant(s)`);
       }
     } else if (id.role === 'tenant') {
