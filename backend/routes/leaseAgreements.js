@@ -36,25 +36,26 @@ function agreementSnapshot(lease) {
 
 function agreementChanges(before, after) {
   const changes = [];
-  const value = item => String(item || '').trim() || 'None';
+  // Keep the revision text normalized on the server so the UI remains read-only and stable.
+  const normalizeDisplayValue = item => String(item || '').trim() || 'None';
   const beforeTerms = JSON.stringify(before.terms || []);
   const afterTerms = JSON.stringify(after.terms || []);
   if (beforeTerms !== afterTerms) {
     const beforeByTitle = new Map((before.terms || []).map(term => [term.title, term.text]));
     const afterByTitle = new Map((after.terms || []).map(term => [term.title, term.text]));
     (after.terms || []).forEach(term => {
-      if (!beforeByTitle.has(term.title)) changes.push(`Clause added: ${term.title} -> ${value(term.text)}`);
-      else if (beforeByTitle.get(term.title) !== term.text) changes.push(`Clause changed: ${term.title} | Previous: ${value(beforeByTitle.get(term.title))} | New: ${value(term.text)}`);
+      if (!beforeByTitle.has(term.title)) changes.push(`Clause added: ${term.title} -> ${normalizeDisplayValue(term.text)}`);
+      else if (beforeByTitle.get(term.title) !== term.text) changes.push(`Clause changed: ${term.title} | Previous: ${normalizeDisplayValue(beforeByTitle.get(term.title))} | New: ${normalizeDisplayValue(term.text)}`);
     });
     (before.terms || []).forEach(term => {
-      if (!afterByTitle.has(term.title)) changes.push(`Clause removed: ${term.title} | Previous: ${value(term.text)}`);
+      if (!afterByTitle.has(term.title)) changes.push(`Clause removed: ${term.title} | Previous: ${normalizeDisplayValue(term.text)}`);
     });
   }
-  if ((before.specialConditions || '') !== (after.specialConditions || '')) changes.push(`Special conditions | Previous: ${value(before.specialConditions)} | New: ${value(after.specialConditions)}`);
-  if (String(before.startDate || '') !== String(after.startDate || '')) changes.push(`Start date | Previous: ${value(before.startDate)} | New: ${value(after.startDate)}`);
-  if (String(before.endDate || '') !== String(after.endDate || '')) changes.push(`End date | Previous: ${value(before.endDate)} | New: ${value(after.endDate)}`);
-  if ((before.landlord?.cnic || '') !== (after.landlord?.cnic || '')) changes.push(`Landlord CNIC | Previous: ${value(before.landlord?.cnic)} | New: ${value(after.landlord?.cnic)}`);
-  if ((before.tenant?.cnic || '') !== (after.tenant?.cnic || '')) changes.push(`Tenant CNIC | Previous: ${value(before.tenant?.cnic)} | New: ${value(after.tenant?.cnic)}`);
+  if ((before.specialConditions || '') !== (after.specialConditions || '')) changes.push(`Special conditions | Previous: ${normalizeDisplayValue(before.specialConditions)} | New: ${normalizeDisplayValue(after.specialConditions)}`);
+  if (String(before.startDate || '') !== String(after.startDate || '')) changes.push(`Start date | Previous: ${normalizeDisplayValue(before.startDate)} | New: ${normalizeDisplayValue(after.startDate)}`);
+  if (String(before.endDate || '') !== String(after.endDate || '')) changes.push(`End date | Previous: ${normalizeDisplayValue(before.endDate)} | New: ${normalizeDisplayValue(after.endDate)}`);
+  if ((before.landlord?.cnic || '') !== (after.landlord?.cnic || '')) changes.push(`Landlord CNIC | Previous: ${normalizeDisplayValue(before.landlord?.cnic)} | New: ${normalizeDisplayValue(after.landlord?.cnic)}`);
+  if ((before.tenant?.cnic || '') !== (after.tenant?.cnic || '')) changes.push(`Tenant CNIC | Previous: ${normalizeDisplayValue(before.tenant?.cnic)} | New: ${normalizeDisplayValue(after.tenant?.cnic)}`);
   return changes.length ? changes : ['Agreement reviewed by landlord'];
 }
 
