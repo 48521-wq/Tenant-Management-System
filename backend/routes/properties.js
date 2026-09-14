@@ -31,11 +31,17 @@ router.get('/my', protect, async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const filter = {};
+    const toValidNumber = value => {
+      const num = Number(value);
+      return Number.isFinite(num) ? num : null;
+    };
     if (req.query.status)     filter.status = req.query.status;
     if (req.query.area)       filter.area   = req.query.area;
     if (req.query.type)       filter.type   = req.query.type;
-    if (req.query.beds)       filter.beds   = { $gte: Number(req.query.beds) };
-    if (req.query.maxRent)    filter.rent   = { $lte: Number(req.query.maxRent) };
+    const minBeds = toValidNumber(req.query.beds);
+    if (minBeds !== null) filter.beds = { $gte: minBeds };
+    const maxRent = toValidNumber(req.query.maxRent);
+    if (maxRent !== null) filter.rent = { $lte: maxRent };
     if (req.query.landlordId) {
       const mongoose = require('mongoose');
       try {
