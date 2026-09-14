@@ -7,7 +7,9 @@ const router = express.Router();
 router.get('/', protect, adminOnly, async (req, res) => {
   try {
     const filter = {};
-    if (req.query.role) filter.role = req.query.role;
+    const allowedRoles = ['admin', 'landlord', 'tenant'];
+    const role = typeof req.query.role === 'string' ? req.query.role.trim().toLowerCase() : '';
+    if (role && allowedRoles.includes(role)) filter.role = role;
     const users = await User.find(filter).sort({ createdAt: -1 });
     res.json({ success: true, count: users.length, users });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
