@@ -9,8 +9,10 @@ const router = express.Router();
 router.get('/', protect, async (req, res) => {
   try {
     let filter = {};
+    const validStatuses = ['open', 'in_progress', 'pending_confirmation', 'resolved', 'rejected'];
+    const status = typeof req.query.status === 'string' ? req.query.status.trim().toLowerCase() : '';
     if (req.user?.isAdmin) {
-      if (req.query.status) filter.status = req.query.status;
+      if (status && validStatuses.includes(status)) filter.status = status;
     } else if (req.user.role === 'tenant') {
       filter.tenantId = req.user._id;
     } else if (req.user.role === 'landlord') {
