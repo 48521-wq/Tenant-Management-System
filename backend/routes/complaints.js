@@ -9,8 +9,10 @@ const router = express.Router();
 router.get('/', protect, async (req, res) => {
   try {
     let filter = {};
+    const validStatuses = ['open', 'in_progress', 'resolved', 'closed'];
+    const status = typeof req.query.status === 'string' ? req.query.status.trim().toLowerCase() : '';
     if (req.user?.isAdmin) {
-      if (req.query.status) filter.status = req.query.status;
+      if (status && validStatuses.includes(status)) filter.status = status;
     } else if (req.user.role === 'tenant') {
       filter.tenantId = req.user._id;
     } else if (req.user.role === 'landlord') {
@@ -29,7 +31,7 @@ router.get('/', protect, async (req, res) => {
         ]
       };
     }
-    if (req.user?.isAdmin && req.query.status) filter.status = req.query.status;
+    if (req.user?.isAdmin && status && validStatuses.includes(status)) filter.status = status;
     const complaints = await Complaint.find(filter).sort({ createdAt: -1 });
     res.json({ success: true, count: complaints.length, complaints });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
