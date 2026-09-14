@@ -12,9 +12,11 @@ function escapeRegex(value) {
 router.get('/', protect, async (req, res) => {
   try {
     let filter = {};
+    const validStatuses = ['pending', 'paid', 'rejected'];
+    const status = typeof req.query.status === 'string' ? req.query.status.trim().toLowerCase() : '';
     if (req.user?.isAdmin) {
       filter.propertyId = { $ne: null };
-      if (req.query.status) filter.status = req.query.status;
+      if (status && validStatuses.includes(status)) filter.status = status;
     } else if (req.user.role === 'tenant') {
       filter.tenantId = req.user._id;
     } else if (req.user.role === 'landlord') {
@@ -33,7 +35,7 @@ router.get('/', protect, async (req, res) => {
           ...(titleRegexes.length ? [{ propertyTitle: { $in: titleRegexes } }] : []),
         ]
       };
-      if (req.query.status) filter.status = req.query.status;
+      if (status && validStatuses.includes(status)) filter.status = status;
       if (req.query.month) {
         // Substring, case-insensitive — so "Aug", "august", "August 2026"
         // all find "August 2026" regardless of how it was typed.
