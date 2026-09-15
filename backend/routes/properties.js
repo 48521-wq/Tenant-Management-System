@@ -31,11 +31,13 @@ router.get('/my', protect, async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const filter = {};
+    const allowedStatuses = ['available', 'rented', 'suspended'];
     const toValidNumber = value => {
       const num = Number(value);
       return Number.isFinite(num) ? num : null;
     };
-    if (req.query.status)     filter.status = req.query.status;
+    const status = typeof req.query.status === 'string' ? req.query.status.trim().toLowerCase() : '';
+    if (status && allowedStatuses.includes(status)) filter.status = status;
     if (req.query.area)       filter.area   = req.query.area;
     if (req.query.type)       filter.type   = req.query.type;
     const minBeds = toValidNumber(req.query.beds);
