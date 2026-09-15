@@ -223,7 +223,8 @@ router.put('/:id/cancel', protect, async (req, res) => {
 // ─── ADMIN: Get all requests (admin only) ───
 router.get('/', protect, async (req, res) => {
   try {
-    if (!req.user.isAdmin && req.user.role !== 'admin') {
+    const isAdmin = req.user?.isAdmin || req.user?.role === 'admin';
+    if (!isAdmin) {
       return res.status(403).json({ success: false, message: 'Not authorized.' });
     }
     const requests = await RentalRequest.find()
