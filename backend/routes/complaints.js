@@ -31,7 +31,6 @@ router.get('/', protect, async (req, res) => {
         ]
       };
     }
-    if (req.user?.isAdmin && status && validStatuses.includes(status)) filter.status = status;
     const complaints = await Complaint.find(filter).sort({ createdAt: -1 });
     res.json({ success: true, count: complaints.length, complaints });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
