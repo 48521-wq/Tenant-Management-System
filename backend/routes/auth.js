@@ -184,7 +184,9 @@ router.post('/google', async (req, res) => {
     } catch { return res.status(401).json({ success: false, message: 'Invalid Google token.' }); }
 
     const { email, name, sub: googleId } = payload;
-    const lEmail = email.toLowerCase();
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const lEmail = String(email || '').toLowerCase().trim();
+    if (!emailPattern.test(lEmail)) return res.status(400).json({ success: false, message: 'Invalid Google email.' });
 
     if (lEmail === process.env.ADMIN_EMAIL.toLowerCase())
       return res.json({ success: true, token: adminTok(), user: { id:'admin', name:'Super Admin', email: process.env.ADMIN_EMAIL, role:'admin', isAdmin:true } });
