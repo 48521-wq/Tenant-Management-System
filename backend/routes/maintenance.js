@@ -31,6 +31,7 @@ router.get('/', protect, async (req, res) => {
         ]
       };
     }
+    if (status && validStatuses.includes(status)) filter.status = status;
     const requests = await Maintenance.find(filter).sort({ createdAt: -1 });
     res.json({ success: true, count: requests.length, requests });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
