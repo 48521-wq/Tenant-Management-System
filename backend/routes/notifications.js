@@ -83,7 +83,9 @@ router.post('/', protect, async (req, res) => {
   try {
     const id = identity(req);
     const { title, message, color } = req.body;
-    if (!title || !message) {
+    const cleanTitle = typeof title === 'string' ? title.trim() : '';
+    const cleanMessage = typeof message === 'string' ? message.trim() : '';
+    if (!cleanTitle || !cleanMessage) {
       return res.status(400).json({ success: false, message: 'Title and message are required.' });
     }
 
@@ -139,8 +141,8 @@ router.post('/', protect, async (req, res) => {
     }
 
     const notif = await Notification.create({
-      title,
-      message,
+      title: cleanTitle,
+      message: cleanMessage,
       color: color || (id.role === 'admin' ? 'red' : id.role === 'landlord' ? 'gold' : 'blue'),
       fromName: id.name,
       fromEmail: id.email,
