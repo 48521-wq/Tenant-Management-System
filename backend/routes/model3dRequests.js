@@ -56,7 +56,9 @@ router.get('/my', protect, async (req, res) => {
 router.get('/', protect, adminOnly, async (req, res) => {
   try {
     const filter = {};
-    if (req.query.status) filter.status = req.query.status;
+    const validStatuses = ['pending', 'admin_reviewed', 'negotiating', 'agreed', 'completed', 'rejected'];
+    const status = typeof req.query.status === 'string' ? req.query.status.trim().toLowerCase() : '';
+    if (status && validStatuses.includes(status)) filter.status = status;
     const requests = await Model3DRequest.find(filter).sort({ createdAt:-1 });
     res.json({ success:true, requests });
   } catch(e) { res.status(500).json({ success:false, message:'Server error.' }); }
