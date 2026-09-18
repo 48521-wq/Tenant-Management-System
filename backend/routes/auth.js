@@ -247,7 +247,18 @@ router.put('/profile', protect, async (req, res) => {
   try {
     if (req.user?.isAdmin) return res.json({ success: true, message: 'Admin profile updated.' });
     const { name, phone, cnic, city, address } = req.body;
-    const user = await User.findByIdAndUpdate(req.user._id, { name, phone, cnic, city, address }, { new: true });
+    const cleanName = typeof name === 'string' ? name.trim() : '';
+    const cleanPhone = typeof phone === 'string' ? phone.trim() : '';
+    const cleanCity = typeof city === 'string' ? city.trim() : '';
+    const cleanAddress = typeof address === 'string' ? address.trim() : '';
+    const cleanCnic = typeof cnic === 'string' ? cnic.trim() : '';
+    const user = await User.findByIdAndUpdate(req.user._id, {
+      name: cleanName || undefined,
+      phone: cleanPhone || undefined,
+      cnic: cleanCnic || undefined,
+      city: cleanCity || undefined,
+      address: cleanAddress || undefined,
+    }, { new: true });
     res.json({ success: true, user });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
