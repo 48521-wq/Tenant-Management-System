@@ -62,6 +62,9 @@ function agreementChanges(before, after) {
 // ─── LANDLORD or TENANT: my agreements ───
 router.get('/my', protect, async (req, res) => {
   try {
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ success: false, message: 'Unauthorized.' });
+    }
     const filter = req.user.role === 'landlord'
       ? { landlordId: req.user._id }
       : { tenantId: req.user._id };
