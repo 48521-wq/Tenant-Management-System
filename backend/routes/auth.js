@@ -82,16 +82,19 @@ router.post('/register', async (req, res) => {
 router.post('/send-otp', async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-    if (!name || !email || !password || !role)
+    const cleanName = typeof name === 'string' ? name.trim() : '';
+    const cleanEmail = typeof email === 'string' ? email.trim() : '';
+    const cleanPassword = typeof password === 'string' ? password.trim() : '';
+    if (!cleanName || !cleanEmail || !cleanPassword || !role)
       return res.status(400).json({ success: false, message: 'Please fill all fields.' });
     if (!['tenant','landlord'].includes(role))
       return res.status(400).json({ success: false, message: 'Invalid role.' });
-    if (password.length < 6)
+    if (cleanPassword.length < 6)
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
-    if (email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase())
+    if (cleanEmail.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase())
       return res.status(400).json({ success: false, message: 'This email cannot be registered.' });
 
-    const exists = await User.findOne({ email: email.toLowerCase() });
+    const exists = await User.findOne({ email: cleanEmail.toLowerCase() });
     if (exists) return res.status(400).json({ success: false, message: 'Account already exists. Please sign in.' });
 
     const otp = generateOTP();
