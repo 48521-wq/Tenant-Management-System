@@ -35,7 +35,6 @@ router.get('/', protect, async (req, res) => {
           ...(titleRegexes.length ? [{ propertyTitle: { $in: titleRegexes } }] : []),
         ]
       };
-      if (status && validStatuses.includes(status)) filter.status = status;
       if (req.query.month) {
         // Substring, case-insensitive — so "Aug", "august", "August 2026"
         // all find "August 2026" regardless of how it was typed.
@@ -48,6 +47,8 @@ router.get('/', protect, async (req, res) => {
         filter.tenantName = new RegExp(escapeRegex(req.query.tenant.trim()), 'i');
       }
     }
+
+    if (status && validStatuses.includes(status)) filter.status = status;
 
     const payments = await Payment.find(filter).sort({ createdAt: -1 });
     res.json({ success: true, count: payments.length, payments });
