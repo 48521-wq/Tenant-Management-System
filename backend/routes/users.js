@@ -15,9 +15,14 @@ router.get('/', protect, adminOnly, async (req, res) => {
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
+const isValidUserId = (value) => typeof value === 'string' && value.trim().length > 0;
+
 // PUT block/unblock
 router.put('/:id/block', protect, adminOnly, async (req, res) => {
   try {
+    if (!isValidUserId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid user id.' });
+    }
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
     user.status = user.status === 'blocked' ? 'active' : 'blocked';
