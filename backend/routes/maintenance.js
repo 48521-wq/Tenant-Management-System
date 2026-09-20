@@ -65,9 +65,14 @@ router.post('/', protect, async (req, res) => {
 router.put('/:id/status', protect, adminOnly, async (req, res) => {
   try {
     const { status, adminNote } = req.body;
-    const update = { status };
+    const validStatuses = ['open', 'in_progress', 'pending_confirmation', 'resolved', 'rejected'];
+    const normalizedStatus = typeof status === 'string' ? status.trim().toLowerCase() : '';
+    if (!normalizedStatus || !validStatuses.includes(normalizedStatus)) {
+      return res.status(400).json({ success: false, message: 'Invalid maintenance status.' });
+    }
+    const update = { status: normalizedStatus };
     if (adminNote) update.adminNote = adminNote;
-    if (status === 'resolved') update.resolvedAt = new Date();
+    if (normalizedStatus === 'resolved') update.resolvedAt = new Date();
     const request = await Maintenance.findByIdAndUpdate(req.params.id, update, { new: true });
     if (!request) return res.status(404).json({ success: false, message: 'Not found.' });
     res.json({ success: true, request });
