@@ -79,6 +79,9 @@ router.get('/', async (req, res) => {
 // GET single property
 router.get('/:id', async (req, res) => {
   try {
+    if (typeof req.params.id !== 'string' || !req.params.id.trim()) {
+      return res.status(400).json({ success: false, message: 'Invalid property id.' });
+    }
     const prop = await Property.findById(req.params.id);
     if (!prop) return res.status(404).json({ success: false, message: 'Property not found.' });
     res.json({ success: true, property: prop });
