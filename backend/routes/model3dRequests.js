@@ -15,6 +15,10 @@ router.post('/', protect, async (req, res) => {
 
     const { propertyId, requirements } = req.body;
     if (!propertyId) return res.status(400).json({ success:false, message:'propertyId is required.' });
+    const normalizedRequirements = typeof requirements === 'string' ? requirements.trim() : requirements;
+    if (normalizedRequirements !== undefined && normalizedRequirements !== null && String(normalizedRequirements).trim() === '') {
+      return res.status(400).json({ success:false, message:'Requirements cannot be empty.' });
+    }
 
     // Verify property belongs to this landlord
     const prop = await Property.findById(propertyId);
@@ -31,7 +35,7 @@ router.post('/', protect, async (req, res) => {
       propertyTitle: prop.title,
       landlordId:    req.user._id,
       landlordName:  req.user.name,
-      requirements:  requirements || {},
+      requirements:  normalizedRequirements ?? {},
     });
 
     res.status(201).json({ success:true, request });
