@@ -99,14 +99,17 @@ router.post('/', protect, async (req, res) => {
     if (id.role === 'admin') {
       const { to, specificEmail } = req.body;
       if (to === 'specific') {
-        if (!specificEmail) return res.status(400).json({ success: false, message: 'Select a recipient.' });
-        const u = await User.findOne({ email: specificEmail });
-        toList = [String(specificEmail).trim()];
-        toLabel = u ? `${u.name} (${u.role})` : String(specificEmail).trim();
+        const normalizedEmail = typeof specificEmail === 'string' ? specificEmail.trim() : '';
+        if (!normalizedEmail) return res.status(400).json({ success: false, message: 'Select a recipient.' });
+        const u = await User.findOne({ email: normalizedEmail });
+        toList = [normalizedEmail];
+        toLabel = u ? `${u.name} (${u.role})` : normalizedEmail;
       } else {
         const labels = { all: 'Everyone', tenant: 'All Tenants', landlord: 'All Landlords', admin: 'Admin' };
-        toList = [String(to || 'all').trim() || 'all'];
-        toLabel = labels[to] || 'Everyone';
+        const normalizedTarget = typeof to === 'string' ? to.trim() : 'all';
+        if (!normalizedTarget) return res.status(400).json({ success: false, message: 'Select a valid recipient target.' });
+        toList = [normalizedTarget || 'all'];
+        toLabel = labels[normalizedTarget] || 'Everyone';
       }
     } else if (id.role === 'landlord') {
       const { to, recipients, recipientLabel } = req.body;
