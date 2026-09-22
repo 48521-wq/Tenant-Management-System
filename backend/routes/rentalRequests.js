@@ -107,6 +107,9 @@ router.get('/received', protect, async (req, res) => {
 // ─── Get a rental request by ID (tenant, landlord, or admin) ───
 router.get('/:id', protect, async (req, res) => {
   try {
+    if (typeof req.params.id !== 'string' || !req.params.id.trim()) {
+      return res.status(400).json({ success: false, message: 'Invalid request id.' });
+    }
     const rentalRequest = await RentalRequest.findById(req.params.id)
       .populate('tenantId')
       .populate('landlordId')
