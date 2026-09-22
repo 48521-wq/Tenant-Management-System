@@ -63,6 +63,9 @@ router.post('/', protect, async (req, res) => {
 // PUT update status (admin only)
 router.put('/:id/status', protect, adminOnly, async (req, res) => {
   try {
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid complaint id.' });
+    }
     const { status, adminNote } = req.body;
     const validStatuses = ['open', 'in_progress', 'resolved', 'closed'];
     const normalizedStatus = typeof status === 'string' ? status.trim().toLowerCase() : '';
@@ -82,6 +85,9 @@ router.put('/:id/status', protect, adminOnly, async (req, res) => {
 router.put('/:id/approve', protect, async (req, res) => {
   try {
     if (req.user.role !== 'landlord') return res.status(403).json({ success: false, message: 'Not authorized.' });
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid complaint id.' });
+    }
     const complaint = await Complaint.findById(req.params.id);
     if (!complaint) return res.status(404).json({ success: false, message: 'Complaint not found.' });
     // Check landlord ownership
@@ -101,6 +107,9 @@ router.put('/:id/approve', protect, async (req, res) => {
 router.put('/:id/resolve', protect, async (req, res) => {
   try {
     if (req.user.role !== 'landlord') return res.status(403).json({ success: false, message: 'Not authorized.' });
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid complaint id.' });
+    }
     const complaint = await Complaint.findById(req.params.id);
     if (!complaint) return res.status(404).json({ success: false, message: 'Complaint not found.' });
     if (complaint.landlordId && complaint.landlordId.toString() !== req.user._id.toString()) {
@@ -119,6 +128,9 @@ router.put('/:id/resolve', protect, async (req, res) => {
 // DELETE complaint (admin)
 router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid complaint id.' });
+    }
     await Complaint.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Complaint deleted.' });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
