@@ -126,6 +126,9 @@ const isPendingConfirmation = status => pendingConfirmationStates.includes(statu
 router.put('/:id/confirm', protect, async (req, res) => {
   try {
     if (req.user.role !== 'tenant') return res.status(403).json({ success: false, message: 'Not authorized.' });
+    if (typeof req.params.id !== 'string' || !req.params.id.trim()) {
+      return res.status(400).json({ success: false, message: 'Invalid request id.' });
+    }
     const request = await Maintenance.findById(req.params.id);
     if (!request) return res.status(404).json({ success: false, message: 'Request not found.' });
     if (!request.tenantId || request.tenantId.toString() !== req.user._id.toString()) {
