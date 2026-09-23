@@ -179,6 +179,9 @@ router.delete('/:id', protect, async (req, res) => {
   try {
     const id = identity(req);
     if (id.role !== 'admin') return res.status(403).json({ success: false, message: 'Admin only.' });
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !require('mongoose').Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid notification id.' });
+    }
     await Notification.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (e) {
