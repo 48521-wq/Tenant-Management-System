@@ -41,12 +41,13 @@ router.post('/', protect, async (req, res) => {
   try {
     if (req.user?.isAdmin) return res.status(403).json({ success: false, message: 'Admin cannot file complaints.' });
     const { subject, description, category, priority, landlordId, landlordName, propertyId } = req.body;
-    if (!subject) return res.status(400).json({ success: false, message: 'Subject is required.' });
+    const cleanSubject = typeof subject === 'string' ? subject.trim() : '';
+    if (!cleanSubject) return res.status(400).json({ success: false, message: 'Subject is required.' });
     const complaintData = {
       tenantId:   req.user._id,
       tenantName: req.user.name,
-      subject,
-      description,
+      subject: cleanSubject,
+      description: typeof description === 'string' ? description.trim() : description,
       category,
       priority,
     };
