@@ -220,6 +220,9 @@ router.post('/google-fallback', async (req, res) => {
     if (!cleanEmail) return res.status(400).json({ success: false, message: 'Email required.' });
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(cleanEmail)) return res.status(400).json({ success: false, message: 'Invalid email address.' });
+    if (typeof role !== 'undefined' && role !== null && typeof role !== 'string') {
+      return res.status(400).json({ success: false, message: 'Invalid role.' });
+    }
     const lEmail = cleanEmail.toLowerCase();
     if (lEmail === process.env.ADMIN_EMAIL.toLowerCase())
       return res.json({ success: true, token: adminTok(), user: { id:'admin', name:'Super Admin', email: process.env.ADMIN_EMAIL, role:'admin', isAdmin:true } });
