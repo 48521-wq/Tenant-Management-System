@@ -145,6 +145,9 @@ router.get('/:id', protect, async (req, res) => {
 // ─── LANDLORD: Accept rental request ───
 router.put('/:id/accept', protect, async (req, res) => {
   try {
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !require('mongoose').Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid request id.' });
+    }
     const rentalRequest = await RentalRequest.findById(req.params.id);
     if (!rentalRequest) {
       return res.status(404).json({ success: false, message: 'Request not found.' });
@@ -179,6 +182,9 @@ router.put('/:id/accept', protect, async (req, res) => {
 // ─── LANDLORD: Reject rental request ───
 router.put('/:id/reject', protect, async (req, res) => {
   try {
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !require('mongoose').Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid request id.' });
+    }
     const rentalRequest = await RentalRequest.findById(req.params.id);
     if (!rentalRequest) {
       return res.status(404).json({ success: false, message: 'Request not found.' });
@@ -204,6 +210,9 @@ router.put('/:id/reject', protect, async (req, res) => {
 // ─── TENANT: Cancel their own request ───
 router.put('/:id/cancel', protect, async (req, res) => {
   try {
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !require('mongoose').Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid request id.' });
+    }
     const rentalRequest = await RentalRequest.findById(req.params.id);
     if (!rentalRequest) {
       return res.status(404).json({ success: false, message: 'Request not found.' });
