@@ -34,6 +34,9 @@ router.put('/:id/block', protect, adminOnly, async (req, res) => {
 // PUT verify
 router.put('/:id/verify', protect, adminOnly, async (req, res) => {
   try {
+    if (!require('mongoose').Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid user id.' });
+    }
     const user = await User.findByIdAndUpdate(req.params.id, { verified: true }, { new: true });
     if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
     res.json({ success: true, message: 'User verified.', user });
@@ -43,6 +46,9 @@ router.put('/:id/verify', protect, adminOnly, async (req, res) => {
 // DELETE user
 router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
+    if (!require('mongoose').Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid user id.' });
+    }
     await User.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'User deleted.' });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
