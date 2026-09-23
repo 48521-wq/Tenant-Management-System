@@ -97,6 +97,9 @@ router.post('/', protect, async (req, res) => {
 // PUT approve payment (landlord)
 router.put('/:id/approve', protect, async (req, res) => {
   try {
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid payment id.' });
+    }
     const payment = await Payment.findById(req.params.id);
     if (!payment) return res.status(404).json({ success: false, message: 'Payment not found.' });
     if (req.user.role === 'landlord') {
@@ -120,6 +123,9 @@ router.put('/:id/approve', protect, async (req, res) => {
 // PUT reject payment (landlord)
 router.put('/:id/reject', protect, async (req, res) => {
   try {
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid payment id.' });
+    }
     const payment = await Payment.findById(req.params.id);
     if (!payment) return res.status(404).json({ success: false, message: 'Payment not found.' });
     if (req.user.role === 'landlord') {
@@ -143,6 +149,9 @@ router.put('/:id/reject', protect, async (req, res) => {
 // DELETE (admin)
 router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid payment id.' });
+    }
     await Payment.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted.' });
   } catch (e) {
