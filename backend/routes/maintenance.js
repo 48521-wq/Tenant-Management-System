@@ -64,6 +64,9 @@ router.post('/', protect, async (req, res) => {
 // PUT update status (admin only)
 router.put('/:id/status', protect, adminOnly, async (req, res) => {
   try {
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid request id.' });
+    }
     const { status, adminNote } = req.body;
     const validStatuses = ['open', 'in_progress', 'pending_confirmation', 'resolved', 'rejected'];
     const normalizedStatus = typeof status === 'string' ? status.trim().toLowerCase() : '';
@@ -83,6 +86,9 @@ router.put('/:id/status', protect, adminOnly, async (req, res) => {
 router.put('/:id/approve', protect, async (req, res) => {
   try {
     if (req.user.role !== 'landlord') return res.status(403).json({ success: false, message: 'Not authorized.' });
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid request id.' });
+    }
     const request = await Maintenance.findById(req.params.id);
     if (!request) return res.status(404).json({ success: false, message: 'Request not found.' });
     if (request.landlordId && request.landlordId.toString() !== req.user._id.toString()) {
@@ -101,6 +107,9 @@ router.put('/:id/approve', protect, async (req, res) => {
 router.put('/:id/done', protect, async (req, res) => {
   try {
     if (req.user.role !== 'landlord') return res.status(403).json({ success: false, message: 'Not authorized.' });
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid request id.' });
+    }
     const request = await Maintenance.findById(req.params.id);
     if (!request) return res.status(404).json({ success: false, message: 'Request not found.' });
     if (request.landlordId && request.landlordId.toString() !== req.user._id.toString()) {
@@ -148,6 +157,9 @@ router.put('/:id/confirm', protect, async (req, res) => {
 router.put('/:id/reject', protect, async (req, res) => {
   try {
     if (req.user.role !== 'tenant') return res.status(403).json({ success: false, message: 'Not authorized.' });
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid request id.' });
+    }
     const request = await Maintenance.findById(req.params.id);
     if (!request) return res.status(404).json({ success: false, message: 'Request not found.' });
     if (!request.tenantId || request.tenantId.toString() !== req.user._id.toString()) {
@@ -166,6 +178,9 @@ router.put('/:id/reject', protect, async (req, res) => {
 // DELETE (admin)
 router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid request id.' });
+    }
     await Maintenance.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted.' });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
