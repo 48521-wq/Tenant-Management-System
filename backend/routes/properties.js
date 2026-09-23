@@ -106,6 +106,9 @@ router.post('/', protect, async (req, res) => {
 // PUT update property
 router.put('/:id', protect, async (req, res) => {
   try {
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !require('mongoose').Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid property id.' });
+    }
     const prop = await Property.findById(req.params.id);
     if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
     if (!req.user?.isAdmin && prop.landlordId.toString() !== req.user._id.toString())
@@ -118,6 +121,9 @@ router.put('/:id', protect, async (req, res) => {
 // PUT upload front image (base64 data URL)
 router.put('/:id/front-image', protect, async (req, res) => {
   try {
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !require('mongoose').Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid property id.' });
+    }
     const prop = await Property.findById(req.params.id);
     if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
     if (prop.landlordId.toString() !== req.user._id.toString())
@@ -133,6 +139,9 @@ router.put('/:id/front-image', protect, async (req, res) => {
 // PUT save 3D model config
 router.put('/:id/model3d', protect, async (req, res) => {
   try {
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !require('mongoose').Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid property id.' });
+    }
     const prop = await Property.findById(req.params.id);
     if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
     prop.model3d = req.body;
@@ -145,6 +154,9 @@ router.put('/:id/model3d', protect, async (req, res) => {
 // PUT save landlord furniture layout
 router.put('/:id/furniture/landlord', protect, async (req, res) => {
   try {
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !require('mongoose').Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid property id.' });
+    }
     const prop = await Property.findById(req.params.id);
     if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
     prop.landlordFurnitureLayout = req.body;
@@ -181,6 +193,9 @@ router.put('/:id/furniture', protect, async (req, res) => {
 // DELETE property
 router.delete('/:id', protect, async (req, res) => {
   try {
+    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !require('mongoose').Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid property id.' });
+    }
     const prop = await Property.findById(req.params.id);
     if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
     if (!req.user?.isAdmin && prop.landlordId.toString() !== req.user._id.toString())
