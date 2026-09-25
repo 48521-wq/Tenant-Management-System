@@ -27,6 +27,12 @@ app.use('/api/3d-requests',    require('./routes/model3dRequests'));
 app.use('/api/notifications',  require('./routes/notifications'));
 app.use('/api/lease-agreements', require('./routes/leaseAgreements'));
 
+app.get('/', (req, res) => res.json({
+  success: true,
+  name: 'Tenant Management System API',
+  status: 'running',
+  health: '/api/health'
+}));
 app.get('/api/health', (req, res) => res.json({ status: 'OK', time: new Date().toISOString() }));
 app.use((req, res) => res.status(404).json({ success: false, message: 'Route not found.' }));
 app.use((err, req, res, next) => res.status(500).json({ success: false, message: 'Server error.' }));
