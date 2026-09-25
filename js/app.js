@@ -15,11 +15,18 @@ const clearAuth= ()    => { localStorage.removeItem('tms_token'); localStorage.r
 
 // ── API helper ────────────────────────────────────────
 async function api(endpoint, method = 'GET', body = null) {
-  const opts = { method, headers: { 'Content-Type': 'application/json', Accept: 'application/json' } };
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  const opts = { method, signal: controller.signal, headers: { 'Content-Type': 'application/json', Accept: 'application/json' } };
   const t = getToken();
   if (t) opts.headers['Authorization'] = 'Bearer ' + t;
   if (body) opts.body = JSON.stringify(body);
-  const res  = await fetch(API_BASE + endpoint, opts);
+  let res;
+  try {
+    res = await fetch(API_BASE + endpoint, opts);
+  } finally {
+    clearTimeout(timeoutId);
+  }
   const data = await res.json().catch(() => ({
     success: false,
     message: `Server returned an invalid response (${res.status}).`
