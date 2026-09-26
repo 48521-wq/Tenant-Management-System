@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express   = require('express');
 const cors      = require('cors');
+const mongoose  = require('mongoose');
 const connectDB = require('./config/database');
 
 const app = express();
@@ -33,7 +34,14 @@ app.get('/', (req, res) => res.json({
   status: 'running',
   health: '/api/health'
 }));
-app.get('/api/health', (req, res) => res.json({ status: 'OK', time: new Date().toISOString() }));
+app.get('/api/health', (req, res) => {
+  const databaseConnected = mongoose.connection.readyState === 1;
+  res.status(databaseConnected ? 200 : 503).json({
+    status: databaseConnected ? 'OK' : 'UNAVAILABLE',
+    database: databaseConnected ? 'connected' : 'disconnected',
+    time: new Date().toISOString()
+  });
+});
 app.use((req, res) => res.status(404).json({ success: false, message: 'Route not found.' }));
 app.use((err, req, res, next) => res.status(500).json({ success: false, message: 'Server error.' }));
 
