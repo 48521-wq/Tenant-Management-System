@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════
 
 const GOOGLE_CLIENT_ID = '1092570435598-nicfmpo6mpqo6a1h36eg614082k8994l.apps.googleusercontent.com';
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = window.TMS_API_BASE || 'http://localhost:5000/api';
 
 // ── Session helpers ───────────────────────────────────
 const getToken = ()    => localStorage.getItem('tms_token');
