@@ -648,10 +648,15 @@ function tmsSubmitAddProperty() {
   const beds = document.getElementById('add-p-beds')?.value.trim();
   const baths = document.getElementById('add-p-baths')?.value.trim();
   const landlord = document.getElementById('add-p-landlord')?.value.trim();
+  const rentAmount = Number(rent);
 
   if (!title || !city) { tmsShowFormMsg('add-property-msg', 'Title and city are required.', false); return; }
+  if (!rent || !Number.isFinite(rentAmount) || rentAmount <= 0) {
+    tmsShowFormMsg('add-property-msg', 'Enter a valid rent amount greater than zero.', false);
+    return;
+  }
 
-  TMS.addProperty({ title, address, city, type, rent: Number(rent), beds, baths, landlord, status: 'available' });
+  TMS.addProperty({ title, address, city, type, rent: rentAmount, beds, baths, landlord, status: 'available' });
   document.getElementById('add-property-form')?.reset();
   tmsShowFormMsg('add-property-msg', '✅ Property added successfully!', true);
   tmsRenderProperties(); tmsUpdateStats();
