@@ -3,6 +3,7 @@ const express   = require('express');
 const cors      = require('cors');
 const mongoose  = require('mongoose');
 const connectDB = require('./config/database');
+const { version } = require('./package.json');
 
 const app = express();
 connectDB();
@@ -31,6 +32,7 @@ app.use('/api/lease-agreements', require('./routes/leaseAgreements'));
 app.get('/', (req, res) => res.json({
   success: true,
   name: 'Tenant Management System API',
+  version,
   status: 'running',
   health: '/api/health'
 }));
@@ -39,6 +41,7 @@ app.get('/api/health', (req, res) => {
   res.status(databaseConnected ? 200 : 503).json({
     status: databaseConnected ? 'OK' : 'UNAVAILABLE',
     database: databaseConnected ? 'connected' : 'disconnected',
+    version,
     time: new Date().toISOString()
   });
 });
