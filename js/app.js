@@ -4,7 +4,12 @@
 // ═══════════════════════════════════════════════════════
 
 const GOOGLE_CLIENT_ID = '1092570435598-nicfmpo6mpqo6a1h36eg614082k8994l.apps.googleusercontent.com';
-const API_BASE = window.TMS_API_BASE || 'http://localhost:5000/api';
+const API_BASE = (() => {
+  if (window.TMS_API_BASE) return window.TMS_API_BASE;
+  const host = window.location.hostname;
+  if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:5000/api';
+  return '/api';
+})();
 
 // ── Session helpers ───────────────────────────────────
 const getToken = ()    => localStorage.getItem('tms_token');
@@ -160,9 +165,12 @@ async function handleSignin() {
       setToken(data.token); setUser(data.user);
       goToDashboard(data.user.role);
     } else {
-      showErr(data.message || 'Login failed.');
+      const msg = data?.message || 'Login failed.';
+      showErr(`${msg} Please verify the backend is running and the API base is correct (${API_BASE}).`);
     }
-  } catch { showErr('Cannot connect to server. Make sure backend is running (npm start).'); }
+  } catch {
+    showErr(`Cannot connect to the backend at ${API_BASE}. Please start the server and try again.`);
+  }
   finally { setBtnLoad('signin-btn', false, 'Sign In'); }
 }
 
