@@ -46,6 +46,8 @@
 .logout-btn svg{width:14px;height:14px;stroke:currentColor;fill:none}
 /* BODY */
 .body-wrap{display:flex;flex:1;position:relative;z-index:1;padding-top:62px;height:calc(100vh - 62px);overflow:visible}
+.skip-link{position:fixed;top:8px;left:8px;z-index:1000;padding:10px 14px;border-radius:8px;background:var(--blue);color:#fff;font-weight:700;transform:translateY(-160%);transition:transform 0.2s}
+.skip-link:focus{transform:translateY(0)}
 /* SIDEBAR */
 .sidebar{width:220px;flex-shrink:0;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:62px;min-height:calc(100vh - 62px);overflow-y:auto;overflow-x:hidden}
 .sidebar-section{padding:16px 12px 6px}
@@ -2178,6 +2180,7 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
 
 <div class="bg"></div>
 
+<a class="skip-link" href="#tenant-main">Skip to main content</a>
 <!-- TOP NAV -->
 <nav class="topnav">
   <div class="topnav-logo">
@@ -2548,7 +2551,7 @@ function filterAllProps() {
 </script>
 
 <!-- MAIN CONTENT -->
-<main class="main">
+<main class="main" id="tenant-main" tabindex="-1">
 
   <!-- ALL PROPERTIES PAGE -->
   <div class="page active" id="page-all-properties">
