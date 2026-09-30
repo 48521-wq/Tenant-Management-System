@@ -2198,34 +2198,34 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
 <aside class="sidebar">
   <div class="sidebar-section">
     <div class="sidebar-label">Main</div>
-    <button class="nav-item" onclick="sp('profile',this)">
-      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>My Profile
-    </button>
     <button class="nav-item" onclick="sp('all-properties',this)">
       <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>All Properties
+    </button>
+    <button class="nav-item" onclick="sp('profile',this)">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>My Profile
     </button>
   </div>
   <div class="sidebar-section">
     <div class="sidebar-label">Property</div>
-    <button class="nav-item" onclick="sp('furniture',this)">
-      <svg viewBox="0 0 24 24"><path d="M2 9V7a2 2 0 012-2h16a2 2 0 012 2v2"/><path d="M2 9h20v11H2z"/><line x1="6" y1="9" x2="6" y2="20"/><line x1="18" y1="9" x2="18" y2="20"/></svg>Furniture Placement
-    </button>
     <button class="nav-item" onclick="sp('my-rentals',this)">
       <svg viewBox="0 0 24 24"><path d="M3 5h18v14H3z"/><path d="M3 9h18"/><path d="M8 13h3"/><path d="M8 17h3"/></svg>My Rentals
-    </button>
-    <button class="nav-item" onclick="sp('payments',this)">
-      <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payment Records
     </button>
     <button class="nav-item" onclick="sp('requests',this)">
       <svg viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h10M4 18h16"/></svg>Rental Requests
       <span class="nb-pill" id="rental-requests-badge" style="display:none">0</span>
     </button>
+    <button class="nav-item" onclick="sp('lease-agreements',this)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg>Lease Agreement
+    </button>
     <button class="nav-item" onclick="sp('documents',this)">
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documents
       <span class="nb-pill" id="docs-badge" style="display:none">0</span>
     </button>
-    <button class="nav-item" onclick="sp('lease-agreements',this)">
-      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg>Lease Agreement
+    <button class="nav-item" onclick="sp('payments',this)">
+      <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payment Records
+    </button>
+    <button class="nav-item" onclick="sp('furniture',this)">
+      <svg viewBox="0 0 24 24"><path d="M2 9V7a2 2 0 012-2h16a2 2 0 012 2v2"/><path d="M2 9h20v11H2z"/><line x1="6" y1="9" x2="6" y2="20"/><line x1="18" y1="9" x2="18" y2="20"/></svg>Furniture Placement
     </button>
   </div>
   <div class="sidebar-section">
