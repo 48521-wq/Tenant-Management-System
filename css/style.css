@@ -231,11 +231,24 @@ body {
 .forgot-link {
   display: block; text-align: right;
   font-size: 12px; color: var(--muted); text-decoration: none;
-  margin-top: -10px; margin-bottom: 20px;
-  cursor: pointer; transition: color 0.2s;
+  margin: 0; cursor: pointer; transition: color 0.2s;
   background: none; border: none; font-family: 'DM Sans', sans-serif;
 }
 .forgot-link:hover { color: var(--gold); }
+
+.auth-options {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin: -6px 0 18px;
+}
+
+.remember-wrap {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--muted); cursor: pointer;
+}
+
+.remember-wrap input {
+  accent-color: var(--gold); width: 14px; height: 14px;
+}
 
 .demo-fill-row {
   display: flex; justify-content: flex-end; margin: -6px 0 14px;
