@@ -5,10 +5,10 @@
 
 const GOOGLE_CLIENT_ID = '1092570435598-nicfmpo6mpqo6a1h36eg614082k8994l.apps.googleusercontent.com';
 const API_BASE = (() => {
-  if (window.TMS_API_BASE) return window.TMS_API_BASE;
+  let base = window.TMS_API_BASE;
   const host = window.location.hostname;
-  if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:5000/api';
-  return '/api';
+  if (!base) base = host === 'localhost' || host === '127.0.0.1' ? 'http://localhost:5000/api' : '/api';
+  return base.replace(/\/+$/, '');
 })();
 
 // ── Session helpers ───────────────────────────────────
