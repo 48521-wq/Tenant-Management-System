@@ -326,8 +326,14 @@ body::after {
         <div class="demo-fill-row">
           <button class="demo-fill-btn" type="button" onclick="fillDemoCredentials()">Use admin demo login</button>
         </div>
+        <div class="auth-options">
+          <label class="remember-wrap">
+            <input type="checkbox" id="remember-me">
+            <span>Remember me</span>
+          </label>
+          <button class="forgot-link" onclick="showForgot()">Forgot Password?</button>
+        </div>
         <button class="btn-primary btn-gold" id="signin-btn" onclick="handleSignin()">Sign In</button>
-        <button class="forgot-link" onclick="showForgot()">Forgot Password?</button>
         <div class="or-divider">or continue with Google</div>
         <button class="btn-google" id="google-signin-btn" onclick="handleGoogleSignin()">
           <svg class="google-icon" viewBox="0 0 24 24">

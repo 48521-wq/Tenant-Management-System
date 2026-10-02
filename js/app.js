@@ -17,6 +17,13 @@ const setToken = (t)   => localStorage.setItem('tms_token', t);
 const setUser  = (u)   => localStorage.setItem('tms_user', JSON.stringify(u));
 const getUser  = ()    => { try { return JSON.parse(localStorage.getItem('tms_user')); } catch { return null; } };
 const clearAuth= ()    => { localStorage.removeItem('tms_token'); localStorage.removeItem('tms_user'); };
+const getRememberMe = () => localStorage.getItem('tms_remember_me') === 'true';
+const setRememberMe = (v) => localStorage.setItem('tms_remember_me', String(Boolean(v)));
+
+const rememberMeCheckbox = document.getElementById('remember-me');
+if (rememberMeCheckbox) {
+  rememberMeCheckbox.checked = getRememberMe();
+}
 
 // ── API helper ────────────────────────────────────────
 async function api(endpoint, method = 'GET', body = null) {
@@ -164,8 +171,10 @@ async function handleSignin() {
   clearErr();
   const email = document.getElementById('signin-email')?.value.trim().toLowerCase();
   const pass  = document.getElementById('signin-password')?.value;
+  const rememberMe = document.getElementById('remember-me')?.checked ?? false;
   if (!email || !pass) { showErr('Enter email and password.'); return; }
   if (!isValidEmail(email)) { showErr('Enter a valid email address.'); return; }
+  setRememberMe(rememberMe);
   setBtnLoad('signin-btn', true, 'Sign In');
   try {
     const { ok, data } = await api('/auth/login', 'POST', { email, password: pass });
