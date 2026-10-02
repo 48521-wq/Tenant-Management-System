@@ -302,7 +302,7 @@ body::after {
         <button class="tab" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
       </div>
 
-      <div id="error-box" class="error-msg" style="display:none;"></div>
+      <div id="error-box" class="error-msg" role="alert" aria-live="assertive" style="display:none;"></div>
 
       <!-- ===== SIGN IN ===== -->
       <div id="form-signin">
@@ -392,7 +392,7 @@ body::after {
               <span class="role-inline-desc">I own properties</span>
             </div>
           </div>
-          <div id="role-error" class="role-error-msg">Please select a role to continue.</div>
+          <div id="role-error" class="role-error-msg" role="alert">Please select a role to continue.</div>
         </div>
         <button class="btn-primary btn-gold" id="signup-btn" onclick="handleSignup()">Send Verification Code</button>
         <div class="or-divider">or sign up with Google</div>
@@ -454,7 +454,7 @@ body::after {
         </div>
         <div class="fp-title">Reset Password</div>
         <div class="fp-sub">Enter your registered email. We'll send you a secure reset link.</div>
-        <div id="fp-error" class="error-msg" style="display:none;"></div>
+        <div id="fp-error" class="error-msg" role="alert" aria-live="assertive" style="display:none;"></div>
         <div class="form-group">
           <label class="form-label" for="fp-email">Email Address</label>
           <div class="input-wrap">
@@ -506,7 +506,7 @@ body::after {
         <svg class="g-input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
         <input class="g-input" id="g-email-input" type="email" placeholder="yourname@gmail.com" autocomplete="email" aria-label="Google account email" onkeydown="if(event.key==='Enter') confirmGoogle()">
       </div>
-      <div class="g-error" id="g-error"></div>
+      <div class="g-error" id="g-error" role="alert" aria-live="assertive"></div>
 
       <div class="g-modal-btns">
         <button class="g-btn-primary" onclick="confirmGoogle()" id="g-confirm-btn">Continue</button>
