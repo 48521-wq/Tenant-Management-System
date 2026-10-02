@@ -58,6 +58,14 @@ function setBtnLoad(id, loading, txt) {
   const b = document.getElementById(id);
   if (b) { b.disabled = loading; b.textContent = loading ? 'Please wait…' : txt; }
 }
+function fillDemoCredentials() {
+  const emailInput = document.getElementById('signin-email');
+  const passInput = document.getElementById('signin-password');
+  if (emailInput) emailInput.value = 'adboy768@gmail.com';
+  if (passInput) passInput.value = 'adnan123@';
+  clearErr();
+  passInput?.focus();
+}
 
 // ── Tabs ──────────────────────────────────────────────
 function switchTab(tab) {

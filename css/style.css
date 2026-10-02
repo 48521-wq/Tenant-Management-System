@@ -237,6 +237,19 @@ body {
 }
 .forgot-link:hover { color: var(--gold); }
 
+.demo-fill-row {
+  display: flex; justify-content: flex-end; margin: -6px 0 14px;
+}
+
+.demo-fill-btn {
+  background: rgba(201,169,110,0.08); border: 1px solid rgba(201,169,110,0.26);
+  color: var(--gold); border-radius: 999px; padding: 8px 12px; font-size: 12px;
+  font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+}
+.demo-fill-btn:hover {
+  background: rgba(201,169,110,0.12); transform: translateY(-1px);
+}
+
 /* ---------- Switch Text ---------- */
 .switch-text { text-align: center; margin-top: 22px; font-size: 13px; color: var(--muted); }
 
