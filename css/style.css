@@ -257,6 +257,15 @@ body {
   accent-color: var(--gold); width: 14px; height: 14px;
 }
 
+.clear-saved-btn {
+  background: transparent; border: 1px solid rgba(201,169,110,0.2); border-radius: 999px;
+  color: var(--gold); padding: 6px 10px; font-size: 11px; cursor: pointer;
+  transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+}
+.clear-saved-btn:hover {
+  background: rgba(201,169,110,0.08); transform: translateY(-1px);
+}
+
 .demo-fill-row {
   display: flex; justify-content: flex-end; margin: -6px 0 14px;
 }

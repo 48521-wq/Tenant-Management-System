@@ -30,6 +30,15 @@ if (rememberMeCheckbox) {
   rememberMeCheckbox.checked = getRememberMe();
 }
 
+function syncSavedLoginUi() {
+  const clearBtn = document.getElementById('clear-saved-login');
+  const checkbox = document.getElementById('remember-me');
+  const saved = getSavedLogin();
+  const hasSaved = Boolean(saved.email || saved.password);
+  if (clearBtn) clearBtn.style.display = hasSaved ? 'inline-flex' : 'none';
+  if (checkbox && !hasSaved) checkbox.checked = false;
+}
+
 function restoreSavedLogin() {
   const emailInput = document.getElementById('signin-email');
   const passInput = document.getElementById('signin-password');
@@ -41,9 +50,33 @@ function restoreSavedLogin() {
     passInput.value = saved.password;
     checkbox.checked = true;
   }
+  syncSavedLoginUi();
 }
 
-document.addEventListener('DOMContentLoaded', restoreSavedLogin);
+function clearSavedLoginState() {
+  clearSavedLogin();
+  setRememberMe(false);
+  const checkbox = document.getElementById('remember-me');
+  const emailInput = document.getElementById('signin-email');
+  const passInput = document.getElementById('signin-password');
+  if (checkbox) checkbox.checked = false;
+  if (emailInput) emailInput.value = '';
+  if (passInput) passInput.value = '';
+  syncSavedLoginUi();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  restoreSavedLogin();
+  const checkbox = document.getElementById('remember-me');
+  if (checkbox) {
+    checkbox.addEventListener('change', () => {
+      if (!checkbox.checked) {
+        clearSavedLogin();
+      }
+      syncSavedLoginUi();
+    });
+  }
+});
 
 // ── API helper ────────────────────────────────────────
 async function api(endpoint, method = 'GET', body = null) {
