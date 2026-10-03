@@ -139,6 +139,13 @@ body {
 
 .logo p { font-size: 13px; color: var(--muted); margin-top: 4px; letter-spacing: 0.5px; }
 
+.demo-banner {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: rgba(201,169,110,0.08); border: 1px solid rgba(201,169,110,0.18);
+  color: var(--gold); border-radius: 999px; padding: 8px 12px; margin-bottom: 18px;
+  font-size: 12px; text-align: center;
+}
+
 /* ---------- Tabs ---------- */
 .tabs {
   display: flex;
