@@ -9,7 +9,6 @@ const router  = express.Router();
 const gClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const genToken = (payload) => jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
-const isValidEmail = (value) => /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9-]+\.[A-Za-z]{2,}$/.test(String(value || '').trim());
 
 // ─── OTP In-Memory Store ────────────────────────────────────────────────────
 // key = email, value = { otp, expiresAt, userData }
@@ -53,18 +52,13 @@ const adminTok = () => genToken({ isAdmin: true, email: process.env.ADMIN_EMAIL 
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-    const cleanName = typeof name === 'string' ? name.trim() : '';
-    const cleanEmail = typeof email === 'string' ? email.trim() : '';
-    const cleanPassword = typeof password === 'string' ? password.trim() : '';
-    if (!cleanName || !cleanEmail || !cleanPassword || !role)
+    if (!name || !email || !password || !role)
       return res.status(400).json({ success: false, message: 'Please fill all fields.' });
-    if (!isValidEmail(email))
-      return res.status(400).json({ success: false, message: 'Enter a valid email address.' });
     if (!['tenant','landlord'].includes(role))
       return res.status(400).json({ success: false, message: 'Invalid role.' });
-    if (cleanPassword.length < 6)
+    if (password.length < 6)
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
-    if (cleanEmail.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase())
+    if (email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase())
       return res.status(400).json({ success: false, message: 'This email cannot be registered.' });
 
     const exists = await User.findOne({ email: email.toLowerCase() });
@@ -88,21 +82,16 @@ router.post('/register', async (req, res) => {
 router.post('/send-otp', async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-    const cleanName = typeof name === 'string' ? name.trim() : '';
-    const cleanEmail = typeof email === 'string' ? email.trim() : '';
-    const cleanPassword = typeof password === 'string' ? password.trim() : '';
-    if (!cleanName || !cleanEmail || !cleanPassword || !role)
+    if (!name || !email || !password || !role)
       return res.status(400).json({ success: false, message: 'Please fill all fields.' });
-    if (!isValidEmail(email))
-      return res.status(400).json({ success: false, message: 'Enter a valid email address.' });
     if (!['tenant','landlord'].includes(role))
       return res.status(400).json({ success: false, message: 'Invalid role.' });
-    if (cleanPassword.length < 6)
+    if (password.length < 6)
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
-    if (cleanEmail.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase())
+    if (email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase())
       return res.status(400).json({ success: false, message: 'This email cannot be registered.' });
 
-    const exists = await User.findOne({ email: cleanEmail.toLowerCase() });
+    const exists = await User.findOne({ email: email.toLowerCase() });
     if (exists) return res.status(400).json({ success: false, message: 'Account already exists. Please sign in.' });
 
     const otp = generateOTP();
@@ -121,23 +110,20 @@ router.post('/send-otp', async (req, res) => {
 router.post('/verify-otp', async (req, res) => {
   try {
     const { email, otp } = req.body;
-    const cleanEmail = typeof email === 'string' ? email.trim() : '';
-    const cleanOtp = typeof otp === 'string' ? otp.trim() : '';
-    if (!cleanEmail || !cleanOtp) return res.status(400).json({ success: false, message: 'Email and OTP required.' });
-    if (!isValidEmail(cleanEmail)) return res.status(400).json({ success: false, message: 'Enter a valid email address.' });
+    if (!email || !otp) return res.status(400).json({ success: false, message: 'Email and OTP required.' });
 
-    const record = otpStore.get(cleanEmail.toLowerCase());
+    const record = otpStore.get(email.toLowerCase());
     if (!record) return res.status(400).json({ success: false, message: 'OTP expired or not requested. Please try again.' });
     if (Date.now() > record.expiresAt) {
-      otpStore.delete(cleanEmail.toLowerCase());
+      otpStore.delete(email.toLowerCase());
       return res.status(400).json({ success: false, message: 'OTP has expired. Please request a new one.' });
     }
-    if (record.otp !== cleanOtp) return res.status(400).json({ success: false, message: 'Incorrect OTP. Please try again.' });
+    if (record.otp !== otp.trim()) return res.status(400).json({ success: false, message: 'Incorrect OTP. Please try again.' });
 
-    otpStore.delete(cleanEmail.toLowerCase()); // one-time use
+    otpStore.delete(email.toLowerCase()); // one-time use
 
     const { name, password, role } = record.userData;
-    const user = await User.create({ name, email: cleanEmail.toLowerCase(), password, role, authProvider: 'email' });
+    const user = await User.create({ name, email: email.toLowerCase(), password, role, authProvider: 'email' });
     const token = genToken({ id: user._id, role: user.role });
 
     res.status(201).json({
@@ -156,11 +142,9 @@ router.post('/verify-otp', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || typeof password !== 'string' || !password)
-      return res.status(400).json({ success: false, message: 'Enter email and password.' });
-
-    const lEmail = String(email).toLowerCase().trim();
-    if (!isValidEmail(lEmail))
+    if (!email || !password) return res.status(400).json({ success: false, message: 'Enter email and password.' });
+    const lEmail = email.toLowerCase().trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lEmail))
       return res.status(400).json({ success: false, message: 'Enter a valid email address.' });
 
     // Admin
@@ -197,9 +181,7 @@ router.post('/google', async (req, res) => {
     } catch { return res.status(401).json({ success: false, message: 'Invalid Google token.' }); }
 
     const { email, name, sub: googleId } = payload;
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const lEmail = String(email || '').toLowerCase().trim();
-    if (!emailPattern.test(lEmail)) return res.status(400).json({ success: false, message: 'Invalid Google email.' });
+    const lEmail = email.toLowerCase();
 
     if (lEmail === process.env.ADMIN_EMAIL.toLowerCase())
       return res.json({ success: true, token: adminTok(), user: { id:'admin', name:'Super Admin', email: process.env.ADMIN_EMAIL, role:'admin', isAdmin:true } });
@@ -226,14 +208,8 @@ router.post('/google', async (req, res) => {
 router.post('/google-fallback', async (req, res) => {
   try {
     const { email, role, mode } = req.body;
-    const cleanEmail = typeof email === 'string' ? email.trim() : '';
-    if (!cleanEmail) return res.status(400).json({ success: false, message: 'Email required.' });
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(cleanEmail)) return res.status(400).json({ success: false, message: 'Invalid email address.' });
-    if (typeof role !== 'undefined' && role !== null && typeof role !== 'string') {
-      return res.status(400).json({ success: false, message: 'Invalid role.' });
-    }
-    const lEmail = cleanEmail.toLowerCase();
+    if (!email) return res.status(400).json({ success: false, message: 'Email required.' });
+    const lEmail = email.toLowerCase().trim();
     if (lEmail === process.env.ADMIN_EMAIL.toLowerCase())
       return res.json({ success: true, token: adminTok(), user: { id:'admin', name:'Super Admin', email: process.env.ADMIN_EMAIL, role:'admin', isAdmin:true } });
 
@@ -263,18 +239,7 @@ router.put('/profile', protect, async (req, res) => {
   try {
     if (req.user?.isAdmin) return res.json({ success: true, message: 'Admin profile updated.' });
     const { name, phone, cnic, city, address } = req.body;
-    const cleanName = typeof name === 'string' ? name.trim() : '';
-    const cleanPhone = typeof phone === 'string' ? phone.trim() : '';
-    const cleanCity = typeof city === 'string' ? city.trim() : '';
-    const cleanAddress = typeof address === 'string' ? address.trim() : '';
-    const cleanCnic = typeof cnic === 'string' ? cnic.trim() : '';
-    const user = await User.findByIdAndUpdate(req.user._id, {
-      name: cleanName || undefined,
-      phone: cleanPhone || undefined,
-      cnic: cleanCnic || undefined,
-      city: cleanCity || undefined,
-      address: cleanAddress || undefined,
-    }, { new: true });
+    const user = await User.findByIdAndUpdate(req.user._id, { name, phone, cnic, city, address }, { new: true });
     res.json({ success: true, user });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });

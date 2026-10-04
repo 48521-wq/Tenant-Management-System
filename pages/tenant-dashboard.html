@@ -46,8 +46,6 @@
 .logout-btn svg{width:14px;height:14px;stroke:currentColor;fill:none}
 /* BODY */
 .body-wrap{display:flex;flex:1;position:relative;z-index:1;padding-top:62px;height:calc(100vh - 62px);overflow:visible}
-.skip-link{position:fixed;top:8px;left:8px;z-index:1000;padding:10px 14px;border-radius:8px;background:var(--blue);color:#fff;font-weight:700;transform:translateY(-160%);transition:transform 0.2s}
-.skip-link:focus{transform:translateY(0)}
 /* SIDEBAR */
 .sidebar{width:220px;flex-shrink:0;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:62px;min-height:calc(100vh - 62px);overflow-y:auto;overflow-x:hidden}
 .sidebar-section{padding:16px 12px 6px}
@@ -655,17 +653,6 @@ tr:hover td {
   .page { padding: 18px 14px 36px !important; }
   .stats-row { grid-template-columns: repeat(2, 1fr) !important; }
 }
-@media (max-width: 700px) {
-  .topnav { padding: 0 12px !important; gap: 7px; }
-  .topnav-logo { gap: 6px; }
-  .topnav-logo .logo-sep,
-  .topnav-logo > span:last-child,
-  .nav-pill { display: none; }
-  .tn-search { max-width: none; min-width: 0; }
-  .sidebar { width: 178px !important; }
-  .page { padding-left: 12px !important; padding-right: 12px !important; }
-  .logout-btn { padding-left: 9px; padding-right: 9px; }
-}
 
 /* ─── SUBTLE GRAIN TEXTURE ON BODY ─── */
 body::after {
@@ -1151,12 +1138,11 @@ body::after {
   const user  = JSON.parse(localStorage.getItem('tms_user')||'null');
   if (!token || !user || user.role !== 'tenant') { localStorage.clear(); window.location.replace('../index.html'); }
 })();
-const API = (() => {
-  let base = window.TMS_API_BASE;
-  const host = window.location.hostname;
-  if (!base) base = host === 'localhost' || host === '127.0.0.1' ? 'http://localhost:5000/api' : '/api';
-  return base.replace(/\/+$/, '');
-})();
+// Auto-switches: localhost during development, your deployed backend once live.
+// After you deploy the backend (Render/Railway/etc.), replace the URL below.
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? 'http://localhost:5000/api'
+  : '/api';
 const tok = () => localStorage.getItem('tms_token');
 
 async function tFetch(url, method='GET', body=null) {
@@ -2196,7 +2182,6 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
 
 <div class="bg"></div>
 
-<a class="skip-link" href="#tenant-main">Skip to main content</a>
 <!-- TOP NAV -->
 <nav class="topnav">
   <div class="topnav-logo">
@@ -2205,8 +2190,8 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
   </div>
   <span class="nav-pill">Tenant Portal</span>
   <div class="tn-search" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="tn-global-search" placeholder="Search anything…" aria-label="Search" oninput="tnGlobalSearch(this.value)" onfocus="tnGlobalSearch(this.value)" autocomplete="off"><div id="gs-results" class="gs-results"></div></div>
-  <button class="icon-btn" onclick="sp('notifications',null)" title="Notifications" aria-label="Open notifications"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span class="notif-badge" id="nb" style="display:none">0</span></button>
-  <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle color theme"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></button>
+  <button class="icon-btn" onclick="sp('notifications',null)" title="Notifications"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span class="notif-badge" id="nb" style="display:none">0</span></button>
+  <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></button>
   <button class="logout-btn" onclick="tmsLogout()">
     <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout
   </button>
@@ -2217,34 +2202,34 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
 <aside class="sidebar">
   <div class="sidebar-section">
     <div class="sidebar-label">Main</div>
-    <button class="nav-item" onclick="sp('all-properties',this)">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>All Properties
-    </button>
     <button class="nav-item" onclick="sp('profile',this)">
       <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>My Profile
+    </button>
+    <button class="nav-item" onclick="sp('all-properties',this)">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>All Properties
     </button>
   </div>
   <div class="sidebar-section">
     <div class="sidebar-label">Property</div>
+    <button class="nav-item" onclick="sp('furniture',this)">
+      <svg viewBox="0 0 24 24"><path d="M2 9V7a2 2 0 012-2h16a2 2 0 012 2v2"/><path d="M2 9h20v11H2z"/><line x1="6" y1="9" x2="6" y2="20"/><line x1="18" y1="9" x2="18" y2="20"/></svg>Furniture Placement
+    </button>
     <button class="nav-item" onclick="sp('my-rentals',this)">
       <svg viewBox="0 0 24 24"><path d="M3 5h18v14H3z"/><path d="M3 9h18"/><path d="M8 13h3"/><path d="M8 17h3"/></svg>My Rentals
+    </button>
+    <button class="nav-item" onclick="sp('payments',this)">
+      <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payment Records
     </button>
     <button class="nav-item" onclick="sp('requests',this)">
       <svg viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h10M4 18h16"/></svg>Rental Requests
       <span class="nb-pill" id="rental-requests-badge" style="display:none">0</span>
     </button>
-    <button class="nav-item" onclick="sp('lease-agreements',this)">
-      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg>Lease Agreement
-    </button>
     <button class="nav-item" onclick="sp('documents',this)">
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documents
       <span class="nb-pill" id="docs-badge" style="display:none">0</span>
     </button>
-    <button class="nav-item" onclick="sp('payments',this)">
-      <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payment Records
-    </button>
-    <button class="nav-item" onclick="sp('furniture',this)">
-      <svg viewBox="0 0 24 24"><path d="M2 9V7a2 2 0 012-2h16a2 2 0 012 2v2"/><path d="M2 9h20v11H2z"/><line x1="6" y1="9" x2="6" y2="20"/><line x1="18" y1="9" x2="18" y2="20"/></svg>Furniture Placement
+    <button class="nav-item" onclick="sp('lease-agreements',this)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg>Lease Agreement
     </button>
   </div>
   <div class="sidebar-section">
@@ -2567,7 +2552,7 @@ function filterAllProps() {
 </script>
 
 <!-- MAIN CONTENT -->
-<main class="main" id="tenant-main" tabindex="-1">
+<main class="main">
 
   <!-- ALL PROPERTIES PAGE -->
   <div class="page active" id="page-all-properties">
@@ -2576,7 +2561,7 @@ function filterAllProps() {
         <h1>Welcome back, <span id="welcome-name-t">Tenant</span></h1>
         <p>Here's what's happening with your rentals today.</p>
       </div>
-      <button class="icon-btn" onclick="sp('search',null)" title="Find a property" aria-label="Find a property"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+      <button class="icon-btn" onclick="sp('search',null)" title="Find a property"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
     </div>
     <div class="pg-head">
       <div><div class="pg-title">All Properties</div><div class="pg-sub">Browse properties from all landlords in the system</div></div>

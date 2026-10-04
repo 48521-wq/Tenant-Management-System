@@ -1,20 +1,11 @@
-# Environment variables (contains secrets - never commit)
 .env
 backend/.env
 *.env
-
-# Dependencies
 node_modules/
 backend/node_modules/
-
-# Logs
+.vercel
 *.log
-npm-debug.log*
-
-# OS files
 .DS_Store
 Thumbs.db
-
-# Editor
 .vscode/*
 !.vscode/tasks.json

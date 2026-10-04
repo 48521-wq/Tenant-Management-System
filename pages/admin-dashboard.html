@@ -1003,12 +1003,11 @@ body::after {
   const user  = JSON.parse(localStorage.getItem('tms_user')||'null');
   if (!token || !user || user.role !== 'admin') { localStorage.clear(); window.location.replace('../index.html'); }
 })();
-const API = (() => {
-  let base = window.TMS_API_BASE;
-  const host = window.location.hostname;
-  if (!base) base = host === 'localhost' || host === '127.0.0.1' ? 'http://localhost:5000/api' : '/api';
-  return base.replace(/\/+$/, '');
-})();
+// Auto-switches: localhost during development, your deployed backend once live.
+// After you deploy the backend (Render/Railway/etc.), replace the URL below.
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? 'http://localhost:5000/api'
+  : '/api';
 const tok = () => localStorage.getItem('tms_token');
 async function aFetch(url, method='GET', body=null) {
   const opts = { method, headers: { 'Content-Type':'application/json' } };

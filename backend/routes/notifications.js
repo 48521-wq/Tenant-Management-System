@@ -83,33 +83,24 @@ router.post('/', protect, async (req, res) => {
   try {
     const id = identity(req);
     const { title, message, color } = req.body;
-    const cleanTitle = typeof title === 'string' ? title.trim() : '';
-    const cleanMessage = typeof message === 'string' ? message.trim() : '';
-    if (!cleanTitle || !cleanMessage) {
+    if (!title || !message) {
       return res.status(400).json({ success: false, message: 'Title and message are required.' });
     }
 
     let toList = [];
     let toLabel = '';
 
-    const normalizeRecipients = (recipients = []) => Array.from(new Set((recipients || [])
-      .map(item => typeof item === 'string' ? item.trim() : '')
-      .filter(Boolean)));
-
     if (id.role === 'admin') {
       const { to, specificEmail } = req.body;
       if (to === 'specific') {
-        const normalizedEmail = typeof specificEmail === 'string' ? specificEmail.trim() : '';
-        if (!normalizedEmail) return res.status(400).json({ success: false, message: 'Select a recipient.' });
-        const u = await User.findOne({ email: normalizedEmail });
-        toList = [normalizedEmail];
-        toLabel = u ? `${u.name} (${u.role})` : normalizedEmail;
+        if (!specificEmail) return res.status(400).json({ success: false, message: 'Select a recipient.' });
+        const u = await User.findOne({ email: specificEmail });
+        toList = [specificEmail];
+        toLabel = u ? `${u.name} (${u.role})` : specificEmail;
       } else {
         const labels = { all: 'Everyone', tenant: 'All Tenants', landlord: 'All Landlords', admin: 'Admin' };
-        const normalizedTarget = typeof to === 'string' ? to.trim() : 'all';
-        if (!normalizedTarget) return res.status(400).json({ success: false, message: 'Select a valid recipient target.' });
-        toList = [normalizedTarget || 'all'];
-        toLabel = labels[normalizedTarget] || 'Everyone';
+        toList = [to || 'all'];
+        toLabel = labels[to] || 'Everyone';
       }
     } else if (id.role === 'landlord') {
       const { to, recipients, recipientLabel } = req.body;
@@ -117,10 +108,10 @@ router.post('/', protect, async (req, res) => {
         toList = ['admin'];
         toLabel = 'Admin';
       } else {
-        toList = normalizeRecipients(recipients);
-        if (!toList.length) {
+        if (!Array.isArray(recipients) || !recipients.length) {
           return res.status(400).json({ success: false, message: 'Choose at least one recipient.' });
         }
+        toList = recipients;
         toLabel = recipientLabel || (toList.includes('all') ? 'Everyone' : `${toList.length} tenant(s)`);
       }
     } else if (id.role === 'tenant') {
@@ -144,8 +135,8 @@ router.post('/', protect, async (req, res) => {
     }
 
     const notif = await Notification.create({
-      title: cleanTitle,
-      message: cleanMessage,
+      title,
+      message,
       color: color || (id.role === 'admin' ? 'red' : id.role === 'landlord' ? 'gold' : 'blue'),
       fromName: id.name,
       fromEmail: id.email,
@@ -179,9 +170,6 @@ router.delete('/:id', protect, async (req, res) => {
   try {
     const id = identity(req);
     if (id.role !== 'admin') return res.status(403).json({ success: false, message: 'Admin only.' });
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !require('mongoose').Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'Invalid notification id.' });
-    }
     await Notification.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (e) {

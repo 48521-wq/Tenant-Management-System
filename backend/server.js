@@ -1,12 +1,15 @@
 require('dotenv').config();
 const express   = require('express');
 const cors      = require('cors');
-const mongoose  = require('mongoose');
 const connectDB = require('./config/database');
-const { version } = require('./package.json');
 
 const app = express();
-connectDB();
+
+// Ensure DB is connected before handling any request (works locally + serverless)
+app.use(async (req, res, next) => {
+  try { await connectDB(); next(); }
+  catch (e) { res.status(500).json({ success: false, message: 'Database connection failed.' }); }
+});
 
 app.use(cors({
   origin: function(origin, callback) {
@@ -29,50 +32,16 @@ app.use('/api/3d-requests',    require('./routes/model3dRequests'));
 app.use('/api/notifications',  require('./routes/notifications'));
 app.use('/api/lease-agreements', require('./routes/leaseAgreements'));
 
-app.get('/', (req, res) => res.json({
-  success: true,
-  name: 'Tenant Management System API',
-  version,
-  status: 'running',
-  health: '/api/health'
-}));
-app.get('/api/health', (req, res) => {
-  const databaseConnected = mongoose.connection.readyState === 1;
-  res.status(databaseConnected ? 200 : 503).json({
-    status: databaseConnected ? 'OK' : 'UNAVAILABLE',
-    database: databaseConnected ? 'connected' : 'disconnected',
-    version,
-    time: new Date().toISOString()
-  });
-});
+app.get('/api/health', (req, res) => res.json({ status: 'OK', time: new Date().toISOString() }));
 app.use((req, res) => res.status(404).json({ success: false, message: 'Route not found.' }));
 app.use((err, req, res, next) => res.status(500).json({ success: false, message: 'Server error.' }));
 
-function getRoutes(app) {
-  const routes = [];
-  app._router.stack.forEach((middleware) => {
-    if (middleware.route) {
-      const methods = Object.keys(middleware.route.methods).map(m => m.toUpperCase()).join(',');
-      routes.push(`${methods} ${middleware.route.path}`);
-    } else if (middleware.name === 'router' && middleware.handle && middleware.handle.stack) {
-      middleware.handle.stack.forEach((handler) => {
-        if (handler.route) {
-          const methods = Object.keys(handler.route.methods).map(m => m.toUpperCase()).join(',');
-          const path = handler.route.path;
-          const prefix = middleware.regexp && middleware.regexp.fast_star ? '' : (middleware.regexp && middleware.regexp.source ? middleware.regexp.source.replace('^\\/?', '').replace('(?:\\/(?=$))?$', '') : '');
-          routes.push(`${methods} /api${path}`);
-        }
-      });
-    }
+// Local development: start a server. On Vercel the app is exported instead.
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`TMS Backend running on http://localhost:${PORT}`);
   });
-  return routes;
 }
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 TMS Backend running on http://localhost:${PORT}`);
-  console.log(`📍 API: http://localhost:${PORT}/api`);
-  console.log(`🔑 Admin: ${process.env.ADMIN_EMAIL}`);
-  console.log('✅ Mounted routes:');
-  getRoutes(app).forEach(route => console.log('   ', route));
-});
+module.exports = app;

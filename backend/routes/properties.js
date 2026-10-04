@@ -31,19 +31,11 @@ router.get('/my', protect, async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const filter = {};
-    const allowedStatuses = ['available', 'rented', 'suspended'];
-    const toValidNumber = value => {
-      const num = Number(value);
-      return Number.isFinite(num) ? num : null;
-    };
-    const status = typeof req.query.status === 'string' ? req.query.status.trim().toLowerCase() : '';
-    if (status && allowedStatuses.includes(status)) filter.status = status;
+    if (req.query.status)     filter.status = req.query.status;
     if (req.query.area)       filter.area   = req.query.area;
     if (req.query.type)       filter.type   = req.query.type;
-    const minBeds = toValidNumber(req.query.beds);
-    if (minBeds !== null) filter.beds = { $gte: minBeds };
-    const maxRent = toValidNumber(req.query.maxRent);
-    if (maxRent !== null) filter.rent = { $lte: maxRent };
+    if (req.query.beds)       filter.beds   = { $gte: Number(req.query.beds) };
+    if (req.query.maxRent)    filter.rent   = { $lte: Number(req.query.maxRent) };
     if (req.query.landlordId) {
       const mongoose = require('mongoose');
       try {
@@ -79,9 +71,6 @@ router.get('/', async (req, res) => {
 // GET single property
 router.get('/:id', async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim()) {
-      return res.status(400).json({ success: false, message: 'Invalid property id.' });
-    }
     const prop = await Property.findById(req.params.id);
     if (!prop) return res.status(404).json({ success: false, message: 'Property not found.' });
     res.json({ success: true, property: prop });
@@ -106,9 +95,6 @@ router.post('/', protect, async (req, res) => {
 // PUT update property
 router.put('/:id', protect, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !require('mongoose').Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'Invalid property id.' });
-    }
     const prop = await Property.findById(req.params.id);
     if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
     if (!req.user?.isAdmin && prop.landlordId.toString() !== req.user._id.toString())
@@ -121,9 +107,6 @@ router.put('/:id', protect, async (req, res) => {
 // PUT upload front image (base64 data URL)
 router.put('/:id/front-image', protect, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !require('mongoose').Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'Invalid property id.' });
-    }
     const prop = await Property.findById(req.params.id);
     if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
     if (prop.landlordId.toString() !== req.user._id.toString())
@@ -139,9 +122,6 @@ router.put('/:id/front-image', protect, async (req, res) => {
 // PUT save 3D model config
 router.put('/:id/model3d', protect, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !require('mongoose').Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'Invalid property id.' });
-    }
     const prop = await Property.findById(req.params.id);
     if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
     prop.model3d = req.body;
@@ -154,9 +134,6 @@ router.put('/:id/model3d', protect, async (req, res) => {
 // PUT save landlord furniture layout
 router.put('/:id/furniture/landlord', protect, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !require('mongoose').Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'Invalid property id.' });
-    }
     const prop = await Property.findById(req.params.id);
     if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
     prop.landlordFurnitureLayout = req.body;
@@ -193,9 +170,6 @@ router.put('/:id/furniture', protect, async (req, res) => {
 // DELETE property
 router.delete('/:id', protect, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !require('mongoose').Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'Invalid property id.' });
-    }
     const prop = await Property.findById(req.params.id);
     if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
     if (!req.user?.isAdmin && prop.landlordId.toString() !== req.user._id.toString())

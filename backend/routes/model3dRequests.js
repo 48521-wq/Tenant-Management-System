@@ -1,5 +1,4 @@
 const express        = require('express');
-const mongoose       = require('mongoose');
 const Model3DRequest = require('../models/Model3DRequest');
 const Property       = require('../models/Property');
 const { protect, adminOnly } = require('../middleware/auth');
@@ -16,10 +15,6 @@ router.post('/', protect, async (req, res) => {
 
     const { propertyId, requirements } = req.body;
     if (!propertyId) return res.status(400).json({ success:false, message:'propertyId is required.' });
-    const normalizedRequirements = typeof requirements === 'string' ? requirements.trim() : requirements;
-    if (normalizedRequirements !== undefined && normalizedRequirements !== null && String(normalizedRequirements).trim() === '') {
-      return res.status(400).json({ success:false, message:'Requirements cannot be empty.' });
-    }
 
     // Verify property belongs to this landlord
     const prop = await Property.findById(propertyId);
@@ -36,7 +31,7 @@ router.post('/', protect, async (req, res) => {
       propertyTitle: prop.title,
       landlordId:    req.user._id,
       landlordName:  req.user.name,
-      requirements:  normalizedRequirements ?? {},
+      requirements:  requirements || {},
     });
 
     res.status(201).json({ success:true, request });
@@ -61,9 +56,7 @@ router.get('/my', protect, async (req, res) => {
 router.get('/', protect, adminOnly, async (req, res) => {
   try {
     const filter = {};
-    const validStatuses = ['pending', 'admin_reviewed', 'negotiating', 'agreed', 'completed', 'rejected'];
-    const status = typeof req.query.status === 'string' ? req.query.status.trim().toLowerCase() : '';
-    if (status && validStatuses.includes(status)) filter.status = status;
+    if (req.query.status) filter.status = req.query.status;
     const requests = await Model3DRequest.find(filter).sort({ createdAt:-1 });
     res.json({ success:true, requests });
   } catch(e) { res.status(500).json({ success:false, message:'Server error.' }); }
@@ -75,9 +68,6 @@ router.get('/', protect, adminOnly, async (req, res) => {
 // ──────────────────────────────────────────────────────────────
 router.get('/:id', protect, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success:false, message:'Invalid request id.' });
-    }
     const request = await Model3DRequest.findById(req.params.id);
     if (!request) return res.status(404).json({ success:false, message:'Request not found.' });
     if (!req.user?.isAdmin && request.landlordId.toString() !== req.user._id.toString())
@@ -93,9 +83,6 @@ router.get('/:id', protect, async (req, res) => {
 // ──────────────────────────────────────────────────────────────
 router.put('/:id/review', protect, adminOnly, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success:false, message:'Invalid request id.' });
-    }
     const { proposedAmount, message } = req.body;
     if (!proposedAmount) return res.status(400).json({ success:false, message:'proposedAmount is required.' });
 
@@ -123,9 +110,6 @@ router.put('/:id/review', protect, adminOnly, async (req, res) => {
 // ──────────────────────────────────────────────────────────────
 router.put('/:id/message', protect, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success:false, message:'Invalid request id.' });
-    }
     if (req.user?.isAdmin) return res.status(403).json({ success:false, message:'Use /admin-message for admin.' });
     const { text, counterAmount } = req.body;
     if (!text) return res.status(400).json({ success:false, message:'text is required.' });
@@ -153,9 +137,6 @@ router.put('/:id/message', protect, async (req, res) => {
 // ──────────────────────────────────────────────────────────────
 router.put('/:id/admin-message', protect, adminOnly, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success:false, message:'Invalid request id.' });
-    }
     const { text, proposedAmount } = req.body;
     if (!text) return res.status(400).json({ success:false, message:'text is required.' });
 
@@ -180,9 +161,6 @@ router.put('/:id/admin-message', protect, adminOnly, async (req, res) => {
 // ──────────────────────────────────────────────────────────────
 router.put('/:id/accept', protect, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success:false, message:'Invalid request id.' });
-    }
     if (req.user?.isAdmin) return res.status(403).json({ success:false, message:'Use /finalize for admin.' });
     const request = await Model3DRequest.findById(req.params.id);
     if (!request) return res.status(404).json({ success:false, message:'Request not found.' });
@@ -211,9 +189,6 @@ router.put('/:id/accept', protect, async (req, res) => {
 // ──────────────────────────────────────────────────────────────
 router.put('/:id/finalize', protect, adminOnly, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success:false, message:'Invalid request id.' });
-    }
     const { agreedAmount } = req.body;
     if (!agreedAmount) return res.status(400).json({ success:false, message:'agreedAmount is required.' });
 
@@ -241,9 +216,6 @@ router.put('/:id/finalize', protect, adminOnly, async (req, res) => {
 // ──────────────────────────────────────────────────────────────
 router.put('/:id/reject', protect, adminOnly, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success:false, message:'Invalid request id.' });
-    }
     const request = await Model3DRequest.findById(req.params.id);
     if (!request) return res.status(404).json({ success:false, message:'Request not found.' });
 
@@ -265,9 +237,6 @@ router.put('/:id/reject', protect, adminOnly, async (req, res) => {
 // ──────────────────────────────────────────────────────────────
 router.put('/:id/complete', protect, adminOnly, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success:false, message:'Invalid request id.' });
-    }
     const { model3d } = req.body;
     if (!model3d) return res.status(400).json({ success:false, message:'model3d config is required.' });
 

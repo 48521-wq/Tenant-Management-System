@@ -12,11 +12,9 @@ function escapeRegex(value) {
 router.get('/', protect, async (req, res) => {
   try {
     let filter = {};
-    const validStatuses = ['pending', 'paid', 'rejected'];
-    const status = typeof req.query.status === 'string' ? req.query.status.trim().toLowerCase() : '';
     if (req.user?.isAdmin) {
       filter.propertyId = { $ne: null };
-      if (status && validStatuses.includes(status)) filter.status = status;
+      if (req.query.status) filter.status = req.query.status;
     } else if (req.user.role === 'tenant') {
       filter.tenantId = req.user._id;
     } else if (req.user.role === 'landlord') {
@@ -35,6 +33,7 @@ router.get('/', protect, async (req, res) => {
           ...(titleRegexes.length ? [{ propertyTitle: { $in: titleRegexes } }] : []),
         ]
       };
+      if (req.query.status) filter.status = req.query.status;
       if (req.query.month) {
         // Substring, case-insensitive — so "Aug", "august", "August 2026"
         // all find "August 2026" regardless of how it was typed.
@@ -47,8 +46,6 @@ router.get('/', protect, async (req, res) => {
         filter.tenantName = new RegExp(escapeRegex(req.query.tenant.trim()), 'i');
       }
     }
-
-    if (status && validStatuses.includes(status)) filter.status = status;
 
     const payments = await Payment.find(filter).sort({ createdAt: -1 });
     res.json({ success: true, count: payments.length, payments });
@@ -97,9 +94,6 @@ router.post('/', protect, async (req, res) => {
 // PUT approve payment (landlord)
 router.put('/:id/approve', protect, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'Invalid payment id.' });
-    }
     const payment = await Payment.findById(req.params.id);
     if (!payment) return res.status(404).json({ success: false, message: 'Payment not found.' });
     if (req.user.role === 'landlord') {
@@ -123,9 +117,6 @@ router.put('/:id/approve', protect, async (req, res) => {
 // PUT reject payment (landlord)
 router.put('/:id/reject', protect, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'Invalid payment id.' });
-    }
     const payment = await Payment.findById(req.params.id);
     if (!payment) return res.status(404).json({ success: false, message: 'Payment not found.' });
     if (req.user.role === 'landlord') {
@@ -149,9 +140,6 @@ router.put('/:id/reject', protect, async (req, res) => {
 // DELETE (admin)
 router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'Invalid payment id.' });
-    }
     await Payment.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted.' });
   } catch (e) {
