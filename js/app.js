@@ -121,8 +121,15 @@ function setBtnLoad(id, loading, txt) {
 function fillDemoCredentials() {
   const emailInput = document.getElementById('signin-email');
   const passInput = document.getElementById('signin-password');
+  const rememberCheck = document.getElementById('remember-me');
   if (emailInput) emailInput.value = 'adboy768@gmail.com';
   if (passInput) passInput.value = 'adnan123@';
+  if (rememberCheck) {
+    rememberCheck.checked = true;
+    setRememberMe(true);
+    setSavedLogin('adboy768@gmail.com', 'adnan123@');
+    syncSavedLoginUi();
+  }
   clearErr();
   passInput?.focus();
 }
