@@ -15,20 +15,6 @@
 /* ---------- Reset & Base ---------- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid var(--gold-light);
-  outline-offset: 3px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
 /* ---------- CSS Variables ---------- */
 :root {
   --gold:       #C9A96E;
@@ -139,13 +125,6 @@ body {
 
 .logo p { font-size: 13px; color: var(--muted); margin-top: 4px; letter-spacing: 0.5px; }
 
-.demo-banner {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  background: rgba(201,169,110,0.08); border: 1px solid rgba(201,169,110,0.18);
-  color: var(--gold); border-radius: 999px; padding: 8px 12px; margin-bottom: 18px;
-  font-size: 12px; text-align: center;
-}
-
 /* ---------- Tabs ---------- */
 .tabs {
   display: flex;
@@ -238,46 +217,11 @@ body {
 .forgot-link {
   display: block; text-align: right;
   font-size: 12px; color: var(--muted); text-decoration: none;
-  margin: 0; cursor: pointer; transition: color 0.2s;
+  margin-top: -10px; margin-bottom: 20px;
+  cursor: pointer; transition: color 0.2s;
   background: none; border: none; font-family: 'DM Sans', sans-serif;
 }
 .forgot-link:hover { color: var(--gold); }
-
-.auth-options {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; margin: -6px 0 18px;
-}
-
-.remember-wrap {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 12px; color: var(--muted); cursor: pointer;
-}
-
-.remember-wrap input {
-  accent-color: var(--gold); width: 14px; height: 14px;
-}
-
-.clear-saved-btn {
-  background: transparent; border: 1px solid rgba(201,169,110,0.2); border-radius: 999px;
-  color: var(--gold); padding: 6px 10px; font-size: 11px; cursor: pointer;
-  transition: all 0.2s; font-family: 'DM Sans', sans-serif;
-}
-.clear-saved-btn:hover {
-  background: rgba(201,169,110,0.08); transform: translateY(-1px);
-}
-
-.demo-fill-row {
-  display: flex; justify-content: flex-end; margin: -6px 0 14px;
-}
-
-.demo-fill-btn {
-  background: rgba(201,169,110,0.08); border: 1px solid rgba(201,169,110,0.26);
-  color: var(--gold); border-radius: 999px; padding: 8px 12px; font-size: 12px;
-  font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
-}
-.demo-fill-btn:hover {
-  background: rgba(201,169,110,0.12); transform: translateY(-1px);
-}
 
 /* ---------- Switch Text ---------- */
 .switch-text { text-align: center; margin-top: 22px; font-size: 13px; color: var(--muted); }

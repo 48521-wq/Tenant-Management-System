@@ -107,9 +107,6 @@ router.get('/received', protect, async (req, res) => {
 // ─── Get a rental request by ID (tenant, landlord, or admin) ───
 router.get('/:id', protect, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim()) {
-      return res.status(400).json({ success: false, message: 'Invalid request id.' });
-    }
     const rentalRequest = await RentalRequest.findById(req.params.id)
       .populate('tenantId')
       .populate('landlordId')
@@ -145,9 +142,6 @@ router.get('/:id', protect, async (req, res) => {
 // ─── LANDLORD: Accept rental request ───
 router.put('/:id/accept', protect, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !require('mongoose').Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'Invalid request id.' });
-    }
     const rentalRequest = await RentalRequest.findById(req.params.id);
     if (!rentalRequest) {
       return res.status(404).json({ success: false, message: 'Request not found.' });
@@ -182,9 +176,6 @@ router.put('/:id/accept', protect, async (req, res) => {
 // ─── LANDLORD: Reject rental request ───
 router.put('/:id/reject', protect, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !require('mongoose').Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'Invalid request id.' });
-    }
     const rentalRequest = await RentalRequest.findById(req.params.id);
     if (!rentalRequest) {
       return res.status(404).json({ success: false, message: 'Request not found.' });
@@ -210,9 +201,6 @@ router.put('/:id/reject', protect, async (req, res) => {
 // ─── TENANT: Cancel their own request ───
 router.put('/:id/cancel', protect, async (req, res) => {
   try {
-    if (typeof req.params.id !== 'string' || !req.params.id.trim() || !require('mongoose').Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'Invalid request id.' });
-    }
     const rentalRequest = await RentalRequest.findById(req.params.id);
     if (!rentalRequest) {
       return res.status(404).json({ success: false, message: 'Request not found.' });
@@ -235,8 +223,7 @@ router.put('/:id/cancel', protect, async (req, res) => {
 // ─── ADMIN: Get all requests (admin only) ───
 router.get('/', protect, async (req, res) => {
   try {
-    const isAdmin = req.user?.isAdmin || req.user?.role === 'admin';
-    if (!isAdmin) {
+    if (!req.user.isAdmin && req.user.role !== 'admin') {
       return res.status(403).json({ success: false, message: 'Not authorized.' });
     }
     const requests = await RentalRequest.find()

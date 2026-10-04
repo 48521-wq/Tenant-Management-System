@@ -7,22 +7,15 @@ const router = express.Router();
 router.get('/', protect, adminOnly, async (req, res) => {
   try {
     const filter = {};
-    const allowedRoles = ['admin', 'landlord', 'tenant'];
-    const role = typeof req.query.role === 'string' ? req.query.role.trim().toLowerCase() : '';
-    if (role && allowedRoles.includes(role)) filter.role = role;
+    if (req.query.role) filter.role = req.query.role;
     const users = await User.find(filter).sort({ createdAt: -1 });
     res.json({ success: true, count: users.length, users });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
-const isValidUserId = (value) => typeof value === 'string' && value.trim().length > 0;
-
 // PUT block/unblock
 router.put('/:id/block', protect, adminOnly, async (req, res) => {
   try {
-    if (!isValidUserId(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'Invalid user id.' });
-    }
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
     user.status = user.status === 'blocked' ? 'active' : 'blocked';
@@ -34,9 +27,6 @@ router.put('/:id/block', protect, adminOnly, async (req, res) => {
 // PUT verify
 router.put('/:id/verify', protect, adminOnly, async (req, res) => {
   try {
-    if (!require('mongoose').Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'Invalid user id.' });
-    }
     const user = await User.findByIdAndUpdate(req.params.id, { verified: true }, { new: true });
     if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
     res.json({ success: true, message: 'User verified.', user });
@@ -46,9 +36,6 @@ router.put('/:id/verify', protect, adminOnly, async (req, res) => {
 // DELETE user
 router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
-    if (!require('mongoose').Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'Invalid user id.' });
-    }
     await User.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'User deleted.' });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }

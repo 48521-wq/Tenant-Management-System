@@ -4,12 +4,11 @@
 // ═══════════════════════════════════════════════════════
 
 const GOOGLE_CLIENT_ID = '1092570435598-nicfmpo6mpqo6a1h36eg614082k8994l.apps.googleusercontent.com';
-const API_BASE = (() => {
-  let base = window.TMS_API_BASE;
-  const host = window.location.hostname;
-  if (!base) base = host === 'localhost' || host === '127.0.0.1' ? 'http://localhost:5000/api' : '/api';
-  return base.replace(/\/+$/, '');
-})();
+// Auto-switches: localhost during development, your deployed backend once live.
+// After you deploy the backend (Render/Railway/etc.), replace the URL below.
+const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? 'http://localhost:5000/api'
+  : '/api';
 
 // ── Session helpers ───────────────────────────────────
 const getToken = ()    => localStorage.getItem('tms_token');
@@ -17,85 +16,15 @@ const setToken = (t)   => localStorage.setItem('tms_token', t);
 const setUser  = (u)   => localStorage.setItem('tms_user', JSON.stringify(u));
 const getUser  = ()    => { try { return JSON.parse(localStorage.getItem('tms_user')); } catch { return null; } };
 const clearAuth= ()    => { localStorage.removeItem('tms_token'); localStorage.removeItem('tms_user'); };
-const getRememberMe = () => localStorage.getItem('tms_remember_me') === 'true';
-const setRememberMe = (v) => localStorage.setItem('tms_remember_me', String(Boolean(v)));
-const getSavedLogin = () => {
-  try { return JSON.parse(localStorage.getItem('tms_saved_login') || '{}'); } catch { return {}; }
-};
-const setSavedLogin = (email, password) => localStorage.setItem('tms_saved_login', JSON.stringify({ email, password }));
-const clearSavedLogin = () => localStorage.removeItem('tms_saved_login');
-
-const rememberMeCheckbox = document.getElementById('remember-me');
-if (rememberMeCheckbox) {
-  rememberMeCheckbox.checked = getRememberMe();
-}
-
-function syncSavedLoginUi() {
-  const clearBtn = document.getElementById('clear-saved-login');
-  const checkbox = document.getElementById('remember-me');
-  const saved = getSavedLogin();
-  const hasSaved = Boolean(saved.email || saved.password);
-  if (clearBtn) clearBtn.style.display = hasSaved ? 'inline-flex' : 'none';
-  if (checkbox && !hasSaved) checkbox.checked = false;
-}
-
-function restoreSavedLogin() {
-  const emailInput = document.getElementById('signin-email');
-  const passInput = document.getElementById('signin-password');
-  const checkbox = document.getElementById('remember-me');
-  if (!emailInput || !passInput || !checkbox) return;
-  const saved = getSavedLogin();
-  if (getRememberMe() && saved.email && saved.password) {
-    emailInput.value = saved.email;
-    passInput.value = saved.password;
-    checkbox.checked = true;
-  }
-  syncSavedLoginUi();
-}
-
-function clearSavedLoginState() {
-  clearSavedLogin();
-  setRememberMe(false);
-  const checkbox = document.getElementById('remember-me');
-  const emailInput = document.getElementById('signin-email');
-  const passInput = document.getElementById('signin-password');
-  if (checkbox) checkbox.checked = false;
-  if (emailInput) emailInput.value = '';
-  if (passInput) passInput.value = '';
-  syncSavedLoginUi();
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  restoreSavedLogin();
-  const checkbox = document.getElementById('remember-me');
-  if (checkbox) {
-    checkbox.addEventListener('change', () => {
-      if (!checkbox.checked) {
-        clearSavedLogin();
-      }
-      syncSavedLoginUi();
-    });
-  }
-});
 
 // ── API helper ────────────────────────────────────────
 async function api(endpoint, method = 'GET', body = null) {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
-  const opts = { method, signal: controller.signal, headers: { 'Content-Type': 'application/json', Accept: 'application/json' } };
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
   const t = getToken();
   if (t) opts.headers['Authorization'] = 'Bearer ' + t;
   if (body) opts.body = JSON.stringify(body);
-  let res;
-  try {
-    res = await fetch(API_BASE + endpoint, opts);
-  } finally {
-    clearTimeout(timeoutId);
-  }
-  const data = await res.json().catch(() => ({
-    success: false,
-    message: `Server returned an invalid response (${res.status}).`
-  }));
+  const res  = await fetch(API_BASE + endpoint, opts);
+  const data = await res.json();
   return { ok: res.ok, data };
 }
 
@@ -117,21 +46,6 @@ function clearErr() {
 function setBtnLoad(id, loading, txt) {
   const b = document.getElementById(id);
   if (b) { b.disabled = loading; b.textContent = loading ? 'Please wait…' : txt; }
-}
-function fillDemoCredentials() {
-  const emailInput = document.getElementById('signin-email');
-  const passInput = document.getElementById('signin-password');
-  const rememberCheck = document.getElementById('remember-me');
-  if (emailInput) emailInput.value = 'adboy768@gmail.com';
-  if (passInput) passInput.value = 'adnan123@';
-  if (rememberCheck) {
-    rememberCheck.checked = true;
-    setRememberMe(true);
-    setSavedLogin('adboy768@gmail.com', 'adnan123@');
-    syncSavedLoginUi();
-  }
-  clearErr();
-  passInput?.focus();
 }
 
 // ── Tabs ──────────────────────────────────────────────
@@ -231,15 +145,8 @@ async function handleSignin() {
   clearErr();
   const email = document.getElementById('signin-email')?.value.trim().toLowerCase();
   const pass  = document.getElementById('signin-password')?.value;
-  const rememberMe = document.getElementById('remember-me')?.checked ?? false;
   if (!email || !pass) { showErr('Enter email and password.'); return; }
   if (!isValidEmail(email)) { showErr('Enter a valid email address.'); return; }
-  setRememberMe(rememberMe);
-  if (rememberMe) {
-    setSavedLogin(email, pass);
-  } else {
-    clearSavedLogin();
-  }
   setBtnLoad('signin-btn', true, 'Sign In');
   try {
     const { ok, data } = await api('/auth/login', 'POST', { email, password: pass });
@@ -247,12 +154,9 @@ async function handleSignin() {
       setToken(data.token); setUser(data.user);
       goToDashboard(data.user.role);
     } else {
-      const msg = data?.message || 'Login failed.';
-      showErr(`${msg} Please verify the backend is running and the API base is correct (${API_BASE}).`);
+      showErr(data.message || 'Login failed.');
     }
-  } catch {
-    showErr(`Cannot connect to the backend at ${API_BASE}. Please start the server and try again.`);
-  }
+  } catch { showErr('Cannot connect to server. Make sure backend is running (npm start).'); }
   finally { setBtnLoad('signin-btn', false, 'Sign In'); }
 }
 
@@ -269,7 +173,6 @@ async function handleSignup() {
   const pass  = document.getElementById('signup-password')?.value;
   const conf  = document.getElementById('signup-confirm')?.value;
   if (!name||!email||!pass||!conf) { showErr('Fill in all fields.'); return; }
-  if (!isValidEmail(email)) { showErr('Enter a valid email address.'); return; }
   if (!isValidEnglishName(name)) { showErr('Full name may only contain letters and spaces.'); return; }
   if (pass !== conf) { showErr('Passwords do not match.'); return; }
   if (pass.length < 6) { showErr('Password must be at least 6 characters.'); return; }
@@ -452,7 +355,7 @@ async function confirmGoogle() {
   const errEl  = document.getElementById('g-error');
   const gErr   = (msg) => { if(errEl){errEl.textContent=msg;errEl.classList.add('show');} };
 
-  if (!email || !isValidEmail(email)) { gErr('Enter valid email.'); return; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { gErr('Enter valid email.'); return; }
 
   try {
     const { ok, data } = await api('/auth/google-fallback', 'POST', { email, role: selRole, mode: gMode });
