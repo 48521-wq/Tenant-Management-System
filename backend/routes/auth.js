@@ -9,6 +9,7 @@ const router  = express.Router();
 const gClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const genToken = (payload) => jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+const isValidEmail = (value) => /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9-]+\.[A-Za-z]{2,}$/.test(String(value || '').trim());
 
 // ─── OTP In-Memory Store ────────────────────────────────────────────────────
 // key = email, value = { otp, expiresAt, userData }
@@ -57,6 +58,8 @@ router.post('/register', async (req, res) => {
     const cleanPassword = typeof password === 'string' ? password.trim() : '';
     if (!cleanName || !cleanEmail || !cleanPassword || !role)
       return res.status(400).json({ success: false, message: 'Please fill all fields.' });
+    if (!isValidEmail(email))
+      return res.status(400).json({ success: false, message: 'Enter a valid email address.' });
     if (!['tenant','landlord'].includes(role))
       return res.status(400).json({ success: false, message: 'Invalid role.' });
     if (cleanPassword.length < 6)
@@ -90,6 +93,8 @@ router.post('/send-otp', async (req, res) => {
     const cleanPassword = typeof password === 'string' ? password.trim() : '';
     if (!cleanName || !cleanEmail || !cleanPassword || !role)
       return res.status(400).json({ success: false, message: 'Please fill all fields.' });
+    if (!isValidEmail(email))
+      return res.status(400).json({ success: false, message: 'Enter a valid email address.' });
     if (!['tenant','landlord'].includes(role))
       return res.status(400).json({ success: false, message: 'Invalid role.' });
     if (cleanPassword.length < 6)
@@ -119,19 +124,20 @@ router.post('/verify-otp', async (req, res) => {
     const cleanEmail = typeof email === 'string' ? email.trim() : '';
     const cleanOtp = typeof otp === 'string' ? otp.trim() : '';
     if (!cleanEmail || !cleanOtp) return res.status(400).json({ success: false, message: 'Email and OTP required.' });
+    if (!isValidEmail(cleanEmail)) return res.status(400).json({ success: false, message: 'Enter a valid email address.' });
 
     const record = otpStore.get(cleanEmail.toLowerCase());
     if (!record) return res.status(400).json({ success: false, message: 'OTP expired or not requested. Please try again.' });
     if (Date.now() > record.expiresAt) {
-      otpStore.delete(email.toLowerCase());
+      otpStore.delete(cleanEmail.toLowerCase());
       return res.status(400).json({ success: false, message: 'OTP has expired. Please request a new one.' });
     }
-    if (record.otp !== otp.trim()) return res.status(400).json({ success: false, message: 'Incorrect OTP. Please try again.' });
+    if (record.otp !== cleanOtp) return res.status(400).json({ success: false, message: 'Incorrect OTP. Please try again.' });
 
-    otpStore.delete(email.toLowerCase()); // one-time use
+    otpStore.delete(cleanEmail.toLowerCase()); // one-time use
 
     const { name, password, role } = record.userData;
-    const user = await User.create({ name, email: email.toLowerCase(), password, role, authProvider: 'email' });
+    const user = await User.create({ name, email: cleanEmail.toLowerCase(), password, role, authProvider: 'email' });
     const token = genToken({ id: user._id, role: user.role });
 
     res.status(201).json({
@@ -153,9 +159,8 @@ router.post('/login', async (req, res) => {
     if (!email || typeof password !== 'string' || !password)
       return res.status(400).json({ success: false, message: 'Enter email and password.' });
 
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const lEmail = String(email).toLowerCase().trim();
-    if (!emailPattern.test(lEmail))
+    if (!isValidEmail(lEmail))
       return res.status(400).json({ success: false, message: 'Enter a valid email address.' });
 
     // Admin

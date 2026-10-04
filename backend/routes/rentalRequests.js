@@ -267,10 +267,10 @@ router.put('/:id/submit-docs', protect, async (req, res) => {
       await r.save();
       return res.status(400).json({ success:false, message:'48-hour deadline passed. Property is no longer reserved.' });
     }
-    const { idCard, policeCert } = req.body;
+    const { idCard, policeCert, birthCert } = req.body;
     if (!idCard || !policeCert)
       return res.status(400).json({ success:false, message:'Both documents are required: ID Card and Police Certificate.' });
-    r.documents = { idCard, policeCert, submittedAt: new Date() };
+    r.documents = { idCard, policeCert, birthCert: birthCert || '', submittedAt: new Date() };
     r.status = 'docs_submitted';
     r.docsRejectReason = '';
     await r.save();
@@ -311,6 +311,28 @@ router.put('/:id/verify-docs', protect, async (req, res) => {
       tenantId: r.tenantId, tenantName: r.tenantName, status: 'rented'
     });
     res.json({ success:true, message:'Documents approved! Tenant onboarded.', request: r });
+  } catch(e) { console.error(e); res.status(500).json({ success:false, message:'Server error.' }); }
+});
+
+// ── LANDLORD or ADMIN: Reopen an expired docs request (give tenant another 48h) ──
+router.put('/:id/reopen-docs', protect, async (req, res) => {
+  try {
+    const r = await RentalRequest.findById(req.params.id);
+    if (!r) return res.status(404).json({ success:false, message:'Request not found.' });
+    const isAdmin = req.user?.isAdmin || req.user?.role === 'admin';
+    if (!isAdmin) {
+      const property = await Property.findById(r.propertyId);
+      if (!property || property.landlordId.toString() !== req.user._id.toString())
+        return res.status(403).json({ success:false, message:'Not authorized.' });
+    }
+    if (r.status !== 'docs_expired')
+      return res.status(400).json({ success:false, message:'Only an expired request can be reopened.' });
+    const deadline = new Date(Date.now() + 48 * 60 * 60 * 1000);
+    r.status = 'docs_pending';
+    r.docsDeadline = deadline;
+    r.docsRejectReason = '';
+    await r.save();
+    res.json({ success:true, message:'Tenant has been given another 48 hours to submit documents.', request: r, docsDeadline: deadline });
   } catch(e) { console.error(e); res.status(500).json({ success:false, message:'Server error.' }); }
 });
 
