@@ -1228,7 +1228,12 @@ body::after {
   const user  = JSON.parse(localStorage.getItem('tms_user')||'null');
   if (!token || !user || user.role !== 'landlord') { localStorage.clear(); window.location.replace('../index.html'); }
 })();
-const API = 'http://localhost:5000/api';
+const API = (() => {
+  let base = window.TMS_API_BASE;
+  const host = window.location.hostname;
+  if (!base) base = host === 'localhost' || host === '127.0.0.1' ? 'http://localhost:5000/api' : '/api';
+  return base.replace(/\/+$/, '');
+})();
 const tok = () => localStorage.getItem('tms_token');
 async function lFetch(url, method='GET', body=null) {
   const opts = { method, headers: { 'Content-Type':'application/json' } };
@@ -1926,6 +1931,9 @@ async function loadLandlordRentalRequests() {
               <button onclick="llOpenVerifyDocs('${req._id}')" style="flex:1;min-width:70px;padding:8px 12px;border-radius:9px;border:none;background:rgba(201,169,110,0.15);color:var(--gold);font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">🔍 Verify Documents</button>
             ` : req.status === 'docs_pending' ? `
               <div style="flex:1;padding:8px 12px;border-radius:9px;background:rgba(255,179,71,0.06);border:1px solid rgba(255,179,71,0.2);font-size:11px;color:#ffb347;font-weight:600;text-align:center">⏳ Docs ka intezaar</div>
+            ` : req.status === 'docs_expired' ? `
+              <button onclick="llReopenDocs('${req._id}')" style="flex:1;min-width:70px;padding:8px 12px;border-radius:9px;border:none;background:rgba(74,158,255,0.12);color:var(--blue);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">🔄 Give 48h More</button>
+              <button onclick="rejectRentalRequest('${req._id}')" style="flex:1;min-width:70px;padding:8px 12px;border-radius:9px;border:none;background:rgba(255,107,107,0.12);color:var(--error);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">❌ Reject &amp; Close</button>
             ` : ['pending','negotiating'].includes(req.status) ? `
               <button onclick="acceptRentalRequest('${req._id}')" style="flex:1;min-width:70px;padding:8px 12px;border-radius:9px;border:none;background:rgba(78,205,196,0.12);color:var(--green);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">✅ Accept</button>
               <button onclick="openNegotiationModal('${req._id}','${(req.propertyTitle||'').replace(/'/g,'\\\'')}',${req.propertyRent||0},${req.proposedRent||0})" style="flex:1;min-width:70px;padding:8px 12px;border-radius:9px;border:none;background:rgba(74,158,255,0.12);color:var(--blue);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">💬 Negotiate</button>
@@ -2066,6 +2074,17 @@ async function rejectRentalRequest(requestId) {
     if (r.success) { alert('✅ Request rejected.'); await loadLandlordRentalRequests(); }
     else { alert('⚠️ '+(r.message||'Failed')); btn.disabled=false; btn.textContent='❌ Reject'; }
   } catch { alert('❌ Unable to connect to the server'); btn.disabled=false; btn.textContent='❌ Reject'; }
+}
+
+async function llReopenDocs(requestId) {
+  if (!confirm('Give this tenant another 48 hours to submit documents?')) return;
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = '⏳ Processing…';
+  try {
+    const r = await lFetch('/rental-requests/'+requestId+'/reopen-docs', 'PUT', {});
+    if (r.success) { alert('✅ Tenant has been given another 48 hours.'); await loadLandlordRentalRequests(); }
+    else { alert('⚠️ '+(r.message||'Failed')); btn.disabled=false; btn.textContent='🔄 Give 48h More'; }
+  } catch { alert('❌ Unable to connect to the server'); btn.disabled=false; btn.textContent='🔄 Give 48h More'; }
 }
 
 // ══════════════════════════════════════
@@ -3939,6 +3958,13 @@ setTimeout(()=>{
           <div id="ll-vd-police-empty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.06);color:var(--muted);font-size:11px;text-align:center;padding:8px">No police certificate uploaded yet.</div>
         </div>
       </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase">🎂 Birth Cert</div>
+        <div style="position:relative;height:110px;">
+          <img id="ll-vd-birth" style="width:100%;height:100%;cursor:pointer;object-fit:cover;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);display:none" onclick="openDocPreview(this.src,'Birth Certificate')" onerror="this.style.opacity=0.3">
+          <div id="ll-vd-birth-empty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.06);color:var(--muted);font-size:11px;text-align:center;padding:8px">Not provided (optional).</div>
+        </div>
+      </div>
       </div>
     </div>
     <div id="ll-vd-subat" style="font-size:11px;color:var(--muted);margin-bottom:14px;text-align:center"></div>
@@ -3994,8 +4020,10 @@ async function llOpenVerifyDocs(reqId) {
     document.getElementById('ll-vd-tname').textContent = 'Tenant: '+(r.tenantName||'')+' · '+(r.tenantEmail||'');
     const idCardSrc = r.documents?.idCard || '';
     const policeSrc = r.documents?.policeCert || '';
+    const birthSrc = r.documents?.birthCert || '';
     updateLlVdDoc('ll-vd-idcard', idCardSrc);
     updateLlVdDoc('ll-vd-police', policeSrc);
+    updateLlVdDoc('ll-vd-birth', birthSrc);
     const submittedAt = r.documents?.submittedAt;
     const anyDoc = !!(idCardSrc || policeSrc);
     document.getElementById('ll-vd-subat').textContent = anyDoc

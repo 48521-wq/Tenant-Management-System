@@ -269,6 +269,7 @@ async function handleSignup() {
   const pass  = document.getElementById('signup-password')?.value;
   const conf  = document.getElementById('signup-confirm')?.value;
   if (!name||!email||!pass||!conf) { showErr('Fill in all fields.'); return; }
+  if (!isValidEmail(email)) { showErr('Enter a valid email address.'); return; }
   if (!isValidEnglishName(name)) { showErr('Full name may only contain letters and spaces.'); return; }
   if (pass !== conf) { showErr('Passwords do not match.'); return; }
   if (pass.length < 6) { showErr('Password must be at least 6 characters.'); return; }
@@ -451,7 +452,7 @@ async function confirmGoogle() {
   const errEl  = document.getElementById('g-error');
   const gErr   = (msg) => { if(errEl){errEl.textContent=msg;errEl.classList.add('show');} };
 
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { gErr('Enter valid email.'); return; }
+  if (!email || !isValidEmail(email)) { gErr('Enter valid email.'); return; }
 
   try {
     const { ok, data } = await api('/auth/google-fallback', 'POST', { email, role: selRole, mode: gMode });
