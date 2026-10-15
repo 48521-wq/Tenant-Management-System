@@ -17,6 +17,25 @@ const setUser  = (u)   => localStorage.setItem('tms_user', JSON.stringify(u));
 const getUser  = ()    => { try { return JSON.parse(localStorage.getItem('tms_user')); } catch { return null; } };
 const clearAuth= ()    => { localStorage.removeItem('tms_token'); localStorage.removeItem('tms_user'); };
 
+const rememberEmailKey = 'tms_last_signin_email';
+
+function saveLastSigninEmail(email) {
+  const value = (email || '').trim().toLowerCase();
+  if (!value) {
+    localStorage.removeItem(rememberEmailKey);
+    return;
+  }
+  localStorage.setItem(rememberEmailKey, value);
+}
+
+function restoreLastSigninEmail() {
+  const input = document.getElementById('signin-email');
+  if (!input) return;
+  const saved = localStorage.getItem(rememberEmailKey);
+  if (saved) input.value = saved;
+  input.addEventListener('input', (e) => saveLastSigninEmail(e.target.value));
+}
+
 // ── API helper ────────────────────────────────────────
 async function api(endpoint, method = 'GET', body = null) {
   const opts = { method, headers: { 'Content-Type': 'application/json' } };
@@ -143,10 +162,12 @@ function enforceLettersInput(el) {
 
 async function handleSignin() {
   clearErr();
-  const email = document.getElementById('signin-email')?.value.trim().toLowerCase();
+  const emailInput = document.getElementById('signin-email');
+  const email = (emailInput?.value || '').trim().toLowerCase();
   const pass  = document.getElementById('signin-password')?.value;
   if (!email || !pass) { showErr('Enter email and password.'); return; }
   if (!isValidEmail(email)) { showErr('Enter a valid email address.'); return; }
+  saveLastSigninEmail(email);
   setBtnLoad('signin-btn', true, 'Sign In');
   try {
     const { ok, data } = await api('/auth/login', 'POST', { email, password: pass });
@@ -367,6 +388,7 @@ async function confirmGoogle() {
 }
 
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeGModal(); });
+restoreLastSigninEmail();
 
 // ── Load Google GSI ───────────────────────────────────
 (function() {
