@@ -18,6 +18,8 @@ const getUser  = ()    => { try { return JSON.parse(localStorage.getItem('tms_us
 const clearAuth= ()    => { localStorage.removeItem('tms_token'); localStorage.removeItem('tms_user'); };
 
 const rememberEmailKey = 'tms_last_signin_email';
+const rememberTabKey = 'tms_last_tab';
+const rememberRoleKey = 'tms_last_role';
 
 function saveLastSigninEmail(email) {
   const value = (email || '').trim().toLowerCase();
@@ -84,6 +86,7 @@ function switchTab(tab) {
     if (ot) ot.style.display = 'none';
     ti.classList.remove('active'); tu.classList.add('active');
   }
+  localStorage.setItem(rememberTabKey, tab);
   const sf = document.getElementById('screen-forgot');
   if (sf) sf.style.display = 'none';
 }
@@ -92,11 +95,23 @@ function switchTab(tab) {
 let selRole = '';
 function selectRole(role) {
   selRole = role;
+  localStorage.setItem(rememberRoleKey, role);
   document.getElementById('role-tenant')?.classList.remove('selected');
   document.getElementById('role-landlord')?.classList.remove('selected');
   document.getElementById('role-' + role)?.classList.add('selected');
   const e = document.getElementById('role-error');
   if (e) e.style.display = 'none';
+}
+
+function restoreSavedAuthState() {
+  const savedTab = localStorage.getItem(rememberTabKey);
+  const validTab = savedTab === 'signin' || savedTab === 'signup' ? savedTab : 'signin';
+  switchTab(validTab);
+
+  const savedRole = localStorage.getItem(rememberRoleKey);
+  if (savedRole === 'tenant' || savedRole === 'landlord') {
+    selectRole(savedRole);
+  }
 }
 
 // ── Password strength ─────────────────────────────────
@@ -389,6 +404,7 @@ async function confirmGoogle() {
 
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeGModal(); });
 restoreLastSigninEmail();
+restoreSavedAuthState();
 
 // ── Load Google GSI ───────────────────────────────────
 (function() {
