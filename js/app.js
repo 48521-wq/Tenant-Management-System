@@ -15,7 +15,12 @@ const getToken = ()    => localStorage.getItem('tms_token');
 const setToken = (t)   => localStorage.setItem('tms_token', t);
 const setUser  = (u)   => localStorage.setItem('tms_user', JSON.stringify(u));
 const getUser  = ()    => { try { return JSON.parse(localStorage.getItem('tms_user')); } catch { return null; } };
-const clearAuth= ()    => { localStorage.removeItem('tms_token'); localStorage.removeItem('tms_user'); };
+const clearAuthState = () => {
+  localStorage.removeItem('tms_last_signin_email');
+  localStorage.removeItem('tms_last_tab');
+  localStorage.removeItem('tms_last_role');
+};
+const clearAuth= ()    => { localStorage.removeItem('tms_token'); localStorage.removeItem('tms_user'); clearAuthState(); };
 
 const rememberEmailKey = 'tms_last_signin_email';
 const rememberTabKey = 'tms_last_tab';
