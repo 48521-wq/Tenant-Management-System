@@ -119,6 +119,31 @@ function restoreSavedAuthState() {
   }
 }
 
+function syncAuthButtonState() {
+  const signInEmail = document.getElementById('signin-email')?.value.trim().toLowerCase();
+  const signInPass = document.getElementById('signin-password')?.value || '';
+  const signInBtn = document.getElementById('signin-btn');
+  if (signInBtn) signInBtn.disabled = !(signInEmail && signInPass && isValidEmail(signInEmail));
+
+  const signUpName = document.getElementById('signup-name')?.value.trim() || '';
+  const signUpEmail = document.getElementById('signup-email')?.value.trim().toLowerCase() || '';
+  const signUpPass = document.getElementById('signup-password')?.value || '';
+  const signUpConfirm = document.getElementById('signup-confirm')?.value || '';
+  const signUpBtn = document.getElementById('signup-btn');
+  const signUpReady = !!(
+    signUpName &&
+    signUpEmail &&
+    signUpPass &&
+    signUpConfirm &&
+    isValidEnglishName(signUpName) &&
+    isValidEmail(signUpEmail) &&
+    signUpPass.length >= 6 &&
+    signUpPass === signUpConfirm &&
+    selRole
+  );
+  if (signUpBtn) signUpBtn.disabled = !signUpReady;
+}
+
 // ── Password strength ─────────────────────────────────
 function checkStrength(val) {
   const colors = ['#FF6B6B','#FFB347','#C9A96E','#4ECDC4'];
@@ -410,6 +435,22 @@ async function confirmGoogle() {
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeGModal(); });
 restoreLastSigninEmail();
 restoreSavedAuthState();
+
+['signin-email','signin-password','signup-name','signup-email','signup-password','signup-confirm']
+  .forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', syncAuthButtonState);
+      el.addEventListener('change', syncAuthButtonState);
+    }
+  });
+
+['tenant','landlord'].forEach(role => {
+  const el = document.getElementById('role-' + role);
+  if (el) el.addEventListener('click', syncAuthButtonState);
+});
+
+syncAuthButtonState();
 
 // ── Load Google GSI ───────────────────────────────────
 (function() {
