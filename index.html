@@ -304,6 +304,15 @@ body::after {
   pointer-events: none; z-index: 999; opacity: 0.4;
 }
 [data-theme="light"] body::after { opacity: 0.12; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 </style>
 
 </head>
