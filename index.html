@@ -314,7 +314,7 @@ body::after {
   <div class="orb1"></div>
   <div class="orb2"></div>
 
-  <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
+  <button class="theme-btn" id="theme-btn" type="button" aria-label="Switch to light theme" title="Switch to light theme" onclick="toggleTheme()">🌙</button>
 
   <div class="container">
     <div class="panel">
@@ -561,12 +561,18 @@ body::after {
       const saved = localStorage.getItem('tms-theme') || 'dark';
       document.documentElement.setAttribute('data-theme', saved);
       document.getElementById('theme-btn').textContent = saved === 'dark' ? '🌙' : '☀️';
+      const action = saved === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+      document.getElementById('theme-btn').setAttribute('aria-label', action);
+      document.getElementById('theme-btn').title = action;
     })();
     function toggleTheme() {
       const html = document.documentElement;
       const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       html.setAttribute('data-theme', next);
       document.getElementById('theme-btn').textContent = next === 'dark' ? '🌙' : '☀️';
+      const action = next === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+      document.getElementById('theme-btn').setAttribute('aria-label', action);
+      document.getElementById('theme-btn').title = action;
       localStorage.setItem('tms-theme', next);
     }
   </script>
