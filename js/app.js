@@ -184,6 +184,7 @@ function handleForgot() {
   const em = document.getElementById('fp-email')?.value.trim();
   const er = document.getElementById('fp-error');
   if (!em) { if(er){er.textContent='Enter your email.';er.style.display='block';} return; }
+  if (!isValidEmail(em)) { if(er){er.textContent='Enter a valid email address.';er.style.display='block';} return; }
   document.getElementById('screen-forgot').style.display  = 'none';
   document.getElementById('screen-success').style.display = '';
   document.getElementById('success-email-display').textContent = em;
