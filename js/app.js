@@ -163,7 +163,10 @@ function togglePass(id, btn) {
   const inp = document.getElementById(id);
   if (!inp) return;
   inp.type = inp.type === 'password' ? 'text' : 'password';
-  btn.style.opacity = inp.type === 'text' ? '1' : '0.5';
+  const isVisible = inp.type === 'text';
+  btn.setAttribute('aria-label', isVisible ? 'Hide password' : 'Show password');
+  btn.setAttribute('aria-pressed', String(isVisible));
+  btn.style.opacity = isVisible ? '1' : '0.5';
 }
 
 // ── Forgot password ───────────────────────────────────
