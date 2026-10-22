@@ -20,18 +20,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .tn-brand{display:flex;align-items:center;gap:10px;margin-right:auto}
 .tn-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--blue),var(--blue-l));display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(37,99,235,0.3)}
 .tn-icon svg{width:17px;height:17px;fill:#fff;stroke:none}
-.tn-name{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;background:linear-gradient(135deg,var(--blue),var(--blue-l));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.tn-pill{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:rgba(255,107,107,0.08);color:var(--red);font-size:12px;font-weight:600}
-.icon-btn{position:relative;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:var(--input-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.2s;flex-shrink:0;color:var(--text)}
+.tn-name{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;background:linear-gradient(135deg,var(--blue),var(--blue-l));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tn-pill{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:rgba(255,107,107,0.08);color:var(--red);font-size:16px;font-weight:600}
+.icon-btn{position:relative;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:var(--input-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all 0.2s;flex-shrink:0;color:var(--text)}
 .icon-btn:hover{background:rgba(37,99,235,0.1);border-color:var(--blue)}
 .tn-search{flex:1;max-width:340px;position:relative;display:flex;align-items:center}
 .tn-search svg{position:absolute;left:12px;width:14px;height:14px;color:var(--muted);pointer-events:none}
-.tn-search input{width:100%;padding:8px 12px 8px 34px;border-radius:20px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none}
+.tn-search input{width:100%;padding:8px 12px 8px 34px;border-radius:20px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;outline:none}
 .tn-search input::placeholder{color:var(--muted)}
 .welcome-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
-.welcome-head h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--text);margin:0}
-.welcome-head p{color:var(--muted);font-size:13px;margin-top:4px}
-.logout-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:9px;background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.2);color:var(--red);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+.welcome-head h1{font-family:'Playfair Display',serif;font-size:25px;font-weight:700;color:var(--text);margin:0}
+.welcome-head p{color:var(--muted);font-size:18px;margin-top:4px}
+.logout-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:9px;background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.2);color:var(--red);font-size:16px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
 .logout-btn:hover{background:rgba(255,107,107,0.15)}
 .logout-btn svg{width:14px;height:14px;stroke:currentColor;fill:none}
 /* LAYOUT */
@@ -39,26 +39,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 /* SIDEBAR */
 .sidebar{width:220px;flex-shrink:0;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:62px;min-height:calc(100vh - 62px);overflow-y:auto}
 .sb-sec{padding:16px 12px 6px}
-.sb-lbl{font-size:10px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;padding:0 10px 8px;display:block}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.18s;margin-bottom:2px;border:none;background:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left}
+.sb-lbl{font-size:14px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;padding:0 10px 8px;display:block}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;color:var(--muted);font-size:18px;font-weight:500;cursor:pointer;transition:all 0.18s;margin-bottom:2px;border:none;background:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left}
 .nav-item svg{width:15px;height:15px;stroke:currentColor;fill:none;flex-shrink:0}
 .nav-item:hover{color:var(--text);background:rgba(255,107,107,0.06)}
 .nav-item.active{color:var(--red);background:rgba(255,107,107,0.09);font-weight:600}
-.nb-pill{margin-left:auto;min-width:18px;height:18px;border-radius:9px;background:var(--red);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.nb-pill{margin-left:auto;min-width:18px;height:18px;border-radius:9px;background:var(--red);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
 .sb-foot{margin-top:auto;padding:14px 12px;border-top:1px solid var(--border)}
 .sb-user{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--input-bg);border-radius:12px;border:1px solid var(--border)}
-.sb-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--red),#FF8E53);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
-.sb-uname{font-size:12px;font-weight:600;color:var(--text)}.sb-urole{font-size:10px;color:var(--muted)}
+.sb-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--red),#FF8E53);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0}
+.sb-uname{font-size:16px;font-weight:600;color:var(--text)}.sb-urole{font-size:14px;color:var(--muted)}
 /* MAIN */
 .main{flex:1;min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden}
 .page{display:none;padding:28px 32px 52px;animation:pgIn 0.27s ease both}
 .page.active{display:block}
 @keyframes pgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .pg-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:14px;flex-wrap:wrap}
-.pg-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--text)}
-.pg-sub{color:var(--muted);font-size:13px;margin-top:3px}
+.pg-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--text)}
+.pg-sub{color:var(--muted);font-size:18px;margin-top:3px}
 /* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;transition:all 0.2s;border:none}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:17px;font-weight:600;cursor:pointer;transition:all 0.2s;border:none}
 .btn svg{width:13px;height:13px;stroke:currentColor;fill:none}
 button, input[type="button"], input[type="submit"], .btn, .submit-btn{color:#FFFFFF !important}
 .btn-red{background:linear-gradient(135deg,var(--red),#FF8E53);color:#FFFFFF;box-shadow:0 3px 12px rgba(255,107,107,0.24)}
@@ -69,7 +69,7 @@ button, input[type="button"], input[type="submit"], .btn, .submit-btn{color:#FFF
 .btn-warn:hover{background:rgba(255,179,71,0.18)}
 .btn-danger{background:rgba(255,107,107,0.08);color:#FFFFFF;border:1px solid rgba(255,107,107,0.18)}
 .btn-danger:hover{background:rgba(255,107,107,0.15)}
-.btn-sm{padding:5px 12px;font-size:11.5px;border-radius:7px}
+.btn-sm{padding:5px 12px;font-size:16px;border-radius:7px}
 /* CARDS */
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
 .card+.card{margin-top:16px}
@@ -77,11 +77,11 @@ button, input[type="button"], input[type="submit"], .btn, .submit-btn{color:#FFF
 .stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px;margin-bottom:22px}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;align-items:center;gap:13px;min-width:0;width:100%}
 .stat-card:hover{border-color:var(--border);transform:none}
-.stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.stat-val{font-size:20px;font-weight:700;font-family:inherit;line-height:1.1;color:var(--text)}
-.stat-lbl{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:0.4px;font-weight:600}
+.stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:23px;flex-shrink:0}
+.stat-val{font-size:23px;font-weight:700;font-family:inherit;line-height:1.1;color:var(--text)}
+.stat-lbl{font-size:14px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:0.4px;font-weight:600}
 /* BADGES */
-.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:15px;font-weight:600}
 .b-green{background:rgba(78,205,196,0.1);color:var(--green);border:1px solid rgba(78,205,196,0.18)}
 .b-gold{background:rgba(201,169,110,0.1);color:var(--gold);border:1px solid rgba(201,169,110,0.18)}
 .b-blue{background:rgba(74,158,255,0.1);color:var(--blue);border:1px solid rgba(74,158,255,0.18)}
@@ -90,27 +90,27 @@ button, input[type="button"], input[type="submit"], .btn, .submit-btn{color:#FFF
 .b-muted{background:var(--input-bg);color:var(--muted);border:1px solid var(--border)}
 /* TABLE */
 .tbl-wrap{overflow-x:auto;margin-top:12px}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;padding:10px 14px;font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:18px}
+th{text-align:left;padding:10px 14px;font-size:14px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border)}
 td{padding:12px 14px;border-bottom:1px solid var(--border);color:var(--text)}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(255,107,107,0.02)}
 /* LOADING */
-.loading{text-align:center;padding:40px;color:var(--muted);font-size:13px}
+.loading{text-align:center;padding:40px;color:var(--muted);font-size:18px}
 .spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin 0.7s linear infinite;margin-right:8px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 /* SEARCH BAR */
-.search-bar{background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;padding:9px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:260px}
+.search-bar{background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;padding:9px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:18px;outline:none;width:260px}
 .search-bar:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,0.08)}
 /* PENDING ACTIONS */
 .action-item{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:var(--input-bg);border-radius:10px;margin-bottom:8px}
-.action-label{font-size:13px;font-weight:600;color:var(--text)}
-.action-sub{font-size:11px;color:var(--muted);margin-top:2px}
-.action-count{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700}
+.action-label{font-size:18px;font-weight:600;color:var(--text)}
+.action-sub{font-size:15px;color:var(--muted);margin-top:2px}
+.action-count{padding:4px 12px;border-radius:20px;font-size:16px;font-weight:700}
 .count-zero{background:rgba(255,255,255,0.04);color:var(--muted)}
 .count-pos{background:rgba(255,107,107,0.1);color:var(--red);border:1px solid rgba(255,107,107,0.2)}
 /* COMPLAINT ACTIONS */
-.sel-status{background:var(--input-bg);border:1.5px solid var(--border);border-radius:8px;padding:5px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer}
+.sel-status{background:var(--input-bg);border:1.5px solid var(--border);border-radius:8px;padding:5px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer}
 .sel-status:focus{border-color:var(--red)}
 .sel-status option{background:var(--bg);color:var(--text)}
 /* Dark theme native select fix */
@@ -132,8 +132,8 @@ select {
 .notif-item{display:flex;gap:12px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;align-items:flex-start}
 .notif-item.unread{border-color:rgba(255,107,107,0.25);background:rgba(255,107,107,0.04)}
 .notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;background:var(--red)}
-.notif-text{font-size:13px;color:var(--text)}
-.notif-time{font-size:11px;color:var(--muted);margin-top:3px}
+.notif-text{font-size:18px;color:var(--text)}
+.notif-time{font-size:15px;color:var(--muted);margin-top:3px}
 
 
 </style>
@@ -162,25 +162,25 @@ select {
 /* ─── TYPOGRAPHY UPGRADE ─── */
 .pg-title, .ov-title, .fp-title, .success-title {
   font-family: 'Cormorant Garamond', 'Playfair Display', serif !important;
-  font-size: 26px !important;
+  font-size: 30px !important;
   font-weight: 700 !important;
   letter-spacing: -0.3px;
 }
 .tn-name {
   font-family: 'Cormorant Garamond', 'Playfair Display', serif !important;
-  font-size: 20px !important;
+  font-size: 23px !important;
   font-weight: 700 !important;
 }
 .stat-val {
   font-family: 'Cormorant Garamond', 'Playfair Display', serif !important;
-  font-size: 28px !important;
+  font-size: 29px !important;
   font-weight: 700 !important;
   line-height: 1;
   letter-spacing: -0.5px;
 }
 .pcard-price {
   font-family: 'Cormorant Garamond', 'Playfair Display', serif !important;
-  font-size: 22px !important;
+  font-size: 25px !important;
 }
 
 /* ─── TOPNAV PREMIUM ─── */
@@ -207,7 +207,7 @@ select {
 .nav-item {
   padding: 9px 14px !important;
   border-radius: var(--radius-sm) !important;
-  font-size: 12.5px !important;
+  font-size: 17px !important;
   font-weight: 500 !important;
   letter-spacing: 0.1px;
   transition: var(--transition) !important;
@@ -230,7 +230,7 @@ select {
   height: 14px !important;
 }
 .sb-lbl {
-  font-size: 9.5px !important;
+  font-size: 11px !important;
   letter-spacing: 1.4px !important;
   font-weight: 700 !important;
   color: rgba(86,96,112,0.7) !important;
@@ -265,11 +265,11 @@ select {
   width: 44px !important;
   height: 44px !important;
   border-radius: 12px !important;
-  font-size: 19px !important;
+  font-size: 22px !important;
   flex-shrink: 0;
 }
 .stat-lbl {
-  font-size: 9.5px !important;
+  font-size: 11px !important;
   letter-spacing: 0.8px !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
@@ -306,19 +306,19 @@ select {
   padding: 15px 17px !important;
 }
 .pcard-title {
-  font-size: 14px !important;
+  font-size: 18px !important;
   font-weight: 700 !important;
   letter-spacing: -0.1px;
 }
 .pcard-loc {
-  font-size: 11.5px !important;
+  font-size: 16px !important;
   letter-spacing: 0.1px;
 }
 
 /* ─── BUTTONS PREMIUM ─── */
 .btn {
   border-radius: var(--radius-sm) !important;
-  font-size: 12.5px !important;
+  font-size: 17px !important;
   font-weight: 600 !important;
   letter-spacing: 0.1px;
   transition: var(--transition) !important;
@@ -343,7 +343,7 @@ select {
 }
 .submit-btn {
   border-radius: var(--radius-sm) !important;
-  font-size: 13.5px !important;
+  font-size: 17px !important;
   font-weight: 600 !important;
   letter-spacing: 0.1px;
   background: linear-gradient(135deg, var(--blue) 0%, var(--blue-l) 100%) !important;
@@ -357,7 +357,7 @@ select {
 
 /* ─── TABLES PREMIUM ─── */
 th {
-  font-size: 10px !important;
+  font-size: 14px !important;
   letter-spacing: 1px !important;
   font-weight: 700 !important;
   padding: 10px 16px !important;
@@ -366,7 +366,7 @@ th {
 }
 td {
   padding: 13px 16px !important;
-  font-size: 13px !important;
+  font-size: 18px !important;
   border-bottom: 1px solid rgba(201,169,110,0.07) !important;
 }
 tr:hover td {
@@ -375,7 +375,7 @@ tr:hover td {
 
 /* ─── FORM INPUTS PREMIUM ─── */
 .fg label {
-  font-size: 10px !important;
+  font-size: 14px !important;
   letter-spacing: 0.8px !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
@@ -384,7 +384,7 @@ tr:hover td {
   border-radius: var(--radius-sm) !important;
   padding: 10px 14px !important;
   border: 1.5px solid rgba(201,169,110,0.14) !important;
-  font-size: 13px !important;
+  font-size: 18px !important;
   transition: var(--transition) !important;
 }
 .fg input:focus, .fg select:focus, .fg textarea:focus {
@@ -399,7 +399,7 @@ tr:hover td {
   border-bottom: 1px solid rgba(201,169,110,0.08);
 }
 .pg-sub {
-  font-size: 12.5px !important;
+  font-size: 17px !important;
   letter-spacing: 0.1px;
   margin-top: 4px !important;
 }
@@ -416,11 +416,11 @@ tr:hover td {
   background: rgba(201,169,110,0.02);
 }
 .li-title {
-  font-size: 13.5px !important;
+  font-size: 17px !important;
   font-weight: 600 !important;
 }
 .li-sub {
-  font-size: 11.5px !important;
+  font-size: 16px !important;
 }
 
 /* ─── NOTIFICATION ITEMS ─── */
@@ -439,7 +439,7 @@ tr:hover td {
 /* ─── BADGES PREMIUM ─── */
 .badge {
   padding: 3px 10px !important;
-  font-size: 10.5px !important;
+  font-size: 14px !important;
   font-weight: 700 !important;
   border-radius: 20px !important;
   letter-spacing: 0.2px;
@@ -456,7 +456,7 @@ tr:hover td {
   border-bottom: 1px solid rgba(201,169,110,0.1) !important;
 }
 .ov-title {
-  font-size: 17px !important;
+  font-size: 21px !important;
 }
 
 /* ─── SCROLLBAR PREMIUM ─── */
@@ -508,11 +508,11 @@ tr:hover td {
   box-shadow: 0 2px 10px rgba(201,169,110,0.25) !important;
 }
 .sb-uname {
-  font-size: 12.5px !important;
+  font-size: 17px !important;
   font-weight: 600 !important;
 }
 .sb-urole {
-  font-size: 10px !important;
+  font-size: 14px !important;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -535,7 +535,7 @@ tr:hover td {
 /* ─── TOPNAV LOGOUT BUTTON ─── */
 .logout-btn {
   border-radius: var(--radius-sm) !important;
-  font-size: 12px !important;
+  font-size: 16px !important;
   padding: 7px 16px !important;
   gap: 6px !important;
   transition: var(--transition) !important;
@@ -547,7 +547,7 @@ tr:hover td {
 
 /* ─── PILL / TAG ─── */
 .tn-pill {
-  font-size: 11px !important;
+  font-size: 15px !important;
   font-weight: 700 !important;
   letter-spacing: 0.2px;
   padding: 5px 14px !important;
@@ -558,7 +558,7 @@ tr:hover td {
 .nb-pill {
   min-width: 18px !important;
   height: 18px !important;
-  font-size: 9.5px !important;
+  font-size: 11px !important;
   font-weight: 700 !important;
   border-radius: 9px !important;
 }
@@ -787,7 +787,7 @@ body::after {
 [data-theme="light"] table th {
   color: #374151 !important;
   font-weight: 700 !important;
-  font-size: 11px !important;
+  font-size: 15px !important;
   background: #F3F6FC !important;
   border-bottom: 2px solid rgba(0,0,0,0.10) !important;
   letter-spacing: 0.6px !important;
@@ -995,6 +995,8 @@ body::after {
 ═══════════════════════════════════════════════════════════ */
 </style>
 
+<link rel="stylesheet" href="../css/v4.css">
+<script src="../js/v4-ui.js"></script>
 </head>
 <body>
 <script>
@@ -1041,6 +1043,7 @@ function toggleTheme() {
 }
 (function(){ const s=localStorage.getItem('tms-theme')||'dark'; document.documentElement.setAttribute('data-theme',s); })();
 
+document.addEventListener('DOMContentLoaded',()=>v4InitAutoStats({'tenants-tbody':'Total tenants','landlords-tbody':'Total landlords','props-tbody':'Total properties','maint-tbody':'Total requests','comps-tbody':'Total complaints','payments-tbody':'Total payments'}));
 // NAV
 function sp(id, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -1136,13 +1139,13 @@ async function loadTenants(filter) {
       return `<tr>
         <td style="color:var(--muted)">${String(i+1).padStart(2,'0')}</td>
         <td><div style="display:flex;align-items:center;gap:9px">
-          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#4A9EFF,#7BBFFF);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">${init}</div>
-          <div><div style="font-weight:600">${u.name||'—'}</div><div style="font-size:11px;color:var(--muted)">${u.authProvider==='google'?'🔵 Google':'📧 Email'}</div></div>
+          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#4A9EFF,#7BBFFF);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0">${init}</div>
+          <div><div style="font-weight:600">${u.name||'—'}</div><div style="font-size:15px;color:var(--muted)">${u.authProvider==='google'?'🔵 Google':'📧 Email'}</div></div>
         </div></td>
         <td>${u.email||'—'}</td>
         <td style="color:var(--muted)">${u.phone||'—'}</td>
         <td><span class="badge ${u.status==='active'?'b-green':'b-red'}">${u.status||'active'}</span></td>
-        <td style="color:var(--muted);font-size:12px">${joined}</td>
+        <td style="color:var(--muted);font-size:16px">${joined}</td>
         <td><div style="display:flex;gap:6px">
           <button class="btn btn-warn btn-sm" onclick="blockUser('${u._id}','tenant')">${u.status==='blocked'?'Unblock':'Block'}</button>
           <button class="btn btn-danger btn-sm" onclick="deleteUser('${u._id}','tenant')">Delete</button>
@@ -1170,8 +1173,8 @@ async function loadLandlords(filter) {
       return `<tr>
         <td style="color:var(--muted)">${String(i+1).padStart(2,'0')}</td>
         <td><div style="display:flex;align-items:center;gap:9px">
-          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-l));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#FFFFFF;flex-shrink:0">${init}</div>
-          <div><div style="font-weight:600">${u.name||'—'}</div><div style="font-size:11px;color:var(--muted)">${u.authProvider==='google'?'🔵 Google':'📧 Email'}</div></div>
+          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-l));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#FFFFFF;flex-shrink:0">${init}</div>
+          <div><div style="font-weight:600">${u.name||'—'}</div><div style="font-size:15px;color:var(--muted)">${u.authProvider==='google'?'🔵 Google':'📧 Email'}</div></div>
         </div></td>
         <td>${u.email||'—'}</td>
         <td style="color:var(--muted)">${u.phone||'—'}</td>
@@ -1202,7 +1205,7 @@ async function loadAdminProps(filter) {
     tbody.innerHTML=list.map((p,i)=>{
       return `<tr>
       <td style="color:var(--muted)">${String(i+1).padStart(2,'0')}</td>
-      <td><div style="font-weight:600">${p.title||'—'}</div><div style="font-size:11px;color:var(--muted)">${p.beds||'?'} Bed · ${p.baths||'?'} Bath · ${p.sqft||'?'} sqft</div></td>
+      <td><div style="font-weight:600">${p.title||'—'}</div><div style="font-size:15px;color:var(--muted)">${p.beds||'?'} Bed · ${p.baths||'?'} Bath · ${p.sqft||'?'} sqft</div></td>
       <td style="color:var(--muted)">${p.landlordName||'—'}</td>
       <td><span class="badge b-blue">${p.type||'House'}</span></td>
       <td style="color:var(--gold);font-weight:600">Rs. ${Number(p.rent||0).toLocaleString()}</td>
@@ -1230,7 +1233,7 @@ async function loadAdminMaintenance() {
     if(!list.length){tbody.innerHTML='<tr><td colspan="6" class="loading">No maintenance requests yet.</td></tr>';return;}
     tbody.innerHTML=list.map((r,i)=>`<tr>
       <td style="color:var(--muted)">${String(i+1).padStart(2,'0')}</td>
-      <td><div style="font-weight:600">${r.type||'—'}</div><div style="font-size:11px;color:var(--muted)">${r.description?.slice(0,50)}…</div></td>
+      <td><div style="font-weight:600">${r.type||'—'}</div><div style="font-size:15px;color:var(--muted)">${r.description?.slice(0,50)}…</div></td>
       <td>${r.tenantName||'—'}</td>
       <td><span class="badge ${r.priority==='urgent'?'b-red':r.priority==='high'?'b-warn':'b-muted'}">${r.priority||'medium'}</span></td>
       <td>${new Date(r.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</td>
@@ -1259,7 +1262,7 @@ async function loadAdminComplaints() {
     if(!list.length){tbody.innerHTML='<tr><td colspan="6" class="loading">No complaints filed yet.</td></tr>';return;}
     tbody.innerHTML=list.map((c,i)=>`<tr>
       <td style="color:var(--muted)">${String(i+1).padStart(2,'0')}</td>
-      <td><div style="font-weight:600">${c.subject||'—'}</div><div style="font-size:11px;color:var(--muted)">${c.description?.slice(0,50)||''}…</div></td>
+      <td><div style="font-weight:600">${c.subject||'—'}</div><div style="font-size:15px;color:var(--muted)">${c.description?.slice(0,50)||''}…</div></td>
       <td>${c.tenantName||'—'}</td>
       <td><span class="badge b-blue">${c.category||'Other'}</span></td>
       <td>${new Date(c.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</td>
@@ -1329,7 +1332,7 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
 <nav class="topnav">
   <div class="tn-brand">
     <div class="tn-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
-    <span class="tn-name">TMS</span><span style="color:var(--muted);font-size:12px;margin:0 4px">/</span><span style="font-size:12px;color:var(--muted)">Admin</span>
+    <span class="tn-name">TMS</span><span style="color:var(--muted);font-size:16px;margin:0 4px">/</span><span style="font-size:16px;color:var(--muted)">Admin</span>
   </div>
   <span class="tn-pill">🛡️ Super Admin</span>
   <div class="tn-search" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="tn-global-search" placeholder="Search anything…" aria-label="Search" oninput="adminGlobalSearch(this.value)" onfocus="adminGlobalSearch(this.value)" autocomplete="off"><div id="gs-results" class="gs-results"></div></div>
@@ -1448,18 +1451,18 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
       <!-- Activity Overview -->
       <div class="card">
-        <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px">📊 Activity Overview</h3>
+        <h3 style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:16px">📊 Activity Overview</h3>
         <div style="display:flex;flex-direction:column;gap:10px">
           <div>
-            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span style="color:var(--muted)">Tenants</span><span style="color:var(--blue)" id="d-users">—</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:16px;margin-bottom:5px"><span style="color:var(--muted)">Tenants</span><span style="color:var(--blue)" id="d-users">—</span></div>
             <div style="height:8px;background:var(--input-bg);border-radius:4px"><div id="bar-tenants" style="height:100%;background:linear-gradient(90deg,#4A9EFF,#7BBFFF);border-radius:4px;transition:width 0.6s ease;width:0%"><span style="display:none"></span></div></div>
           </div>
           <div>
-            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span style="color:var(--muted)">Landlords</span><span style="color:var(--gold)" id="bar-ll-cnt">—</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:16px;margin-bottom:5px"><span style="color:var(--muted)">Landlords</span><span style="color:var(--gold)" id="bar-ll-cnt">—</span></div>
             <div style="height:8px;background:var(--input-bg);border-radius:4px"><div id="bar-landlords" style="height:100%;background:linear-gradient(90deg,#C9A96E,#E8C97A);border-radius:4px;transition:width 0.6s ease;width:0%"><span style="display:none"></span></div></div>
           </div>
           <div>
-            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span style="color:var(--muted)">Properties</span><span style="color:var(--green)" id="d-avail">—</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:16px;margin-bottom:5px"><span style="color:var(--muted)">Properties</span><span style="color:var(--green)" id="d-avail">—</span></div>
             <div style="height:8px;background:var(--input-bg);border-radius:4px"><div id="bar-props" style="height:100%;background:linear-gradient(90deg,#4ECDC4,#35B5AC);border-radius:4px;transition:width 0.6s ease;width:0%"><span style="display:none"></span></div></div>
           </div>
         </div>
@@ -1467,7 +1470,7 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
 
       <!-- Pending Actions -->
       <div class="card">
-        <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px">⚡ Pending Actions</h3>
+        <h3 style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:16px">⚡ Pending Actions</h3>
         <div class="action-item">
           <div><div class="action-label">Verified Landlords</div><div class="action-sub">Approved landlords</div></div>
           <span class="action-count count-zero" id="pa-verif">0</span>
@@ -1566,7 +1569,7 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
   <div class="page" id="page-payments">
     <div class="pg-head">
       <div><div class="pg-title">Payment Records</div><div class="pg-sub" id="payments-count">Loading…</div></div>
-      <span style="background:var(--card);border:1px solid var(--border);padding:7px 14px;border-radius:9px;font-size:13px;color:var(--gold);font-weight:700" id="payments-total">Rs. 0</span>
+      <span style="background:var(--card);border:1px solid var(--border);padding:7px 14px;border-radius:9px;font-size:18px;color:var(--gold);font-weight:700" id="payments-total">Rs. 0</span>
     </div>
     <div class="card">
       <div class="tbl-wrap">
@@ -1580,19 +1583,19 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
 
   <div class="page" id="page-notifications">
     <div style="margin-bottom:24px">
-      <div style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px">🔔 Notifications</div>
-      <div style="font-size:13px;color:var(--muted)">System-wide notifications from landlords and admin</div>
+      <div style="font-size:25px;font-weight:700;color:var(--text);margin-bottom:4px">🔔 Notifications</div>
+      <div style="font-size:18px;color:var(--muted)">System-wide notifications from landlords and admin</div>
     </div>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px">
       <div style="display:grid;gap:14px">
         <div style="display:grid;grid-template-columns:1fr minmax(180px, 300px);gap:14px;align-items:end">
           <div style="display:flex;flex-direction:column;gap:6px">
-            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Title</label>
-            <input id="notif-title" placeholder="Notification title" type="text" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
+            <label style="font-size:16px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Title</label>
+            <input id="notif-title" placeholder="Notification title" type="text" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:18px;outline:none">
           </div>
           <div style="display:flex;flex-direction:column;gap:6px;width:100%">
-            <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Send To</label>
-            <select id="notif-to" onchange="tmsOnNotifToChange()" style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
+            <label style="font-size:16px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Send To</label>
+            <select id="notif-to" onchange="tmsOnNotifToChange()" style="width:100%;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:18px;outline:none">
               <option value="all">Everyone</option>
               <option value="tenant">Tenants</option>
               <option value="landlord">Landlords</option>
@@ -1608,12 +1611,12 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px">
-          <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Message</label>
-          <textarea id="notif-msg" placeholder="Write your notification message..." rows="3" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:vertical"></textarea>
+          <label style="font-size:16px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px">Message</label>
+          <textarea id="notif-msg" placeholder="Write your notification message..." rows="3" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:18px;outline:none;resize:vertical"></textarea>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:10px;align-items:center">
-          <span id="notif-ok" style="font-size:12px;color:var(--green);font-weight:600;opacity:0;transition:opacity 0.3s">✅ Notification sent!</span>
-          <button onclick="adminSendNotification()" style="padding:9px 22px;border-radius:9px;border:none;background:var(--red);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Send Notification</button>
+          <span id="notif-ok" style="font-size:16px;color:var(--green);font-weight:600;opacity:0;transition:opacity 0.3s">✅ Notification sent!</span>
+          <button onclick="adminSendNotification()" style="padding:9px 22px;border-radius:9px;border:none;background:var(--red);color:#fff;font-family:'DM Sans',sans-serif;font-size:18px;font-weight:600;cursor:pointer">Send Notification</button>
         </div>
       </div>
     </div>
@@ -1627,7 +1630,7 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
     <div class="pg-head">
       <div><div class="pg-title">3D Model Requests</div><div class="pg-sub" id="admin-3dreq-sub">3D visualization requests — review, negotiate and deliver models</div></div>
       <div style="display:flex;gap:8px">
-        <select id="admin-3dreq-filter" onchange="adminLoad3DRequests()" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:7px 12px;color:var(--text);font-size:12px;outline:none">
+        <select id="admin-3dreq-filter" onchange="adminLoad3DRequests()" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:7px 12px;color:var(--text);font-size:16px;outline:none">
           <option value="">All Status</option>
           <option value="pending">Pending</option>
           <option value="negotiating">Negotiating</option>
@@ -1645,7 +1648,7 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
   <div class="page" id="page-docs-review">
     <div class="pg-head">
       <div><div class="pg-title">Documents Review</div><div class="pg-sub">Tenant document verification — approve, reject, or block fraud</div></div>
-      <button onclick="aLoadDocsReview()" style="padding:8px 16px;border-radius:9px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">🔄 Refresh</button>
+      <button onclick="aLoadDocsReview()" style="padding:8px 16px;border-radius:9px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:16px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">🔄 Refresh</button>
     </div>
     <div id="a-docs-list" style="display:grid;gap:14px"><div class="loading"><span class="spinner"></span>Loading…</div></div>
   </div>
@@ -1657,18 +1660,18 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
 <div class="ov" id="ov-admin3d" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;padding:20px">
   <div style="background:var(--card);border-radius:18px;border:1px solid var(--border);width:min(820px,97vw);overflow:hidden">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)">
-      <span style="font-size:15px;font-weight:700;color:var(--text)" id="admin-3d-title">3D Property View</span>
+      <span style="font-size:19px;font-weight:700;color:var(--text)" id="admin-3d-title">3D Property View</span>
       <div style="display:flex;gap:6px;align-items:center">
-        <button onclick="h3d_front('c3d-admin')" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Front</button>
-        <button onclick="h3d_side('c3d-admin')" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Side</button>
-        <button onclick="h3d_top('c3d-admin')" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Top</button>
-        <button onclick="h3d_night('c3d-admin')" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">🌙</button>
-        <button onclick="h3d_reset('c3d-admin')" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">↺</button>
-        <button onclick="closeAdmin3D()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,107,107,0.12);color:var(--red,#FF6B6B);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+        <button onclick="h3d_front('c3d-admin')" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:15px;cursor:pointer;font-family:'DM Sans',sans-serif">Front</button>
+        <button onclick="h3d_side('c3d-admin')" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:15px;cursor:pointer;font-family:'DM Sans',sans-serif">Side</button>
+        <button onclick="h3d_top('c3d-admin')" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:15px;cursor:pointer;font-family:'DM Sans',sans-serif">Top</button>
+        <button onclick="h3d_night('c3d-admin')" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:15px;cursor:pointer;font-family:'DM Sans',sans-serif">🌙</button>
+        <button onclick="h3d_reset('c3d-admin')" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:15px;cursor:pointer;font-family:'DM Sans',sans-serif">↺</button>
+        <button onclick="closeAdmin3D()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,107,107,0.12);color:var(--red,#FF6B6B);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
       </div>
     </div>
     <canvas id="c3d-admin" style="width:100%;height:480px;display:block;background:#080B12"></canvas>
-    <div style="padding:10px 20px;font-size:11px;color:var(--muted);text-align:center;border-top:1px solid var(--border)">Drag to rotate · Scroll to zoom · Day/Night toggle</div>
+    <div style="padding:10px 20px;font-size:15px;color:var(--muted);text-align:center;border-top:1px solid var(--border)">Drag to rotate · Scroll to zoom · Day/Night toggle</div>
   </div>
 </div>
 
@@ -1676,8 +1679,8 @@ function set_count(id, v) { const e=document.getElementById(id); if(e) e.textCon
 .gs-results{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 28px rgba(0,0,0,0.35);max-height:340px;overflow-y:auto;z-index:500}
 .gs-item{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;transition:background 0.2s}
 .gs-item:hover{background:rgba(201,169,110,0.08)}
-.gs-sec-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.9px;color:var(--muted);padding:10px 14px 6px}
-.gs-empty{padding:12px 14px;color:var(--muted);font-size:13px}
+.gs-sec-lbl{font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:0.9px;color:var(--muted);padding:10px 14px 6px}
+.gs-empty{padding:12px 14px;color:var(--muted);font-size:18px}
 </style>
 
 <script src="../js/tms-data.js"></script>
@@ -1855,37 +1858,37 @@ document.getElementById('ov-admin3d').addEventListener('click', function(e) {
     <!-- Header -->
     <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)">
       <div>
-        <div style="font-size:15px;font-weight:700;color:var(--text)" id="adm3d-title">3D Request</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px" id="adm3d-status"></div>
+        <div style="font-size:19px;font-weight:700;color:var(--text)" id="adm3d-title">3D Request</div>
+        <div style="font-size:16px;color:var(--muted);margin-top:2px" id="adm3d-status"></div>
       </div>
-      <button onclick="closeAdmin3DReqModal()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,107,107,0.12);color:#FF6B6B;font-size:16px;cursor:pointer">✕</button>
+      <button onclick="closeAdmin3DReqModal()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,107,107,0.12);color:#FF6B6B;font-size:20px;cursor:pointer">✕</button>
     </div>
     <!-- Requirements info -->
-    <div id="adm3d-info" style="padding:12px 22px;background:var(--input-bg);border-bottom:1px solid var(--border);font-size:12px;color:var(--muted)"></div>
+    <div id="adm3d-info" style="padding:12px 22px;background:var(--input-bg);border-bottom:1px solid var(--border);font-size:16px;color:var(--muted)"></div>
     <!-- Chat -->
     <div id="adm3d-msgs" style="flex:1;overflow-y:auto;padding:16px 22px;display:flex;flex-direction:column;gap:10px;min-height:160px;max-height:280px"></div>
     <!-- Admin actions panel -->
     <div style="padding:16px 22px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:12px">
       <!-- Propose / update amount -->
       <div id="adm3d-propose-row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <input id="adm3d-amount" type="number" placeholder="Propose amount (Rs.)" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;width:180px">
-        <textarea id="adm3d-msg-text" rows="2" placeholder="Message to landlord..." style="flex:1;min-width:160px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;resize:none"></textarea>
-        <button onclick="adminSend3DMessage()" style="padding:9px 18px;border-radius:9px;border:none;background:var(--red,#FF6B6B);color:#fff;font-size:13px;font-weight:700;cursor:pointer">Send</button>
+        <input id="adm3d-amount" type="number" placeholder="Propose amount (Rs.)" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:18px;outline:none;width:180px">
+        <textarea id="adm3d-msg-text" rows="2" placeholder="Message to landlord..." style="flex:1;min-width:160px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:18px;outline:none;resize:none"></textarea>
+        <button onclick="adminSend3DMessage()" style="padding:9px 18px;border-radius:9px;border:none;background:var(--red,#FF6B6B);color:#fff;font-size:18px;font-weight:700;cursor:pointer">Send</button>
       </div>
       <!-- Finalize + Reject row -->
       <div id="adm3d-action-row" style="display:flex;gap:8px;flex-wrap:wrap">
-        <button id="adm3d-finalize-btn" onclick="adminFinalize3D()" style="padding:9px 18px;border-radius:9px;border:none;background:#22c55e;color:#fff;font-size:13px;font-weight:700;cursor:pointer">🤝 Finalize Amount</button>
-        <input id="adm3d-finalize-amount" type="number" placeholder="Final Rs." style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;width:130px">
-        <button id="adm3d-reject-btn" onclick="adminReject3D()" style="padding:9px 18px;border-radius:9px;border:none;background:rgba(255,107,107,0.15);color:#FF6B6B;border:1px solid rgba(255,107,107,0.3);font-size:13px;font-weight:700;cursor:pointer">❌ Reject</button>
-        <input id="adm3d-reject-reason" placeholder="Rejection reason..." style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;flex:1;min-width:140px">
+        <button id="adm3d-finalize-btn" onclick="adminFinalize3D()" style="padding:9px 18px;border-radius:9px;border:none;background:#22c55e;color:#fff;font-size:18px;font-weight:700;cursor:pointer">🤝 Finalize Amount</button>
+        <input id="adm3d-finalize-amount" type="number" placeholder="Final Rs." style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:18px;outline:none;width:130px">
+        <button id="adm3d-reject-btn" onclick="adminReject3D()" style="padding:9px 18px;border-radius:9px;border:none;background:rgba(255,107,107,0.15);color:#FF6B6B;border:1px solid rgba(255,107,107,0.3);font-size:18px;font-weight:700;cursor:pointer">❌ Reject</button>
+        <input id="adm3d-reject-reason" placeholder="Rejection reason..." style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:18px;outline:none;flex:1;min-width:140px">
       </div>
       <!-- Complete with 3D builder (shown only when agreed) -->
       <div id="adm3d-complete-row" style="display:none;background:var(--input-bg);border:1px solid var(--border);border-radius:12px;padding:14px">
-        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px">🏗️ Build & Attach 3D Model</div>
+        <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:10px">🏗️ Build & Attach 3D Model</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:10px">
           <div>
-            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Type</label>
-            <select id="adm3d-build-type" style="width:100%;margin-top:4px;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12px;outline:none">
+            <label style="font-size:15px;font-weight:600;color:var(--muted);text-transform:uppercase">Type</label>
+            <select id="adm3d-build-type" style="width:100%;margin-top:4px;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:16px;outline:none">
               <option value="standard">Standard</option>
               <option value="modern">Modern</option>
               <option value="villa">Villa</option>
@@ -1893,30 +1896,30 @@ document.getElementById('ov-admin3d').addEventListener('click', function(e) {
             </select>
           </div>
           <div>
-            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Floors</label>
-            <input id="adm3d-build-floors" type="number" min="1" max="5" value="1" style="width:100%;margin-top:4px;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12px;outline:none;box-sizing:border-box">
+            <label style="font-size:15px;font-weight:600;color:var(--muted);text-transform:uppercase">Floors</label>
+            <input id="adm3d-build-floors" type="number" min="1" max="5" value="1" style="width:100%;margin-top:4px;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:16px;outline:none;box-sizing:border-box">
           </div>
           <div>
-            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Wall Color</label>
+            <label style="font-size:15px;font-weight:600;color:var(--muted);text-transform:uppercase">Wall Color</label>
             <input id="adm3d-build-wall" type="color" value="#C9A96E" style="width:100%;margin-top:4px;height:34px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;background:var(--card)">
           </div>
           <div>
-            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Roof Color</label>
+            <label style="font-size:15px;font-weight:600;color:var(--muted);text-transform:uppercase">Roof Color</label>
             <input id="adm3d-build-roof" type="color" value="#7A4F2A" style="width:100%;margin-top:4px;height:34px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;background:var(--card)">
           </div>
           <div>
-            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Floor Color</label>
+            <label style="font-size:15px;font-weight:600;color:var(--muted);text-transform:uppercase">Floor Color</label>
             <input id="adm3d-build-floor" type="color" value="#D2B48C" style="width:100%;margin-top:4px;height:34px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;background:var(--card)">
           </div>
         </div>
         <div style="display:flex;gap:14px;margin-bottom:12px">
-          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);cursor:pointer"><input id="adm3d-build-garden" type="checkbox"> 🌿 Garden</label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);cursor:pointer"><input id="adm3d-build-pool" type="checkbox"> 🏊 Pool</label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);cursor:pointer"><input id="adm3d-build-garage" type="checkbox"> 🚗 Garage</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:16px;color:var(--text);cursor:pointer"><input id="adm3d-build-garden" type="checkbox"> 🌿 Garden</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:16px;color:var(--text);cursor:pointer"><input id="adm3d-build-pool" type="checkbox"> 🏊 Pool</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:16px;color:var(--text);cursor:pointer"><input id="adm3d-build-garage" type="checkbox"> 🚗 Garage</label>
         </div>
         <div style="display:flex;gap:10px;align-items:center">
-          <button onclick="adminComplete3D()" style="padding:9px 22px;border-radius:9px;border:none;background:var(--gold,#C9A96E);color:#1a1a1a;font-size:13px;font-weight:700;cursor:pointer">✅ Complete & Attach 3D to Property</button>
-          <div id="adm3d-complete-msg" style="display:none;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600"></div>
+          <button onclick="adminComplete3D()" style="padding:9px 22px;border-radius:9px;border:none;background:var(--gold,#C9A96E);color:#1a1a1a;font-size:18px;font-weight:700;cursor:pointer">✅ Complete & Attach 3D to Property</button>
+          <div id="adm3d-complete-msg" style="display:none;padding:7px 12px;border-radius:8px;font-size:16px;font-weight:600"></div>
         </div>
       </div>
     </div>
@@ -1940,7 +1943,7 @@ function adm3dBadge(status) {
     rejected:      { color:'#ef4444', label:'❌ Rejected' },
   };
   const s = map[status] || { color:'#888', label: status };
-  return `<span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${s.color}22;color:${s.color}">${s.label}</span>`;
+  return `<span style="padding:3px 10px;border-radius:20px;font-size:15px;font-weight:700;background:${s.color}22;color:${s.color}">${s.label}</span>`;
 }
 
 async function adminLoad3DRequests() {
@@ -1962,7 +1965,7 @@ async function adminLoad3DRequests() {
   } catch(e) {
     console.error('Failed to load admin 3D requests:', e);
     if (el) {
-      el.innerHTML = `<div class="loading" style="padding:40px;text-align:center"><div style="font-size:18px;font-weight:700;color:var(--text)">Unable to load 3D requests</div><div style="color:var(--muted);font-size:13px;margin-top:8px">${e.message}</div></div>`;
+      el.innerHTML = `<div class="loading" style="padding:40px;text-align:center"><div style="font-size:22px;font-weight:700;color:var(--text)">Unable to load 3D requests</div><div style="color:var(--muted);font-size:18px;margin-top:8px">${e.message}</div></div>`;
     }
   }
 }
@@ -1971,19 +1974,19 @@ function adminRender3DRequests() {
   const el = document.getElementById('admin-3dreq-list');
   if(!el) return;
   if(!_admin3dRequests.length) {
-    el.innerHTML = '<div class="loading" style="padding:40px;text-align:center"><div style="font-size:40px;margin-bottom:12px">🏗️</div><div style="font-size:15px;font-weight:600;color:var(--text)">No 3D Requests</div><div style="color:var(--muted);font-size:13px;margin-top:6px">No landlord has submitted a 3D model request yet.</div></div>';
+    el.innerHTML = '<div class="loading" style="padding:40px;text-align:center"><div style="font-size:42px;margin-bottom:12px">🏗️</div><div style="font-size:19px;font-weight:600;color:var(--text)">No 3D Requests</div><div style="color:var(--muted);font-size:18px;margin-top:6px">No landlord has submitted a 3D model request yet.</div></div>';
     return;
   }
   el.innerHTML = _admin3dRequests.map(r => `
     <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <div>
-          <div style="font-size:14px;font-weight:700;color:var(--text)">${r.propertyTitle||'Property'}</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:2px">by ${r.landlordName||'Landlord'} · ${new Date(r.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>
+          <div style="font-size:18px;font-weight:700;color:var(--text)">${r.propertyTitle||'Property'}</div>
+          <div style="font-size:16px;color:var(--muted);margin-top:2px">by ${r.landlordName||'Landlord'} · ${new Date(r.createdAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>
         </div>
         ${adm3dBadge(r.status)}
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:10px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:16px;color:var(--muted);margin-bottom:10px">
         <span>🏠 ${r.requirements?.houseType||'standard'}</span>
         <span>🏢 ${r.requirements?.floors||1} floor(s)</span>
         ${r.requirements?.hasGarden?'<span>🌿 Garden</span>':''}
@@ -1991,9 +1994,9 @@ function adminRender3DRequests() {
         ${r.requirements?.hasGarage?'<span>🚗 Garage</span>':''}
         ${r.requirements?.extraNotes ? `<span>📝 "${r.requirements.extraNotes.substring(0,40)}${r.requirements.extraNotes.length>40?'…':''}"</span>` : ''}
       </div>
-      ${r.agreedAmount ? `<div style="font-size:12px;color:#22c55e;margin-bottom:8px">🤝 Agreed: <strong>Rs. ${r.agreedAmount.toLocaleString()}</strong></div>` : (r.proposedAmount ? `<div style="font-size:12px;color:var(--gold,#C9A96E);margin-bottom:8px">💰 Proposed: Rs. ${r.proposedAmount.toLocaleString()}</div>` : '')}
+      ${r.agreedAmount ? `<div style="font-size:16px;color:#22c55e;margin-bottom:8px">🤝 Agreed: <strong>Rs. ${r.agreedAmount.toLocaleString()}</strong></div>` : (r.proposedAmount ? `<div style="font-size:16px;color:var(--gold,#C9A96E);margin-bottom:8px">💰 Proposed: Rs. ${r.proposedAmount.toLocaleString()}</div>` : '')}
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button onclick="openAdmin3DReqModal('${r._id}')" style="padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:12px;font-weight:600;cursor:pointer">
+        <button onclick="openAdmin3DReqModal('${r._id}')" style="padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:16px;font-weight:600;cursor:pointer">
           ${r.status==='pending' ? '👁️ Review' : r.status==='negotiating' ? '💬 Negotiate' : r.status==='agreed' ? '🏗️ Build 3D' : '👁️ View'}
         </button>
       </div>
@@ -2026,7 +2029,7 @@ function openAdmin3DReqModal(reqId) {
   document.getElementById('adm3d-info').style.display = 'flex';
   document.getElementById('adm3d-info').style.flexWrap = 'wrap';
   document.getElementById('adm3d-info').style.gap = '6px';
-  document.getElementById('adm3d-info').innerHTML = _infoTags.map(t=>`<span style="padding:3px 9px;border-radius:99px;background:var(--card);border:1px solid var(--border);white-space:nowrap;font-size:11px">${t}</span>`).join('');
+  document.getElementById('adm3d-info').innerHTML = _infoTags.map(t=>`<span style="padding:3px 9px;border-radius:99px;background:var(--card);border:1px solid var(--border);white-space:nowrap;font-size:15px">${t}</span>`).join('');
 
   // Pre-fill 3D builder from requirements
   const setVal = (id, val) => { const e=document.getElementById(id); if(e) e.value=val; };
@@ -2047,15 +2050,15 @@ function openAdmin3DReqModal(reqId) {
     const isAdmin = m.from==='admin';
     return `<div style="display:flex;flex-direction:column;align-items:${isAdmin?'flex-end':'flex-start'}">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;${isAdmin?'flex-direction:row-reverse':''}">
-        <div style="width:26px;height:26px;border-radius:50%;background:${isAdmin?'rgba(255,107,107,0.15)':'rgba(201,169,110,0.15)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:${isAdmin?'#FF6B6B':'var(--gold,#C9A96E)'}">${isAdmin?'AD':'LO'}</div>
-        <span style="font-size:10px;color:var(--muted)">${isAdmin?'You (Admin)':'Landlord'} · ${new Date(m.createdAt||Date.now()).toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'})}</span>
+        <div style="width:26px;height:26px;border-radius:50%;background:${isAdmin?'rgba(255,107,107,0.15)':'rgba(201,169,110,0.15)'};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:${isAdmin?'#FF6B6B':'var(--gold,#C9A96E)'}">${isAdmin?'AD':'LO'}</div>
+        <span style="font-size:14px;color:var(--muted)">${isAdmin?'You (Admin)':'Landlord'} · ${new Date(m.createdAt||Date.now()).toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'})}</span>
       </div>
-      <div style="max-width:82%;padding:10px 14px;border-radius:${isAdmin?'14px 4px 14px 14px':'4px 14px 14px 14px'};background:${isAdmin?'rgba(255,107,107,0.08)':'var(--input-bg)'};border:1px solid ${isAdmin?'rgba(255,107,107,0.25)':'var(--border)'};font-size:13px;color:var(--text);line-height:1.5">
+      <div style="max-width:82%;padding:10px 14px;border-radius:${isAdmin?'14px 4px 14px 14px':'4px 14px 14px 14px'};background:${isAdmin?'rgba(255,107,107,0.08)':'var(--input-bg)'};border:1px solid ${isAdmin?'rgba(255,107,107,0.25)':'var(--border)'};font-size:18px;color:var(--text);line-height:1.5">
         ${m.text}
-        ${m.amount ? `<div style="margin-top:6px;display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;background:rgba(201,169,110,0.15);border:1px solid rgba(201,169,110,0.3);font-size:12px;font-weight:700;color:var(--gold,#C9A96E)">💰 Rs. ${Number(m.amount).toLocaleString()}</div>` : ''}
+        ${m.amount ? `<div style="margin-top:6px;display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;background:rgba(201,169,110,0.15);border:1px solid rgba(201,169,110,0.3);font-size:16px;font-weight:700;color:var(--gold,#C9A96E)">💰 Rs. ${Number(m.amount).toLocaleString()}</div>` : ''}
       </div>
     </div>`;
-  }).join('') : '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px"><div style="font-size:28px;margin-bottom:8px">💬</div>No messages yet. Start by proposing an amount below.</div>';
+  }).join('') : '<div style="text-align:center;color:var(--muted);font-size:18px;padding:20px"><div style="font-size:29px;margin-bottom:8px">💬</div>No messages yet. Start by proposing an amount below.</div>';
   msgsEl.scrollTop = msgsEl.scrollHeight;
 
   // Show/hide action panels based on status
@@ -2191,31 +2194,31 @@ async function aLoadDocsReview() {
     <div style="background:var(--card);border:1px solid ${r.status==='docs_submitted'?'rgba(74,158,255,0.3)':'var(--border)'};border-radius:14px;padding:16px 18px">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
         <div style="flex:1;min-width:200px">
-          <div style="font-size:14px;font-weight:700;color:var(--text)">${r.tenantName||'Tenant'} <span style="font-size:11px;color:var(--muted);font-weight:400">${r.tenantEmail||''}</span></div>
-          <div style="font-size:12px;color:var(--muted);margin-top:3px">🏠 ${r.propertyTitle||''} · Landlord: ${r.landlordName||''}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">Rent: Rs. ${Number(r.propertyRent||0).toLocaleString()}/mo</div>
-          ${r.docsDeadline?`<div style="font-size:11px;color:#ffb347;margin-top:3px">⏰ Deadline: ${new Date(r.docsDeadline).toLocaleString('en-PK',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>`:''}
-          ${r.docsRejectReason?`<div style="font-size:11px;color:var(--error);margin-top:3px">Reject reason: ${r.docsRejectReason}</div>`:''}
+          <div style="font-size:18px;font-weight:700;color:var(--text)">${r.tenantName||'Tenant'} <span style="font-size:15px;color:var(--muted);font-weight:400">${r.tenantEmail||''}</span></div>
+          <div style="font-size:16px;color:var(--muted);margin-top:3px">🏠 ${r.propertyTitle||''} · Landlord: ${r.landlordName||''}</div>
+          <div style="font-size:15px;color:var(--muted);margin-top:2px">Rent: Rs. ${Number(r.propertyRent||0).toLocaleString()}/mo</div>
+          ${r.docsDeadline?`<div style="font-size:15px;color:#ffb347;margin-top:3px">⏰ Deadline: ${new Date(r.docsDeadline).toLocaleString('en-PK',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>`:''}
+          ${r.docsRejectReason?`<div style="font-size:15px;color:var(--error);margin-top:3px">Reject reason: ${r.docsRejectReason}</div>`:''}
         </div>
         <span class="badge ${statusBadge[r.status]||'b-warn'}">${statusLabel[r.status]||r.status}</span>
       </div>
       ${r.documents&&r.documents.idCard?`
       <div style="display:grid;grid-template-columns:repeat(${r.documents.birthCert?3:2},1fr);gap:10px;margin-top:14px">
-        <div><div style="font-size:10px;color:var(--muted);margin-bottom:5px;font-weight:700;text-transform:uppercase">🪪 ID Card</div><img src="${r.documents.idCard}" style="width:100%;height:100px;cursor:pointer;object-fit:cover;border-radius:8px;border:1px solid var(--border)" onclick="openDocPreview(this.src,'ID Card')" onerror="this.style.opacity=0.2"></div>
-        <div><div style="font-size:10px;color:var(--muted);margin-bottom:5px;font-weight:700;text-transform:uppercase">🚔 Police Cert</div><img src="${r.documents.policeCert||''}" style="width:100%;height:100px;cursor:pointer;object-fit:cover;border-radius:8px;border:1px solid var(--border)" onclick="openDocPreview(this.src,'Police Certificate')" onerror="this.style.opacity=0.2"></div>
-        ${r.documents.birthCert?`<div><div style="font-size:10px;color:var(--muted);margin-bottom:5px;font-weight:700;text-transform:uppercase">🎂 Birth Cert</div><img src="${r.documents.birthCert}" style="width:100%;height:100px;cursor:pointer;object-fit:cover;border-radius:8px;border:1px solid var(--border)" onclick="openDocPreview(this.src,'Birth Certificate')" onerror="this.style.opacity=0.2"></div>`:''}
+        <div><div style="font-size:14px;color:var(--muted);margin-bottom:5px;font-weight:700;text-transform:uppercase">🪪 ID Card</div><img src="${r.documents.idCard}" style="width:100%;height:100px;cursor:pointer;object-fit:cover;border-radius:8px;border:1px solid var(--border)" onclick="openDocPreview(this.src,'ID Card')" onerror="this.style.opacity=0.2"></div>
+        <div><div style="font-size:14px;color:var(--muted);margin-bottom:5px;font-weight:700;text-transform:uppercase">🚔 Police Cert</div><img src="${r.documents.policeCert||''}" style="width:100%;height:100px;cursor:pointer;object-fit:cover;border-radius:8px;border:1px solid var(--border)" onclick="openDocPreview(this.src,'Police Certificate')" onerror="this.style.opacity=0.2"></div>
+        ${r.documents.birthCert?`<div><div style="font-size:14px;color:var(--muted);margin-bottom:5px;font-weight:700;text-transform:uppercase">🎂 Birth Cert</div><img src="${r.documents.birthCert}" style="width:100%;height:100px;cursor:pointer;object-fit:cover;border-radius:8px;border:1px solid var(--border)" onclick="openDocPreview(this.src,'Birth Certificate')" onerror="this.style.opacity=0.2"></div>`:''}
       </div>
-      ${r.documents.submittedAt?`<div style="font-size:11px;color:var(--muted);margin-top:8px">Submitted: ${new Date(r.documents.submittedAt).toLocaleString('en-PK',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>`:''}
-      `:r.status==='docs_pending'?`<div style="margin-top:12px;padding:10px 12px;background:rgba(255,179,71,0.06);border-radius:8px;font-size:12px;color:#ffb347">⏳ The tenant has not submitted documents yet.</div>`:`<div style="margin-top:12px;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:8px;font-size:12px;color:var(--muted)">Documents are not available.</div>`}
+      ${r.documents.submittedAt?`<div style="font-size:15px;color:var(--muted);margin-top:8px">Submitted: ${new Date(r.documents.submittedAt).toLocaleString('en-PK',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>`:''}
+      `:r.status==='docs_pending'?`<div style="margin-top:12px;padding:10px 12px;background:rgba(255,179,71,0.06);border-radius:8px;font-size:16px;color:#ffb347">⏳ The tenant has not submitted documents yet.</div>`:`<div style="margin-top:12px;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:8px;font-size:16px;color:var(--muted)">Documents are not available.</div>`}
       ${r.status==='docs_submitted'?`
       <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
-        <button onclick="aDocsAction('${r._id}','approve')" style="flex:1;min-width:120px;padding:9px;border-radius:9px;border:none;background:linear-gradient(135deg,#4ecdc4,#2bb5ac);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">✅ Approve</button>
-        <button onclick="aDocsRejectPrompt('${r._id}')" style="flex:1;min-width:120px;padding:9px;border-radius:9px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:var(--error);font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">❌ Reject</button>
-        <button onclick="aBlockTenant('${r.tenantId&&(r.tenantId._id||r.tenantId)}')" style="flex:1;min-width:120px;padding:9px;border-radius:9px;border:1px solid rgba(255,107,107,0.5);background:rgba(255,50,50,0.12);color:#ff4444;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">🚫 Fraud — Block Tenant</button>
+        <button onclick="aDocsAction('${r._id}','approve')" style="flex:1;min-width:120px;padding:9px;border-radius:9px;border:none;background:linear-gradient(135deg,#4ecdc4,#2bb5ac);color:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">✅ Approve</button>
+        <button onclick="aDocsRejectPrompt('${r._id}')" style="flex:1;min-width:120px;padding:9px;border-radius:9px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:var(--error);font-size:16px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">❌ Reject</button>
+        <button onclick="aBlockTenant('${r.tenantId&&(r.tenantId._id||r.tenantId)}')" style="flex:1;min-width:120px;padding:9px;border-radius:9px;border:1px solid rgba(255,107,107,0.5);background:rgba(255,50,50,0.12);color:#ff4444;font-size:16px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">🚫 Fraud — Block Tenant</button>
       </div>`:r.status==='docs_expired'?`
       <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
-        <button onclick="aReopenDocs('${r._id}')" style="flex:1;min-width:120px;padding:9px;border-radius:9px;border:none;background:rgba(74,158,255,0.12);color:#4a9eff;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">🔄 Give 48h More</button>
-        <button onclick="aDocsRejectPrompt('${r._id}')" style="flex:1;min-width:120px;padding:9px;border-radius:9px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:var(--error);font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">❌ Reject &amp; Close</button>
+        <button onclick="aReopenDocs('${r._id}')" style="flex:1;min-width:120px;padding:9px;border-radius:9px;border:none;background:rgba(74,158,255,0.12);color:#4a9eff;font-size:16px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">🔄 Give 48h More</button>
+        <button onclick="aDocsRejectPrompt('${r._id}')" style="flex:1;min-width:120px;padding:9px;border-radius:9px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:var(--error);font-size:16px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">❌ Reject &amp; Close</button>
       </div>`:''}
     </div>`).join('');
   } catch(e){ list.innerHTML='<div class="loading">⚠️ Error: '+e.message+'</div>'; }
@@ -2294,8 +2297,8 @@ window.sp = function(id, btn) {
 
 <div id="doc-preview-overlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.86);align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)">
   <div style="position:relative;max-width:95%;max-height:95%;width:100%;">
-    <button onclick="closeDocPreview()" style="position:absolute;top:-12px;right:-12px;width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,0.12);color:#fff;font-size:22px;cursor:pointer;z-index:10">×</button>
-    <div style="font-size:12px;color:#ddd;margin-bottom:10px;text-align:center" id="doc-preview-title">Document Preview</div>
+    <button onclick="closeDocPreview()" style="position:absolute;top:-12px;right:-12px;width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,0.12);color:#fff;font-size:25px;cursor:pointer;z-index:10">×</button>
+    <div style="font-size:16px;color:#ddd;margin-bottom:10px;text-align:center" id="doc-preview-title">Document Preview</div>
     <img id="doc-preview-img" src="" style="width:100%;height:auto;max-height:85vh;display:block;margin:0 auto;border-radius:12px;object-fit:contain;box-shadow:0 0 35px rgba(0,0,0,0.4)">
   </div>
 </div>
