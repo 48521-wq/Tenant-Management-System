@@ -47,7 +47,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .layout{display:flex;flex:1;position:relative;z-index:1;padding-top:62px;height:calc(100vh - 62px);overflow:visible}
 /* SIDEBAR */
 .sidebar{
-  width:220px;
+  width:232px;
   flex-shrink:0;
   background:var(--sidebar-bg);
   border-right:1px solid var(--border);
@@ -60,8 +60,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   overflow-x:hidden;
 }
 .sb-sec{padding:16px 12px 6px}
-.sb-lbl{font-size:10px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;padding:0 10px 8px;display:block}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.18s;margin-bottom:2px;border:none;background:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left}
+.sb-lbl{font-size:11px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;padding:0 10px 8px;display:block}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--muted);font-size:14px;font-weight:500;cursor:pointer;transition:all 0.18s;margin-bottom:2px;border:none;background:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left}
 .nav-item svg{width:15px;height:15px;stroke:currentColor;fill:none;flex-shrink:0}
 .nav-item:hover{color:var(--text);background:rgba(201,169,110,0.07)}
 .nav-item.active{color:var(--gold);background:rgba(201,169,110,0.1);font-weight:600}
@@ -69,7 +69,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .sb-foot{margin-top:auto;padding:14px 12px;border-top:1px solid var(--border)}
 .sb-user{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--input-bg);border-radius:12px;border:1px solid var(--border)}
 .sb-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-l));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#FFFFFF;flex-shrink:0}
-.sb-uname{font-size:12px;font-weight:600;color:var(--text)}.sb-urole{font-size:10px;color:var(--muted)}
+.sb-uname{font-size:13px;font-weight:600;color:var(--text)}.sb-urole{font-size:11px;color:var(--muted)}
 /* MAIN */
 .main{flex:1;min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden}
 .page{display:none;padding:28px 32px 52px;animation:pgIn 0.27s ease both}
@@ -78,6 +78,57 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .pg-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:14px;flex-wrap:wrap}
 .pg-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--text)}
 .pg-sub{color:var(--muted);font-size:13px;margin-top:3px}
+/* Rental requests are often reviewed on shared/projected screens, so keep their
+   key details comfortably readable and let the cards use the available width. */
+.rental-requests-page{padding:32px 40px 56px}
+.rental-requests-page .pg-head{align-items:center;margin-bottom:24px}
+.rental-requests-page .pg-title{font-size:30px}
+.rental-requests-page .pg-sub{font-size:16px;line-height:1.5}
+.rental-requests-card{width:100%;padding:28px;border-radius:18px}
+.rental-requests-card-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.rental-requests-card-title{font-size:19px;font-weight:700;color:var(--text)}
+.rental-requests-card-hint{font-size:15px;color:var(--muted)}
+.rental-request-group{margin-bottom:24px;border-top:1px solid var(--border);padding-top:18px}
+.rental-request-group-title{font-size:14px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px}
+.rental-request-card{background:var(--input-bg);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-bottom:14px}
+.rental-request-card.is-negotiating{border-color:rgba(74,158,255,.38)}
+.rental-request-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:12px}
+.rental-request-property{min-width:0;flex:1}
+.rental-request-property-title{font-size:17px;font-weight:700;color:var(--text);line-height:1.4}
+.rental-request-property-details{font-size:14px;color:var(--muted);margin-top:4px;line-height:1.5;overflow-wrap:anywhere}
+.rental-request-offer{font-size:15px;color:var(--blue);margin-top:6px;font-weight:700}
+.rental-request-card .badge{font-size:13px;padding:6px 12px;white-space:nowrap}
+.rental-request-meta{display:flex;justify-content:space-between;gap:18px;padding:12px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.rental-request-meta-block:last-child{text-align:right}
+.rental-request-meta-label{font-size:13px;color:var(--muted);margin-bottom:3px}
+.rental-request-meta-value{font-size:15px;font-weight:600;color:var(--text);line-height:1.5;overflow-wrap:anywhere}
+.rental-request-meta-email{font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.rental-request-agreed{font-size:15px;color:var(--green);font-weight:700}
+.rental-request-message{margin:12px 0;padding:12px 14px;background:rgba(74,158,255,.08);border-left:3px solid var(--blue);border-radius:6px;font-size:14px;color:var(--text);line-height:1.55;overflow-wrap:anywhere}
+.rental-request-last-message{margin:12px 0;padding:12px 14px;background:rgba(201,169,110,.08);border-radius:10px;font-size:14px;color:var(--text);line-height:1.55;overflow-wrap:anywhere}
+.rental-request-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.rental-request-actions button{flex:1 1 180px!important;min-width:150px!important;padding:11px 14px!important;font-size:14px!important}
+.rental-request-actions .rental-docs-waiting{flex:1;padding:11px 14px;border-radius:9px;background:rgba(255,179,71,.08);border:1px solid rgba(255,179,71,.24);font-size:14px;color:#ffb347;font-weight:600;text-align:center}
+@media (max-width: 900px) {
+  .page.rental-requests-page{padding:24px 22px 40px!important}
+  .rental-requests-card{padding:22px}
+}
+@media (max-width: 600px) {
+  .page.rental-requests-page{padding:20px 14px 32px!important}
+  .rental-requests-page .pg-title{font-size:26px}
+  .rental-requests-page .pg-sub{font-size:15px}
+  .rental-requests-card{padding:18px 14px}
+  .rental-requests-card-title{font-size:17px}
+  .rental-requests-card-hint{font-size:14px}
+  .rental-request-top{gap:8px}
+  .rental-request-property-title{font-size:16px}
+  .rental-request-property-details{font-size:13px}
+  .rental-request-meta{gap:12px}
+  .rental-request-meta-value{font-size:14px}
+  .rental-request-meta-email{font-size:12px}
+  .rental-request-actions{flex-direction:column}
+  .rental-request-actions button{flex-basis:auto!important;width:100%}
+}
 /* BUTTONS */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;border:none}
 .btn svg{width:14px;height:14px;stroke:currentColor;fill:none}
@@ -634,9 +685,11 @@ tr:hover td {
 .page {
   padding: 24px 28px 48px !important;
 }
-#page-dashboard,
-#page-rental-requests {
+#page-dashboard {
   padding: 6px 18px 24px !important;
+}
+#page-rental-requests {
+  padding: 24px 40px 32px !important;
 }
 #page-dashboard .pg-head,
 #page-rental-requests .pg-head {
@@ -650,12 +703,14 @@ tr:hover td {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 12px;
 }
-#page-dashboard .stat-card,
-#page-rental-requests .card {
+#page-dashboard .stat-card {
   padding: 12px 14px;
 }
+#page-rental-requests .card {
+  padding: 28px;
+}
 #page-rental-requests {
-  padding-top: 0 !important;
+  padding-top: 16px !important;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -676,7 +731,127 @@ tr:hover td {
 }
 @media (max-width: 900px) {
   .page { padding: 18px 14px 32px !important; }
+  #page-rental-requests { padding: 20px 22px 28px !important; }
+  #page-rental-requests .card { padding: 22px; }
   .stats-row { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 600px) {
+  #page-rental-requests { padding: 16px 14px 24px !important; }
+  #page-rental-requests .card { padding: 18px 14px; }
+  #page-rental-requests .rental-request-top { flex-wrap: wrap; }
+}
+#page-lfurniture { padding: 24px 32px 36px !important; }
+#page-lfurniture .pg-head { margin-bottom: 18px; }
+#page-lfurniture .pg-title { font-size: 28px; }
+#page-lfurniture .pg-sub { font-size: 15px; line-height: 1.5; }
+.lfurn-property-bar {
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  padding:16px 20px;margin-bottom:16px;background:var(--card);
+  border:1px solid var(--border);border-radius:16px;
+}
+.lfurn-property-select { display:flex;align-items:center;gap:14px;flex-wrap:wrap; }
+.lfurn-property-select label { color:var(--text);font-size:14px;font-weight:700; }
+.lfurn-property-select select {
+  min-width:280px;padding:11px 42px 11px 14px;border:1px solid var(--border);
+  border-radius:10px;background:var(--input-bg);color:var(--text);
+  font:500 14px 'DM Sans',sans-serif;outline:none;
+}
+.lfurn-property-select select:focus { border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.14); }
+.lfurn-property-meta { display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
+.lfurn-saved-badge,.lfurn-tenant-toggle {
+  align-items:center;padding:9px 13px;border-radius:10px;font:600 13px 'DM Sans',sans-serif;
+}
+.lfurn-saved-badge { color:var(--green);background:rgba(78,205,196,.1);border:1px solid rgba(78,205,196,.3); }
+.lfurn-tenant-toggle { color:var(--green);background:rgba(78,205,196,.08);border:1px solid rgba(78,205,196,.3);cursor:pointer; }
+.lfurn-placeholder {
+  min-height:440px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;
+  padding:36px;text-align:center;color:var(--muted);background:var(--card);
+  border:1px dashed var(--border);border-radius:18px;
+}
+.lfurn-placeholder-icon { font-size:56px; }
+.lfurn-placeholder strong { color:var(--text);font-size:20px; }
+.lfurn-placeholder span:last-child { max-width:480px;font-size:14px;line-height:1.6; }
+.lfurn-studio { grid-template-columns:minmax(250px,300px) minmax(0,1fr);gap:16px;align-items:stretch; }
+.lfurn-tools {
+  display:flex;flex-direction:column;gap:14px;min-width:0;padding:18px;
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+}
+.lfurn-tools-heading { display:flex;flex-direction:column;gap:4px;padding-bottom:14px;border-bottom:1px solid var(--border); }
+.lfurn-tools-heading>span { color:var(--text);font-size:17px;font-weight:700; }
+.lfurn-tools-heading small { color:var(--muted);font-size:12px;line-height:1.5; }
+.lfurn-catalog { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px; }
+.lfurn-catalog button {
+  min-height:58px;padding:8px;display:flex;align-items:center;gap:8px;text-align:left;
+  border:1px solid var(--border);border-radius:11px;background:var(--input-bg);
+  color:var(--text);font:600 12px 'DM Sans',sans-serif;cursor:pointer;
+  transition:transform .16s,border-color .16s,background .16s;
+}
+.lfurn-catalog button:hover { transform:translateY(-2px);border-color:var(--blue);background:rgba(37,99,235,.08); }
+.lfurn-catalog button span:first-child { width:30px;height:30px;display:grid;place-items:center;flex:none;background:rgba(37,99,235,.09);border-radius:9px;font-size:18px; }
+.lfurn-catalog button span:last-child { line-height:1.3; }
+.lfurn-controls { flex-direction:column;gap:10px;padding-top:14px;border-top:1px solid var(--border); }
+.lfurn-controls-heading { color:var(--gold);font-size:13px;font-weight:700; }
+.lfurn-controls-buttons { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px; }
+.lfurn-controls-buttons button,.lfurn-export-btn {
+  min-height:40px;padding:8px 10px;border:1px solid var(--border);border-radius:9px;
+  background:var(--input-bg);color:var(--text);font:600 12px 'DM Sans',sans-serif;cursor:pointer;
+}
+.lfurn-controls-buttons button:hover,.lfurn-export-btn:hover { border-color:var(--blue);background:rgba(37,99,235,.08); }
+.lfurn-controls-buttons .lfurn-delete { color:var(--error);border-color:rgba(255,107,107,.25); }
+.lfurn-help { display:flex;flex-direction:column;gap:9px;margin-top:auto;padding-top:14px;border-top:1px solid var(--border);color:var(--muted);font-size:12px; }
+.lfurn-help strong { color:var(--text);font-size:13px; }
+.lfurn-help kbd { display:inline-block;min-width:88px;margin-right:5px;padding:3px 6px;text-align:center;background:var(--input-bg);border:1px solid var(--border);border-radius:5px;color:var(--text);font:500 10px 'DM Sans',sans-serif; }
+.lfurn-workspace { display:flex;flex-direction:column;gap:12px;min-width:0; }
+.lfurn-canvas-wrap {
+  position:relative;isolation:isolate;min-width:0;min-height:560px;flex:1;overflow:hidden;
+  border:1px solid rgba(130,150,180,.25);border-radius:16px;
+  background:radial-gradient(ellipse at 50% 35%,#38404b 0%,#1c2430 72%,#121821 100%);
+  box-shadow:0 18px 44px rgba(0,0,0,.2);
+}
+.lfurn-canvas-wrap canvas { display:block;width:100%;height:100%;min-height:560px;outline:none; }
+.lfurn-scene-label {
+  position:absolute;z-index:2;top:14px;left:14px;display:flex;align-items:center;gap:8px;
+  padding:8px 11px;border:1px solid rgba(255,255,255,.16);border-radius:9px;
+  background:rgba(13,18,26,.72);color:#F8FAFC;font-size:10px;font-weight:700;letter-spacing:.8px;
+  pointer-events:none;backdrop-filter:blur(10px);
+}
+.lfurn-scene-label span { width:8px;height:8px;border-radius:50%;background:#4ECDC4;box-shadow:0 0 10px #4ECDC4; }
+.lfurn-viewlabel { position:absolute;top:14px;right:14px;padding:8px 12px;border-radius:9px;background:rgba(13,18,26,.78);font-size:12px;font-weight:700;color:#4ECDC4; }
+.lfurn-savebar {
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  padding:15px 18px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+}
+.lfurn-savebar-copy { display:flex;flex-direction:column;gap:3px; }
+.lfurn-savebar-copy strong { color:var(--text);font-size:14px; }
+.lfurn-savebar-copy span { color:var(--muted);font-size:12px; }
+.lfurn-savebar-actions { display:flex;gap:8px;flex-wrap:wrap; }
+.lfurn-save-btn { min-height:42px;padding:10px 17px;border:0;border-radius:9px;background:linear-gradient(135deg,var(--blue),var(--blue-l));color:#fff;font:700 13px 'DM Sans',sans-serif;cursor:pointer;box-shadow:0 4px 12px rgba(37,99,235,.2); }
+.lfurn-save-btn:hover { filter:brightness(1.08); }
+.lfurn-save-btn:disabled { opacity:.65;cursor:wait; }
+@media (max-width: 1100px) {
+  #page-lfurniture { padding:20px 22px 30px!important; }
+  .lfurn-studio { grid-template-columns:minmax(220px,260px) minmax(0,1fr);gap:12px; }
+  .lfurn-tools { padding:14px; }
+  .lfurn-canvas-wrap,.lfurn-canvas-wrap canvas { min-height:500px; }
+}
+@media (max-width: 760px) {
+  #page-lfurniture { padding:16px 14px 24px!important; }
+  #page-lfurniture .pg-title { font-size:24px; }
+  .lfurn-property-bar { padding:14px; }
+  .lfurn-property-select { width:100%;align-items:flex-start;flex-direction:column;gap:8px; }
+  .lfurn-property-select select { width:100%;min-width:0; }
+  .lfurn-studio { grid-template-columns:minmax(0,1fr); }
+  .lfurn-tools { gap:12px; }
+  .lfurn-catalog { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .lfurn-catalog button { min-height:54px;padding:7px;gap:6px;font-size:11px; }
+  .lfurn-help { display:grid;grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .lfurn-help strong { grid-column:1/-1; }
+  .lfurn-canvas-wrap,.lfurn-canvas-wrap canvas { min-height:420px;height:55vh; }
+}
+@media (max-width: 430px) {
+  .lfurn-catalog { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .lfurn-savebar-actions { width:100%; }
+  .lfurn-savebar-actions button { flex:1; }
 }
 
 /* ─── SUBTLE GRAIN TEXTURE ON BODY ─── */
@@ -1898,47 +2073,47 @@ async function loadLandlordRentalRequests() {
       const items = requests.filter(r => r.status === status);
       if (items.length === 0) return;
       const groupLabel = {pending:'Pending',accepted:'Accepted',rejected:'Rejected',cancelled:'Cancelled',negotiating:'Negotiating'}[status]||status;
-      html += `<div style="margin-bottom:20px;border-top:1px solid var(--border);padding-top:14px">
-        <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">${statusEmoji[status]} ${groupLabel} Requests (${items.length})</div>`;
+      html += `<div class="rental-request-group">
+        <div class="rental-request-group-title">${statusEmoji[status]} ${groupLabel} Requests (${items.length})</div>`;
       items.forEach(req => {
         const lastMsg = (req.negotiationMessages||[]).slice(-1)[0];
         html += `
-        <div style="background:var(--input-bg);border:1px solid ${status==='negotiating'?'rgba(74,158,255,0.3)':'var(--border)'};border-radius:12px;padding:14px 16px;margin-bottom:10px">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px">
-            <div style="flex:1">
-              <div style="font-size:13px;font-weight:600;color:var(--text)">${req.propertyTitle}</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px">📍 ${req.propertyAddress} · 💰 Rs. ${Number(req.propertyRent||0).toLocaleString()}/month</div>
-              ${req.proposedRent ? `<div style="font-size:12px;color:var(--blue);margin-top:4px;font-weight:600">🏷️ Tenant offer: Rs. ${Number(req.proposedRent).toLocaleString()}/mo</div>` : ''}
+        <div class="rental-request-card${status==='negotiating'?' is-negotiating':''}">
+          <div class="rental-request-top">
+            <div class="rental-request-property">
+              <div class="rental-request-property-title">${req.propertyTitle}</div>
+              <div class="rental-request-property-details">📍 ${req.propertyAddress} · 💰 Rs. ${Number(req.propertyRent||0).toLocaleString()}/month</div>
+              ${req.proposedRent ? `<div class="rental-request-offer">🏷️ Tenant offer: Rs. ${Number(req.proposedRent).toLocaleString()}/mo</div>` : ''}
             </div>
             <span class="badge ${statusBadges[req.status]||'b-warn'}">${statusEmoji[req.status]||''} ${statusLabelMap[req.status]||req.status}</span>
           </div>
-          <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
-            <div>
-              <div style="font-size:11px;color:var(--muted)">Tenant</div>
-              <div style="font-size:12px;font-weight:600;color:var(--text)">${req.tenantName}</div>
-              <div style="font-size:11px;color:var(--muted)">${req.tenantEmail}</div>
+          <div class="rental-request-meta">
+            <div class="rental-request-meta-block">
+              <div class="rental-request-meta-label">Tenant</div>
+              <div class="rental-request-meta-value">${req.tenantName}</div>
+              <div class="rental-request-meta-email">${req.tenantEmail}</div>
             </div>
-            <div>
-              <div style="font-size:11px;color:var(--muted)">Request Date</div>
-              <div style="font-size:12px;font-weight:600;color:var(--text)">${new Date(req.requestedAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>
+            <div class="rental-request-meta-block">
+              <div class="rental-request-meta-label">Request Date</div>
+              <div class="rental-request-meta-value">${new Date(req.requestedAt).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}</div>
             </div>
           </div>
-          ${req.message ? `<div style="margin:8px 0;padding:8px;background:rgba(74,158,255,0.08);border-left:2px solid var(--blue);border-radius:4px;font-size:12px;color:var(--text)">"${req.message}"</div>` : ''}
-          ${lastMsg ? `<div style="margin:8px 0;padding:8px 10px;background:rgba(201,169,110,0.07);border-radius:8px;font-size:12px;color:var(--text)"><span style="color:var(--muted);font-size:11px">${lastMsg.senderRole==='tenant'?'🧑 Tenant':'🏠 Aap'}:</span> ${lastMsg.text||''}${lastMsg.proposedRent?` <span style="color:var(--blue);font-weight:700">Rs. ${Number(lastMsg.proposedRent).toLocaleString()}/mo</span>`:''}</div>` : ''}
-          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          ${req.message ? `<div class="rental-request-message">"${req.message}"</div>` : ''}
+          ${lastMsg ? `<div class="rental-request-last-message"><span style="color:var(--muted);font-size:13px">${lastMsg.senderRole==='tenant'?'🧑 Tenant':'🏠 Aap'}:</span> ${lastMsg.text||''}${lastMsg.proposedRent?` <span style="color:var(--blue);font-weight:700">Rs. ${Number(lastMsg.proposedRent).toLocaleString()}/mo</span>`:''}</div>` : ''}
+          <div class="rental-request-actions">
             ${req.status === 'docs_submitted' ? `
-              <button onclick="llOpenVerifyDocs('${req._id}')" style="flex:1;min-width:70px;padding:8px 12px;border-radius:9px;border:none;background:rgba(201,169,110,0.15);color:var(--gold);font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">🔍 Verify Documents</button>
+              <button onclick="llOpenVerifyDocs('${req._id}')" style="border-radius:9px;border:none;background:rgba(201,169,110,0.15);color:var(--gold);font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">🔍 Verify Documents</button>
             ` : req.status === 'docs_pending' ? `
-              <div style="flex:1;padding:8px 12px;border-radius:9px;background:rgba(255,179,71,0.06);border:1px solid rgba(255,179,71,0.2);font-size:11px;color:#ffb347;font-weight:600;text-align:center">⏳ Docs ka intezaar</div>
+              <div class="rental-docs-waiting">⏳ Docs ka intezaar</div>
             ` : req.status === 'docs_expired' ? `
-              <button onclick="llReopenDocs('${req._id}')" style="flex:1;min-width:70px;padding:8px 12px;border-radius:9px;border:none;background:rgba(74,158,255,0.12);color:var(--blue);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">🔄 Give 48h More</button>
-              <button onclick="rejectRentalRequest('${req._id}')" style="flex:1;min-width:70px;padding:8px 12px;border-radius:9px;border:none;background:rgba(255,107,107,0.12);color:var(--error);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">❌ Reject &amp; Close</button>
+              <button onclick="llReopenDocs('${req._id}')" style="border-radius:9px;border:none;background:rgba(74,158,255,0.12);color:var(--blue);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">🔄 Give 48h More</button>
+              <button onclick="rejectRentalRequest('${req._id}')" style="border-radius:9px;border:none;background:rgba(255,107,107,0.12);color:var(--error);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">❌ Reject &amp; Close</button>
             ` : ['pending','negotiating'].includes(req.status) ? `
-              <button onclick="acceptRentalRequest('${req._id}')" style="flex:1;min-width:70px;padding:8px 12px;border-radius:9px;border:none;background:rgba(78,205,196,0.12);color:var(--green);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">✅ Accept</button>
-              <button onclick="openNegotiationModal('${req._id}','${(req.propertyTitle||'').replace(/'/g,'\\\'')}',${req.propertyRent||0},${req.proposedRent||0})" style="flex:1;min-width:70px;padding:8px 12px;border-radius:9px;border:none;background:rgba(74,158,255,0.12);color:var(--blue);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">💬 Negotiate</button>
-              <button onclick="rejectRentalRequest('${req._id}')" style="flex:1;min-width:70px;padding:8px 12px;border-radius:9px;border:none;background:rgba(255,107,107,0.12);color:var(--error);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">❌ Reject</button>
+              <button onclick="acceptRentalRequest('${req._id}')" style="border-radius:9px;border:none;background:rgba(78,205,196,0.12);color:var(--green);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">✅ Accept</button>
+              <button onclick="openNegotiationModal('${req._id}','${(req.propertyTitle||'').replace(/'/g,'\\\'')}',${req.propertyRent||0},${req.proposedRent||0})" style="border-radius:9px;border:none;background:rgba(74,158,255,0.12);color:var(--blue);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">💬 Negotiate</button>
+              <button onclick="rejectRentalRequest('${req._id}')" style="border-radius:9px;border:none;background:rgba(255,107,107,0.12);color:var(--error);font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">❌ Reject</button>
             ` : ''}
-            ${req.status === 'accepted' && req.agreedRent ? `<div style="font-size:12px;color:var(--green);font-weight:600">🤝 Agreed: Rs. ${Number(req.agreedRent).toLocaleString()}/mo</div>` : ''}
+            ${req.status === 'accepted' && req.agreedRent ? `<div class="rental-request-agreed">🤝 Agreed: Rs. ${Number(req.agreedRent).toLocaleString()}/mo</div>` : ''}
           </div>
         </div>`;
       });
@@ -2383,15 +2558,15 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
   </div>
 
   <!-- RENTAL REQUESTS PAGE -->
-  <div class="page" id="page-rental-requests">
+  <div class="page rental-requests-page" id="page-rental-requests">
     <div class="pg-head">
       <div><div class="pg-title">Rental Requests</div><div class="pg-sub">Review and respond to tenant requests for your properties</div></div>
       <div class="tn-pill" id="rental-requests-badge-ll" style="display:none">0</div>
     </div>
-    <div class="card" style="margin-top:8px">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px">
-        <h3 style="font-size:15px;font-weight:700;margin:0;color:var(--text)">Pending & Recent Requests</h3>
-        <div style="font-size:12px;color:var(--muted)">Accept, negotiate, or reject each request</div>
+    <div class="card rental-requests-card" style="margin-top:8px">
+      <div class="rental-requests-card-head">
+        <h3 class="rental-requests-card-title">Pending & Recent Requests</h3>
+        <div class="rental-requests-card-hint">Accept, negotiate, or reject each request</div>
       </div>
       <div id="ll-rental-requests-list"><div class="loading"><span class="spinner"></span>Loading rental requests…</div></div>
     </div>
@@ -2424,40 +2599,64 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
     <div class="pg-head">
       <div><div class="pg-title">🛋️ Furniture Placement</div><div class="pg-sub">Design room layouts for your properties — tenants can also save their own</div></div>
     </div>
-    <div style="margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-      <label style="font-size:13px;font-weight:600;color:var(--muted)">Select Property:</label>
-      <select id="lfurn-prop-select" onchange="loadLFurnForProp(this.value)"
-        style="padding:9px 16px;border-radius:10px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;min-width:220px">
-        <option value="">— Select a property —</option>
-      </select>
-      <div id="lfurn-saved-badge" style="display:none;padding:4px 12px;border-radius:20px;background:rgba(201,169,110,0.12);border:1px solid rgba(201,169,110,0.4);color:var(--gold);font-size:11px;font-weight:700">✅ My Layout Saved</div>
-      <button id="lfurn-toggle-btn" onclick="lFurnToggleView()" style="display:none;padding:7px 16px;border-radius:9px;border:1px solid #4ECDC4;background:rgba(78,205,196,0.08);color:#4ECDC4;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600">🛋️ View Tenant Layout</button>
+    <div class="lfurn-property-bar">
+      <div class="lfurn-property-select">
+        <label for="lfurn-prop-select">Choose property</label>
+        <select id="lfurn-prop-select" onchange="loadLFurnForProp(this.value)">
+          <option value="">— Select a property —</option>
+        </select>
+      </div>
+      <div class="lfurn-property-meta">
+        <div id="lfurn-saved-badge" class="lfurn-saved-badge" style="display:none">✅ My Layout Saved</div>
+        <button id="lfurn-toggle-btn" class="lfurn-tenant-toggle" onclick="lFurnToggleView()" style="display:none">🛋️ View Tenant Layout</button>
+      </div>
     </div>
-    <div id="lfurn-placeholder" style="display:flex;align-items:center;justify-content:center;min-height:420px;border-radius:16px;border:1px dashed var(--border);background:var(--input-bg);color:var(--muted);font-size:14px;flex-direction:column;gap:10px">
-      <span style="font-size:48px">🏠</span><span>Select Property from above</span>
+    <div id="lfurn-placeholder" class="lfurn-placeholder">
+      <span class="lfurn-placeholder-icon">🏠</span>
+      <strong>Choose a property to start designing</strong>
+      <span>Select one of your properties above to open the interactive 3D room studio.</span>
     </div>
-    <div id="lfurn-main" style="display:none;flex-direction:column;gap:12px">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-right:4px">Add:</div>
-        <div id="lfurn-catalog" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-      </div>
-      <div id="lfurn-controls" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-radius:10px;background:var(--input-bg);border:1px solid var(--border)">
-        <span style="font-size:12px;font-weight:600;color:var(--gold)">Selected:</span>
-        <button onclick="lFurnRotate(-45)" style="padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">↺ -45°</button>
-        <button onclick="lFurnRotate(45)"  style="padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">↻ +45°</button>
-        <button onclick="lFurnRotate(90)"  style="padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">↻ 90°</button>
-        <button onclick="lFurnDelete()"    style="padding:6px 12px;border-radius:7px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:#FF6B6B;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">🗑 Delete</button>
-        <span style="font-size:11px;color:var(--muted);margin-left:8px">Right-drag: orbit · Scroll: zoom</span>
-      </div>
-      <div style="position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--border)">
-        <canvas id="c3d-lfurnpage" style="width:100%;height:520px;display:block;background:#1A1A2E;border-radius:10px"></canvas>
-        <div id="lfurn-viewlabel" style="display:none;position:absolute;top:12px;left:14px;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.6);font-size:11px;font-weight:700;color:#4ECDC4"></div>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button id="lfurn-save-btn" onclick="lFurnSave()" style="padding:10px 24px;border-radius:10px;background:var(--gold-grad,linear-gradient(135deg,#C9A96E,#B8954A));color:#fff;border:none;cursor:pointer;font-weight:600;font-family:'DM Sans',sans-serif;font-size:13px;background:linear-gradient(135deg,#C9A96E,#B8954A)">💾 Save My Layout</button>
-        <button onclick="lFurnDownloadPNG()"  style="padding:10px 18px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px">📷 Download PNG</button>
-        <button onclick="lFurnDownloadJSON()" style="padding:10px 18px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px">⬇️ Download JSON</button>
-      </div>
+    <div id="lfurn-main" class="lfurn-studio" style="display:none">
+      <aside class="lfurn-tools">
+        <div class="lfurn-tools-heading">
+          <span>Room furniture</span>
+          <small>Choose an item to add it to the room</small>
+        </div>
+        <div id="lfurn-catalog" class="lfurn-catalog"></div>
+        <div id="lfurn-controls" class="lfurn-controls" style="display:none">
+          <div class="lfurn-controls-heading">Selected furniture</div>
+          <div class="lfurn-controls-buttons">
+            <button onclick="lFurnRotate(-45)" title="Rotate counterclockwise">↺ <span>-45°</span></button>
+            <button onclick="lFurnRotate(45)" title="Rotate clockwise">↻ <span>+45°</span></button>
+            <button onclick="lFurnRotate(90)" title="Rotate 90 degrees">⤾ <span>90°</span></button>
+            <button class="lfurn-delete" onclick="lFurnDelete()">🗑 <span>Delete</span></button>
+          </div>
+        </div>
+        <div class="lfurn-help">
+          <strong>Move around the room</strong>
+          <span><kbd>Click + drag</kbd> Move furniture</span>
+          <span><kbd>Right-drag</kbd> Orbit the room</span>
+          <span><kbd>Scroll</kbd> Zoom in or out</span>
+        </div>
+      </aside>
+      <section class="lfurn-workspace">
+        <div class="lfurn-canvas-wrap">
+          <div class="lfurn-scene-label"><span></span> INTERACTIVE 3D ROOM</div>
+          <canvas id="c3d-lfurnpage"></canvas>
+          <div id="lfurn-viewlabel" class="lfurn-viewlabel" style="display:none"></div>
+        </div>
+        <div class="lfurn-savebar">
+          <div class="lfurn-savebar-copy">
+            <strong>Room layout</strong>
+            <span>Changes are private until you save them.</span>
+          </div>
+          <div class="lfurn-savebar-actions">
+            <button id="lfurn-save-btn" class="lfurn-save-btn" onclick="lFurnSave()">💾 Save My Layout</button>
+            <button class="lfurn-export-btn" onclick="lFurnDownloadPNG()">📷 Export image</button>
+            <button class="lfurn-export-btn" onclick="lFurnDownloadJSON()">⬇️ Export layout</button>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 
@@ -3320,6 +3519,14 @@ const LFURN_CATALOG = [
   {type:'desk',         label:'Desk',         color:'#9B7A4A', icon:'🖥️'},
 ];
 
+const LFURN_STARTER_LAYOUT = {
+  sofa: [{x:0,z:2.35,rotY:0}],
+  coffee_table: [{x:0,z:0.55,rotY:0}],
+  armchair: [{x:-1.65,z:0.35,rotY:0.2},{x:1.65,z:0.35,rotY:-0.2}],
+  lamp: [{x:-2.85,z:2.1,rotY:0}],
+  plant: [{x:3.1,z:-2.75,rotY:0}],
+};
+
 let _lFurnPropId = null;
 let _lFurnShowingTenant = false;
 
@@ -3339,23 +3546,13 @@ function loadLFurniturePage() {
   if (cat && !cat.hasChildNodes()) {
     LFURN_CATALOG.forEach(item => {
       const btn = document.createElement('button');
-      btn.style.cssText = 'padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-family:DM Sans,sans-serif;font-size:11.5px;display:flex;align-items:center;gap:5px;transition:background 0.12s';
+      btn.className = 'lfurn-catalog-item';
+      btn.title = `Add ${item.label} to the room`;
+      btn.setAttribute('aria-label', `Add ${item.label}`);
       btn.innerHTML = `<span>${item.icon}</span><span>${item.label}</span>`;
-      btn.onmouseenter = () => btn.style.background = 'var(--input-bg)';
-      btn.onmouseleave = () => btn.style.background = 'var(--card)';
       btn.onclick = () => { const sc=getFurnitureScene('c3d-lfurnpage'); if(sc) sc.addFurniture(item.type, parseInt(item.color.replace('#',''),16)); };
       cat.appendChild(btn);
     });
-  }
-
-  // Wire controls panel
-  const actionPanel = document.getElementById('furn-action-panel');
-  if (actionPanel && !actionPanel._lfObserved) {
-    actionPanel._lfObserved = true;
-    new MutationObserver(() => {
-      const ctrl = document.getElementById('lfurn-controls');
-      if (ctrl) ctrl.style.display = actionPanel.style.display === 'flex' ? 'flex' : 'none';
-    }).observe(actionPanel, { attributes: true, attributeFilter: ['style'] });
   }
 }
 
@@ -3382,9 +3579,10 @@ function loadLFurnForProp(propId) {
   const tenantLayout   = p.tenantFurnitureLayout   || {};
   const hasLandlord = Object.keys(landlordLayout).length > 0;
   const hasTenant   = Object.keys(tenantLayout).length > 0;
+  const displayLayout = hasLandlord ? landlordLayout : LFURN_STARTER_LAYOUT;
 
   if (placeholder) placeholder.style.display = 'none';
-  if (main) main.style.display = 'flex';
+  if (main) main.style.display = 'grid';
   if (badge) badge.style.display = hasLandlord ? 'flex' : 'none';
   if (toggleBtn) { toggleBtn.style.display = hasTenant ? 'inline-flex' : 'none'; toggleBtn.textContent = '🛋️ View Tenant Layout'; }
   if (saveBtn) saveBtn.style.display = '';
@@ -3392,7 +3590,7 @@ function loadLFurnForProp(propId) {
 
   setTimeout(() => {
     if (typeof initFurniturePlacement === 'function') {
-      window._lFurnScene = initFurniturePlacement('c3d-lfurnpage', landlordLayout, null);
+      window._lFurnScene = initFurniturePlacement('c3d-lfurnpage', displayLayout, null);
     }
   }, 100);
 }
@@ -3402,7 +3600,10 @@ function lFurnToggleView() {
   const p = (window._propMap||{})[propId]; if (!p) return;
   _lFurnShowingTenant = !_lFurnShowingTenant;
   const isTenant = _lFurnShowingTenant;
-  const layout = isTenant ? (p.tenantFurnitureLayout||{}) : (p.landlordFurnitureLayout||p.furnitureLayout||{});
+  const landlordLayout = p.landlordFurnitureLayout || p.furnitureLayout || {};
+  const layout = isTenant
+    ? (p.tenantFurnitureLayout||{})
+    : (Object.keys(landlordLayout).length ? landlordLayout : LFURN_STARTER_LAYOUT);
   const toggleBtn = document.getElementById('lfurn-toggle-btn');
   const saveBtn   = document.getElementById('lfurn-save-btn');
   const label     = document.getElementById('lfurn-viewlabel');

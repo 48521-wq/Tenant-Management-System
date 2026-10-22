@@ -5,16 +5,64 @@
    ============================================================ */
 
 const _fScenes = {};
+let _woodTexture;
+let _fabricTexture;
+
+function makeSurfaceTexture(kind){
+  const canvas=document.createElement('canvas');
+  canvas.width=canvas.height=256;
+  const ctx=canvas.getContext('2d');
+  if(!ctx) throw new Error('Canvas texture support is required for 3D furniture.');
+  ctx.fillStyle='#eeeae3';
+  ctx.fillRect(0,0,256,256);
+
+  if(kind==='wood'){
+    for(let i=0;i<44;i++){
+      const y=i*6;
+      ctx.beginPath();
+      ctx.moveTo(0,y);
+      ctx.bezierCurveTo(70,y+((i%5)-2),175,y+((i%7)-3),256,y+((i%3)-1));
+      ctx.strokeStyle=i%3===0?'rgba(91,62,39,0.10)':'rgba(255,255,255,0.18)';
+      ctx.lineWidth=i%6===0?2:1;
+      ctx.stroke();
+    }
+    for(let i=0;i<18;i++){
+      const x=(i*47)%256;
+      const y=(i*83)%256;
+      ctx.beginPath();
+      ctx.ellipse(x,y,8+(i%4)*2,2,0,0,Math.PI*2);
+      ctx.strokeStyle='rgba(91,62,39,0.07)';
+      ctx.lineWidth=1;
+      ctx.stroke();
+    }
+  } else {
+    for(let i=0;i<=256;i+=3){
+      ctx.strokeStyle=i%6===0?'rgba(73,78,86,0.06)':'rgba(255,255,255,0.13)';
+      ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,256);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(256,i);ctx.stroke();
+    }
+  }
+
+  const texture=new THREE.CanvasTexture(canvas);
+  texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
+  texture.repeat.set(kind==='wood'?1.5:2,kind==='wood'?1:2);
+  texture.anisotropy=4;
+  texture.encoding=THREE.sRGBEncoding;
+  return texture;
+}
 
 // ── PBR Material helpers ────────────────────────────────────
 function woodMat(hex){
+  if(!_woodTexture) _woodTexture=makeSurfaceTexture('wood');
   return new THREE.MeshStandardMaterial({
-    color: hex||0x8B5E3C, roughness:0.75, metalness:0.0
+    color: hex||0x8B5E3C, map:_woodTexture, roughness:0.68, metalness:0.0
   });
 }
 function fabricMat(hex){
+  if(!_fabricTexture) _fabricTexture=makeSurfaceTexture('fabric');
   return new THREE.MeshStandardMaterial({
-    color: hex||0x6B7A8D, roughness:0.95, metalness:0.0
+    color: hex||0x6B7A8D, map:_fabricTexture, roughness:0.98, metalness:0.0
   });
 }
 function metalMat(hex){
@@ -34,7 +82,8 @@ function leatherMat(hex){
   });
 }
 function mattressMat(){
-  return new THREE.MeshStandardMaterial({ color:0xF2EEE8, roughness:0.9 });
+  if(!_fabricTexture) _fabricTexture=makeSurfaceTexture('fabric');
+  return new THREE.MeshStandardMaterial({ color:0xF2EEE8, map:_fabricTexture, roughness:0.98 });
 }
 function concreteMat(hex){
   return new THREE.MeshStandardMaterial({
@@ -499,7 +548,7 @@ function initFurniturePlacement(canvasId, savedLayout, onSave){
   const canvas = document.getElementById(canvasId);
   if(!canvas) return;
   if(_fScenes[canvasId]){
-    try{ _fScenes[canvasId].renderer.dispose(); }catch{}
+    _fScenes[canvasId].dispose();
     delete _fScenes[canvasId];
   }
 
@@ -516,16 +565,16 @@ function initFurniturePlacement(canvasId, savedLayout, onSave){
   renderer.toneMappingExposure=1.1;
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x1C1C28, 0.035);
+  scene.fog = new THREE.FogExp2(0x1C1C28, 0.018);
 
   const camera = new THREE.PerspectiveCamera(42,W/H,0.1,80);
   camera.position.set(0,9,10);
   camera.lookAt(0,0,0);
 
   // ── Lighting ──
-  const ambL = new THREE.AmbientLight(0xFFEEDD,0.5);
+  const ambL = new THREE.AmbientLight(0xFFEEDD,0.68);
   scene.add(ambL);
-  const sunL = new THREE.DirectionalLight(0xFFF8F0,1.2);
+  const sunL = new THREE.DirectionalLight(0xFFF8F0,1.55);
   sunL.position.set(5,10,6);
   sunL.castShadow=true;
   sunL.shadow.mapSize.width=sunL.shadow.mapSize.height=2048;
@@ -534,35 +583,88 @@ function initFurniturePlacement(canvasId, savedLayout, onSave){
   sunL.shadow.camera.right=sunL.shadow.camera.top=8;
   sunL.shadow.bias=-0.001;
   scene.add(sunL);
-  const fillL = new THREE.DirectionalLight(0xCCDDFF,0.35);
+  const fillL = new THREE.DirectionalLight(0xCCDDFF,0.48);
   fillL.position.set(-4,4,-3); scene.add(fillL);
 
   // ── Room ──
   const ROOM_W=8, ROOM_D=8;
   // Floor — parquet wood look via grid pattern
   const floorGeo = new THREE.PlaneGeometry(ROOM_W,ROOM_D,16,16);
-  const floorMat = new THREE.MeshStandardMaterial({color:0xC4A882,roughness:0.78,metalness:0.02});
+  const floorMat = new THREE.MeshStandardMaterial({color:0x765941,roughness:0.9,metalness:0});
   const floor = new THREE.Mesh(floorGeo,floorMat);
   floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
 
-  // Subtle floor grid lines (plank lines)
-  const gridH = new THREE.GridHelper(ROOM_W,16,0xAA9060,0xAA9060);
-  gridH.material.opacity=0.18; gridH.material.transparent=true;
-  gridH.position.y=0.002; scene.add(gridH);
+  // Staggered wood boards give the room a more natural, furnished-showroom feel.
+  const plankColors=[0xC39B70,0xB58A60,0xCFAB82,0xAA805B,0xBD9368];
+  const plankGeometry=new THREE.BoxGeometry(0.985,0.012,0.238);
+  const plankGroups=plankColors.map(color=>[]);
+  for(let row=0;row<32;row++){
+    const stagger=row%2?0.5:0;
+    for(let col=-1;col<9;col++){
+      const x=-3.5+stagger+col;
+      const paletteIndex=(row*3+col+plankColors.length*2)%plankColors.length;
+      plankGroups[paletteIndex].push([x,0.008,-3.875+row*0.25]);
+    }
+  }
+  const plankTransform=new THREE.Object3D();
+  plankGroups.forEach((positions,index)=>{
+    const material=new THREE.MeshStandardMaterial({color:plankColors[index],roughness:0.76,metalness:0});
+    const boards=new THREE.InstancedMesh(plankGeometry,material,positions.length);
+    positions.forEach(([x,y,z],instance)=>{
+      plankTransform.position.set(x,y,z);
+      plankTransform.updateMatrix();
+      boards.setMatrixAt(instance,plankTransform.matrix);
+    });
+    boards.instanceMatrix.needsUpdate=true;
+    boards.receiveShadow=true;
+    scene.add(boards);
+  });
 
   // Walls
-  const wallMat = new THREE.MeshStandardMaterial({color:0xEDE8E0,roughness:0.92});
-  const wallMatL = new THREE.MeshStandardMaterial({color:0xE5E0D8,roughness:0.92});
+  const wallMat = new THREE.MeshStandardMaterial({color:0xF0ECE5,roughness:0.92});
+  const wallMatL = new THREE.MeshStandardMaterial({color:0xE3DED5,roughness:0.92});
   // Back wall
   const bwGeo = new THREE.PlaneGeometry(ROOM_W,3.6);
   const bw = new THREE.Mesh(bwGeo,wallMat);
-  bw.position.set(0,1.8,-ROOM_D/2); scene.add(bw);
+  bw.position.set(0,1.8,-ROOM_D/2); bw.receiveShadow=true; scene.add(bw);
   // Left wall
   const lw = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_D,3.6),wallMatL);
-  lw.rotation.y=Math.PI/2; lw.position.set(-ROOM_W/2,1.8,0); scene.add(lw);
+  lw.rotation.y=Math.PI/2; lw.position.set(-ROOM_W/2,1.8,0); lw.receiveShadow=true; scene.add(lw);
   // Right wall
   const rw = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_D,3.6),wallMatL);
-  rw.rotation.y=-Math.PI/2; rw.position.set(ROOM_W/2,1.8,0); scene.add(rw);
+  rw.rotation.y=-Math.PI/2; rw.position.set(ROOM_W/2,1.8,0); rw.receiveShadow=true; scene.add(rw);
+
+  const trimMat=new THREE.MeshStandardMaterial({color:0xF7F3EC,roughness:0.68});
+  function roomBox(w,h,d,mat,x,y,z){
+    const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+    mesh.position.set(x,y,z);
+    mesh.castShadow=true;
+    mesh.receiveShadow=true;
+    scene.add(mesh);
+    return mesh;
+  }
+  roomBox(7.94,0.16,0.09,trimMat,0,0.08,-3.94);
+  roomBox(0.09,0.16,7.94,trimMat,-3.94,0.08,0);
+  roomBox(0.09,0.16,7.94,trimMat,3.94,0.08,0);
+  roomBox(7.94,0.045,0.06,trimMat,0,3.52,-3.94);
+  roomBox(0.06,0.045,7.94,trimMat,-3.94,3.52,0);
+  roomBox(0.06,0.045,7.94,trimMat,3.94,3.52,0);
+
+  // A framed window anchors the back wall and adds depth to the room.
+  const windowFrame=new THREE.MeshStandardMaterial({color:0xFBF8F2,roughness:0.58});
+  const windowGlass=new THREE.MeshStandardMaterial({
+    color:0xB8D7E8,emissive:0x38596A,emissiveIntensity:0.22,
+    roughness:0.2,metalness:0.08,transparent:true,opacity:0.8
+  });
+  roomBox(2.45,1.7,0.1,woodMat(0x75543A),0,2.32,-3.91);
+  roomBox(2.24,1.5,0.045,windowGlass,0,2.32,-3.845);
+  roomBox(2.42,0.09,0.12,windowFrame,0,3.18,-3.82);
+  roomBox(2.42,0.09,0.12,windowFrame,0,1.46,-3.82);
+  roomBox(0.09,1.7,0.12,windowFrame,-1.21,2.32,-3.82);
+  roomBox(0.09,1.7,0.12,windowFrame,1.21,2.32,-3.82);
+  roomBox(0.055,1.5,0.08,windowFrame,0,2.32,-3.78);
+  roomBox(2.24,0.055,0.08,windowFrame,0,2.32,-3.78);
+  roomBox(2.52,0.08,0.32,trimMat,0,1.42,-3.76);
   // Ceiling
   const ceilGeo = new THREE.PlaneGeometry(ROOM_W+0.1,ROOM_D+0.1);
   const ceilMat = new THREE.MeshStandardMaterial({color:0xF8F5EE,roughness:0.95});
@@ -576,7 +678,7 @@ function initFurniturePlacement(canvasId, savedLayout, onSave){
     const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,seg), mat);
     m.position.set(x,y,z); scene.add(m);
   }
-  const cLight = new THREE.PointLight(0xFFEECC,1.5,12);
+  const cLight = new THREE.PointLight(0xFFEECC,2.0,14);
   cLight.position.set(0,3.4,0); scene.add(cLight);
 
   // ── Catalog ──
@@ -622,6 +724,7 @@ function initFurniturePlacement(canvasId, savedLayout, onSave){
   let selected=null;
   let orbitDragging=false, orbitPrev={x:0,y:0};
   let camTheta=0.48, camPhi=0.72, camDist=16;
+  let animationFrameId=0;
 
   function updateCamera(){
     camera.position.x=camDist*Math.sin(camPhi)*Math.sin(camTheta);
@@ -654,11 +757,15 @@ function initFurniturePlacement(canvasId, savedLayout, onSave){
         if(m.isMesh) m.material.emissive?.setHex(0x1A1400);
       });
     }
-    const rp=document.getElementById(canvasId==='c3d-tfurn' ? 'tfurn-action-panel' : 'furn-action-panel');
+    const panelId=canvasId==='c3d-tfurn'
+      ? 'tfurn-action-panel'
+      : canvasId==='c3d-lfurnpage' ? 'lfurn-controls'
+      : canvasId==='c3d-furnpage' ? 'furn-page-controls' : 'furn-action-panel';
+    const rp=document.getElementById(panelId);
     if(rp) rp.style.display=selected?'flex':'none';
   }
 
-  canvas.addEventListener('mousedown',e=>{
+  function onMouseDown(e){
     if(e.button===2){orbitDragging=true;orbitPrev={x:e.clientX,y:e.clientY};return;}
     const rect=canvas.getBoundingClientRect();
     mouse.x=((e.clientX-rect.left)/rect.width)*2-1;
@@ -680,9 +787,10 @@ function initFurniturePlacement(canvasId, savedLayout, onSave){
         if(wp) dragOffset.copy(found.mesh.position).sub(wp);
       }
     } else { selectObj(null); }
-  });
+  }
+  canvas.addEventListener('mousedown',onMouseDown);
 
-  window.addEventListener('mousemove',e=>{
+  function onMouseMove(e){
     if(orbitDragging){
       camPhi  +=(e.clientX-orbitPrev.x)*0.004;
       camTheta=Math.max(0.15,Math.min(1.45,camTheta+(e.clientY-orbitPrev.y)*0.004));
@@ -696,18 +804,22 @@ function initFurniturePlacement(canvasId, savedLayout, onSave){
       Math.max(-3.5,Math.min(3.5,wp.x+dragOffset.x)),0,
       Math.max(-3.5,Math.min(3.5,wp.z+dragOffset.z))
     );
-  });
+  }
+  window.addEventListener('mousemove',onMouseMove);
 
-  window.addEventListener('mouseup',e=>{
+  function onMouseUp(e){
     if(e.button===2){orbitDragging=false;return;}
     dragging=null;
-  });
+  }
+  window.addEventListener('mouseup',onMouseUp);
 
-  canvas.addEventListener('wheel',e=>{
+  function onWheel(e){
     camDist=Math.max(4,Math.min(22,camDist+e.deltaY*0.018));
     updateCamera(); e.preventDefault();
-  },{passive:false});
-  canvas.addEventListener('contextmenu',e=>e.preventDefault());
+  }
+  canvas.addEventListener('wheel',onWheel,{passive:false});
+  function onContextMenu(e){e.preventDefault();}
+  canvas.addEventListener('contextmenu',onContextMenu);
 
   // ── Public API ──
   function addFurniture(type,colorHex){
@@ -749,10 +861,10 @@ function initFurniturePlacement(canvasId, savedLayout, onSave){
   }
 
   function animate(){
-    requestAnimationFrame(animate);
+    animationFrameId=requestAnimationFrame(animate);
     renderer.render(scene,camera);
   }
-  animate();
+  animationFrameId=requestAnimationFrame(animate);
 
   const ro=new ResizeObserver(()=>{
     const w=canvas.clientWidth,h=canvas.clientHeight;
@@ -763,8 +875,19 @@ function initFurniturePlacement(canvasId, savedLayout, onSave){
   });
   ro.observe(canvas);
 
+  function dispose(){
+    cancelAnimationFrame(animationFrameId);
+    ro.disconnect();
+    canvas.removeEventListener('mousedown',onMouseDown);
+    canvas.removeEventListener('wheel',onWheel);
+    canvas.removeEventListener('contextmenu',onContextMenu);
+    window.removeEventListener('mousemove',onMouseMove);
+    window.removeEventListener('mouseup',onMouseUp);
+    renderer.dispose();
+  }
+
   _fScenes[canvasId]={renderer,scene,camera,placed,CATALOG,
-    addFurniture,rotateSelected,deleteSelected,getLayout,updateCamera};
+    addFurniture,rotateSelected,deleteSelected,getLayout,updateCamera,dispose};
   return _fScenes[canvasId];
 }
 
