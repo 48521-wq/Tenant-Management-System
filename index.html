@@ -364,7 +364,7 @@ body::after {
         <div class="form-group">
           <label class="form-label" for="signin-email">Email Address</label>
           <div class="input-wrap">
-            <input type="email" class="form-input" id="signin-email" placeholder="your@email.com" autocomplete="username" onkeydown="if(event.key==='Enter') handleSignin()">
+            <input type="email" class="form-input" id="signin-email" placeholder="your@email.com" autocomplete="username" autocapitalize="none" spellcheck="false" onkeydown="if(event.key==='Enter') handleSignin()">
             <svg class="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           </div>
         </div>
@@ -411,7 +411,7 @@ body::after {
         <div class="form-group">
           <label class="form-label" for="signup-email">Email Address</label>
           <div class="input-wrap">
-            <input type="email" class="form-input" id="signup-email" placeholder="your@email.com" autocomplete="email">
+            <input type="email" class="form-input" id="signup-email" placeholder="your@email.com" autocomplete="email" autocapitalize="none" spellcheck="false">
             <svg class="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           </div>
         </div>
@@ -476,7 +476,7 @@ body::after {
         <div class="form-group">
           <label class="form-label" for="otp-input">Enter OTP Code</label>
           <div class="input-wrap">
-            <input type="text" class="form-input" id="otp-input" placeholder="Enter 6-digit code" maxlength="6"
+            <input type="text" class="form-input" id="otp-input" placeholder="Enter 6-digit code" maxlength="6" inputmode="numeric" autocomplete="one-time-code"
               style="letter-spacing:6px;font-size:22px;font-weight:700;text-align:center;"
               oninput="this.value=this.value.replace(/[^0-9]/g,'')"
               onkeydown="if(event.key==='Enter')verifyOTP()">
@@ -506,7 +506,7 @@ body::after {
         <div class="form-group">
           <label class="form-label" for="fp-email">Email Address</label>
           <div class="input-wrap">
-            <input type="email" class="form-input" id="fp-email" placeholder="your@email.com" autocomplete="email">
+            <input type="email" class="form-input" id="fp-email" placeholder="your@email.com" autocomplete="email" autocapitalize="none" spellcheck="false">
             <svg class="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           </div>
         </div>
