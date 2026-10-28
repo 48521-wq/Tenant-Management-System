@@ -243,3 +243,12 @@ div.loading{display:flex;align-items:center;justify-content:center;text-align:ce
 /* ── light-theme contrast fixes for inline-styled buttons ── */
 [data-theme="light"] button[style*="var(--error)"],[data-theme="light"] button[style*="#FF6B6B"],[data-theme="light"] button[style*="#ff4444"]{color:#B91C1C!important}
 [data-theme="light"] button[style*="var(--input-bg)"]{color:var(--text)!important}
+
+/* ── toast notifications ── */
+#tms-toasts{position:fixed;top:78px;right:24px;z-index:100000;display:flex;flex-direction:column;gap:12px;max-width:min(520px,calc(100vw - 32px));pointer-events:none}
+.tms-toast{pointer-events:auto;cursor:pointer;padding:16px 20px;border-radius:14px;font:600 17px/1.4 'DM Sans',system-ui,sans-serif;color:#fff;background:#1E293B;border-left:6px solid #3B82F6;box-shadow:0 14px 40px rgba(0,0,0,.35);animation:tmsIn .28s ease;transition:opacity .25s,transform .25s}
+.tms-toast.out{opacity:0;transform:translateX(30px)}
+.tms-toast-ok{background:#065F46;border-left-color:#34D399}
+.tms-toast-error{background:#7F1D1D;border-left-color:#F87171}
+.tms-toast-warn{background:#78350F;border-left-color:#FBBF24}
+@keyframes tmsIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}

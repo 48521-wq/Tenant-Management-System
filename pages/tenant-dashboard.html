@@ -1161,7 +1161,7 @@ async function tFetch(url, method='GET', body=null) {
       return;
     }
     const message = data?.message || r.statusText || 'Request failed';
-    throw new Error(`${r.status} ${message} (${fullUrl})`);
+    const err = new Error(message); err.status = r.status; err.code = data && data.code; err.data = data; throw err;
   }
   if (data && data.success === false) {
     throw new Error(data.message || 'Request failed');
@@ -1666,8 +1666,16 @@ function openRentalRequestModal(propertyId) { showRequestModal(propertyId); }
 function showRequestModal(propertyId) {
   const prop = window._tenantPropMap[propertyId];
   if (!prop) { alert('Property not found'); return; }
+  if (prop.status !== 'available') {   // list was stale - this house is no longer open for requests
+    alert('⚠️ This property is not available for rent right now.');
+    if (typeof loadAllProperties === 'function') loadAllProperties();
+    return;
+  }
+  tmsCloseModals('request');
   
   const modal = document.createElement('div');
+  modal.setAttribute('data-tms-modal', 'request');
+  modal.addEventListener('mousedown', e => { if (e.target === modal) modal.remove(); });
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(2px)';
   modal.innerHTML = `
     <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:400px;width:90%;max-height:80vh;overflow-y:auto">
@@ -1741,29 +1749,27 @@ async function submitRentalRequest(propertyId, btn) {
       return;
     }
   }
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = 'Sending…';
-  }
-  
+  const resetBtn = () => { if (btn && btn.isConnected) { btn.disabled = false; btn.textContent = 'Send Request'; } };
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+
   try {
     const r = await tFetch('/rental-requests/request', 'POST', { propertyId, message, proposedRent: proposedRent ? Number(proposedRent) : undefined });
-    if (r.success) {
-      alert('✅ Request sent to landlord!');
-      // Close all request modals
-      document.querySelectorAll('[style*="position:fixed"]').forEach(el => {
-        if (el.textContent.includes('Send Request')) el.remove();
-      });
-      await loadRentalRequests();
+    if (r && r.success) {
+      tmsCloseModals('request');                       // close the form straight away
+      alert('✅ Request sent to the landlord!');
+      loadRentalRequests();
+      if (typeof loadAllProperties === 'function') loadAllProperties();
     } else {
-      alert('⚠️ ' + (r.message || 'Failed to send request'));
-      if (btn) { btn.disabled = false; btn.textContent = 'Send Request'; }
+      alert('⚠️ ' + ((r && r.message) || 'Failed to send request'));
+      resetBtn();
     }
-  } catch(e) {
-    console.error('submitRentalRequest error', e);
-    const message = e?.message || 'Unable to connect to the server.';
-    alert('❌ ' + message);
-    if (btn) { btn.disabled = false; btn.textContent = 'Send Request'; }
+  } catch (e) {
+    const msg = tmsCleanErr(e);
+    alert('❌ ' + msg);
+    if (/not available/i.test(msg)) {                  // someone else got it first - close and refresh the list
+      tmsCloseModals('request');
+      if (typeof loadAllProperties === 'function') loadAllProperties();
+    } else resetBtn();
   }
 }
 
