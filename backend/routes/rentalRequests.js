@@ -3,7 +3,7 @@ const RentalRequest = require('../models/RentalRequest');
 const Property = require('../models/Property');
 const User = require('../models/User');
 const { protect } = require('../middleware/auth');
-const { canCreateFollowUpRequest } = require('../utils/rentalRequestPolicy');
+const { evaluateFollowUp } = require('../utils/rentalRequestPolicy');
 const router = express.Router();
 
 // ─── TENANT: Get all requests by this tenant ───
@@ -37,23 +37,17 @@ router.post('/request', protect, async (req, res) => {
       return res.status(400).json({ success: false, message: 'This property is not available.' });
     }
 
-    const existing = await RentalRequest.findOne({
-      tenantId: req.user._id,
-      propertyId,
-      status: { $in: ['pending', 'negotiating', 'rejected', 'cancelled'] }
-    }).sort({ createdAt: -1 });
-
-    console.log('[RentalRequest] submit', {
-      userId: req.user._id.toString(),
-      propertyId,
-      proposedRent,
-      existingStatus: existing?.status,
-      existingProposedRent: existing?.proposedRent,
-      existingId: existing?._id
-    });
-
-    if (existing && !canCreateFollowUpRequest(existing, proposedRent)) {
-      return res.status(400).json({ success: false, message: 'A higher offer is required to submit another request for this property.' });
+    // Earlier requests by this tenant for the same property (any status)
+    const priorRequests = await RentalRequest.find({ tenantId: req.user._id, propertyId }).select('proposedRent status');
+    const rule = evaluateFollowUp(priorRequests, proposedRent);
+    if (!rule.allowed) {
+      return res.status(400).json({
+        success: false,
+        code: 'OFFER_TOO_LOW',
+        message: rule.message,
+        priorBid: rule.priorBid,
+        minimumOffer: rule.minimumOffer
+      });
     }
 
     // Get landlord info
