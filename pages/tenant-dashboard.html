@@ -1705,11 +1705,42 @@ function showRequestModal(propertyId) {
     </div>
   `;
   document.body.appendChild(modal);
+  window._reqFloor = null;
+  (async () => {   // a repeat request for the same property must beat the previous bid by Rs. 2,000
+    try {
+      const d = await tFetch('/rental-requests/my-requests');
+      const reqs = d.requests || []; window._myRequests = reqs;
+      const same = reqs.filter(r => String((r.propertyId && r.propertyId._id) || r.propertyId) === String(propertyId));
+      if (!same.length) return;
+      let best = null; same.forEach(r => { const v = Number(r.proposedRent); if (v > 0 && (best === null || v > best)) best = v; });
+      const min = best !== null ? best + 2000 : 1;
+      window._reqFloor = { propertyId, min, best };
+      const inp = modal.querySelector('#request-offer'); if (!inp) return;
+      inp.min = min; inp.placeholder = best !== null ? 'Minimum Rs. ' + min.toLocaleString() : 'Enter your offer';
+      const wrap = inp.parentElement, lab = wrap.querySelector('label'); if (lab) lab.textContent = 'Your Offer (required)';
+      const note = document.createElement('div');
+      note.style.cssText = 'padding:10px 13px;border-radius:9px;margin-bottom:12px;font-size:16px;line-height:1.45;background:rgba(255,179,71,0.14);border:1.5px solid rgba(255,179,71,0.5);color:var(--text)';
+      note.innerHTML = best !== null
+        ? '⚠️ You already offered <b>Rs. ' + best.toLocaleString() + '</b> for this property. To send another request, your new offer must be at least <b>Rs. ' + min.toLocaleString() + '</b> (Rs. 2,000 more).'
+        : '⚠️ You already sent a request for this property. Please enter your rent offer to send another one.';
+      wrap.parentElement.insertBefore(note, wrap);
+    } catch (e) { /* server still enforces the rule */ }
+  })();
 }
 
 async function submitRentalRequest(propertyId, btn) {
   const message = document.getElementById('request-message')?.value?.trim() || '';
   const proposedRent = document.getElementById('request-offer')?.value?.trim() || '';
+  const fl = window._reqFloor;
+  if (fl && String(fl.propertyId) === String(propertyId)) {
+    const off = Number(proposedRent || 0);
+    if (!off || off < fl.min) {
+      alert('⚠️ ' + (fl.best !== null
+        ? 'Your new offer must be at least Rs. ' + fl.min.toLocaleString() + ' (your previous bid Rs. ' + fl.best.toLocaleString() + ' + Rs. 2,000).'
+        : 'Please enter your rent offer to send another request for this property.'));
+      return;
+    }
+  }
   if (btn) {
     btn.disabled = true;
     btn.textContent = 'Sending…';
