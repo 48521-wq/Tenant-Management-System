@@ -1668,7 +1668,7 @@ function showRequestModal(propertyId) {
   if (!prop) { alert('Property not found'); return; }
   if (prop.status !== 'available') {   // list was stale - this house is no longer open for requests
     alert('⚠️ This property is not available for rent right now.');
-    if (typeof loadAllProperties === 'function') loadAllProperties();
+    if (typeof loadAllProperties === 'function') loadAllProperties(true);
     return;
   }
   tmsCloseModals('request');
@@ -1757,8 +1757,8 @@ async function submitRentalRequest(propertyId, btn) {
     if (r && r.success) {
       tmsCloseModals('request');                       // close the form straight away
       alert('✅ Request sent to the landlord!');
-      loadRentalRequests();
-      if (typeof loadAllProperties === 'function') loadAllProperties();
+      loadRentalRequests(true);                          // refresh quietly - no full reload
+      if (typeof loadAllProperties === 'function') loadAllProperties(true);
     } else {
       alert('⚠️ ' + ((r && r.message) || 'Failed to send request'));
       resetBtn();
@@ -1768,15 +1768,15 @@ async function submitRentalRequest(propertyId, btn) {
     alert('❌ ' + msg);
     if (/not available/i.test(msg)) {                  // someone else got it first - close and refresh the list
       tmsCloseModals('request');
-      if (typeof loadAllProperties === 'function') loadAllProperties();
+      if (typeof loadAllProperties === 'function') loadAllProperties(true);
     } else resetBtn();
   }
 }
 
-async function loadRentalRequests() {
+async function loadRentalRequests(silent) {
   const list = document.getElementById('rental-requests-list');
   if (!list) return;
-  list.innerHTML = '<div class="loading"><span class="spinner"></span>Loading your requests…</div>';
+  if (!silent || !list.children.length) list.innerHTML = '<div class="loading"><span class="spinner"></span>Loading your requests…</div>';
   try {
     const data = await tFetch('/rental-requests/my-requests');
     const requests = data.requests || [];
@@ -1859,7 +1859,7 @@ async function cancelRentalRequest(requestId) {
     const r = await tFetch('/rental-requests/'+requestId+'/cancel', 'PUT', {});
     if (r.success) {
       alert('✅ Request cancelled');
-      await loadRentalRequests();
+      await loadRentalRequests(true);
     } else alert('❌ ' + (r.message || 'Failed'));
   } catch { alert('❌ Cannot connect to server'); }
 }
@@ -2317,11 +2317,11 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
 </aside>
 
 <script>
-async function loadAllProperties() {
+async function loadAllProperties(silent) {
   const grid = document.getElementById('props-grid-all');
   const rc = document.getElementById('rc-all');
   if (!grid) return;
-  grid.innerHTML = '<div class="loading"><span class="spinner"></span>Loading properties…</div>';
+  if (!silent || !grid.children.length) grid.innerHTML = '<div class="loading"><span class="spinner"></span>Loading properties…</div>';
   try {
     const [allData, myReqData] = await Promise.all([
       tFetch('/properties?fields=_id,title,type,area,address,city,rent,beds,baths,sqft,description,status,landlordName,tenantId,tenantName,model3d,tenantFurnitureLayout,frontImage'),
@@ -2357,9 +2357,13 @@ async function loadAllProperties() {
 
       // Rent request button — smart status
       const reqStatus = reqMap[pid];
-      const isRented = p.status === 'rented';
+      const isRented = p.status === 'rented' || p.status === 'suspended';
+      const _me = JSON.parse(localStorage.getItem('tms_user') || '{}');
+      const isMyRental = !!p.tenantId && String((p.tenantId && p.tenantId._id) || p.tenantId) === String(_me._id || _me.id || '');
       let rentBtn = '';
-      if (isRented && !reqStatus) {
+      if (isMyRental) {
+        rentBtn = `<button class="btn btn-sm" style="${btnBaseStyle};background:rgba(78,205,196,0.15);color:#4ecdc4;border:1px solid rgba(78,205,196,0.3);cursor:not-allowed" disabled>✅ My Rental</button>`;
+      } else if (isRented) {
         rentBtn = `<button class="btn btn-sm" style="${btnBaseStyle};background:rgba(255,179,71,0.1);color:#ffb347;border:1px solid rgba(255,179,71,0.25);cursor:not-allowed" disabled>🔒 Rented</button>`;
       } else if (reqStatus === 'pending' || reqStatus === 'negotiating') {
         rentBtn = `<button class="btn btn-sm" style="${btnBaseStyle};background:rgba(78,205,196,0.1);color:#4ecdc4;border:1px solid rgba(78,205,196,0.25);cursor:not-allowed" disabled>⏳ Requested</button>`;
@@ -2579,9 +2583,13 @@ function filterAllProps() {
       ? `<button class="btn btn-gold btn-sm" style="${btnBaseStyle}" onclick="tenantView3D('${pid}')">View 360</button>`
       : `<button class="btn btn-gold btn-sm" style="${btnBaseStyle};opacity:0.65;cursor:not-allowed" disabled>360 Pending</button>`;
     const reqStatus = reqMap[pid];
-    const isRented = p.status === 'rented';
+    const isRented = p.status === 'rented' || p.status === 'suspended';
+      const _me = JSON.parse(localStorage.getItem('tms_user') || '{}');
+      const isMyRental = !!p.tenantId && String((p.tenantId && p.tenantId._id) || p.tenantId) === String(_me._id || _me.id || '');
     let rentBtn = '';
-    if (isRented && !reqStatus) {
+    if (isMyRental) {
+      rentBtn = `<button class="btn btn-sm" style="${btnBaseStyle};background:rgba(78,205,196,0.15);color:#4ecdc4;border:1px solid rgba(78,205,196,0.3);cursor:not-allowed" disabled>✅ My Rental</button>`;
+    } else if (isRented) {
       rentBtn = `<button class="btn btn-sm" style="${btnBaseStyle};background:rgba(255,179,71,0.1);color:#ffb347;border:1px solid rgba(255,179,71,0.25);cursor:not-allowed" disabled>🔒 Rented</button>`;
     } else if (reqStatus === 'pending' || reqStatus === 'negotiating') {
       rentBtn = `<button class="btn btn-sm" style="${btnBaseStyle};background:rgba(78,205,196,0.1);color:#4ecdc4;border:1px solid rgba(78,205,196,0.25);cursor:not-allowed" disabled>⏳ Requested</button>`;
@@ -3129,7 +3137,9 @@ function populateFurnPropSelect() {
   (allProps||[]).forEach(p => {
     const opt = document.createElement('option');
     opt.value = p._id;
-    const isRented = p.status === 'rented';
+    const isRented = p.status === 'rented' || p.status === 'suspended';
+      const _me = JSON.parse(localStorage.getItem('tms_user') || '{}');
+      const isMyRental = !!p.tenantId && String((p.tenantId && p.tenantId._id) || p.tenantId) === String(_me._id || _me.id || '');
     opt.textContent = (p.title || 'Property') + (isRented ? ' ✓ My Rental' : '');
     if (isRented) opt.style.color = '#C9A96E';
     sel.appendChild(opt);
@@ -3354,7 +3364,7 @@ async function sendTenantNegMsg() {
     if(data.success) {
       document.getElementById('teg-msg-input').value='';
       await loadTenantNegMessages(_tNegReqId);
-      await loadRentalRequests();
+      await loadRentalRequests(true);
     } else alert(data.message||'Error');
   } catch{alert('Unable to connect to the server.');}
 }
@@ -3486,7 +3496,7 @@ async function tDocsSubmit(){
     if(res.success){
       closeTenantDocsModal();
       alert('✅ Documents submitted successfully! Landlord and Admin will verify them.');
-      await loadRentalRequests();
+      await loadRentalRequests(true);
     } else { err.textContent='❌ '+(res.message||'Submission failed'); err.style.display='block'; }
   } catch (e) {
     console.error('tDocsSubmit error', e);
