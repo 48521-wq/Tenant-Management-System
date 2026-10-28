@@ -1768,7 +1768,7 @@ async function save3DModel() {
     } else {
       showMsg('b3d-msg','360 view applied. It will save with the property.','ok');
     }
-    setTimeout(close3DBuilder, 1800);
+    setTimeout(close3DBuilder, 700);
     await loadMyProperties();
   } catch { showMsg('b3d-msg','Error saving 360 view.','err'); }
   finally { if(btn){btn.disabled=false;btn.textContent='Save 360 View';} }

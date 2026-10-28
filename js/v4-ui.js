@@ -44,3 +44,28 @@ function v4InitAutoStats(map){
   Object.keys(map).forEach(id=>{const tb=document.getElementById(id); if(!tb)return;
     let t=null; new MutationObserver(()=>{clearTimeout(t);t=setTimeout(()=>v4AutoStats(id,map[id]),30);}).observe(tb,{childList:true});});
 }
+
+// ── Non-blocking notifications (replaces the browser's blocking alert box) ──
+(function () {
+  if (window.tmsToast) return;
+  window.tmsToast = function (msg, type) {
+    msg = String(msg == null ? '' : msg).trim(); if (!msg || !document.body) return;
+    if (!type) type = /^(❌|✖|⛔)/.test(msg) ? 'error' : /^⚠/.test(msg) ? 'warn' : /^(✅|✔)/.test(msg) ? 'ok' : 'info';
+    let box = document.getElementById('tms-toasts');
+    if (!box) { box = document.createElement('div'); box.id = 'tms-toasts'; document.body.appendChild(box); }
+    const el = document.createElement('div'); el.className = 'tms-toast tms-toast-' + type; el.textContent = msg; el.title = 'Click to dismiss';
+    const kill = () => { el.classList.add('out'); setTimeout(() => el.remove(), 250); };
+    el.onclick = kill; box.appendChild(el); setTimeout(kill, type === 'error' || type === 'warn' ? 7000 : 4200);
+  };
+  window.alert = function (m) { window.tmsToast(m); };
+})();
+
+// Turns "400 This property is not available. (http://…/api/…)" into plain readable text
+function tmsCleanErr(e) {
+  return String((e && e.message) || e || 'Something went wrong').replace(/^\d{3}\s+/, '').replace(/\s*\(https?:[^)]*\)\s*$/, '');
+}
+// Removes any dialog opened with data-tms-modal (optionally only one kind)
+function tmsCloseModals(kind) {
+  document.querySelectorAll(kind ? '[data-tms-modal="' + kind + '"]' : '[data-tms-modal]').forEach(m => m.remove());
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') tmsCloseModals(); });
