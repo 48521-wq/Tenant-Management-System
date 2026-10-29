@@ -1,6 +1,7 @@
 // A tenant may send another request for the SAME property, but the new
 // offer must beat their previous (highest) bid by at least MIN_RAISE rupees.
 const MIN_RAISE = 2000;
+const MAX_REQUESTS_PER_PROPERTY = 2;   // a tenant may bid at most twice on the same house
 
 function highestPriorBid(requests) {
   let best = null;
@@ -16,6 +17,10 @@ function evaluateFollowUp(priorRequests, newOfferRent) {
   const prior = highestPriorBid(priorRequests);
   const next = Number(newOfferRent || 0);
   if (!priorRequests || !priorRequests.length) return { allowed: true, priorBid: null, minimumOffer: null };
+  if (priorRequests.length >= MAX_REQUESTS_PER_PROPERTY) {
+    return { allowed: false, code: 'REQUEST_LIMIT', priorBid: prior, minimumOffer: null,
+      message: `You have already sent ${MAX_REQUESTS_PER_PROPERTY} requests for this property. No more requests are allowed.` };
+  }
 
   if (prior === null) {
     return { allowed: next > 0, priorBid: null, minimumOffer: 1,
@@ -31,4 +36,4 @@ function canCreateFollowUpRequest(existingRequest, newOfferRent) {
   return evaluateFollowUp(existingRequest ? [existingRequest] : [], newOfferRent).allowed;
 }
 
-module.exports = { MIN_RAISE, highestPriorBid, evaluateFollowUp, canCreateFollowUpRequest };
+module.exports = { MIN_RAISE, MAX_REQUESTS_PER_PROPERTY, highestPriorBid, evaluateFollowUp, canCreateFollowUpRequest };
