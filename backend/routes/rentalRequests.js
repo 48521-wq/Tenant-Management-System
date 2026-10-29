@@ -43,7 +43,7 @@ router.post('/request', protect, async (req, res) => {
     if (!rule.allowed) {
       return res.status(400).json({
         success: false,
-        code: 'OFFER_TOO_LOW',
+        code: rule.code || 'OFFER_TOO_LOW',
         message: rule.message,
         priorBid: rule.priorBid,
         minimumOffer: rule.minimumOffer
