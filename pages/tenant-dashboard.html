@@ -1671,7 +1671,7 @@ function showRequestModal(propertyId) {
     if (typeof loadAllProperties === 'function') loadAllProperties(true);
     return;
   }
-  const _sent = ((window._tReqByProp || {})[propertyId] || []).length;
+  const _sent = ((window._tReqByProp || {})[propertyId] || []).filter(x => x !== 'accepted' && x !== 'approved').length;
   if (_sent >= T_MAX_REQ) {
     alert('⚠️ You have already sent ' + T_MAX_REQ + ' requests for this property. No more requests are allowed.');
     return;
@@ -2360,13 +2360,15 @@ if (!window._tPollTimers) {
 // after that the button is locked. Rented houses are always locked.
 const T_MAX_REQ = 2;
 function tRentButton(pid, base, isMyRental, isRented) {
-  const list = (window._tReqByProp || {})[pid] || [], n = list.length;
+  const all = (window._tReqByProp || {})[pid] || [];
+  const list = all.filter(x => x !== 'accepted' && x !== 'approved');   // a finished tenancy is history, not a live request
+  const n = list.length;
   const has = (...st) => list.some(x => st.includes(x));
   const lock = (txt, bg, col, bd) => `<button class="btn btn-sm" style="${base};background:${bg};color:${col};border:1px solid ${bd};cursor:not-allowed" disabled>${txt}</button>`;
   if (isMyRental) return lock('✅ My Rental', 'rgba(78,205,196,0.15)', '#4ecdc4', 'rgba(78,205,196,0.3)');
   if (isRented) return lock('🔒 Rented', 'rgba(255,179,71,0.1)', '#ffb347', 'rgba(255,179,71,0.25)');
-  if (has('accepted', 'approved')) return lock('✅ Approved', 'rgba(78,205,196,0.15)', '#4ecdc4', 'rgba(78,205,196,0.3)');
-  if (has('docs_pending', 'docs_submitted')) return lock('📄 In progress', 'rgba(78,205,196,0.1)', '#4ecdc4', 'rgba(78,205,196,0.25)');
+  if (has('docs_pending')) return lock('📄 Documents required', 'rgba(78,205,196,0.1)', '#4ecdc4', 'rgba(78,205,196,0.25)');
+  if (has('docs_submitted')) return lock('🔍 Docs under review', 'rgba(78,205,196,0.1)', '#4ecdc4', 'rgba(78,205,196,0.25)');
   if (n >= T_MAX_REQ) return lock((has('pending', 'negotiating') ? '⏳ Requested' : '🔒 Limit reached') + ' · ' + n + '/' + T_MAX_REQ, 'rgba(255,179,71,0.1)', '#ffb347', 'rgba(255,179,71,0.25)');
   if (n === 1 && has('pending', 'negotiating'))
     return `<button class="btn btn-teal btn-sm" style="${base}" onclick="openRentalRequestModal('${pid}')" title="Send a second request with a higher offer">⬆️ Raise Offer · 1/${T_MAX_REQ}</button>`;
