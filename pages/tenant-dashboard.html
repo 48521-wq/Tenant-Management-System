@@ -1762,8 +1762,8 @@ async function submitRentalRequest(propertyId, btn) {
     if (r && r.success) {
       tmsCloseModals('request');                       // close the form straight away
       alert('✅ Request sent to the landlord!');
-      loadRentalRequests(true);                          // refresh quietly - no full reload
-      if (typeof loadAllProperties === 'function') loadAllProperties(true);
+      tAfterRequestSent(propertyId, r.request);          // card flips to "Requested 2/2" instantly
+      loadRentalRequests(true);                          // quiet refresh of the requests page
     } else {
       alert('⚠️ ' + ((r && r.message) || 'Failed to send request'));
       resetBtn();
@@ -2322,6 +2322,39 @@ function tFurnDownloadJSON() { if(typeof downloadFurnitureJSON==='function') dow
 </aside>
 
 <script>
+// ── Keep request buttons current without a page refresh ──
+// Light sync: only re-reads MY requests (small) and redraws the cards from the cached property list.
+async function tSyncMyRequests() {
+  try {
+    const d = await tFetch('/rental-requests/my-requests');
+    const reqs = d.requests || [];
+    const by = {}, last = {};
+    reqs.forEach(r => { if (!r.propertyId) return; const k = r.propertyId._id || r.propertyId; (by[k] = by[k] || []).push(r.status); last[k] = r.status; });
+    window._tReqByProp = by; window._allReqMap = last; window._myRequests = reqs;
+    if (document.getElementById('page-all-properties')?.classList.contains('active') && window._allPropsCache) filterAllProps();
+  } catch (e) { /* next tick will retry */ }
+}
+// Called right after a request was accepted by the server: update the card instantly, then confirm in the background
+function tAfterRequestSent(pid, newReq) {
+  const by = (window._tReqByProp = window._tReqByProp || {});
+  (by[pid] = by[pid] || []).push((newReq && newReq.status) || 'pending');
+  window._allReqMap = window._allReqMap || {}; window._allReqMap[pid] = (newReq && newReq.status) || 'pending';
+  if (window._allPropsCache) filterAllProps();       // card shows "Requested 2/2" immediately
+  tSyncMyRequests();                                  // quiet confirmation from the server
+}
+// Automatic background refresh: my requests every 20s, full property list every 90s (only while the tab is visible)
+if (!window._tPollTimers) {
+  let tick = 0;
+  window._tPollTimers = setInterval(() => {
+    if (document.hidden || document.querySelector('[data-tms-modal]')) return;
+    tick++;
+    if (document.getElementById('page-all-properties')?.classList.contains('active')) {
+      if (tick % 4 === 0 && typeof loadAllProperties === 'function') loadAllProperties(true); else tSyncMyRequests();
+    } else if (document.getElementById('page-requests')?.classList.contains('active') && typeof loadRentalRequests === 'function') loadRentalRequests(true);
+  }, 20000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) tSyncMyRequests(); });
+}
+
 // Rent button for a property card.
 // A tenant may send up to 2 requests per house (the 2nd needs an offer >= previous bid + Rs. 2,000);
 // after that the button is locked. Rented houses are always locked.
