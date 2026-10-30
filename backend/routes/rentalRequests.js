@@ -37,8 +37,8 @@ router.post('/request', protect, async (req, res) => {
       return res.status(400).json({ success: false, message: 'This property is not available.' });
     }
 
-    // Earlier requests by this tenant for the same property (any status)
-    const priorRequests = await RentalRequest.find({ tenantId: req.user._id, propertyId }).select('proposedRent status');
+    // Earlier requests by this tenant for the same property (a finished/accepted tenancy is history and does not count)
+    const priorRequests = await RentalRequest.find({ tenantId: req.user._id, propertyId, status: { $ne: 'accepted' } }).select('proposedRent status');
     const rule = evaluateFollowUp(priorRequests, proposedRent);
     if (!rule.allowed) {
       return res.status(400).json({
