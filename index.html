@@ -501,7 +501,7 @@ body::after {
           <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
         </div>
         <div class="fp-title">Reset Password</div>
-        <div class="fp-sub">Enter your registered email. We'll send you a secure reset link.</div>
+        <div class="fp-sub">Enter your registered email. We'll send you a 6-digit reset code.</div>
         <div id="fp-error" class="error-msg" style="display:none;"></div>
         <div class="form-group">
           <label class="form-label" for="fp-email">Email Address</label>
@@ -510,7 +510,45 @@ body::after {
             <svg class="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           </div>
         </div>
-        <button class="btn-primary btn-gold" id="fp-btn" onclick="handleForgot()">Send Reset Link</button>
+        <button class="btn-primary btn-gold" id="fp-btn" onclick="handleForgot()">Send Reset Code</button>
+      </div>
+
+
+      <!-- ===== RESET PASSWORD (code + new password) ===== -->
+      <div id="screen-reset" style="display:none;">
+        <button class="back-btn" onclick="showForgot()">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <div class="fp-title">Enter Code</div>
+        <div class="fp-sub">We sent a 6-digit code to <strong id="reset-email-display" style="color:var(--gold);"></strong></div>
+        <div id="rp-error" class="error-msg" style="display:none;"></div>
+        <div class="form-group">
+          <label class="form-label" for="rp-otp">Reset Code</label>
+          <div class="input-wrap">
+            <input type="text" class="form-input" id="rp-otp" placeholder="6-digit code" maxlength="6" inputmode="numeric" autocomplete="one-time-code"
+              style="letter-spacing:6px;font-size:20px;font-weight:700;text-align:center;"
+              oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="rp-pass">New Password</label>
+          <div class="input-wrap">
+            <input type="password" class="form-input" id="rp-pass" placeholder="At least 6 characters" autocomplete="new-password">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="rp-confirm">Confirm Password</label>
+          <div class="input-wrap">
+            <input type="password" class="form-input" id="rp-confirm" placeholder="Repeat password" autocomplete="new-password"
+              onkeydown="if(event.key==='Enter')handleReset()">
+          </div>
+        </div>
+        <button class="btn-primary btn-gold" id="rp-btn" onclick="handleReset()">Update Password</button>
+        <div style="text-align:center;margin-top:14px;">
+          <span style="font-size:13px;color:var(--text-secondary);">Didn't get it? </span>
+          <button class="switch-link" onclick="handleForgot(true)" style="font-size:13px;">Resend code</button>
+        </div>
       </div>
 
       <!-- ===== SUCCESS ===== -->
@@ -519,11 +557,11 @@ body::after {
           <div class="success-icon">
             <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
-          <div class="success-title">Check Your Inbox</div>
+          <div class="success-title">Password Updated</div>
           <div class="success-msg">
-            We've sent a password reset link to<br>
+            Your password has been updated for<br>
             <span class="success-email" id="success-email-display"></span><br><br>
-            Please check your email. The link expires in 30 minutes.
+            You can now sign in with your new password.
           </div>
           <div style="margin-top:28px;">
             <button class="btn-primary btn-gold" onclick="showAuth()" style="max-width:200px;margin:0 auto;display:block;">Back to Login</button>

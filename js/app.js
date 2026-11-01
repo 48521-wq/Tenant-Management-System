@@ -175,22 +175,65 @@ function showForgot() {
   document.getElementById('form-signup').style.display = 'none';
   document.getElementById('main-tabs').style.display   = 'none';
   document.getElementById('screen-forgot').style.display = '';
+  const _sr2 = document.getElementById('screen-reset'); if (_sr2) _sr2.style.display = 'none';
   clearErr();
 }
 function showAuth() {
   document.getElementById('screen-forgot').style.display  = 'none';
+  const _sr = document.getElementById('screen-reset'); if (_sr) _sr.style.display = 'none';
   document.getElementById('screen-success').style.display = 'none';
   document.getElementById('main-tabs').style.display = '';
   switchTab('signin');
 }
-function handleForgot() {
-  const em = document.getElementById('fp-email')?.value.trim();
+let _resetToken = '';
+let _resetEmail = '';
+
+async function handleForgot(isResend) {
   const er = document.getElementById('fp-error');
-  if (!em) { if(er){er.textContent='Enter your email.';er.style.display='block';} return; }
-  if (!isValidEmail(em)) { if(er){er.textContent='Enter a valid email address.';er.style.display='block';} return; }
-  document.getElementById('screen-forgot').style.display  = 'none';
-  document.getElementById('screen-success').style.display = '';
-  document.getElementById('success-email-display').textContent = em;
+  const showFp = (m) => { if (er) { er.textContent = m; er.style.display = m ? 'block' : 'none'; } };
+  const em = (isResend === true ? _resetEmail : document.getElementById('fp-email')?.value.trim().toLowerCase());
+  if (!em) return showFp('Enter your email.');
+  if (!isValidEmail(em)) return showFp('Enter a valid email address.');
+  showFp('');
+  setBtnLoad('fp-btn', true, 'Send Reset Code');
+  try {
+    const { ok, data } = await api('/auth/forgot-password', 'POST', { email: em });
+    if (ok && data.success) {
+      _resetToken = data.resetToken; _resetEmail = em;
+      document.getElementById('screen-forgot').style.display = 'none';
+      document.getElementById('screen-reset').style.display  = '';
+      document.getElementById('reset-email-display').textContent = em;
+      document.getElementById('rp-otp')?.focus();
+    } else {
+      showFp(data.message || 'Could not send reset code.');
+    }
+  } catch { showFp('Cannot connect to server.'); }
+  finally { setBtnLoad('fp-btn', false, 'Send Reset Code'); }
+}
+
+async function handleReset() {
+  const er = document.getElementById('rp-error');
+  const showRp = (m) => { if (er) { er.textContent = m; er.style.display = m ? 'block' : 'none'; } };
+  const otp  = document.getElementById('rp-otp')?.value.trim();
+  const pass = document.getElementById('rp-pass')?.value;
+  const conf = document.getElementById('rp-confirm')?.value;
+  if (!otp || otp.length !== 6) return showRp('Enter the 6-digit code from your email.');
+  if (!pass || pass.length < 6) return showRp('Password must be at least 6 characters.');
+  if (pass !== conf) return showRp('Passwords do not match.');
+  showRp('');
+  setBtnLoad('rp-btn', true, 'Update Password');
+  try {
+    const { ok, data } = await api('/auth/reset-password', 'POST', { resetToken: _resetToken, otp, newPassword: pass });
+    if (ok && data.success) {
+      document.getElementById('screen-reset').style.display   = 'none';
+      document.getElementById('screen-success').style.display = '';
+      document.getElementById('success-email-display').textContent = _resetEmail;
+      _resetToken = '';
+    } else {
+      showRp(data.message || 'Reset failed.');
+    }
+  } catch { showRp('Cannot connect to server.'); }
+  finally { setBtnLoad('rp-btn', false, 'Update Password'); }
 }
 
 // ═══════════════════════════════════════════════════════
