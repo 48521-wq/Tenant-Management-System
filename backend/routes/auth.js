@@ -1,5 +1,6 @@
 const express    = require('express');
 const jwt        = require('jsonwebtoken');
+const crypto     = require('crypto');
 const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
 const User    = require('../models/User');
@@ -225,6 +226,85 @@ router.post('/google-fallback', async (req, res) => {
     const token = genToken({ id: user._id, role: user.role });
     res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, role: user.role, status: user.status, verified: user.verified } });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
+});
+
+
+// ─── PASSWORD RESET (stateless: works on Vercel serverless) ─────────────────
+const resetHash = (email, otp, pwdHash) =>
+  crypto.createHmac('sha256', process.env.JWT_SECRET).update(`${email}|${otp}|${pwdHash || ''}`).digest('hex');
+
+async function sendResetEmail(email, otp, name) {
+  await transporter.sendMail({
+    from: `"TMS - Tenant Management System" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: '🔑 Your TMS Password Reset Code',
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;background:#f9f9f9;border-radius:12px;padding:32px;border:1px solid #e0e0e0;">
+        <h2 style="color:#c9a84c;margin-bottom:4px;">Reset Your Password</h2>
+        <p style="color:#555;margin-bottom:24px;">Hi <strong>${name}</strong>, use this code to reset your TMS password.</p>
+        <div style="background:#fff;border:2px dashed #c9a84c;border-radius:10px;padding:20px;text-align:center;margin-bottom:24px;">
+          <span style="font-size:36px;font-weight:bold;letter-spacing:10px;color:#222;">${otp}</span>
+        </div>
+        <p style="color:#888;font-size:13px;">This code expires in <strong>10 minutes</strong>. If you did not request this, ignore this email.</p>
+      </div>`,
+  });
+}
+
+// POST /api/auth/forgot-password  — Step 1: email a 6-digit reset code
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const email = (req.body.email || '').toLowerCase().trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      return res.status(400).json({ success: false, message: 'Enter a valid email address.' });
+    if (email === process.env.ADMIN_EMAIL.toLowerCase())
+      return res.status(400).json({ success: false, message: 'Admin password is set in server settings.' });
+
+    const user = await User.findOne({ email }).select('+password');
+    const otp = generateOTP();
+    // Same response whether or not the account exists (no email enumeration)
+    const resetToken = jwt.sign(
+      { email, h: resetHash(email, otp, user?.password), purpose: 'pwd-reset' },
+      process.env.JWT_SECRET, { expiresIn: '10m' }
+    );
+    if (user) {
+      if (user.authProvider === 'google' && !user.password)
+        return res.status(400).json({ success: false, message: 'This account uses Google Sign-In. No password to reset.' });
+      await sendResetEmail(email, otp, user.name);
+    }
+    res.json({ success: true, resetToken, message: 'If the account exists, a code has been sent.' });
+  } catch (e) {
+    console.error('Forgot password:', e);
+    res.status(500).json({ success: false, message: 'Failed to send email. Check EMAIL_USER / EMAIL_PASS on server.' });
+  }
+});
+
+// POST /api/auth/reset-password  — Step 2: verify code & set new password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { resetToken, otp, newPassword } = req.body;
+    if (!resetToken || !otp || !newPassword)
+      return res.status(400).json({ success: false, message: 'Code and new password required.' });
+    if (newPassword.length < 6)
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
+
+    let decoded;
+    try { decoded = jwt.verify(resetToken, process.env.JWT_SECRET); }
+    catch { return res.status(400).json({ success: false, message: 'Code expired. Please request a new one.' }); }
+    if (decoded.purpose !== 'pwd-reset')
+      return res.status(400).json({ success: false, message: 'Invalid request.' });
+
+    const user = await User.findOne({ email: decoded.email }).select('+password');
+    if (!user || decoded.h !== resetHash(decoded.email, String(otp).trim(), user.password))
+      return res.status(400).json({ success: false, message: 'Incorrect or already-used code.' });
+
+    user.password = newPassword;
+    user.authProvider = user.authProvider === 'google' ? 'google' : 'email';
+    await user.save();   // pre-save hook hashes it; old code stops working automatically
+    res.json({ success: true, message: 'Password updated. You can sign in now.' });
+  } catch (e) {
+    console.error('Reset password:', e);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
 });
 
 // GET /api/auth/me
