@@ -69,6 +69,26 @@ function clearErr() {
   const b = document.getElementById('error-box');
   if (b) { b.textContent = ''; b.style.display = 'none'; }
 }
+// ── Popup (modal) for validation messages ────────────
+function showPopup(title, lines, focusId) {
+  const old = document.getElementById('tms-popup'); if (old) old.remove();
+  const items = (Array.isArray(lines) ? lines : [lines]).map(l => `<li style="margin:4px 0">${l}</li>`).join('');
+  const ov = document.createElement('div');
+  ov.id = 'tms-popup';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);padding:16px';
+  ov.innerHTML = `<div role="alertdialog" aria-modal="true" style="max-width:380px;width:100%;background:#111a2b;color:#e8ecf4;border:1px solid rgba(255,107,107,.45);border-radius:14px;padding:22px 22px 18px;box-shadow:0 20px 60px rgba(0,0,0,.5);font-family:inherit">
+    <div style="font-size:18px;font-weight:700;color:#ff6b6b;margin-bottom:8px">&#9888;&#65039; ${title}</div>
+    <ul style="margin:0 0 16px 18px;padding:0;font-size:14px;line-height:1.5;color:#cfd6e4">${items}</ul>
+    <button type="button" id="tms-popup-ok" style="width:100%;padding:10px;border:0;border-radius:10px;background:#c9a96e;color:#1a1305;font-weight:700;font-size:15px;cursor:pointer">OK</button>
+  </div>`;
+  const close = () => { ov.remove(); document.removeEventListener('keydown', onKey); if (focusId) document.getElementById(focusId)?.focus(); };
+  const onKey = (e) => { if (e.key === 'Escape' || e.key === 'Enter') { e.preventDefault(); close(); } };
+  ov.addEventListener('click', (e) => { if (e.target === ov) close(); });
+  document.body.appendChild(ov);
+  document.getElementById('tms-popup-ok').addEventListener('click', close);
+  document.addEventListener('keydown', onKey);
+  document.getElementById('tms-popup-ok').focus();
+}
 function setBtnLoad(id, loading, txt) {
   const b = document.getElementById(id);
   if (b) { b.disabled = loading; b.textContent = loading ? 'Please wait…' : txt; }
@@ -141,7 +161,8 @@ function syncAuthButtonState() {
     signUpPass === signUpConfirm &&
     selRole
   );
-  if (signUpBtn) signUpBtn.disabled = !signUpReady;
+  // Signup button stays clickable so handleSignup() can show a popup explaining what is wrong.
+  if (signUpBtn && signUpBtn.textContent !== 'Please wait…') signUpBtn.disabled = false;
 }
 
 // ── Password strength ─────────────────────────────────
@@ -244,7 +265,7 @@ function isValidEnglishName(value) {
 }
 
 function isValidEmail(value) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((value || '').trim());
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test((value || '').trim());
 }
 
 function enforceLettersInput(el) {
@@ -285,14 +306,22 @@ async function handleSignup() {
   const email = document.getElementById('signup-email')?.value.trim().toLowerCase();
   const pass  = document.getElementById('signup-password')?.value;
   const conf  = document.getElementById('signup-confirm')?.value;
-  if (!name||!email||!pass||!conf) { showErr('Fill in all fields.'); return; }
-  if (!isValidEnglishName(name)) { showErr('Full name may only contain letters and spaces.'); return; }
-  if (pass !== conf) { showErr('Passwords do not match.'); return; }
-  if (pass.length < 6) { showErr('Password must be at least 6 characters.'); return; }
-  if (!selRole) {
-    document.getElementById('role-error')?.style && (document.getElementById('role-error').style.display='block');
-    showErr('Select Tenant or Landlord.'); return;
+  const missing = [];
+  if (!name)  missing.push('Full Name');
+  if (!email) missing.push('Email Address');
+  if (!pass)  missing.push('Password');
+  if (!conf)  missing.push('Confirm Password');
+  if (!selRole) missing.push('Account type (Tenant or Landlord)');
+  if (missing.length) {
+    if (!selRole) document.getElementById('role-error')?.style && (document.getElementById('role-error').style.display='block');
+    const first = !name ? 'signup-name' : !email ? 'signup-email' : !pass ? 'signup-password' : !conf ? 'signup-confirm' : null;
+    showPopup('Please fill in all fields', ['These fields are required:', '<b>' + missing.join('</b>, <b>') + '</b>'], first);
+    return;
   }
+  if (!isValidEnglishName(name)) { showPopup('Invalid name', 'Full name may only contain letters and spaces.', 'signup-name'); return; }
+  if (!isValidEmail(email)) { showPopup('Invalid email address', 'Please enter a valid email, e.g. <b>name@example.com</b>.', 'signup-email'); return; }
+  if (pass.length < 6) { showPopup('Password too short', 'Password must be at least 6 characters.', 'signup-password'); return; }
+  if (pass !== conf) { showPopup('Passwords do not match', 'Password and Confirm Password must be the same.', 'signup-confirm'); return; }
   setBtnLoad('signup-btn', true, 'Sending OTP...');
   try {
     const { ok, data } = await api('/auth/send-otp', 'POST', { name, email, password: pass, role: selRole });

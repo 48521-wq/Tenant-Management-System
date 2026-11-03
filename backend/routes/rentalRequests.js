@@ -214,6 +214,29 @@ router.put('/:id/cancel', protect, async (req, res) => {
   }
 });
 
+// ─── TENANT: Permanently delete their own request ───
+// Deleting frees one of the tenant's 2 request slots for that property.
+// An approved (accepted) request is a real tenancy and cannot be deleted here.
+router.delete('/:id', protect, async (req, res) => {
+  try {
+    const rentalRequest = await RentalRequest.findById(req.params.id);
+    if (!rentalRequest) {
+      return res.status(404).json({ success: false, message: 'Request not found.' });
+    }
+    if (rentalRequest.tenantId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized.' });
+    }
+    if (rentalRequest.status === 'accepted') {
+      return res.status(400).json({ success: false, message: 'An approved rental cannot be deleted.' });
+    }
+    await rentalRequest.deleteOne();
+    res.json({ success: true, message: 'Request deleted.', propertyId: rentalRequest.propertyId });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+});
+
 // ─── ADMIN: Get all requests (admin only) ───
 router.get('/', protect, async (req, res) => {
   try {

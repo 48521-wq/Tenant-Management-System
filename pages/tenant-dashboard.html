@@ -58,7 +58,8 @@
 .sidebar-foot{margin-top:auto;padding:14px 12px;border-top:1px solid var(--border)}
 .user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--input-bg);border-radius:12px;border:1px solid var(--border)}
 .uav{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-l));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0}
-.u-name{font-size:16px;font-weight:600;color:var(--text)}.u-role{font-size:14px;color:var(--muted)}
+.user-card>div:not(.uav){min-width:0;flex:1}
+.u-name{font-size:16px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.u-role{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* MAIN */
 .main{flex:1;min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;height:100%}
 .page{display:none;padding:28px 32px 48px;animation:fadeUp 0.3s ease both}
@@ -372,15 +373,41 @@ select {
 }
 .pcard-body {
   padding: 15px 17px !important;
+  min-width: 0;
+  width: 100%;
 }
 .pcard-title {
   font-size: 18px !important;
   font-weight: 700 !important;
   letter-spacing: -0.1px;
+  overflow-wrap: anywhere;
 }
 .pcard-loc {
   font-size: 16px !important;
   letter-spacing: 0.1px;
+  overflow-wrap: anywhere;
+}
+.pcard-body > div[style*="display:flex"] {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.pcard-actions {
+  width: 100%;
+  min-width: 0;
+  align-items: stretch;
+}
+.pcard-actions > .btn {
+  flex: 1 1 120px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  justify-content: center;
+  padding-left: 8px;
+  padding-right: 8px;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.2;
 }
 
 /* ─── BUTTONS PREMIUM ─── */
@@ -1242,7 +1269,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Set names
   ['pav','sav'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=init; });
   ['pdn','sdn','welcome-name-t'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=name; });
-  ['pde','sde'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=email; });
+  ['pde','sde'].forEach(id => { const e=document.getElementById(id); if(e){ e.textContent=email; e.title=email; } });
 
   // Profile form
   const parts = name.split(' ');
@@ -1370,7 +1397,7 @@ function renderProps(list, rentedIds) {
     const has360 = !!panoramaUrl;
     const coverImage = p.frontImage || '';
     const thumbnail = coverImage ? `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">` : '';
-    const btnBaseStyle = 'flex:1;min-width:120px';
+    const btnBaseStyle = 'flex:1 1 120px;min-width:0;max-width:100%;box-sizing:border-box;justify-content:center;padding-left:8px;padding-right:8px;text-align:center;white-space:normal;overflow-wrap:anywhere;line-height:1.2';
     const viewButton = has360
       ? `<button class="btn btn-gold btn-sm" style="${btnBaseStyle}" onclick="tenantView3D('${pid}')">View 360</button>`
       : `<button class="btn btn-gold btn-sm" style="${btnBaseStyle};opacity:0.65;cursor:not-allowed" disabled>360 Pending</button>`;
@@ -1397,7 +1424,7 @@ function renderProps(list, rentedIds) {
         <div class="pcard-actions" style="flex-wrap:wrap;gap:6px;margin-top:10px">
           ${viewButton}
           ${requestBtn}
-          <button class="btn btn-teal btn-sm" style="flex:1;min-width:120px" onclick="tenantOpenFurniture('${pid}')">${Object.keys(p.tenantFurnitureLayout||{}).length>0?'✅ My Layout':'🛋️ Furnish'}</button>
+          <button class="btn btn-teal btn-sm" style="flex:1 1 120px;min-width:0;max-width:100%;box-sizing:border-box;justify-content:center;padding-left:8px;padding-right:8px;text-align:center;white-space:normal;overflow-wrap:anywhere;line-height:1.2" onclick="tenantOpenFurniture('${pid}')">${Object.keys(p.tenantFurnitureLayout||{}).length>0?'✅ My Layout':'🛋️ Furnish'}</button>
         </div>
       </div>
     </div>
@@ -1850,12 +1877,34 @@ async function loadRentalRequests(silent) {
           ${req.status==='docs_expired' ? `
             <div style="padding:10px 12px;background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);border-radius:9px;font-size:16px;color:var(--error);font-weight:600">⏰ Documents were not submitted within 48 hours — property was returned</div>
           ` : ''}
+          ${req.status!=='accepted' ? `
+            <button onclick="deleteRentalRequest('${req._id}')" style="width:100%;padding:7px 12px;border-radius:7px;border:1px solid rgba(255,107,107,0.35);background:rgba(255,107,107,0.08);color:var(--error);font-size:15px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">🗑️ Delete Request</button>
+          ` : ''}
         </div>
       </div>`;
     }).join('');
   } catch(e) {
     list.innerHTML = '<div class="loading">⚠️ Error loading requests.</div>';
   }
+}
+
+async function deleteRentalRequest(requestId) {
+  if (!confirm('Delete this request permanently?\n\nThis frees up one of your 2 request slots for this property.')) return;
+  try {
+    const r = await tFetch('/rental-requests/'+requestId, 'DELETE');
+    if (r && r.success) {
+      // Update the per-property counters right away so All Properties shows the new X/2 without a refresh
+      const gone = (window._myRequests || []).find(x => x._id === requestId);
+      const pid = gone && gone.propertyId && (gone.propertyId._id || gone.propertyId);
+      if (pid && window._tReqByProp && window._tReqByProp[pid]) {
+        const i = window._tReqByProp[pid].indexOf(gone.status);
+        if (i > -1) window._tReqByProp[pid].splice(i, 1);
+        if (!window._tReqByProp[pid].length) { delete window._tReqByProp[pid]; if (window._allReqMap) delete window._allReqMap[pid]; }
+      }
+      await loadRentalRequests(true);
+      await tSyncMyRequests();      // re-read from the server and redraw the All Properties cards
+    } else alert('❌ ' + ((r && r.message) || 'Failed'));
+  } catch (e) { alert('❌ ' + (e.message || 'Cannot connect to server')); }
 }
 
 async function cancelRentalRequest(requestId) {
@@ -2364,7 +2413,7 @@ function tRentButton(pid, base, isMyRental, isRented) {
   const list = all.filter(x => x !== 'accepted' && x !== 'approved');   // a finished tenancy is history, not a live request
   const n = list.length;
   const has = (...st) => list.some(x => st.includes(x));
-  const lock = (txt, bg, col, bd) => `<button class="btn btn-sm" style="${base};background:${bg};color:${col};border:1px solid ${bd};cursor:not-allowed" disabled>${txt}</button>`;
+  const lock = (txt, bg, col, bd) => `<button class="btn btn-sm" style="${base};background:${bg};color:${col};border:1px solid ${bd};cursor:not-allowed;white-space:normal;line-height:1.2;text-align:center;overflow-wrap:anywhere;min-width:0;max-width:100%" title="${txt.replace(/"/g,'&quot;')}" disabled>${txt}</button>`;
   if (isMyRental) return lock('✅ My Rental', 'rgba(78,205,196,0.15)', '#4ecdc4', 'rgba(78,205,196,0.3)');
   if (isRented) return lock('🔒 Rented', 'rgba(255,179,71,0.1)', '#ffb347', 'rgba(255,179,71,0.25)');
   if (has('docs_pending')) return lock('📄 Documents required', 'rgba(78,205,196,0.1)', '#4ecdc4', 'rgba(78,205,196,0.25)');
@@ -2382,11 +2431,42 @@ async function loadAllProperties(silent) {
   if (!silent || !grid.children.length) grid.innerHTML = '<div class="loading"><span class="spinner"></span>Loading properties…</div>';
   try {
     const [allData, myReqData] = await Promise.all([
-      tFetch('/properties?fields=_id,title,type,area,address,city,rent,beds,baths,sqft,description,status,landlordName,tenantId,tenantName,model3d,tenantFurnitureLayout,frontImage'),
+      (async () => {
+        try {
+          return await tFetch('/properties/tenant-portfolio');
+        } catch (portfolioError) {
+          console.warn('Tenant portfolio endpoint unavailable; using properties API fallback:', portfolioError);
+          const legacyData = await tFetch('/properties?fields=_id,title,type,area,address,city,rent,beds,baths,sqft,description,status,landlordId,landlordName,tenantId,tenantName,model3d,tenantFurnitureLayout,frontImage');
+          const properties = legacyData.properties || [];
+          const user = JSON.parse(localStorage.getItem('tms_user') || '{}');
+          const userId = String(user._id || user.id || '');
+          const landlordIds = new Set(properties
+            .filter(property => {
+              const tenantId = property.tenantId && (property.tenantId._id || property.tenantId);
+              return ['rented', 'suspended'].includes(property.status) && String(tenantId || '') === userId;
+            })
+            .map(property => String(property.landlordId || ''))
+            .filter(Boolean));
+          const scopedProperties = landlordIds.size
+            ? properties.filter(property => landlordIds.has(String(property.landlordId || '')))
+            : properties;
+          return {
+            properties: scopedProperties,
+            scope: landlordIds.size ? 'landlords' : 'all',
+            landlordCount: landlordIds.size
+          };
+        }
+      })(),
       tFetch('/rental-requests/my-requests').catch(() => ({ requests: [] }))
     ]);
     const allP = allData.properties || [];
     const myRequests = myReqData.requests || [];
+    const subtitle = document.querySelector('#page-all-properties .pg-sub');
+    if (subtitle) {
+      subtitle.textContent = allData.scope === 'landlords'
+        ? `Browse properties from your landlord${allData.landlordCount === 1 ? '' : 's'}`
+        : 'Browse properties from all landlords in the system';
+    }
 
     // Build a map: propertyId -> request status
     const reqMap = {};
@@ -2410,7 +2490,7 @@ async function loadAllProperties(silent) {
       const has360 = !!panoramaUrl;
       const coverImage = p.frontImage || '';
       const thumbnail = coverImage ? `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">` : '';
-      const btnBaseStyle = 'flex:1;min-width:120px';
+      const btnBaseStyle = 'flex:1 1 120px;min-width:0;max-width:100%;box-sizing:border-box;justify-content:center;padding-left:8px;padding-right:8px;text-align:center;white-space:normal;overflow-wrap:anywhere;line-height:1.2';
       const viewButton = has360
         ? `<button class="btn btn-gold btn-sm" style="${btnBaseStyle}" onclick="tenantView3D('${pid}')">View 360</button>`
         : `<button class="btn btn-gold btn-sm" style="${btnBaseStyle};opacity:0.65;cursor:not-allowed" disabled>360 Pending</button>`;
@@ -2449,7 +2529,12 @@ async function loadAllProperties(silent) {
     window._allPropsCache = allP;
     window._allReqMap = reqMap;
   } catch(e) {
-    grid.innerHTML = `<div class="loading">⚠️ Unable to load properties.</div>`;
+    console.error('loadAllProperties error:', e);
+    grid.innerHTML = '';
+    const error = document.createElement('div');
+    error.className = 'loading';
+    error.textContent = `⚠️ Unable to load properties${e?.message ? `: ${e.message}` : '.'}`;
+    grid.appendChild(error);
   }
 }
 // Show correct page and load data
@@ -2620,7 +2705,7 @@ function filterAllProps() {
   if (!grid) return;
   if (!filtered.length) { grid.innerHTML = '<div class="loading">🔍 No properties found.</div>'; return; }
 
-  const btnBaseStyle = 'flex:1;min-width:120px';
+  const btnBaseStyle = 'flex:1 1 120px;min-width:0;max-width:100%;box-sizing:border-box;justify-content:center;padding-left:8px;padding-right:8px;text-align:center;white-space:normal;overflow-wrap:anywhere;line-height:1.2';
 
   grid.innerHTML = filtered.map(p => {
     const pid = p._id;
@@ -2860,7 +2945,7 @@ function filterAllProps() {
         <button onclick="furnPageRotate(45)"  style="padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:16px;font-family:'DM Sans',sans-serif">↻ +45°</button>
         <button onclick="furnPageRotate(90)"  style="padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:16px;font-family:'DM Sans',sans-serif">↻ 90°</button>
         <button onclick="furnPageDelete()"    style="padding:6px 12px;border-radius:7px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:#FF6B6B;cursor:pointer;font-size:16px;font-family:'DM Sans',sans-serif">🗑 Delete</button>
-        <span style="font-size:15px;color:var(--muted);margin-left:8px">Right-drag: orbit · Scroll: zoom</span>
+        <span style="font-size:15px;color:var(--muted);margin-left:8px">Drag empty room: orbit · Scroll: zoom</span>
       </div>
       <!-- Canvas -->
       <div style="position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--border)">
@@ -3081,14 +3166,14 @@ function filterAllProps() {
             <button onclick="tFurnDelete()"    style="padding:6px;border-radius:7px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:#FF6B6B;cursor:pointer;font-size:15px;font-family:'DM Sans',sans-serif">🗑 Delete</button>
           </div>
           <div style="font-size:14px;color:var(--muted);line-height:1.9;margin-top:8px">
-            <b>Click</b> to select<br><b>Drag</b> to move<br><b>Right-drag</b> orbit<br><b>Scroll</b> zoom
+            <b>Click furniture</b> to select<br><b>Drag furniture</b> to move<br><b>Drag empty room</b> to orbit 360°<br><b>Scroll</b> to zoom
           </div>
         </div>
       </div>
       <!-- Canvas -->
       <div style="flex:1;position:relative;background:transparent">
         <canvas id="c3d-tfurn" style="width:100%;height:100%;display:block;min-height:520px"></canvas>
-        <div style="position:absolute;bottom:10px;right:14px;font-size:14px;color:rgba(255,255,255,0.3)">Right-drag orbit · Scroll zoom</div>
+        <div style="position:absolute;bottom:10px;right:14px;font-size:14px;color:rgba(255,255,255,0.55);pointer-events:none">Drag empty room to orbit 360° · Scroll to zoom</div>
       </div>
     </div>
   </div>

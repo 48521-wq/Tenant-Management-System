@@ -27,6 +27,35 @@ router.get('/my', protect, async (req, res) => {
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
+// GET properties from the landlord(s) renting to this tenant.
+router.get('/tenant-portfolio', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'tenant')
+      return res.status(403).json({ success: false, message: 'Tenant access required.' });
+
+    const rentals = await Property.find({
+      tenantId: req.user._id,
+      status: { $in: ['rented', 'suspended'] }
+    }).select('landlordId').lean();
+    const landlordIds = [...new Set(rentals.map(property => String(property.landlordId)))];
+    const filter = landlordIds.length ? { landlordId: { $in: landlordIds } } : {};
+    const properties = await Property.find(filter)
+      .select('_id title type area address city rent beds baths sqft description status landlordName tenantId tenantName model3d tenantFurnitureLayout frontImage')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: properties.length,
+      scope: landlordIds.length ? 'landlords' : 'all',
+      landlordCount: landlordIds.length,
+      properties
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+});
+
 // GET all properties (public / admin)
 router.get('/', async (req, res) => {
   try {

@@ -309,12 +309,15 @@ function buildRoomDims(scene, RW, RD) {
     const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true }));
     sp.scale.set(2.1, 0.6, 1); sp.position.set(x, 0.25, z); sp.renderOrder = 10; scene.add(sp);
   };
-  label(RW.toFixed(1) + ' m', 0, RD / 2 + o + 0.45); label(RD.toFixed(1) + ' m', RW / 2 + o + 0.75, 0);
+  label(_formatMeters(RW) + ' m', 0, RD / 2 + o + 0.45); label(_formatMeters(RD) + ' m', RW / 2 + o + 0.75, 0);
 }
 
-// ── Furnished room: plank floor, skirting, window + curtains, art, lights, environment ──
-function buildRoom(scene, renderer, RW, RD) {
+// ── Furnished room: configurable finishes, skirting, window + curtains, art, lights ──
+function buildRoom(scene, renderer, RW, RD, roomStyle) {
   RW = RW || 8; RD = RD || 8; const RH = 3.6, MX = Math.max(RW, RD) / 8;
+  roomStyle = roomStyle || {};
+  const wallColor = roomStyle.wallColor || '#EFE9DF';
+  const floorStyle = roomStyle.floorStyle || 'wood';
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.9;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -338,7 +341,29 @@ function buildRoom(scene, renderer, RW, RD) {
   const cl = new THREE.PointLight(0xFFE7C2, 0.5, 14 * MX + 4, 2); cl.position.set(0, 3.3, 0); scene.add(cl);
 
   // floor: oak planks
-  const plank = _tex('floorplank', (x, w, h) => {
+  const plank = floorStyle === 'tile'
+    ? _tex('floortile', (x, w, h) => {
+      x.fillStyle = '#D5D0C7'; x.fillRect(0, 0, w, h);
+      const step = w / 6;
+      for (let row = 0; row < 6; row++) for (let col = 0; col < 6; col++) {
+        const px = col * step, py = row * step;
+        x.fillStyle = (row + col) % 2 ? '#E6E0D6' : '#D8D1C6';
+        x.fillRect(px + 2, py + 2, step - 4, step - 4);
+        x.strokeStyle = 'rgba(95,83,70,0.3)'; x.lineWidth = 3; x.strokeRect(px + 2, py + 2, step - 4, step - 4);
+      }
+    }, 768)
+    : floorStyle === 'marble'
+    ? _marbleTex()
+    : floorStyle === 'carpet'
+    ? _tex('floorcarpet', (x, w, h) => {
+      x.fillStyle = '#87919A'; x.fillRect(0, 0, w, h); _seed = 19;
+      for (let i = 0; i < 16000; i++) {
+        const a = 0.025 + _rnd() * 0.08;
+        x.fillStyle = _rnd() < 0.5 ? `rgba(20,25,30,${a})` : `rgba(255,255,255,${a})`;
+        x.fillRect(_rnd() * w, _rnd() * h, 2, 2);
+      }
+    }, 768)
+    : _tex('floorplank', (x, w, h) => {
     const rows = 8, ph = h / rows; _seed = 5;
     for (let r = 0; r < rows; r++) { let px = -_rnd() * 300; while (px < w) { const pw = 260 + _rnd() * 220, t = 0.86 + _rnd() * 0.2; x.fillStyle = `rgb(${158 * t | 0},${118 * t | 0},${78 * t | 0})`; x.fillRect(px, r * ph, pw, ph);
       for (let i = 0; i < 14; i++) { x.strokeStyle = `rgba(70,40,15,${0.04 + _rnd() * 0.09})`; x.lineWidth = 0.6 + _rnd(); const y = r * ph + _rnd() * ph; x.beginPath(); x.moveTo(px, y); x.bezierCurveTo(px + pw * 0.3, y + (_rnd() - 0.5) * 5, px + pw * 0.7, y + (_rnd() - 0.5) * 5, px + pw, y); x.stroke(); }
@@ -346,18 +371,24 @@ function buildRoom(scene, renderer, RW, RD) {
       x.fillStyle = 'rgba(30,15,5,0.4)'; x.fillRect(0, r * ph, w, 1.5); }
   }, 1024);
   const ft = plank.clone(); ft.repeat.set(RW / 2.4, RD / 2.4); ft.needsUpdate = true;
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(RW, RD), new THREE.MeshStandardMaterial({ map: ft, bumpMap: ft, bumpScale: 0.25, roughness: 0.4, metalness: 0, envMapIntensity: 0.6 }));
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(RW, RD), new THREE.MeshStandardMaterial({
+    map: ft, bumpMap: floorStyle === 'wood' || floorStyle === 'carpet' ? ft : null,
+    bumpScale: floorStyle === 'carpet' ? 0.08 : 0.25,
+    roughness: floorStyle === 'marble' ? 0.2 : floorStyle === 'tile' ? 0.32 : 0.82,
+    metalness: 0, envMapIntensity: floorStyle === 'marble' ? 0.9 : 0.6,
+    color: floorStyle === 'carpet' ? 0xDCE2E8 : 0xFFFFFF
+  }));
   floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
 
   // walls (back, left, right) + ceiling
-  const wallTex = _tex('wallpaint', (x, w, h) => { x.fillStyle = '#EFE9DF'; x.fillRect(0, 0, w, h); for (let i = 0; i < 9000; i++) { x.fillStyle = `rgba(${_rnd() < 0.5 ? '0,0,0' : '255,255,255'},${_rnd() * 0.04})`; x.fillRect(_rnd() * w, _rnd() * h, 2, 2); } }, 512);
-  const wm = new THREE.MeshStandardMaterial({ map: wallTex, roughness: 0.95, envMapIntensity: 0.3 }), wmB = wm.clone(); wmB.color = new THREE.Color(0xF6F0E4);
+  const wallTex = _tex('wallpaint', (x, w, h) => { x.fillStyle = '#FFFFFF'; x.fillRect(0, 0, w, h); for (let i = 0; i < 9000; i++) { x.fillStyle = `rgba(${_rnd() < 0.5 ? '0,0,0' : '255,255,255'},${_rnd() * 0.04})`; x.fillRect(_rnd() * w, _rnd() * h, 2, 2); } }, 512);
+  const wm = new THREE.MeshStandardMaterial({ map: wallTex, color: new THREE.Color(wallColor), roughness: 0.95, envMapIntensity: 0.3 }), wmB = wm.clone();
   const wall = (w, x, y, z, ry, mat) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, RH), mat || wm); m.position.set(x, y, z); m.rotation.y = ry; m.receiveShadow = true; scene.add(m); return m; };
   wall(RW, 0, RH / 2, -RD / 2, 0, wmB); wall(RD, -RW / 2, RH / 2, 0, Math.PI / 2); wall(RD, RW / 2, RH / 2, 0, -Math.PI / 2);
   const ceil = new THREE.Mesh(new THREE.PlaneGeometry(RW, RD), new THREE.MeshStandardMaterial({ color: 0xFAF7F0, roughness: 0.95 })); ceil.rotation.x = Math.PI / 2; ceil.position.y = RH; scene.add(ceil);
 
   // skirting + crown
-  const trim = new THREE.MeshStandardMaterial({ color: 0xFBF9F4, roughness: 0.5 });
+  const trim = new THREE.MeshStandardMaterial({ color: _shade(new THREE.Color(wallColor).getHex(), 0.2), roughness: 0.5 });
   const bar = (w, h, d, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), trim); m.position.set(x, y, z); m.castShadow = y < 1; m.receiveShadow = true; scene.add(m); };
   bar(RW, 0.14, 0.03, 0, 0.07, -RD / 2 + 0.015); bar(0.03, 0.14, RD, -RW / 2 + 0.015, 0.07, 0); bar(0.03, 0.14, RD, RW / 2 - 0.015, 0.07, 0);
   bar(RW, 0.1, 0.06, 0, RH - 0.05, -RD / 2 + 0.03); bar(0.06, 0.1, RD, -RW / 2 + 0.03, RH - 0.05, 0); bar(0.06, 0.1, RD, RW / 2 - 0.03, RH - 0.05, 0);
@@ -410,7 +441,7 @@ function _initRoomScene(canvasId, savedLayout, onSave, room){
   const camera = new THREE.PerspectiveCamera(42,W/H,0.1,80);
   camera.position.set(0,9,10);
   camera.lookAt(0,0,0);
-  buildRoom(scene, renderer, room.w, room.d);
+  buildRoom(scene, renderer, room.w, room.d, room.style);
 
   // ── Catalog ──
   const CATALOG=[
@@ -436,6 +467,17 @@ function _initRoomScene(canvasId, savedLayout, onSave, room){
 
   // ── Placed items ──
   const placed=[];
+  function clampItemPosition(item, x, z) {
+    const size = item.mesh.userData.size || new THREE.Vector3(0.8, 0, 0.8);
+    const c = Math.abs(Math.cos(item.rotY || 0)), s = Math.abs(Math.sin(item.rotY || 0));
+    const halfX = Math.min(BX, c * size.x / 2 + s * size.z / 2 + 0.06);
+    const halfZ = Math.min(BZ, s * size.x / 2 + c * size.z / 2 + 0.06);
+    item.mesh.position.set(
+      Math.max(-room.w / 2 + halfX, Math.min(room.w / 2 - halfX, x)),
+      0,
+      Math.max(-room.d / 2 + halfZ, Math.min(room.d / 2 - halfZ, z))
+    );
+  }
 
   Object.entries(savedLayout).forEach(([key,data])=>{
     if(!data) return;
@@ -444,10 +486,11 @@ function _initRoomScene(canvasId, savedLayout, onSave, room){
     items.forEach(item=>{
       if(item.visible===false) return;
       const mesh=buildFurniture(scene,cat.id,cat.color);
-      mesh.position.set(Math.max(-BX,Math.min(BX,item.x||0)),0,Math.max(-BZ,Math.min(BZ,item.z||0)));
       mesh.rotation.y=item.rotY||0;
+      const placedItem={mesh,type:cat.id,id:key+'_'+Date.now(),rotY:item.rotY||0};
+      clampItemPosition(placedItem,item.x||0,item.z||0);
       scene.add(mesh);
-      placed.push({mesh,type:cat.id,id:key+'_'+Date.now(),rotY:item.rotY||0});
+      placed.push(placedItem);
     });
   });
 
@@ -455,7 +498,7 @@ function _initRoomScene(canvasId, savedLayout, onSave, room){
   // ── Interaction ──
   const raycaster=new THREE.Raycaster();
   const mouse=new THREE.Vector2();
-  let dragging=null, dragOffset=new THREE.Vector3();
+  let dragging=null, dragOffset=new THREE.Vector3(), activePointerId=null;
   let selected=null;
   let orbitDragging=false, orbitPrev={x:0,y:0};
   let camTheta=0.48, camPhi=0.72, camDist=Math.max(room.w,room.d)*1.35+3; const camMax=camDist*1.5;
@@ -499,8 +542,12 @@ function _initRoomScene(canvasId, savedLayout, onSave, room){
     if(rp) rp.style.display=selected?'flex':'none';
   }
 
-  function onMouseDown(e){
-    if(e.button===2){orbitDragging=true;orbitPrev={x:e.clientX,y:e.clientY};return;}
+  function onPointerDown(e){
+    if(e.button===2||e.button===1){
+      orbitDragging=true;orbitPrev={x:e.clientX,y:e.clientY};activePointerId=e.pointerId;
+      if(canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
+      e.preventDefault();return;
+    }
     const rect=canvas.getBoundingClientRect();
     mouse.x=((e.clientX-rect.left)/rect.width)*2-1;
     mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
@@ -516,15 +563,22 @@ function _initRoomScene(canvasId, savedLayout, onSave, room){
         if(inside){found=p;break;}
       }
       if(found){
-        selectObj(found); dragging=found;
+        selectObj(found); dragging=found;activePointerId=e.pointerId;
         const wp=getWorldXZ(e);
         if(wp) dragOffset.copy(found.mesh.position).sub(wp);
+        if(canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
       }
-    } else { selectObj(null); }
+    } else {
+      selectObj(null);orbitDragging=true;orbitPrev={x:e.clientX,y:e.clientY};activePointerId=e.pointerId;
+      if(canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
+    }
+    e.preventDefault();
   }
-  canvas.addEventListener('mousedown',onMouseDown);
+  canvas.style.touchAction='none';
+  canvas.addEventListener('pointerdown',onPointerDown);
 
-  function onMouseMove(e){
+  function onPointerMove(e){
+    if(activePointerId!==null&&e.pointerId!==activePointerId)return;
     if(orbitDragging){
       camPhi  +=(e.clientX-orbitPrev.x)*0.004;
       camTheta=Math.max(0.15,Math.min(1.45,camTheta+(e.clientY-orbitPrev.y)*0.004));
@@ -534,18 +588,16 @@ function _initRoomScene(canvasId, savedLayout, onSave, room){
     if(!dragging) return;
     const wp=getWorldXZ(e);
     if(!wp) return;
-    dragging.mesh.position.set(
-      Math.max(-BX,Math.min(BX,wp.x+dragOffset.x)),0,
-      Math.max(-BZ,Math.min(BZ,wp.z+dragOffset.z))
-    );
+    clampItemPosition(dragging,wp.x+dragOffset.x,wp.z+dragOffset.z);
   }
-  window.addEventListener('mousemove',onMouseMove);
+  window.addEventListener('pointermove',onPointerMove);
 
-  function onMouseUp(e){
-    if(e.button===2){orbitDragging=false;return;}
-    dragging=null;
+  function onPointerUp(e){
+    if(activePointerId!==null&&e.pointerId!==activePointerId)return;
+    orbitDragging=false;dragging=null;activePointerId=null;
   }
-  window.addEventListener('mouseup',onMouseUp);
+  window.addEventListener('pointerup',onPointerUp);
+  window.addEventListener('pointercancel',onPointerUp);
 
   function onWheel(e){
     camDist=Math.max(3,Math.min(camMax,camDist+e.deltaY*0.018));
@@ -560,9 +612,9 @@ function _initRoomScene(canvasId, savedLayout, onSave, room){
     const cat=CATALOG.find(c=>c.id===type);
     const color=colorHex||cat?.color||0x888888;
     const mesh=buildFurniture(scene,type,color);
-    mesh.position.set((Math.random()-0.5)*Math.min(3,BX*1.2),0,(Math.random()-0.5)*Math.min(3,BZ*1.2));
-    scene.add(mesh);
     const item={mesh,type,id:type+'_'+Date.now(),rotY:0};
+    clampItemPosition(item,(Math.random()-0.5)*Math.min(3,BX*1.2),(Math.random()-0.5)*Math.min(3,BZ*1.2));
+    scene.add(mesh);
     placed.push(item);
     selectObj(item);
   }
@@ -571,6 +623,7 @@ function _initRoomScene(canvasId, savedLayout, onSave, room){
     if(!selected) return;
     selected.rotY+=deg*Math.PI/180;
     selected.mesh.rotation.y=selected.rotY;
+    clampItemPosition(selected,selected.mesh.position.x,selected.mesh.position.z);
   }
 
   function deleteSelected(){
@@ -616,11 +669,12 @@ function _initRoomScene(canvasId, savedLayout, onSave, room){
     _dead=true;
     cancelAnimationFrame(animationFrameId);
     ro.disconnect();
-    canvas.removeEventListener('mousedown',onMouseDown);
+    canvas.removeEventListener('pointerdown',onPointerDown);
     canvas.removeEventListener('wheel',onWheel);
     canvas.removeEventListener('contextmenu',onContextMenu);
-    window.removeEventListener('mousemove',onMouseMove);
-    window.removeEventListener('mouseup',onMouseUp);
+    window.removeEventListener('pointermove',onPointerMove);
+    window.removeEventListener('pointerup',onPointerUp);
+    window.removeEventListener('pointercancel',onPointerUp);
     renderer.dispose();
   }
   const api={renderer,scene,camera,placed,CATALOG,room,
@@ -672,6 +726,25 @@ function downloadFurnitureJSON(canvasId, propTitle, role) {
 //  the property's area (sqft), bedrooms and type.
 // ════════════════════════════════════════════════════════════
 const _SQM = 0.0929;
+const _ROOM_FLOORS = ['wood', 'tile', 'marble', 'carpet'];
+const _formatMeters = value => String(Math.round(Number(value) * 100) / 100);
+function _roomDefaultStyle(room) {
+  const id = String(room.id || '').toLowerCase();
+  if (id.includes('dining')) return { wallColor: '#F3E8D6', floorStyle: 'tile' };
+  if (id.includes('master')) return { wallColor: '#E5EAF2', floorStyle: 'wood' };
+  if (id.includes('bed')) return { wallColor: '#E7EDF0', floorStyle: 'carpet' };
+  if (id.includes('study')) return { wallColor: '#E8E2D6', floorStyle: 'wood' };
+  if (id.includes('bath')) return { wallColor: '#E4EEF0', floorStyle: 'tile' };
+  if (id.includes('kitchen')) return { wallColor: '#EEECE5', floorStyle: 'marble' };
+  return { wallColor: '#EFE9DF', floorStyle: 'wood' };
+}
+function _roomSettingsFor(saved) {
+  if (saved && saved.settings && typeof saved.settings === 'object') return saved.settings;
+  return {};
+}
+function _isRoomColor(value) {
+  return typeof value === 'string' && /^#[\da-f]{6}$/i.test(value);
+}
 function _furnPropFor(canvasId) {
   try {
     const g = (n) => (typeof window[n] !== 'undefined' ? window[n] : undefined);
@@ -704,7 +777,7 @@ function _roomsFor(p) {
 }
 function _splitLayout(saved, rooms) {
   const out = {};
-  if (saved && saved.__v === 2 && saved.rooms) { rooms.forEach(r => { if (saved.rooms[r.id]) out[r.id] = saved.rooms[r.id]; }); return out; }
+  if (saved && (saved.__v === 2 || saved.__v === 3) && saved.rooms) { rooms.forEach(r => { if (saved.rooms[r.id]) out[r.id] = saved.rooms[r.id]; }); return out; }
   if (saved && Object.keys(saved).filter(k => k !== '__v').length) out[rooms[0].id] = saved;   // legacy single-room layout
   return out;
 }
@@ -716,25 +789,95 @@ function initFurniturePlacement(canvasId, savedLayout, onSave) {
   if (prev) { try { prev.destroy && prev.destroy(); } catch (e) {} try { prev.renderer.dispose(); } catch (e) {} delete _fScenes[canvasId]; }
   const parent = canvas.parentElement;
   const old = parent.querySelector('.furn-rooms'); if (old) old.remove();
+  const oldTools = parent.querySelector('.furn-room-tools'); if (oldTools) oldTools.remove();
 
-  const prop = _furnPropFor(canvasId), rooms = _roomsFor(prop);
-  const st = { rooms, layouts: _splitLayout(savedLayout, rooms), cur: null, inner: null };
+  const prop = _furnPropFor(canvasId), roomSettings = _roomSettingsFor(savedLayout);
+  const rooms = _roomsFor(prop).map(room => {
+    const saved = roomSettings[room.id] || {};
+    const customDimensions = !room.custom && Number(saved.w) > 1 && Number(saved.d) > 1;
+    return {
+      ...room,
+      w: customDimensions ? Number(saved.w) : room.w,
+      d: customDimensions ? Number(saved.d) : room.d,
+      dimensionSource: room.custom || customDimensions ? 'specified' : 'estimated',
+      style: {
+        ..._roomDefaultStyle(room),
+        ...(_isRoomColor(saved.wallColor) ? { wallColor: saved.wallColor } : {}),
+        ...(_ROOM_FLOORS.includes(saved.floorStyle) ? { floorStyle: saved.floorStyle } : {})
+      }
+    };
+  });
+  const st = { rooms, layouts: _splitLayout(savedLayout, rooms), settings: roomSettings, cur: null, inner: null };
   if (getComputedStyle(parent).position === 'static') parent.style.position = 'relative';
 
   const bar = document.createElement('div'); bar.className = 'furn-rooms';
   bar.style.cssText = 'position:absolute;top:10px;left:10px;right:10px;z-index:6;display:flex;gap:8px;flex-wrap:wrap;pointer-events:none;font-family:"DM Sans",system-ui,sans-serif';
   parent.appendChild(bar);
+  const tools = document.createElement('div'); tools.className = 'furn-room-tools';
+  tools.style.cssText = 'position:absolute;left:12px;bottom:12px;z-index:6;display:flex;align-items:center;gap:8px;flex-wrap:wrap;max-width:calc(100% - 24px);padding:9px 11px;border:1px solid rgba(255,255,255,.18);border-radius:11px;background:rgba(20,20,28,.9);color:#F3E6C8;backdrop-filter:blur(8px);font:12px "DM Sans",system-ui,sans-serif';
+  parent.appendChild(tools);
+  const toolLabel = (text) => {
+    const label = document.createElement('label');
+    label.style.cssText = 'display:flex;align-items:center;gap:5px;white-space:nowrap';
+    label.appendChild(document.createTextNode(text));
+    return label;
+  };
+  const floorSelect = document.createElement('select');
+  floorSelect.style.cssText = 'max-width:130px;padding:5px 7px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:#24242d;color:#fff;font:inherit';
+  [['wood','Oak wood'],['tile','Ceramic tile'],['marble','Marble'],['carpet','Carpet']].forEach(([value,label]) => {
+    const option = document.createElement('option'); option.value = value; option.textContent = label; floorSelect.appendChild(option);
+  });
+  const wallInput = document.createElement('input'); wallInput.type = 'color'; wallInput.title = 'Room wall color';
+  wallInput.style.cssText = 'width:32px;height:26px;padding:1px;border:1px solid rgba(255,255,255,.25);border-radius:5px;background:#24242d;cursor:pointer';
+  const widthInput = document.createElement('input'); widthInput.type = 'number'; widthInput.min = '2'; widthInput.max = '20'; widthInput.step = '0.01'; widthInput.title = 'Room width in metres';
+  const depthInput = document.createElement('input'); depthInput.type = 'number'; depthInput.min = '2'; depthInput.max = '20'; depthInput.step = '0.01'; depthInput.title = 'Room length in metres';
+  [widthInput, depthInput].forEach(input => { input.style.cssText = 'width:62px;padding:5px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:#24242d;color:#fff;font:inherit'; });
+  const widthLabel = toolLabel('Width'); widthLabel.appendChild(widthInput);
+  const depthLabel = toolLabel('Length'); depthLabel.appendChild(depthInput);
+  const floorLabel = toolLabel('Floor'); floorLabel.appendChild(floorSelect);
+  const wallLabel = toolLabel('Wall'); wallLabel.appendChild(wallInput);
+  const estimateNote = document.createElement('span'); estimateNote.style.cssText = 'opacity:.72;white-space:nowrap';
+  tools.append(floorLabel, wallLabel, widthLabel, depthLabel, estimateNote);
 
   const facade = {
     get renderer() { return st.inner.renderer; }, get scene() { return st.inner.scene; }, get camera() { return st.inner.camera; },
     get placed() { return st.inner.placed; }, get CATALOG() { return st.inner.CATALOG; }, get room() { return st.inner.room; }, rooms, st,
     addFurniture: (t, c) => st.inner.addFurniture(t, c), rotateSelected: (d) => st.inner.rotateSelected(d), deleteSelected: () => st.inner.deleteSelected(),
-    updateCamera: () => st.inner.updateCamera(), destroy: () => { st.inner.destroy(); bar.remove(); },
+    updateCamera: () => st.inner.updateCamera(), destroy: () => { st.inner.destroy(); bar.remove(); tools.remove(); },
     switchRoom: (id) => open(id),
+    updateRoom: (id, patch) => {
+      const room = rooms.find(item => item.id === id);
+      if (!room) return false;
+      const next = { ...room, ...patch };
+      if (!room.custom && patch.w != null) next.w = Math.round(Math.max(2, Math.min(20, Number(patch.w) || room.w)) * 100) / 100;
+      if (!room.custom && patch.d != null) next.d = Math.round(Math.max(2, Math.min(20, Number(patch.d) || room.d)) * 100) / 100;
+      if (patch.style) next.style = { ...room.style, ...patch.style };
+      if (!room.custom && (patch.w != null || patch.d != null)) next.dimensionSource = 'specified';
+      Object.assign(room, next);
+      const savedSettings = st.settings[id] || {};
+      st.settings[id] = {
+        ...savedSettings,
+        ...(!room.custom && (patch.w != null || patch.d != null) ? { w: room.w, d: room.d } : {}),
+        wallColor: room.style.wallColor,
+        floorStyle: room.style.floorStyle
+      };
+      open(id);
+      return true;
+    },
     getLayout() {
       if (st.inner) st.layouts[st.cur] = st.inner.getLayout();
       const rm = {}; Object.entries(st.layouts).forEach(([k, v]) => { if (v && Object.keys(v).length) rm[k] = v; });
-      return Object.keys(rm).length ? { __v: 2, rooms: rm } : {};
+      const settings = {};
+      rooms.forEach(room => {
+        const saved = st.settings[room.id];
+        if (!saved) return;
+        settings[room.id] = {
+          ...(!room.custom && saved.w != null && saved.d != null ? { w: room.w, d: room.d } : {}),
+          wallColor: room.style.wallColor,
+          floorStyle: room.style.floorStyle
+        };
+      });
+      return Object.keys(rm).length || Object.keys(settings).length ? { __v: 3, rooms: rm, settings } : {};
     },
   };
 
@@ -744,10 +887,30 @@ function initFurniturePlacement(canvasId, savedLayout, onSave) {
       const n = Object.values(st.layouts[r.id] || {}).reduce((a, v) => a + (Array.isArray(v) ? v.length : 1), 0);
       const b = document.createElement('button'); b.type = 'button'; const on = r.id === st.cur;
       b.style.cssText = 'pointer-events:auto;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:7px 13px;border-radius:12px;font-family:inherit;border:1.5px solid ' + (on ? '#C9A96E' : 'rgba(255,255,255,0.18)') + ';background:' + (on ? 'rgba(201,169,110,0.95)' : 'rgba(20,20,28,0.78)') + ';color:' + (on ? '#1A1408' : '#F3E6C8') + ';backdrop-filter:blur(6px);box-shadow:0 4px 14px rgba(0,0,0,0.3)';
-      b.innerHTML = '<span style="font-weight:700;font-size:13px">' + r.name + (n ? ' \u00B7 ' + n : '') + '</span><span style="font-size:11px;opacity:.8">' + r.w.toFixed(1) + ' \u00D7 ' + r.d.toFixed(1) + ' m \u00B7 ' + Math.round(r.w * r.d) + ' m\u00B2</span>';
+      b.innerHTML = '<span style="font-weight:700;font-size:13px">' + r.name + (n ? ' \u00B7 ' + n : '') + '</span><span style="font-size:11px;opacity:.8">' + _formatMeters(r.w) + ' \u00D7 ' + _formatMeters(r.d) + ' m \u00B7 ' + (r.w * r.d).toFixed(2) + ' m\u00B2' + (r.dimensionSource === 'estimated' ? ' · estimated' : '') + '</span>';
       b.onclick = () => open(r.id); bar.appendChild(b);
     });
+    const current = rooms.find(r => r.id === st.cur) || rooms[0];
+    if (current) {
+      floorSelect.value = current.style.floorStyle;
+      wallInput.value = current.style.wallColor;
+      widthInput.value = _formatMeters(current.w);
+      depthInput.value = _formatMeters(current.d);
+      widthInput.disabled = depthInput.disabled = !!current.custom;
+      widthInput.title = depthInput.title = current.custom ? 'Dimensions set by the landlord property model' : 'Set room dimensions in metres';
+      estimateNote.textContent = current.custom ? 'Landlord dimensions' : current.dimensionSource === 'estimated' ? 'Estimated from property area; edit to set measured size' : 'Custom room size';
+    }
   }
+  floorSelect.onchange = () => facade.updateRoom(st.cur, { style: { floorStyle: floorSelect.value } });
+  wallInput.onchange = () => facade.updateRoom(st.cur, { style: { wallColor: wallInput.value } });
+  const updateDimensions = () => {
+    const current = rooms.find(r => r.id === st.cur);
+    if (!current || current.custom) return;
+    const w = Number(widthInput.value), d = Number(depthInput.value);
+    if (w >= 2 && w <= 20 && d >= 2 && d <= 20) facade.updateRoom(st.cur, { w, d });
+  };
+  widthInput.onchange = updateDimensions;
+  depthInput.onchange = updateDimensions;
   function open(id) {
     if (st.inner) { st.layouts[st.cur] = st.inner.getLayout(); st.inner.destroy(); try { st.inner.renderer.dispose(); } catch (e) {} delete _fScenes[canvasId];
       const c2 = canvas.cloneNode(false); canvas.parentNode.replaceChild(c2, canvas); canvas = c2; }
