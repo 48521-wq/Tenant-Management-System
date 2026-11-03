@@ -69,7 +69,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .sb-foot{margin-top:auto;padding:14px 12px;border-top:1px solid var(--border)}
 .sb-user{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--input-bg);border-radius:12px;border:1px solid var(--border)}
 .sb-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-l));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#FFFFFF;flex-shrink:0}
-.sb-uname{font-size:16px;font-weight:600;color:var(--text)}.sb-urole{font-size:14px;color:var(--muted)}
+.sb-user>div:not(.sb-av){min-width:0;flex:1}
+.sb-uname{font-size:16px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sb-urole{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* MAIN */
 .main{flex:1;min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden}
 .page{display:none;padding:28px 32px 52px;animation:pgIn 0.27s ease both}
@@ -2658,7 +2659,7 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
         <button onclick="lFurnRotate(45)"  style="padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:16px;font-family:'DM Sans',sans-serif">↻ +45°</button>
         <button onclick="lFurnRotate(90)"  style="padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:16px;font-family:'DM Sans',sans-serif">↻ 90°</button>
         <button onclick="lFurnDelete()"    style="padding:6px 12px;border-radius:7px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:#FF6B6B;cursor:pointer;font-size:16px;font-family:'DM Sans',sans-serif">🗑 Delete</button>
-        <span style="font-size:15px;color:var(--muted);margin-left:8px">Right-drag: orbit · Scroll: zoom</span>
+        <span style="font-size:15px;color:var(--muted);margin-left:8px">Drag empty room: orbit · Scroll: zoom</span>
       </div>
       <div style="position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--border)">
         <canvas id="c3d-lfurnpage" style="width:100%;height:520px;display:block;background:#1A1A2E;border-radius:10px"></canvas>
@@ -3026,7 +3027,7 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
             <button onclick="furnDelete()"    style="padding:6px;border-radius:7px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:#FF6B6B;cursor:pointer;font-size:15px;font-family:'DM Sans',sans-serif">🗑 Delete</button>
           </div>
           <div style="font-size:14px;color:var(--muted);line-height:1.9;margin-top:8px">
-            <b>Click</b> to select<br><b>Drag</b> to move<br><b>Right-drag</b> orbit<br><b>Scroll</b> zoom
+            <b>Click furniture</b> to select<br><b>Drag furniture</b> to move<br><b>Drag empty room</b> to orbit 360°<br><b>Scroll</b> to zoom
           </div>
         </div>
       </div>
