@@ -1307,7 +1307,7 @@ async function loadProperties() {
     // Load rented properties only and keep the payload small
     let rentedProps = [];
     try {
-      const allData = await tFetch('/properties?status=rented&fields=_id,status,tenantId,title,area,city,rent,beds,baths,type,frontImage,model3d,tenantFurnitureLayout');
+      const allData = await tFetch('/properties?status=rented&fields=_id,status,tenantId,title,area,city,rent,beds,baths,type,frontImage,houseViewCount,model3d,tenantFurnitureLayout');
       const allP = allData.properties || [];
       rentedProps = allP.filter(p => {
         const tid = (p.tenantId || p.tenant || '').toString();
@@ -1398,9 +1398,7 @@ function renderProps(list, rentedIds) {
     const coverImage = p.frontImage || '';
     const thumbnail = coverImage ? `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">` : '';
     const btnBaseStyle = 'flex:1 1 120px;min-width:0;max-width:100%;box-sizing:border-box;justify-content:center;padding-left:8px;padding-right:8px;text-align:center;white-space:normal;overflow-wrap:anywhere;line-height:1.2';
-    const viewButton = has360
-      ? `<button class="btn btn-gold btn-sm" style="${btnBaseStyle}" onclick="tenantView3D('${pid}')">View 360</button>`
-      : `<button class="btn btn-gold btn-sm" style="${btnBaseStyle};opacity:0.65;cursor:not-allowed" disabled>360 Pending</button>`;
+    const viewButton = tViewButtons(p, btnBaseStyle);
     const requestBtn = isMine
       ? `<button class="btn btn-teal btn-sm" style="${btnBaseStyle};opacity:0.65;cursor:not-allowed" disabled>✅ My Property</button>`
       : (p.status === 'available'
@@ -1468,7 +1466,7 @@ async function populatePropertyDropdowns() {
     // Fallback: fetch rented properties only
     if (!rentedProps.length && userId) {
       try {
-        const allPropsData = await tFetch('/properties?status=rented&fields=_id,status,tenantId,title,area,city,rent,beds,baths,type,frontImage,model3d,tenantFurnitureLayout,address');
+        const allPropsData = await tFetch('/properties?status=rented&fields=_id,status,tenantId,title,area,city,rent,beds,baths,type,frontImage,houseViewCount,model3d,tenantFurnitureLayout,address');
         const allPropsArr = allPropsData.properties || [];
         rentedProps = allPropsArr.filter(p => {
           const tid = (p.tenantId || p.tenant || '').toString();
@@ -2210,7 +2208,8 @@ function tenantView3D(propId) {
   const p = (window._tenantPropMap||{})[propId]; if(!p) return;
   const panoramaUrl = getProperty360Url(p);
   if (!panoramaUrl) {
-    return alert('3D view is pending admin approval for this property.');
+    if (Number(p.houseViewCount) > 0) return tOpenHouseView(propId);   // no 360 yet - show the house view photos instead
+    return alert('⚠️ 3D view is pending admin approval for this property.');
   }
   open3D(propId, p.title, p.model3d, p.type);
 }
@@ -2404,6 +2403,22 @@ if (!window._tPollTimers) {
   document.addEventListener('visibilitychange', () => { if (!document.hidden) tSyncMyRequests(); });
 }
 
+// Buttons that let a tenant look at a house: 360/3D model and/or House View photos
+function tViewButtons(p, base) {
+  const pid = p._id, has360 = !!getProperty360Url(p), hv = Number(p.houseViewCount) || 0;
+  const b360 = has360 ? `<button class="btn btn-gold btn-sm" style="${base}" onclick="tenantView3D('${pid}')">View 360</button>` : '';
+  const bhv = hv ? `<button class="btn btn-gold btn-sm" style="${base}" onclick="tOpenHouseView('${pid}')">📷 House View</button>` : '';
+  if (b360 || bhv) return b360 + bhv;
+  return `<button class="btn btn-sm" style="${base};background:rgba(201,169,110,0.1);color:#c9a96e;border:1px solid rgba(201,169,110,0.25);cursor:default" disabled>360 Pending</button>`;
+}
+async function tOpenHouseView(pid) {
+  const p = (window._tenantPropMap || {})[pid] || {};
+  try {
+    const r = await tFetch('/properties/' + pid + '/house-view');
+    tmsHouseView(r.title || p.title, r.images || []);
+  } catch (e) { alert('❌ ' + tmsCleanErr(e)); }
+}
+
 // Rent button for a property card.
 // A tenant may send up to 2 requests per house (the 2nd needs an offer >= previous bid + Rs. 2,000);
 // after that the button is locked. Rented houses are always locked.
@@ -2416,9 +2431,9 @@ function tRentButton(pid, base, isMyRental, isRented) {
   const lock = (txt, bg, col, bd) => `<button class="btn btn-sm" style="${base};background:${bg};color:${col};border:1px solid ${bd};cursor:not-allowed;white-space:normal;line-height:1.2;text-align:center;overflow-wrap:anywhere;min-width:0;max-width:100%" title="${txt.replace(/"/g,'&quot;')}" disabled>${txt}</button>`;
   if (isMyRental) return lock('✅ My Rental', 'rgba(78,205,196,0.15)', '#4ecdc4', 'rgba(78,205,196,0.3)');
   if (isRented) return lock('🔒 Rented', 'rgba(255,179,71,0.1)', '#ffb347', 'rgba(255,179,71,0.25)');
-  if (has('docs_pending')) return lock('📄 Documents required', 'rgba(78,205,196,0.1)', '#4ecdc4', 'rgba(78,205,196,0.25)');
-  if (has('docs_submitted')) return lock('🔍 Docs under review', 'rgba(78,205,196,0.1)', '#4ecdc4', 'rgba(78,205,196,0.25)');
-  if (n >= T_MAX_REQ) return lock((has('pending', 'negotiating') ? '⏳ Requested' : '🔒 Limit reached') + ' · ' + n + '/' + T_MAX_REQ, 'rgba(255,179,71,0.1)', '#ffb347', 'rgba(255,179,71,0.25)');
+  if (has('docs_pending')) return lock('📄 Upload Docs', 'rgba(78,205,196,0.1)', '#4ecdc4', 'rgba(78,205,196,0.25)');
+  if (has('docs_submitted')) return lock('🔍 In review', 'rgba(78,205,196,0.1)', '#4ecdc4', 'rgba(78,205,196,0.25)');
+  if (n >= T_MAX_REQ) return lock((has('pending', 'negotiating') ? '⏳ Requested' : '🔒 Limit') + ' ' + n + '/' + T_MAX_REQ, 'rgba(255,179,71,0.1)', '#ffb347', 'rgba(255,179,71,0.25)');
   if (n === 1 && has('pending', 'negotiating'))
     return `<button class="btn btn-teal btn-sm" style="${base}" onclick="openRentalRequestModal('${pid}')" title="Send a second request with a higher offer">⬆️ Raise Offer · 1/${T_MAX_REQ}</button>`;
   return `<button class="btn btn-teal btn-sm" style="${base}" onclick="openRentalRequestModal('${pid}')">🏠 Request Rent${n ? ' · ' + (n + 1) + '/' + T_MAX_REQ : ''}</button>`;
@@ -2436,7 +2451,7 @@ async function loadAllProperties(silent) {
           return await tFetch('/properties/tenant-portfolio');
         } catch (portfolioError) {
           console.warn('Tenant portfolio endpoint unavailable; using properties API fallback:', portfolioError);
-          const legacyData = await tFetch('/properties?fields=_id,title,type,area,address,city,rent,beds,baths,sqft,description,status,landlordId,landlordName,tenantId,tenantName,model3d,tenantFurnitureLayout,frontImage');
+          const legacyData = await tFetch('/properties?fields=_id,title,type,area,address,city,rent,beds,baths,sqft,description,status,landlordId,landlordName,tenantId,tenantName,model3d,tenantFurnitureLayout,frontImage,houseViewCount');
           const properties = legacyData.properties || [];
           const user = JSON.parse(localStorage.getItem('tms_user') || '{}');
           const userId = String(user._id || user.id || '');
@@ -2491,9 +2506,7 @@ async function loadAllProperties(silent) {
       const coverImage = p.frontImage || '';
       const thumbnail = coverImage ? `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">` : '';
       const btnBaseStyle = 'flex:1 1 120px;min-width:0;max-width:100%;box-sizing:border-box;justify-content:center;padding-left:8px;padding-right:8px;text-align:center;white-space:normal;overflow-wrap:anywhere;line-height:1.2';
-      const viewButton = has360
-        ? `<button class="btn btn-gold btn-sm" style="${btnBaseStyle}" onclick="tenantView3D('${pid}')">View 360</button>`
-        : `<button class="btn btn-gold btn-sm" style="${btnBaseStyle};opacity:0.65;cursor:not-allowed" disabled>360 Pending</button>`;
+      const viewButton = tViewButtons(p, btnBaseStyle);
 
       // Rent request button — smart status
       const reqStatus = reqMap[pid];
@@ -2639,7 +2652,7 @@ async function loadMyRentals() {
     const user = JSON.parse(localStorage.getItem('tms_user') || '{}');
     const userId = (user._id || user.id || '').toString();
 
-    const propertyData = await tFetch('/properties?status=rented&fields=_id,status,tenantId,title,address,area,city,rent,beds,baths,type,frontImage,landlordName,tenantName').catch(() => ({ properties: [] }));
+    const propertyData = await tFetch('/properties?status=rented&fields=_id,status,tenantId,title,address,area,city,rent,beds,baths,type,frontImage,houseViewCount,landlordName,tenantName').catch(() => ({ properties: [] }));
 
     const propertyRentals = (propertyData && Array.isArray(propertyData.properties)) ? propertyData.properties.filter(p => {
       const tid = (p.tenantId || p.tenant || '').toString();
@@ -2713,9 +2726,7 @@ function filterAllProps() {
     const has360 = !!panoramaUrl;
     const coverImage = p.frontImage || '';
     const thumbnail = coverImage ? `<img src="${coverImage}" alt="${p.title||''}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">` : '';
-    const viewButton = has360
-      ? `<button class="btn btn-gold btn-sm" style="${btnBaseStyle}" onclick="tenantView3D('${pid}')">View 360</button>`
-      : `<button class="btn btn-gold btn-sm" style="${btnBaseStyle};opacity:0.65;cursor:not-allowed" disabled>360 Pending</button>`;
+    const viewButton = tViewButtons(p, btnBaseStyle);
     const reqStatus = reqMap[pid];
     const isRented = p.status === 'rented' || p.status === 'suspended';
       const _me = JSON.parse(localStorage.getItem('tms_user') || '{}');

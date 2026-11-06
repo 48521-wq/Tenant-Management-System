@@ -1605,13 +1605,15 @@ function renderMyProperties() {
     const viewButton = has360
       ? `<button class="btn btn-gold btn-sm" style="flex:1" onclick="quickView3D('${id}')">View 360</button>`
       : `<button class="btn btn-ghost btn-sm" style="flex:1" onclick="open3DRequestModal('${id}')">Request 360</button>`;
+    const hvCount = Number(p.houseViewCount) || 0;
+    const hvButton = `<button class="btn btn-teal btn-sm" style="flex:1" onclick="openHouseViewEditor('${id}')">${hvCount > 0 ? '📷 House View (' + hvCount + '/4)' : '📷 Add House View'}</button>`;
     const addCoverButton = !coverImage ? `<button class="btn btn-teal btn-sm" style="flex:1" onclick="promptFrontImageUpload('${id}')">📷 Add Cover Image</button>` : '';
     return `
     <div class="pcard">
       <div class="pcard-thumb" style="padding:0;cursor:pointer" onclick="quickView3D('${id}')">
         ${thumbnail}
         <span style="position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:20px;font-size:14px;font-weight:700;background:${statusColors[p.status]||statusColors.available};color:#fff;pointer-events:none">${p.status||'available'}</span>
-        <span style="position:absolute;bottom:10px;right:10px;padding:3px 9px;border-radius:7px;font-size:14px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--gold);border:1px solid rgba(201,169,110,0.3);pointer-events:none">${has360 ? '360 View' : 'Details'}</span>
+        <span style="position:absolute;bottom:10px;right:10px;padding:3px 9px;border-radius:7px;font-size:14px;font-weight:600;background:rgba(0,0,0,0.7);color:var(--gold);border:1px solid rgba(201,169,110,0.3);pointer-events:none">${has360 ? '360 View' : (hvCount > 0 ? '📷 House View' : 'Details')}</span>
       </div>
       <div class="pcard-body">
         <div class="pcard-title">${p.title||'Untitled'}</div>
@@ -1620,9 +1622,10 @@ function renderMyProperties() {
           <span>🛏 ${p.beds||'?'}</span><span>🚿 ${p.baths||'?'}</span><span>${p.type||'House'}</span>
         </div>
         <div class="pcard-price">Rs. ${Number(p.rent||0).toLocaleString()} <span>/mo</span></div>
-        <div style="font-size:16px;color:var(--muted);margin-top:6px">${has360 ? '360 view available' : 'Details only until admin approves a 3D model.'}</div>
+        <div style="font-size:16px;color:var(--muted);margin-top:6px">${has360 ? (hvCount > 0 ? '360 view + house view available' : '360 view available') : (hvCount > 0 ? '📷 House view · ' + hvCount + ' photo' + (hvCount > 1 ? 's' : '') : 'Add house view photos or request a 360 model.')}</div>
         <div class="pcard-actions" style="flex-wrap:wrap;gap:6px;margin-top:10px">
           ${viewButton}
+          ${hvButton}
           ${addCoverButton}
           <button class="btn btn-ghost btn-sm" style="flex:1" onclick="furnViewByPropId('${id}')">${Object.keys((window._propMap&&window._propMap[id]&&window._propMap[id].landlordFurnitureLayout)||{}).length>0?'✅ My Layout':'🛋️ Interior'}</button>
           <button class="btn btn-danger btn-sm" onclick="deleteProp('${id}')">🗑</button>
@@ -1651,9 +1654,11 @@ async function submitAddProp() {
     const data = await lFetch('/properties','POST',{
       title, type, area, address:addr, rent:Number(rent),
       beds:Number(beds)||2, baths:Number(baths)||1, sqft:Number(sqft)||1000, description:desc,
-      frontImage
+      frontImage,
+      houseView: window._apHV ? window._apHV.getImages() : []
     });
     if (data.success) {
+      if (window._apHV) window._apHV.clear();
       showMsg('ap-msg','✅ Property listed successfully!','ok');
       ['ap-title','ap-addr','ap-desc'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
       clearPropImage();
@@ -1666,6 +1671,8 @@ async function submitAddProp() {
 
 // ── Image upload helpers ──
 window._apFrontImage = '';
+window._apHV = null;   // House View editor of the Add Property form
+document.addEventListener('DOMContentLoaded', () => { const c = document.getElementById('ap-hv'); if (c && !window._apHV) window._apHV = tmsHouseViewEditor(c); });
 function handleImgSelect(e) {
   const file = e.target.files[0];
   if (file) loadImgFile(file);
@@ -2459,9 +2466,26 @@ function quickView3D(propId) {
   const p = (window._propMap||{})[propId]; if(!p) return;
   const panoramaUrl = getProperty360Url(p);
   if (!panoramaUrl) {
+    if (Number(p.houseViewCount) > 0) return viewHouseView(propId);   // no 360 - show the photos
     return open3DRequestModal(propId);
   }
   open3D(propId, p.title, p.model3d, p.type);
+}
+async function viewHouseView(propId) {
+  const p = (window._propMap || {})[propId] || {};
+  try {
+    const r = await lFetch('/properties/' + propId + '/house-view');
+    tmsHouseView(r.title || p.title, r.images || []);
+  } catch (e) { alert('❌ ' + tmsCleanErr(e)); }
+}
+function openHouseViewEditor(propId) {
+  const p = (window._propMap || {})[propId]; if (!p) return;
+  tmsOpenHouseViewEditor({
+    title: p.title,
+    load: async () => (await lFetch('/properties/' + propId + '/house-view')).images || [],
+    save: (images) => lFetch('/properties/' + propId + '/house-view', 'PUT', { images }),
+    onSaved: (n) => { p.houseViewCount = n; const mp = myProps.find(x => x._id === propId); if (mp) mp.houseViewCount = n; renderMyProperties(); }
+  });
 }
 function edit3DByPropId(propId) {
   const p = (window._propMap||{})[propId]; if(!p) return;
@@ -2721,9 +2745,11 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
           </div>
         </div>
       </div>
+      <!-- House View photos (up to 4) -->
+      <div id="ap-hv" style="margin-top:18px"></div>
       <!-- 3D Model Preview for New Property -->
       <div style="margin-top:18px;padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:12px">
-        <div style="font-size:18px;font-weight:700;color:var(--text)">🏗️ 360 View Approval</div>
+        <div style="font-size:18px;font-weight:700;color:var(--text)">🏗️ 360 View (optional)</div>
         <div style="margin-top:10px;font-size:16px;color:var(--muted)">New listings show only property details until admin approves a 360 model. After publishing, submit a request from the 3D Model Requests page.</div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;margin-top:16px">
