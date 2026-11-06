@@ -31,6 +31,10 @@ const propertySchema = new mongoose.Schema({
   tenantFurnitureLayout:   { type: mongoose.Schema.Types.Mixed, default: {} },
 
   images: [String],
+
+  // House View: up to 4 interior/exterior photos chosen by the landlord (alternative or addition to a 360/3D model)
+  houseView:      { type: [String], default: [] },
+  houseViewCount: { type: Number,   default: 0 },
   
   // Front/cover image as base64 data URL (uploaded by landlord)
   frontImage: { type: String, default: '' },

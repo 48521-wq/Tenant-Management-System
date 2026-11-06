@@ -69,3 +69,119 @@ function tmsCloseModals(kind) {
   document.querySelectorAll(kind ? '[data-tms-modal="' + kind + '"]' : '[data-tms-modal]').forEach(m => m.remove());
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') tmsCloseModals(); });
+
+// ════════════════════════════════════════════════════════════
+//  HOUSE VIEW  — up to 4 photos per property
+//  The landlord chooses: request a 360/3D model, show a house view, or both.
+// ════════════════════════════════════════════════════════════
+const TMS_HV_MAX = 4;
+
+// Downscale a picked image to a web-friendly JPEG data URL (keeps uploads small and fast)
+function tmsImageToDataUrl(file, max, quality) {
+  max = max || 1280; quality = quality || 0.8;
+  return new Promise((resolve, reject) => {
+    if (!file || !/^image\//.test(file.type)) return reject(new Error('Please choose an image file.'));
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url); resolve(c.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read that image.')); };
+    img.src = url;
+  });
+}
+
+// 4-slot photo editor. Returns { getImages(), setImages(list), clear() }
+function tmsHouseViewEditor(container, initial) {
+  let imgs = (initial || []).slice(0, TMS_HV_MAX);
+  const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.multiple = true; input.style.display = 'none';
+  let replaceAt = -1;
+  const draw = () => {
+    container.classList.add('hv-editor');
+    container.innerHTML = '<div class="hv-head"><b>House View photos</b><span>' + imgs.length + ' / ' + TMS_HV_MAX + '</span></div>'
+      + '<div class="hv-hint">Add up to ' + TMS_HV_MAX + ' photos so tenants can see the house. You can use this instead of, or together with, a 360/3D model.</div>'
+      + '<div class="hv-slots"></div>';
+    const wrap = container.querySelector('.hv-slots');
+    for (let i = 0; i < TMS_HV_MAX; i++) {
+      const s = document.createElement('div'); s.className = 'hv-slot' + (imgs[i] ? ' filled' : '');
+      if (imgs[i]) {
+        s.innerHTML = '<img alt="Photo ' + (i + 1) + '"><span class="hv-n">' + (i + 1) + '</span><button type="button" class="hv-rm" title="Remove">✕</button><button type="button" class="hv-rp">Replace</button>';
+        s.querySelector('img').src = imgs[i];
+        s.querySelector('.hv-rm').onclick = (e) => { e.stopPropagation(); imgs.splice(i, 1); draw(); };
+        s.querySelector('.hv-rp').onclick = (e) => { e.stopPropagation(); replaceAt = i; input.click(); };
+      } else {
+        s.innerHTML = '<div class="hv-add"><span>＋</span>Add photo</div>';
+        s.onclick = () => { replaceAt = -1; input.click(); };
+      }
+      wrap.appendChild(s);
+    }
+    container.appendChild(input);
+  };
+  input.onchange = async () => {
+    const files = [...input.files]; input.value = '';
+    for (const f of files) {
+      try {
+        const d = await tmsImageToDataUrl(f);
+        if (replaceAt >= 0) { imgs[replaceAt] = d; replaceAt = -1; }
+        else if (imgs.length < TMS_HV_MAX) imgs.push(d);
+        else { alert('⚠️ You can add at most ' + TMS_HV_MAX + ' photos.'); break; }
+      } catch (e) { alert('❌ ' + e.message); }
+    }
+    draw();
+  };
+  draw();
+  return { getImages: () => imgs.slice(), setImages: (l) => { imgs = (l || []).slice(0, TMS_HV_MAX); draw(); }, clear: () => { imgs = []; draw(); } };
+}
+
+// Dialog used by the landlord: load existing photos, edit, save.
+function tmsOpenHouseViewEditor(opts) {
+  tmsCloseModals('house-view-edit');
+  const m = document.createElement('div'); m.setAttribute('data-tms-modal', 'house-view-edit'); m.className = 'hv-overlay';
+  m.innerHTML = '<div class="hv-dialog"><div class="hv-dt">📷 House View</div><div class="hv-ds"></div><div class="hv-body"><div class="loading" style="min-height:160px">Loading photos…</div></div>'
+    + '<div class="hv-actions"><button type="button" class="btn btn-ghost hv-cancel">Cancel</button><button type="button" class="btn btn-teal hv-save" disabled>💾 Save photos</button></div></div>';
+  m.querySelector('.hv-ds').textContent = opts.title || '';
+  m.addEventListener('mousedown', e => { if (e.target === m) m.remove(); });
+  m.querySelector('.hv-cancel').onclick = () => m.remove();
+  document.body.appendChild(m);
+  let ed = null; const save = m.querySelector('.hv-save');
+  Promise.resolve().then(() => opts.load()).then(list => {
+    const body = m.querySelector('.hv-body'); body.innerHTML = ''; ed = tmsHouseViewEditor(body, list || []); save.disabled = false;
+  }).catch(() => { m.querySelector('.hv-body').innerHTML = '<div class="loading">⚠️ Could not load the photos.</div>'; });
+  save.onclick = async () => {
+    save.disabled = true; save.textContent = 'Saving…';
+    try {
+      const imgs = ed.getImages(), r = await opts.save(imgs);
+      if (r && r.success === false) throw new Error(r.message || 'Could not save');
+      m.remove(); alert('✅ ' + (imgs.length ? 'House view saved (' + imgs.length + ' photo' + (imgs.length > 1 ? 's' : '') + ').' : 'House view removed.'));
+      if (opts.onSaved) opts.onSaved(imgs.length);
+    } catch (e) { alert('❌ ' + tmsCleanErr(e)); save.disabled = false; save.textContent = '💾 Save photos'; }
+  };
+}
+
+// Photo gallery viewer (tenant, landlord, admin)
+function tmsHouseView(title, images, start) {
+  images = (images || []).filter(Boolean);
+  if (!images.length) { alert('⚠️ No house view photos have been added for this property yet.'); return; }
+  tmsCloseModals('house-view');
+  let i = Math.min(Math.max(start || 0, 0), images.length - 1);
+  const m = document.createElement('div'); m.setAttribute('data-tms-modal', 'house-view'); m.className = 'hv-viewer';
+  m.innerHTML = '<div class="hv-vt"><span class="hv-vtitle"></span><span class="hv-count"></span><button type="button" class="hv-x" title="Close (Esc)">✕</button></div>'
+    + '<div class="hv-stage"><button type="button" class="hv-nav prev" title="Previous">‹</button><img class="hv-main" alt="House view"><button type="button" class="hv-nav next" title="Next">›</button></div>'
+    + '<div class="hv-thumbs"></div>';
+  m.querySelector('.hv-vtitle').textContent = '📷 ' + (title || 'House View');
+  const main = m.querySelector('.hv-main'), cnt = m.querySelector('.hv-count'), th = m.querySelector('.hv-thumbs');
+  images.forEach((src, k) => { const t = document.createElement('img'); t.src = src; t.alt = 'Photo ' + (k + 1); t.onclick = () => go(k); th.appendChild(t); });
+  const go = (k) => { i = (k + images.length) % images.length; main.src = images[i]; cnt.textContent = (i + 1) + ' / ' + images.length;
+    [...th.children].forEach((t, j) => t.classList.toggle('on', j === i)); };
+  m.querySelector('.prev').onclick = () => go(i - 1); m.querySelector('.next').onclick = () => go(i + 1);
+  m.querySelector('.hv-x').onclick = () => { m.remove(); document.removeEventListener('keydown', key); };
+  if (images.length < 2) m.querySelectorAll('.hv-nav').forEach(b => b.style.display = 'none');
+  const key = (e) => { if (!document.body.contains(m)) return document.removeEventListener('keydown', key); if (e.key === 'ArrowLeft') go(i - 1); else if (e.key === 'ArrowRight') go(i + 1); };
+  document.addEventListener('keydown', key);
+  m.addEventListener('mousedown', e => { if (e.target === m || e.target.classList.contains('hv-stage')) m.querySelector('.hv-x').click(); });
+  let sx = null; main.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
+  main.addEventListener('touchend', e => { if (sx === null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40) go(i + (dx < 0 ? 1 : -1)); sx = null; });
+  document.body.appendChild(m); go(i);
+}
