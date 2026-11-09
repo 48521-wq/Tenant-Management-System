@@ -1607,7 +1607,7 @@ function renderMyProperties() {
       : `<button class="btn btn-ghost btn-sm" style="flex:1" onclick="open3DRequestModal('${id}')">Request 360</button>`;
     const hvCount = Number(p.houseViewCount) || 0;
     const hvButton = `<button class="btn btn-teal btn-sm" style="flex:1" onclick="openHouseViewEditor('${id}')">${hvCount > 0 ? '📷 House View (' + hvCount + '/4)' : '📷 Add House View'}</button>`;
-    const addCoverButton = !coverImage ? `<button class="btn btn-teal btn-sm" style="flex:1" onclick="promptFrontImageUpload('${id}')">📷 Add Cover Image</button>` : '';
+    const addCoverButton = `<button class="btn btn-teal btn-sm" style="flex:1" onclick="promptFrontImageUpload('${id}')">${coverImage ? '🖼️ Change Cover' : '📷 Add Cover Image'}</button>`;
     return `
     <div class="pcard">
       <div class="pcard-thumb" style="padding:0;cursor:pointer" onclick="quickView3D('${id}')">
@@ -1704,36 +1704,30 @@ function clearPropImage(e) {
 }
 
 async function promptFrontImageUpload(propId) {
+  // Add OR change the cover image of a property (the outside photo of the house works best)
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
   input.style.display = 'none';
   input.onchange = async function() {
     const file = input.files && input.files[0];
-    if (!file) {
-      document.body.removeChild(input);
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) { alert('Image must be smaller than 5 MB.'); document.body.removeChild(input); return; }
-    const reader = new FileReader();
-    reader.onload = async function(ev) {
-      const frontImage = ev.target.result;
-      try {
-        const res = await lFetch(`/properties/${propId}/front-image`, 'PUT', { frontImage });
-        if (res && res.success) {
-          alert('Cover image added successfully!');
-          await loadMyProperties();
-        } else {
-          alert('Error: ' + (res && res.message ? res.message : 'Unable to save image.'));
-        }
-      } catch (err) {
-        alert('Unable to save image.');
-        console.error(err);
-      } finally {
-        document.body.removeChild(input);
+    input.remove();
+    if (!file) return;
+    try {
+      const frontImage = await tmsImageToDataUrl(file, 1600, 0.82);   // any phone photo works - it is resized automatically
+      const res = await lFetch(`/properties/${propId}/front-image`, 'PUT', { frontImage });
+      if (res && res.success) {
+        const hadCover = !!((myProps.find(x => x._id === propId) || {}).frontImage);
+        const mp = myProps.find(x => x._id === propId); if (mp) mp.frontImage = frontImage;
+        if (window._propMap && window._propMap[propId]) window._propMap[propId].frontImage = frontImage;
+        renderMyProperties();
+        alert('✅ Cover image ' + (hadCover ? 'changed.' : 'added.'));
+      } else {
+        alert('❌ ' + (res && res.message ? res.message : 'Unable to save image.'));
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      alert('❌ ' + tmsCleanErr(err));
+    }
   };
   document.body.appendChild(input);
   input.click();

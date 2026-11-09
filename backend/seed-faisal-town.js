@@ -10,6 +10,7 @@
 //   node seed-faisal-town.js --confirm                        # add it
 //   node seed-faisal-town.js --confirm --landlord-email=a@b.com
 //   optional values: --rent=85000 --beds=3 --baths=3 --sqft=2250
+//   node seed-faisal-town.js --clear-cover --confirm          # property already added earlier: remove its (interior) cover image
 //   node seed-faisal-town.js --selftest                       # offline schema check
 // ─────────────────────────────────────────────────────────────────────────────
 require('dotenv').config();
@@ -38,7 +39,8 @@ function buildDoc(landlord) {
     rent: Number(val('rent')) || 85000, beds: Number(val('beds')) || 3, baths: Number(val('baths')) || 3, sqft: Number(val('sqft')) || 2250,
     description: 'Furnished, well-lit house in A Block, Faisal Town with a tiled lounge, wall-mounted TV, false ceiling with LED lighting, ceiling fans and AC. See the House View photos.',
     status: 'available', landlordId: landlord._id, landlordName: landlord.name,
-    frontImage: imgs[0], houseView: imgs, houseViewCount: imgs.length,
+    frontImage: '',   // cover = OUTSIDE photo of the house: add it from the landlord dashboard ("Add Cover Image"); the 4 photos here are interior House View photos
+    houseView: imgs, houseViewCount: imgs.length,
   };
 }
 
@@ -68,7 +70,11 @@ async function main() {
   console.log(`Landlord that will own the property: ${landlord.name} <${landlord.email}>`);
 
   const exists = await Property.findOne({ title: TITLE, landlordId: landlord._id }).select('_id');
-  if (exists) { console.log('\nThis property already exists for that landlord - nothing to do.'); return mongoose.disconnect(); }
+  if (exists) {
+    if (flag('clear-cover') && flag('confirm')) { await Property.updateOne({ _id: exists._id }, { $set: { frontImage: '' } }); console.log('\nThe interior photo was removed as cover image. Add the outside photo from the landlord dashboard.'); }
+    else console.log('\nThis property already exists for that landlord - nothing to do. (Use --clear-cover --confirm to remove its cover image.)');
+    return mongoose.disconnect();
+  }
 
   const doc = buildDoc(landlord);
   console.log(`\nWill add: "${doc.title}" | ${doc.type} | Rs. ${doc.rent.toLocaleString('en-US')}/mo | ${doc.beds} bed, ${doc.baths} bath, ${doc.sqft} sqft | ${doc.houseViewCount} house-view photos`);
