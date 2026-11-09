@@ -2406,10 +2406,15 @@ if (!window._tPollTimers) {
 // Buttons that let a tenant look at a house: 360/3D model and/or House View photos
 function tViewButtons(p, base) {
   const pid = p._id, has360 = !!getProperty360Url(p), hv = Number(p.houseViewCount) || 0;
-  const b360 = has360 ? `<button class="btn btn-gold btn-sm" style="${base}" onclick="tenantView3D('${pid}')">View 360</button>` : '';
-  const bhv = hv ? `<button class="btn btn-gold btn-sm" style="${base}" onclick="tOpenHouseView('${pid}')">📷 House View</button>` : '';
-  if (b360 || bhv) return b360 + bhv;
-  return `<button class="btn btn-sm" style="${base};background:rgba(201,169,110,0.1);color:#c9a96e;border:1px solid rgba(201,169,110,0.25);cursor:default" disabled>360 Pending</button>`;
+  // 360 button: always shown ("360 Pending" until a 360/3D model is approved)
+  const b360 = has360
+    ? `<button class="btn btn-gold btn-sm" style="${base}" onclick="tenantView3D('${pid}')">View 360</button>`
+    : `<button class="btn btn-sm" style="${base};background:rgba(201,169,110,0.1);color:#c9a96e;border:1px solid rgba(201,169,110,0.25);cursor:default" disabled>360 Pending</button>`;
+  // House View button: always shown too; muted when the landlord has not added photos yet
+  const bhv = hv
+    ? `<button class="btn btn-gold btn-sm" style="${base}" onclick="tOpenHouseView('${pid}')">📷 House View</button>`
+    : `<button class="btn btn-sm" style="${base};background:rgba(201,169,110,0.1);color:#c9a96e;border:1px solid rgba(201,169,110,0.25)" onclick="alert('⚠️ The landlord has not added House View photos for this property yet.')">📷 House View</button>`;
+  return b360 + bhv;
 }
 async function tOpenHouseView(pid) {
   const p = (window._tenantPropMap || {})[pid] || {};
