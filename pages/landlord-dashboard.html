@@ -1601,13 +1601,13 @@ function renderMyProperties() {
     const panoramaUrl = getProperty360Url(p);
     const has360 = !!panoramaUrl;
     const coverImage = p.frontImage || '';
-    const thumbnail = coverImage ? `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">` : tmsHouseArtImg(p);
+    const thumbnail = coverImage ? `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.onerror=null;this.src=tmsHouseArt('${p._id}','${p.type||''}')">` : tmsHouseArtImg(p);
     const viewButton = has360
-      ? `<button class="btn btn-gold btn-sm" style="flex:1" onclick="quickView3D('${id}')">View 360</button>`
-      : `<button class="btn btn-ghost btn-sm" style="flex:1" onclick="open3DRequestModal('${id}')">Request 360</button>`;
+      ? `<button class="btn btn-gold btn-sm" onclick="quickView3D('${id}')">View 360</button>`
+      : `<button class="btn btn-ghost btn-sm" onclick="open3DRequestModal('${id}')">Request 360</button>`;
     const hvCount = Number(p.houseViewCount) || 0;
-    const hvButton = `<button class="btn btn-teal btn-sm" style="flex:1" onclick="openHouseViewEditor('${id}')">${hvCount > 0 ? '📷 House View (' + hvCount + '/4)' : '📷 Add House View'}</button>`;
-    const addCoverButton = `<button class="btn btn-teal btn-sm" style="flex:1" onclick="promptFrontImageUpload('${id}')">${coverImage ? '🖼️ Change Cover' : '📷 Add Cover Image'}</button>`;
+    const hvButton = `<button class="btn btn-teal btn-sm" onclick="openHouseViewEditor('${id}')">${hvCount > 0 ? '📷 House View (' + hvCount + '/4)' : '📷 Add House View'}</button>`;
+    const addCoverButton = `<button class="btn btn-teal btn-sm" onclick="promptFrontImageUpload('${id}')">${coverImage ? '🖼️ Change Cover' : '📷 Add Cover Image'}</button>`;
     return `
     <div class="pcard">
       <div class="pcard-thumb" style="padding:0;cursor:pointer" onclick="quickView3D('${id}')">
@@ -1623,12 +1623,12 @@ function renderMyProperties() {
         </div>
         <div class="pcard-price">Rs. ${Number(p.rent||0).toLocaleString()} <span>/mo</span></div>
         <div style="font-size:16px;color:var(--muted);margin-top:6px">${has360 ? (hvCount > 0 ? '360 view + house view available' : '360 view available') : (hvCount > 0 ? '📷 House view · ' + hvCount + ' photo' + (hvCount > 1 ? 's' : '') : 'Add house view photos or request a 360 model.')}</div>
-        <div class="pcard-actions" style="flex-wrap:wrap;gap:6px;margin-top:10px">
+        <div class="pcard-actions lc-actions">
           ${viewButton}
           ${hvButton}
           ${addCoverButton}
-          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="furnViewByPropId('${id}')">${Object.keys((window._propMap&&window._propMap[id]&&window._propMap[id].landlordFurnitureLayout)||{}).length>0?'✅ My Layout':'🛋️ Interior'}</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteProp('${id}')">🗑</button>
+          <button class="btn btn-ghost btn-sm" onclick="furnViewByPropId('${id}')">${Object.keys((window._propMap&&window._propMap[id]&&window._propMap[id].landlordFurnitureLayout)||{}).length>0?'✅ My Layout':'🛋️ Interior'}</button>
+          <button class="btn btn-danger btn-sm lc-del" onclick="deleteProp('${id}')">🗑 Delete property</button>
         </div>
       </div>
     </div>
@@ -1664,8 +1664,15 @@ async function submitAddProp() {
       clearPropImage();
       current3DConfig = {viewerMode:'panorama360', panoramaUrl: DEFAULT_PANORAMA_URL};
       await loadMyProperties();
+      alert('✅ Property listed successfully!');
+      const navEl = [...document.querySelectorAll('.nav-item')].find(n => (n.getAttribute('onclick') || '').includes("'properties'"));
+      if (typeof sp === 'function') sp('properties', navEl);          // show it in My Properties
     } else showMsg('ap-msg','⚠️ '+(data.message||'Error'),'err');
-  } catch { showMsg('ap-msg','⚠️ Unable to connect to the server.','err'); }
+  } catch (err) {
+    const m = tmsCleanErr(err);
+    showMsg('ap-msg','⚠️ ' + (/failed to fetch|networkerror/i.test(m) ? 'Unable to connect to the server.' : m),'err');
+    alert('❌ Property was not added: ' + m);
+  }
   finally { if(btn){btn.disabled=false;btn.textContent='🏠 Add Property';} }
 }
 
@@ -1683,16 +1690,14 @@ function handleImgDrop(e) {
   const file = e.dataTransfer.files[0];
   if (file && file.type.startsWith('image/')) loadImgFile(file);
 }
-function loadImgFile(file) {
-  if (file.size > 5*1024*1024) { alert('Image must be smaller than 5 MB.'); return; }
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    window._apFrontImage = ev.target.result;
-    document.getElementById('ap-img-preview').src = ev.target.result;
+async function loadImgFile(file) {
+  try {
+    const url = await tmsImageToDataUrl(file, 1600, 0.82);   // resized automatically - any phone photo works
+    window._apFrontImage = url;
+    document.getElementById('ap-img-preview').src = url;
     document.getElementById('ap-img-preview-wrap').style.display = 'block';
     document.getElementById('ap-img-placeholder').style.display = 'none';
-  };
-  reader.readAsDataURL(file);
+  } catch (e) { alert('❌ ' + tmsCleanErr(e)); }
 }
 function clearPropImage(e) {
   if (e) e.stopPropagation();
