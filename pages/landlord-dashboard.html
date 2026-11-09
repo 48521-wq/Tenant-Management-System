@@ -1601,7 +1601,7 @@ function renderMyProperties() {
     const panoramaUrl = getProperty360Url(p);
     const has360 = !!panoramaUrl;
     const coverImage = p.frontImage || '';
-    const thumbnail = coverImage ? `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">` : '';
+    const thumbnail = coverImage ? `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">` : tmsHouseArtImg(p);
     const viewButton = has360
       ? `<button class="btn btn-gold btn-sm" style="flex:1" onclick="quickView3D('${id}')">View 360</button>`
       : `<button class="btn btn-ghost btn-sm" style="flex:1" onclick="open3DRequestModal('${id}')">Request 360</button>`;

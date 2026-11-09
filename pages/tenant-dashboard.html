@@ -1396,7 +1396,7 @@ function renderProps(list, rentedIds) {
     const panoramaUrl = getProperty360Url(p);
     const has360 = !!panoramaUrl;
     const coverImage = p.frontImage || '';
-    const thumbnail = coverImage ? `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">` : '';
+    const thumbnail = coverImage ? `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">` : tmsHouseArtImg(p);
     const btnBaseStyle = 'flex:1 1 120px;min-width:0;max-width:100%;box-sizing:border-box;justify-content:center;padding-left:8px;padding-right:8px;text-align:center;white-space:normal;overflow-wrap:anywhere;line-height:1.2';
     const viewButton = tViewButtons(p, btnBaseStyle);
     const requestBtn = isMine
@@ -2509,7 +2509,7 @@ async function loadAllProperties(silent) {
       const panoramaUrl = getProperty360Url(p);
       const has360 = !!panoramaUrl;
       const coverImage = p.frontImage || '';
-      const thumbnail = coverImage ? `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">` : '';
+      const thumbnail = coverImage ? `<img src="${coverImage}" alt="${p.title||'Property'}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">` : tmsHouseArtImg(p);
       const btnBaseStyle = 'flex:1 1 120px;min-width:0;max-width:100%;box-sizing:border-box;justify-content:center;padding-left:8px;padding-right:8px;text-align:center;white-space:normal;overflow-wrap:anywhere;line-height:1.2';
       const viewButton = tViewButtons(p, btnBaseStyle);
 
@@ -2730,7 +2730,7 @@ function filterAllProps() {
     const panoramaUrl = getProperty360Url(p);
     const has360 = !!panoramaUrl;
     const coverImage = p.frontImage || '';
-    const thumbnail = coverImage ? `<img src="${coverImage}" alt="${p.title||''}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">` : '';
+    const thumbnail = coverImage ? `<img src="${coverImage}" alt="${p.title||''}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">` : tmsHouseArtImg(p);
     const viewButton = tViewButtons(p, btnBaseStyle);
     const reqStatus = reqMap[pid];
     const isRented = p.status === 'rented' || p.status === 'suspended';
