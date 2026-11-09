@@ -10,7 +10,7 @@
 //   node seed-faisal-town.js --confirm                        # add it
 //   node seed-faisal-town.js --confirm --landlord-email=a@b.com
 //   optional values: --rent=85000 --beds=3 --baths=3 --sqft=2250
-//   node seed-faisal-town.js --clear-cover --confirm          # property already added earlier: remove its (interior) cover image
+//   node seed-faisal-town.js --clear-cover --confirm          # property already added earlier: reset its cover image
 //   node seed-faisal-town.js --selftest                       # offline schema check
 // ─────────────────────────────────────────────────────────────────────────────
 require('dotenv').config();
@@ -31,6 +31,8 @@ function photos() {
   return fs.readdirSync(DIR).filter(f => /\.(jpe?g|png|webp)$/i.test(f)).sort().slice(0, 4)
     .map(f => 'data:image/' + (/png$/i.test(f) ? 'png' : /webp$/i.test(f) ? 'webp' : 'jpeg') + ';base64,' + fs.readFileSync(path.join(DIR, f)).toString('base64'));
 }
+const COVER = path.join(__dirname, 'seed', 'faisal-town-cover', 'cover.jpg');
+function cover() { return fs.existsSync(COVER) ? 'data:image/jpeg;base64,' + fs.readFileSync(COVER).toString('base64') : ''; }
 function buildDoc(landlord) {
   const imgs = photos();
   return {
@@ -39,7 +41,7 @@ function buildDoc(landlord) {
     rent: Number(val('rent')) || 85000, beds: Number(val('beds')) || 3, baths: Number(val('baths')) || 3, sqft: Number(val('sqft')) || 2250,
     description: 'Furnished, well-lit house in A Block, Faisal Town with a tiled lounge, wall-mounted TV, false ceiling with LED lighting, ceiling fans and AC. See the House View photos.',
     status: 'available', landlordId: landlord._id, landlordName: landlord.name,
-    frontImage: '',   // cover = OUTSIDE photo of the house: add it from the landlord dashboard ("Add Cover Image"); the 4 photos here are interior House View photos
+    frontImage: cover(),   // outside-of-the-house cover (illustration) - replace it with a real photo any time via "Change Cover"; the 4 interior photos are the House View
     houseView: imgs, houseViewCount: imgs.length,
   };
 }
@@ -71,8 +73,8 @@ async function main() {
 
   const exists = await Property.findOne({ title: TITLE, landlordId: landlord._id }).select('_id');
   if (exists) {
-    if (flag('clear-cover') && flag('confirm')) { await Property.updateOne({ _id: exists._id }, { $set: { frontImage: '' } }); console.log('\nThe interior photo was removed as cover image. Add the outside photo from the landlord dashboard.'); }
-    else console.log('\nThis property already exists for that landlord - nothing to do. (Use --clear-cover --confirm to remove its cover image.)');
+    if (flag('clear-cover') && flag('confirm')) { await Property.updateOne({ _id: exists._id }, { $set: { frontImage: cover() } }); console.log('\nCover image reset to the outside-of-house picture. You can replace it with a real photo from the landlord dashboard (Change Cover).'); }
+    else console.log('\nThis property already exists for that landlord - nothing to do. (Use --clear-cover --confirm to reset its cover image.)');
     return mongoose.disconnect();
   }
 
