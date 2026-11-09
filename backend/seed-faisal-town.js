@@ -6,9 +6,9 @@
 // "Request 360" option, so the landlord can later ask for a 360/3D model too.
 // Nothing is deleted or changed. Running it twice does not create a duplicate.
 //
-//   node seed-faisal-town.js                                  # DRY RUN - shows what would be added
-//   node seed-faisal-town.js --confirm                        # add it
-//   node seed-faisal-town.js --confirm --landlord-email=a@b.com
+//   node seed-faisal-town.js                                  # DRY RUN - lists the landlords and shows what would be added
+//   node seed-faisal-town.js --landlord-email=a@b.com --confirm   # add it to THAT landlord (required when there is more than one)
+//   node seed-faisal-town.js --landlord-email=a@b.com --move --confirm   # it was added to the wrong landlord: move it
 //   optional values: --rent=85000 --beds=3 --baths=3 --sqft=2250
 //   node seed-faisal-town.js --clear-cover --confirm          # property already added earlier: reset its cover image
 //   node seed-faisal-town.js --selftest                       # offline schema check
@@ -60,16 +60,27 @@ async function main() {
   console.log(flag('confirm') ? 'MODE: LIVE (--confirm)\n' : 'MODE: DRY RUN (add --confirm to apply)\n');
 
   let landlord;
-  const email = val('landlord-email').toLowerCase();
-  if (email) landlord = await User.findOne({ email, role: 'landlord' });
-  else {
-    const owners = await Property.aggregate([{ $group: { _id: '$landlordId', n: { $sum: 1 } } }, { $sort: { n: -1 } }]);
-    for (const o of owners) { landlord = await User.findOne({ _id: o._id, role: 'landlord' }); if (landlord) break; }
-    const all = await User.find({ role: 'landlord' }).select('name email');
-    console.log('Landlords in the system:', all.map(l => `${l.name} <${l.email}>`).join('; ') || 'none');
+  const email = val('landlord-email').toLowerCase(), lname = val('landlord-name');
+  const all = await User.find({ role: 'landlord' }).select('name email');
+  const counts = {}; (await Property.aggregate([{ $group: { _id: '$landlordId', n: { $sum: 1 } } }])).forEach(o => { counts[String(o._id)] = o.n; });
+  console.log('Landlords in the system:');
+  all.forEach(l => console.log(`   - ${l.name} <${l.email}>  (${counts[String(l._id)] || 0} properties)`));
+  if (email) landlord = all.find(l => (l.email || '').toLowerCase() === email);
+  else if (lname) landlord = all.find(l => (l.name || '').toLowerCase() === lname.toLowerCase());
+  else if (all.length === 1) landlord = all[0];
+  else { console.error('\nMore than one landlord exists - tell me which one should own the property:\n  node seed-faisal-town.js --landlord-email=<email from the list above> --confirm'); process.exit(1); }
+  if (!landlord) { console.error('\nThat landlord was not found in the list above.'); process.exit(1); }
+  console.log(`\nLandlord that will own the property: ${landlord.name} <${landlord.email}>`);
+
+  // The property may already exist under ANOTHER landlord (added earlier by mistake) -> move it
+  const other = await Property.findOne({ title: TITLE, landlordId: { $ne: landlord._id } }).select('_id landlordName');
+  if (other && flag('move')) {
+    console.log(`Found "${TITLE}" under ${other.landlordName} - moving it to ${landlord.name}.`);
+    if (flag('confirm')) { await Property.updateOne({ _id: other._id }, { $set: { landlordId: landlord._id, landlordName: landlord.name } }); console.log('Moved. Refresh the landlord dashboard.'); }
+    else console.log('(dry run - add --confirm to move it)');
+    return mongoose.disconnect();
   }
-  if (!landlord) { console.error('No landlord found. Use --landlord-email=<email>'); process.exit(1); }
-  console.log(`Landlord that will own the property: ${landlord.name} <${landlord.email}>`);
+  if (other) console.log(`NOTE: "${TITLE}" already exists under ${other.landlordName}. Use --move to move it to ${landlord.name} instead of creating a second copy.`);
 
   const exists = await Property.findOne({ title: TITLE, landlordId: landlord._id }).select('_id');
   if (exists) {

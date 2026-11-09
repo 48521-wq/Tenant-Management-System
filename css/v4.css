@@ -289,4 +289,9 @@ div.loading{display:flex;align-items:center;justify-content:center;text-align:ce
 /* ── long text never escapes its box (labels, emails) ── */
 .user-card>div,.user-card .uinfo{min-width:0}
 .uname,.uemail,.user-card div,.user-card span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
-.pcard-actions .btn,.pcard-actions button{min-width:0;white-space:normal;line-height:1.25;text-align:center;overflow-wrap:anywhere}
+.pcard-actions .btn,.pcard-actions button{min-width:0;white-space:normal;line-height:1.25;text-align:center;overflow-wrap:break-word;word-break:normal}
+
+/* ── landlord property card: neat 2-column action grid ── */
+.pcard-actions.lc-actions{display:grid!important;grid-template-columns:1fr 1fr;gap:10px!important;margin-top:14px!important}
+.lc-actions .btn{flex:none!important;min-height:50px;padding:10px 10px!important;font-size:16px!important;line-height:1.25;white-space:normal;word-break:normal;overflow-wrap:normal;text-align:center;display:flex!important;align-items:center;justify-content:center;gap:6px;border-radius:12px!important}
+.lc-actions .lc-del{grid-column:1/-1;min-height:44px;font-size:15px!important}
