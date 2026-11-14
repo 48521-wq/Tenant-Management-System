@@ -2420,7 +2420,7 @@ async function tOpenHouseView(pid) {
   const p = (window._tenantPropMap || {})[pid] || {};
   try {
     const r = await tFetch('/properties/' + pid + '/house-view');
-    tmsHouseView(r.title || p.title, r.images || []);
+    tmsHouseView(r.title || p.title, (r.rooms && r.rooms.length) ? r.rooms : (r.images || []));
   } catch (e) { alert('❌ ' + tmsCleanErr(e)); }
 }
 

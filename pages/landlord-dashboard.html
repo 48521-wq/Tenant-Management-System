@@ -1606,7 +1606,7 @@ function renderMyProperties() {
       ? `<button class="btn btn-gold btn-sm" onclick="quickView3D('${id}')">View 360</button>`
       : `<button class="btn btn-ghost btn-sm" onclick="open3DRequestModal('${id}')">Request 360</button>`;
     const hvCount = Number(p.houseViewCount) || 0;
-    const hvButton = `<button class="btn btn-teal btn-sm" onclick="openHouseViewEditor('${id}')">${hvCount > 0 ? '📷 House View (' + hvCount + '/4)' : '📷 Add House View'}</button>`;
+    const hvButton = `<button class="btn btn-teal btn-sm" onclick="openHouseViewEditor('${id}')">${hvCount > 0 ? '📷 House View (' + hvCount + '/' + (tmsHouseViewSections(p).length * 4) + ')' : '📷 Add House View'}</button>`;
     const addCoverButton = `<button class="btn btn-teal btn-sm" onclick="promptFrontImageUpload('${id}')">${coverImage ? '🖼️ Change Cover' : '📷 Add Cover Image'}</button>`;
     return `
     <div class="pcard">
@@ -1654,11 +1654,10 @@ async function submitAddProp() {
     const data = await lFetch('/properties','POST',{
       title, type, area, address:addr, rent:Number(rent),
       beds:Number(beds)||2, baths:Number(baths)||1, sqft:Number(sqft)||1000, description:desc,
-      frontImage,
-      houseView: window._apHV ? window._apHV.getImages() : []
+      dining:Math.max(parseInt(g('ap-dining'),10)||0,0), kitchens:Math.max(parseInt(g('ap-kitchens'),10)||0,0), lounges:Math.max(parseInt(g('ap-lounges'),10)||0,0), guestRooms:Math.max(parseInt(g('ap-guestrooms'),10)||0,0),
+      frontImage
     });
     if (data.success) {
-      if (window._apHV) window._apHV.clear();
       showMsg('ap-msg','✅ Property listed successfully!','ok');
       ['ap-title','ap-addr','ap-desc'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
       clearPropImage();
@@ -1667,6 +1666,9 @@ async function submitAddProp() {
       alert('✅ Property listed successfully!');
       const navEl = [...document.querySelectorAll('.nav-item')].find(n => (n.getAttribute('onclick') || '').includes("'properties'"));
       if (typeof sp === 'function') sp('properties', navEl);          // show it in My Properties
+      // Step 2: photos only - the dialog builds Room 1..N, Guest Room, Dining, Kitchen... from the details just saved
+      const newId = data.property && data.property._id;
+      if (newId && window._propMap && window._propMap[newId]) setTimeout(() => openHouseViewEditor(newId), 300);
     } else showMsg('ap-msg','⚠️ '+(data.message||'Error'),'err');
   } catch (err) {
     const m = tmsCleanErr(err);
@@ -1678,8 +1680,6 @@ async function submitAddProp() {
 
 // ── Image upload helpers ──
 window._apFrontImage = '';
-window._apHV = null;   // House View editor of the Add Property form
-document.addEventListener('DOMContentLoaded', () => { const c = document.getElementById('ap-hv'); if (c && !window._apHV) window._apHV = tmsHouseViewEditor(c); });
 function handleImgSelect(e) {
   const file = e.target.files[0];
   if (file) loadImgFile(file);
@@ -2474,15 +2474,16 @@ async function viewHouseView(propId) {
   const p = (window._propMap || {})[propId] || {};
   try {
     const r = await lFetch('/properties/' + propId + '/house-view');
-    tmsHouseView(r.title || p.title, r.images || []);
+    tmsHouseView(r.title || p.title, (r.rooms && r.rooms.length) ? r.rooms : (r.images || []));
   } catch (e) { alert('❌ ' + tmsCleanErr(e)); }
 }
 function openHouseViewEditor(propId) {
   const p = (window._propMap || {})[propId]; if (!p) return;
   tmsOpenHouseViewEditor({
     title: p.title,
-    load: async () => (await lFetch('/properties/' + propId + '/house-view')).images || [],
-    save: (images) => lFetch('/properties/' + propId + '/house-view', 'PUT', { images }),
+    spec: p,
+    load: async () => lFetch('/properties/' + propId + '/house-view'),
+    save: (rooms) => lFetch('/properties/' + propId + '/house-view', 'PUT', { rooms }),
     onSaved: (n) => { p.houseViewCount = n; const mp = myProps.find(x => x._id === propId); if (mp) mp.houseViewCount = n; renderMyProperties(); }
   });
 }
@@ -2725,6 +2726,10 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
         <div class="fg"><label>Monthly Rent (Rs.) *</label><input id="ap-rent" type="number" placeholder="25000"></div>
         <div class="fg"><label>Bedrooms</label><input id="ap-beds" type="number" placeholder="2" value="2"></div>
         <div class="fg"><label>Bathrooms</label><input id="ap-baths" type="number" placeholder="1" value="1"></div>
+        <div class="fg"><label>Dining rooms</label><input id="ap-dining" type="number" min="0" value="1"></div>
+        <div class="fg"><label>Kitchens</label><input id="ap-kitchens" type="number" min="0" value="1"></div>
+        <div class="fg"><label>Guest rooms</label><input id="ap-guestrooms" type="number" min="0" value="0"></div>
+        <div class="fg"><label>Lounges / living rooms</label><input id="ap-lounges" type="number" min="0" value="0"></div>
         <div class="fg"><label>Size (sqft)</label><input id="ap-sqft" type="number" placeholder="1000" value="1000"></div>
         <div class="fg full"><label>Description</label><textarea id="ap-desc" placeholder="Describe amenities, nearby places, condition..."></textarea></div>
         <!-- Front Image Upload -->
@@ -2744,8 +2749,6 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
           </div>
         </div>
       </div>
-      <!-- House View photos (up to 4) -->
-      <div id="ap-hv" style="margin-top:18px"></div>
       <!-- 3D Model Preview for New Property -->
       <div style="margin-top:18px;padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:12px">
         <div style="font-size:18px;font-weight:700;color:var(--text)">🏗️ 360 View (optional)</div>

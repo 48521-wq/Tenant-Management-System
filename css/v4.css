@@ -258,6 +258,11 @@ div.loading{display:flex;align-items:center;justify-content:center;text-align:ce
 .hv-head{display:flex;justify-content:space-between;align-items:center;font-size:18px;margin-bottom:4px;color:var(--text)}
 .hv-head span{font-weight:700;color:var(--gold,#C9A96E)}
 .hv-hint{font-size:15px;color:var(--muted);margin-bottom:12px;line-height:1.45}
+.hv-hint b{color:var(--text)}
+.hv-rooms{display:flex;flex-direction:column;gap:16px}
+.hv-room{padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:rgba(127,127,127,.05)}
+.hv-room-h{display:flex;justify-content:space-between;align-items:center;font-size:17px;margin-bottom:10px;color:var(--text)}
+.hv-room-h span{font-weight:700;color:var(--gold,#C9A96E);font-size:15px}
 .hv-slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .hv-slot{position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:2px dashed var(--border);background:rgba(127,127,127,.08);cursor:pointer;transition:border-color .15s}
 .hv-slot:hover{border-color:var(--gold,#C9A96E)}
@@ -295,3 +300,8 @@ div.loading{display:flex;align-items:center;justify-content:center;text-align:ce
 .pcard-actions.lc-actions{display:grid!important;grid-template-columns:1fr 1fr;gap:10px!important;margin-top:14px!important}
 .lc-actions .btn{flex:none!important;min-height:50px;padding:10px 10px!important;font-size:16px!important;line-height:1.25;white-space:normal;word-break:normal;overflow-wrap:normal;text-align:center;display:flex!important;align-items:center;justify-content:center;gap:6px;border-radius:12px!important}
 .lc-actions .lc-del{grid-column:1/-1;min-height:44px;font-size:15px!important}
+
+.hv-tabs{display:flex;gap:8px;padding:0 22px 8px;overflow-x:auto}
+.hv-tab{flex:0 0 auto;padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font:600 15px 'DM Sans',sans-serif;cursor:pointer}
+.hv-tab.on{background:#C9A96E;border-color:#C9A96E;color:#1a1a1a}
+.hv-caption{text-align:center;font-size:17px;font-weight:700;color:#C9A96E;padding:10px 0 0;min-height:22px}
