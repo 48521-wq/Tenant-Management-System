@@ -11,6 +11,11 @@ const propertySchema = new mongoose.Schema({
   beds:        { type: Number, default: 2 },
   baths:       { type: Number, default: 1 },
   sqft:        { type: Number, default: 1000 },
+  // Other spaces (used to build the House View photo sections automatically)
+  dining:      { type: Number, default: 1 },
+  kitchens:    { type: Number, default: 1 },
+  lounges:     { type: Number, default: 0 },
+  guestRooms:  { type: Number, default: 0 },
   description: { type: String, default: '' },
   status:      { type: String, enum: ['available','rented','suspended'], default: 'available' },
   
@@ -35,6 +40,9 @@ const propertySchema = new mongoose.Schema({
   // House View: up to 4 interior/exterior photos chosen by the landlord (alternative or addition to a 360/3D model)
   houseView:      { type: [String], default: [] },
   houseViewCount: { type: Number,   default: 0 },
+  // Room-wise photos: [{ label: 'Room 1', images: [up to 4 data URLs] }, { label: 'Dining', images: [...] }]
+  // (houseView above always holds the same photos as one flat list, for older code)
+  houseViewRooms: { type: [mongoose.Schema.Types.Mixed], default: [] },
   
   // Front/cover image as base64 data URL (uploaded by landlord)
   frontImage: { type: String, default: '' },

@@ -13,12 +13,29 @@ function cleanHouseView(list) {
     .slice(0, MAX_HOUSE_VIEW);
 }
 
+// Room-wise House View: [{ label, images[] }] - max 4 photos per room/section
+const MAX_PER_ROOM = 4, MAX_ROOMS = 30;
+function cleanHouseRooms(list) {
+  if (!Array.isArray(list)) return [];
+  return list.slice(0, MAX_ROOMS).map(r => ({
+    label: String((r && r.label) || '').trim().slice(0, 40),
+    images: cleanHouseView(r && r.images).slice(0, MAX_PER_ROOM)
+  })).filter(r => r.label && r.images.length);
+}
+// Applies body.houseViewRooms (if sent) to a plain body/doc: keeps flat houseView + count in sync
+function applyHouseRooms(target, rooms) {
+  const clean = cleanHouseRooms(rooms);
+  target.houseViewRooms = clean;
+  target.houseView = clean.reduce((a, r) => a.concat(r.images), []);
+  target.houseViewCount = target.houseView.length;
+}
+
 // GET all rented properties for this landlord (with tenant info)
 router.get('/my/rented', protect, async (req, res) => {
   try {
     // Find all properties for this landlord that are rented and have a tenantId
     const props = await Property.find({ landlordId: req.user._id, status: 'rented', tenantId: { $ne: null } })
-      .select('-houseView')
+      .select('-houseView -houseViewRooms')
       .populate('tenantId', 'name email');
     res.json({ success: true, count: props.length, properties: props });
   } catch (e) {
@@ -30,7 +47,7 @@ router.get('/my/rented', protect, async (req, res) => {
 // GET landlord's OWN properties (uses JWT — no ID needed in URL)
 router.get('/my', protect, async (req, res) => {
   try {
-    const props = await Property.find({ landlordId: req.user._id }).select('-houseView')
+    const props = await Property.find({ landlordId: req.user._id }).select('-houseView -houseViewRooms')
       .sort({ createdAt: -1 })
       .populate('tenantId', 'name email phone cnic address');
     res.json({ success: true, count: props.length, properties: props });
@@ -87,7 +104,7 @@ router.get('/', async (req, res) => {
     let query = Property.find(filter).sort({ createdAt: -1 });
     if (req.query.full === 'true' || req.query.fields === 'all') {
       // Return full document when explicitly requested (photo set is fetched separately via /:id/house-view)
-      query = query.select('-houseView');
+      query = query.select('-houseView -houseViewRooms');
     } else {
       const defaultFields = [
         '_id', 'title', 'type', 'area', 'address', 'city', 'rent', 'beds', 'baths', 'sqft',
@@ -124,7 +141,8 @@ router.post('/', protect, async (req, res) => {
     if (req.user.role !== 'landlord') return res.status(403).json({ success: false, message: 'Only landlords can add properties.' });
 
     const body = { ...req.body };
-    if (body.houseView !== undefined) { body.houseView = cleanHouseView(body.houseView); body.houseViewCount = body.houseView.length; }
+    if (body.houseViewRooms !== undefined) applyHouseRooms(body, body.houseViewRooms);
+    else if (body.houseView !== undefined) { body.houseView = cleanHouseView(body.houseView); body.houseViewCount = body.houseView.length; }
     const prop = await Property.create({
       ...body,
       landlordId:   req.user._id,
@@ -142,7 +160,8 @@ router.put('/:id', protect, async (req, res) => {
     if (!req.user?.isAdmin && prop.landlordId.toString() !== req.user._id.toString())
       return res.status(403).json({ success: false, message: 'Not authorized.' });
     const body = { ...req.body };
-    if (body.houseView !== undefined) { body.houseView = cleanHouseView(body.houseView); body.houseViewCount = body.houseView.length; }
+    if (body.houseViewRooms !== undefined) applyHouseRooms(body, body.houseViewRooms);
+    else if (body.houseView !== undefined) { body.houseView = cleanHouseView(body.houseView); body.houseViewCount = body.houseView.length; }
     const updated = await Property.findByIdAndUpdate(req.params.id, body, { new: true });
     res.json({ success: true, property: updated });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
@@ -151,23 +170,32 @@ router.put('/:id', protect, async (req, res) => {
 // GET house view photos of one property (public - only the photos, not the whole document)
 router.get('/:id/house-view', async (req, res) => {
   try {
-    const prop = await Property.findById(req.params.id).select('title houseView houseViewCount');
+    const prop = await Property.findById(req.params.id).select('title houseView houseViewCount houseViewRooms beds baths dining kitchens lounges guestRooms');
     if (!prop) return res.status(404).json({ success: false, message: 'Property not found.' });
-    res.json({ success: true, title: prop.title, images: prop.houseView || [] });
+    res.json({ success: true, title: prop.title, spec: { beds: prop.beds, baths: prop.baths, dining: prop.dining, kitchens: prop.kitchens, lounges: prop.lounges, guestRooms: prop.guestRooms }, images: prop.houseView || [], rooms: prop.houseViewRooms || [] });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
-// PUT save house view photos (landlord/admin) - replaces the whole set, max 4 photos
+// PUT save house view photos (landlord/admin) - replaces the whole set.
+// Send { rooms: [{label, images[]}] } (max 4 photos per room) - or legacy { images: [] } (max 4 total)
 router.put('/:id/house-view', protect, async (req, res) => {
   try {
     const prop = await Property.findById(req.params.id);
     if (!prop) return res.status(404).json({ success: false, message: 'Not found.' });
     if (!req.user?.isAdmin && prop.landlordId.toString() !== req.user._id.toString())
       return res.status(403).json({ success: false, message: 'Not authorized.' });
+    if (Array.isArray(req.body && req.body.rooms)) {
+      if (req.body.rooms.some(r => Array.isArray(r && r.images) && r.images.length > MAX_PER_ROOM))
+        return res.status(400).json({ success: false, message: `You can add at most ${MAX_PER_ROOM} photos per room.` });
+      applyHouseRooms(prop, req.body.rooms);
+      await prop.save();
+      return res.json({ success: true, message: prop.houseViewCount ? 'House view saved.' : 'House view removed.', count: prop.houseViewCount });
+    }
     const images = cleanHouseView(req.body && req.body.images);
     if (Array.isArray(req.body && req.body.images) && req.body.images.length > MAX_HOUSE_VIEW)
       return res.status(400).json({ success: false, message: `You can add at most ${MAX_HOUSE_VIEW} photos.` });
     prop.houseView = images;
+    prop.houseViewRooms = [];
     prop.houseViewCount = images.length;
     await prop.save();
     res.json({ success: true, message: images.length ? 'House view saved.' : 'House view removed.', count: images.length });
