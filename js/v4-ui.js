@@ -71,7 +71,7 @@ function tmsCloseModals(kind) {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') tmsCloseModals(); });
 
 // ════════════════════════════════════════════════════════════
-//  HOUSE VIEW  — up to 4 photos per property
+//  HOUSE VIEW  — 4 photos for every room (Room 1..N from the bedroom count) + Dining
 //  The landlord chooses: request a 360/3D model, show a house view, or both.
 // ════════════════════════════════════════════════════════════
 const TMS_HV_MAX = 4;
@@ -93,49 +93,106 @@ function tmsImageToDataUrl(file, max, quality) {
   });
 }
 
-// 4-slot photo editor. Returns { getImages(), setImages(list), clear() }
-function tmsHouseViewEditor(container, initial) {
-  let imgs = (initial || []).slice(0, TMS_HV_MAX);
+// Sections a property needs photos for - built automatically from the property details:
+//   Room 1..N (bedrooms, at least 1), Guest Room, Dining, Kitchen, Lounge, Bathroom.
+// spec = { beds, baths, dining, kitchens, lounges, guestRooms }. A plain number is treated as the bedroom count (older code).
+function tmsHouseViewSections(spec) {
+  if (typeof spec !== 'object' || spec === null) spec = { beds: spec };
+  const num = (v, d, max) => { const n = parseInt(v, 10); return Math.min(Math.max(isNaN(n) ? d : n, 0), max); };
+  const out = [], beds = Math.max(num(spec.beds, 1, 20), 1);
+  for (let i = 1; i <= beds; i++) out.push('Room ' + i);
+  const add = (name, n) => { for (let i = 1; i <= n; i++) out.push(n > 1 ? name + ' ' + i : name); };
+  add('Guest Room', num(spec.guestRooms, 0, 5));
+  add('Dining', num(spec.dining, 1, 5));
+  add('Kitchen', num(spec.kitchens, 1, 5));
+  add('Lounge', num(spec.lounges, 0, 5));
+  add('Bathroom', num(spec.baths, 0, 10));
+  return out;
+}
+function tmsHouseViewIcon(label) { return /^Guest/.test(label) ? '🛌 ' : /^Dining/.test(label) ? '🍽️ ' : /^Kitchen/.test(label) ? '🍳 ' : /^Lounge/.test(label) ? '🛋️ ' : /^Bathroom/.test(label) ? '🚿 ' : '🛏️ '; }
+function tmsHouseViewSummary(spec) {
+  const c = {}; tmsHouseViewSections(spec).forEach(l => { const k = l.replace(/ \d+$/, ''); c[k] = (c[k] || 0) + 1; });
+  const names = { Room: 'bedroom', 'Guest Room': 'guest room', Dining: 'dining', Kitchen: 'kitchen', Lounge: 'lounge', Bathroom: 'bathroom' };
+  return Object.keys(c).map(k => c[k] + ' ' + names[k] + (c[k] > 1 ? 's' : '')).join(', ');
+}
+// Old properties stored one flat list - spread it over the sections, 4 per section
+function tmsHouseViewFromFlat(list, spec) {
+  const secs = tmsHouseViewSections(spec), rooms = [];
+  (list || []).forEach((src, i) => {
+    const k = Math.min(Math.floor(i / TMS_HV_MAX), secs.length - 1);
+    (rooms[k] = rooms[k] || { label: secs[k], images: [] }).images.push(src);
+  });
+  return rooms.filter(Boolean);
+}
+
+// Room-wise photo editor: one block per room/dining, 4 slots each.
+// Returns { getRooms(), getImages(), setRooms(list), setSpec(spec), clear() }
+// The sections come from `spec` (the property details) - there is no room-count control inside the editor.
+//   getRooms() -> [{ label:'Room 1', images:[...] }, ...] (only sections that have photos)
+function tmsHouseViewEditor(container, initial, spec) {
+  let curSpec = spec || { beds: 1 };
+  const store = {};                       // label -> [dataUrl,...]  (kept even if beds is lowered, so nothing is lost by accident)
+  const setStore = (rooms) => { Object.keys(store).forEach(k => delete store[k]); (rooms || []).forEach(r => { if (r && r.label) store[r.label] = (r.images || []).slice(0, TMS_HV_MAX); }); };
+  setStore(initial);
   const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.multiple = true; input.style.display = 'none';
-  let replaceAt = -1;
+  let target = null;                      // { label, replaceAt }
+  const total = () => tmsHouseViewSections(curSpec).reduce((a, l) => a + (store[l] || []).length, 0);
   const draw = () => {
+    const secs = tmsHouseViewSections(curSpec);
     container.classList.add('hv-editor');
-    container.innerHTML = '<div class="hv-head"><b>House View photos</b><span>' + imgs.length + ' / ' + TMS_HV_MAX + '</span></div>'
-      + '<div class="hv-hint">Add up to ' + TMS_HV_MAX + ' photos so tenants can see the house. You can use this instead of, or together with, a 360/3D model.</div>'
-      + '<div class="hv-slots"></div>';
-    const wrap = container.querySelector('.hv-slots');
-    for (let i = 0; i < TMS_HV_MAX; i++) {
-      const s = document.createElement('div'); s.className = 'hv-slot' + (imgs[i] ? ' filled' : '');
-      if (imgs[i]) {
-        s.innerHTML = '<img alt="Photo ' + (i + 1) + '"><span class="hv-n">' + (i + 1) + '</span><button type="button" class="hv-rm" title="Remove">✕</button><button type="button" class="hv-rp">Replace</button>';
-        s.querySelector('img').src = imgs[i];
-        s.querySelector('.hv-rm').onclick = (e) => { e.stopPropagation(); imgs.splice(i, 1); draw(); };
-        s.querySelector('.hv-rp').onclick = (e) => { e.stopPropagation(); replaceAt = i; input.click(); };
-      } else {
-        s.innerHTML = '<div class="hv-add"><span>＋</span>Add photo</div>';
-        s.onclick = () => { replaceAt = -1; input.click(); };
+    container.innerHTML = '<div class="hv-head"><b>House View photos</b><span>' + total() + ' / ' + secs.length * TMS_HV_MAX + '</span></div>'
+      + '<div class="hv-rooms"></div>';
+    const rooms = container.querySelector('.hv-rooms');
+    secs.forEach(label => {
+      const imgs = store[label] = store[label] || [];
+      const box = document.createElement('div'); box.className = 'hv-room';
+      box.innerHTML = '<div class="hv-room-h"><b></b><span>' + imgs.length + ' / ' + TMS_HV_MAX + '</span></div><div class="hv-slots"></div>';
+      box.querySelector('b').textContent = tmsHouseViewIcon(label) + label;
+      const wrap = box.querySelector('.hv-slots');
+      for (let i = 0; i < TMS_HV_MAX; i++) {
+        const s = document.createElement('div'); s.className = 'hv-slot' + (imgs[i] ? ' filled' : '');
+        if (imgs[i]) {
+          s.innerHTML = '<img alt=""><span class="hv-n">' + (i + 1) + '</span><button type="button" class="hv-rm" title="Remove">✕</button><button type="button" class="hv-rp">Replace</button>';
+          s.querySelector('img').src = imgs[i]; s.querySelector('img').alt = label + ' photo ' + (i + 1);
+          s.querySelector('.hv-rm').onclick = (e) => { e.stopPropagation(); imgs.splice(i, 1); draw(); };
+          s.querySelector('.hv-rp').onclick = (e) => { e.stopPropagation(); target = { label, replaceAt: i }; input.click(); };
+        } else {
+          s.innerHTML = '<div class="hv-add"><span>＋</span>Add photo</div>';
+          s.onclick = () => { target = { label, replaceAt: -1 }; input.click(); };
+        }
+        wrap.appendChild(s);
       }
-      wrap.appendChild(s);
-    }
+      rooms.appendChild(box);
+    });
     container.appendChild(input);
   };
   input.onchange = async () => {
-    const files = [...input.files]; input.value = '';
+    const files = [...input.files]; input.value = ''; if (!target) return;
+    const { label, replaceAt } = target, imgs = store[label] = store[label] || [];
+    let at = replaceAt;
     for (const f of files) {
       try {
-        const d = await tmsImageToDataUrl(f);
-        if (replaceAt >= 0) { imgs[replaceAt] = d; replaceAt = -1; }
+        const d = await tmsImageToDataUrl(f, 960, 0.72);   // smaller than before: many photos per property
+        if (at >= 0) { imgs[at] = d; at = -1; }
         else if (imgs.length < TMS_HV_MAX) imgs.push(d);
-        else { alert('⚠️ You can add at most ' + TMS_HV_MAX + ' photos.'); break; }
+        else { alert('⚠️ ' + label + ': you can add at most ' + TMS_HV_MAX + ' photos.'); break; }
       } catch (e) { alert('❌ ' + e.message); }
     }
     draw();
   };
   draw();
-  return { getImages: () => imgs.slice(), setImages: (l) => { imgs = (l || []).slice(0, TMS_HV_MAX); draw(); }, clear: () => { imgs = []; draw(); } };
+  const getRooms = () => tmsHouseViewSections(curSpec).map(l => ({ label: l, images: (store[l] || []).slice(0, TMS_HV_MAX) })).filter(r => r.images.length);
+  return {
+    getRooms,
+    getImages: () => getRooms().reduce((a, r) => a.concat(r.images), []),
+    setRooms: (l) => { setStore(l); draw(); },
+    setSpec: (sp) => { curSpec = sp || { beds: 1 }; draw(); },
+    clear: () => { setStore([]); draw(); }
+  };
 }
 
 // Dialog used by the landlord: load existing photos, edit, save.
+// opts: { title, spec, load() -> {rooms, images}, save(rooms), onSaved(count) }
 function tmsOpenHouseViewEditor(opts) {
   tmsCloseModals('house-view-edit');
   const m = document.createElement('div'); m.setAttribute('data-tms-modal', 'house-view-edit'); m.className = 'hv-overlay';
@@ -146,38 +203,56 @@ function tmsOpenHouseViewEditor(opts) {
   m.querySelector('.hv-cancel').onclick = () => m.remove();
   document.body.appendChild(m);
   let ed = null; const save = m.querySelector('.hv-save');
-  Promise.resolve().then(() => opts.load()).then(list => {
-    const body = m.querySelector('.hv-body'); body.innerHTML = ''; ed = tmsHouseViewEditor(body, list || []); save.disabled = false;
+  Promise.resolve().then(() => opts.load()).then(r => {
+    r = r || {};
+    const spec = r.spec || opts.spec;
+    const rooms = (r.rooms && r.rooms.length) ? r.rooms : tmsHouseViewFromFlat(r.images, spec);
+    const body = m.querySelector('.hv-body'); body.innerHTML = ''; ed = tmsHouseViewEditor(body, rooms, spec); save.disabled = false;
   }).catch(() => { m.querySelector('.hv-body').innerHTML = '<div class="loading">⚠️ Could not load the photos.</div>'; });
   save.onclick = async () => {
     save.disabled = true; save.textContent = 'Saving…';
     try {
-      const imgs = ed.getImages(), r = await opts.save(imgs);
-      if (r && r.success === false) throw new Error(r.message || 'Could not save');
-      m.remove(); alert('✅ ' + (imgs.length ? 'House view saved (' + imgs.length + ' photo' + (imgs.length > 1 ? 's' : '') + ').' : 'House view removed.'));
-      if (opts.onSaved) opts.onSaved(imgs.length);
+      const rooms = ed.getRooms(), n = ed.getImages().length, res = await opts.save(rooms);
+      if (res && res.success === false) throw new Error(res.message || 'Could not save');
+      m.remove(); alert('✅ ' + (n ? 'House view saved (' + n + ' photo' + (n > 1 ? 's' : '') + ' in ' + rooms.length + ' room' + (rooms.length > 1 ? 's' : '') + ').' : 'House view removed.'));
+      if (opts.onSaved) opts.onSaved(n);
     } catch (e) { alert('❌ ' + tmsCleanErr(e)); save.disabled = false; save.textContent = '💾 Save photos'; }
   };
 }
 
-// Photo gallery viewer (tenant, landlord, admin)
+// Photo gallery viewer (tenant, landlord, admin).
+// `images` can be a flat list of URLs, or room-wise: [{ label:'Room 1', images:[...] }, ...]
 function tmsHouseView(title, images, start) {
-  images = (images || []).filter(Boolean);
-  if (!images.length) { alert('⚠️ No house view photos have been added for this property yet.'); return; }
+  const list = [];
+  (images || []).forEach(x => {
+    if (!x) return;
+    if (typeof x === 'string') list.push({ src: x, label: '' });
+    else (x.images || []).forEach(src => src && list.push({ src, label: x.label || '' }));
+  });
+  if (!list.length) { alert('⚠️ No house view photos have been added for this property yet.'); return; }
   tmsCloseModals('house-view');
-  let i = Math.min(Math.max(start || 0, 0), images.length - 1);
+  let i = Math.min(Math.max(start || 0, 0), list.length - 1);
   const m = document.createElement('div'); m.setAttribute('data-tms-modal', 'house-view'); m.className = 'hv-viewer';
   m.innerHTML = '<div class="hv-vt"><span class="hv-vtitle"></span><span class="hv-count"></span><button type="button" class="hv-x" title="Close (Esc)">✕</button></div>'
+    + '<div class="hv-tabs"></div>'
     + '<div class="hv-stage"><button type="button" class="hv-nav prev" title="Previous">‹</button><img class="hv-main" alt="House view"><button type="button" class="hv-nav next" title="Next">›</button></div>'
-    + '<div class="hv-thumbs"></div>';
+    + '<div class="hv-caption"></div><div class="hv-thumbs"></div>';
   m.querySelector('.hv-vtitle').textContent = '📷 ' + (title || 'House View');
-  const main = m.querySelector('.hv-main'), cnt = m.querySelector('.hv-count'), th = m.querySelector('.hv-thumbs');
-  images.forEach((src, k) => { const t = document.createElement('img'); t.src = src; t.alt = 'Photo ' + (k + 1); t.onclick = () => go(k); th.appendChild(t); });
-  const go = (k) => { i = (k + images.length) % images.length; main.src = images[i]; cnt.textContent = (i + 1) + ' / ' + images.length;
-    [...th.children].forEach((t, j) => t.classList.toggle('on', j === i)); };
+  const main = m.querySelector('.hv-main'), cnt = m.querySelector('.hv-count'), th = m.querySelector('.hv-thumbs'), tabs = m.querySelector('.hv-tabs'), cap = m.querySelector('.hv-caption');
+  // room tabs (only when photos are grouped by room)
+  const labels = [...new Set(list.map(x => x.label).filter(Boolean))];
+  labels.forEach(l => { const b = document.createElement('button'); b.type = 'button'; b.className = 'hv-tab'; b.dataset.l = l;
+    b.textContent = l + ' (' + list.filter(x => x.label === l).length + ')'; b.onclick = () => go(list.findIndex(x => x.label === l)); tabs.appendChild(b); });
+  if (!labels.length) tabs.style.display = 'none';
+  list.forEach((x, k) => { const t = document.createElement('img'); t.src = x.src; t.alt = (x.label || 'Photo') + ' ' + (k + 1); t.onclick = () => go(k); th.appendChild(t); });
+  const go = (k) => { i = (k + list.length) % list.length; main.src = list[i].src; cnt.textContent = (i + 1) + ' / ' + list.length;
+    const cur = list[i], inRoom = list.filter(x => x.label === cur.label), pos = inRoom.indexOf(cur) + 1;
+    cap.textContent = cur.label ? cur.label + ' · photo ' + pos + ' of ' + inRoom.length : '';
+    [...th.children].forEach((t, j) => t.classList.toggle('on', j === i));
+    [...tabs.children].forEach(b => b.classList.toggle('on', b.dataset.l === cur.label)); };
   m.querySelector('.prev').onclick = () => go(i - 1); m.querySelector('.next').onclick = () => go(i + 1);
   m.querySelector('.hv-x').onclick = () => { m.remove(); document.removeEventListener('keydown', key); };
-  if (images.length < 2) m.querySelectorAll('.hv-nav').forEach(b => b.style.display = 'none');
+  if (list.length < 2) m.querySelectorAll('.hv-nav').forEach(b => b.style.display = 'none');
   const key = (e) => { if (!document.body.contains(m)) return document.removeEventListener('keydown', key); if (e.key === 'ArrowLeft') go(i - 1); else if (e.key === 'ArrowRight') go(i + 1); };
   document.addEventListener('keydown', key);
   m.addEventListener('mousedown', e => { if (e.target === m || e.target.classList.contains('hv-stage')) m.querySelector('.hv-x').click(); });
