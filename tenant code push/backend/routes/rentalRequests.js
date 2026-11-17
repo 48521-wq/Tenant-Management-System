@@ -27,7 +27,10 @@ router.get('/my-requests', protect, async (req, res) => {
 // ─── TENANT: Submit rental request for a property ───
 router.post('/request', protect, async (req, res) => {
   try {
-    const { propertyId, message, proposedRent } = req.body;
+    if (req.user.role !== 'tenant')
+      return res.status(403).json({ success: false, message: 'Tenant access required.' });
+
+    const { propertyId, message, proposedRent } = req.body || {};
     const rent = parseRentAmount(proposedRent);
     if (!rent.valid)
       return res.status(400).json({ success: false, message: 'Rent offer must be a positive number.' });
@@ -147,6 +150,8 @@ router.put('/:id/accept', protect, async (req, res) => {
 
     // Verify landlord owns this property
     const property = await Property.findById(rentalRequest.propertyId);
+    if (!property)
+      return res.status(404).json({ success: false, message: 'Property not found.' });
     if (property.landlordId.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: 'Not authorized.' });
     }
@@ -181,6 +186,8 @@ router.put('/:id/reject', protect, async (req, res) => {
 
     // Verify landlord owns this property
     const property = await Property.findById(rentalRequest.propertyId);
+    if (!property)
+      return res.status(404).json({ success: false, message: 'Property not found.' });
     if (property.landlordId.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: 'Not authorized.' });
     }
