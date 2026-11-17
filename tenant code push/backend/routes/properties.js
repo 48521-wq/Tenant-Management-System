@@ -2,6 +2,7 @@
 const express  = require('express');
 const Property = require('../models/Property');
 const { protect, adminOnly } = require('../middleware/auth');
+const { parsePropertyNumericFilters } = require('../utils/propertyFilters');
 const router = express.Router();
 
 // House View photos: max 4, must be image data URLs (or http/https links)
@@ -86,12 +87,16 @@ router.get('/tenant-portfolio', protect, async (req, res) => {
 // GET all properties (public / admin)
 router.get('/', async (req, res) => {
   try {
+    const numericFilters = parsePropertyNumericFilters(req.query);
+    if (!numericFilters.valid)
+      return res.status(400).json({ success: false, message: `Invalid ${numericFilters.field} filter.` });
+
     const filter = {};
     if (req.query.status)     filter.status = req.query.status;
     if (req.query.area)       filter.area   = req.query.area;
     if (req.query.type)       filter.type   = req.query.type;
-    if (req.query.beds)       filter.beds   = { $gte: Number(req.query.beds) };
-    if (req.query.maxRent)    filter.rent   = { $lte: Number(req.query.maxRent) };
+    if (numericFilters.beds !== null) filter.beds = { $gte: numericFilters.beds };
+    if (numericFilters.maxRent !== null) filter.rent = { $lte: numericFilters.maxRent };
     if (req.query.landlordId) {
       const mongoose = require('mongoose');
       try {
