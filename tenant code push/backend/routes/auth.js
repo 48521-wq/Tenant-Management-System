@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
 const User    = require('../models/User');
 const { protect } = require('../middleware/auth');
+const { generateOTP, escapeHtml } = require('../utils/authHelpers');
 
 const router  = express.Router();
 const gClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -24,10 +25,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-function generateOTP() {
-  return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit
-}
-
 async function sendOTPEmail(email, otp, name) {
   await transporter.sendMail({
     from: `"TMS - Tenant Management System" <${process.env.EMAIL_USER}>`,
@@ -36,7 +33,7 @@ async function sendOTPEmail(email, otp, name) {
     html: `
       <div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;background:#f9f9f9;border-radius:12px;padding:32px;border:1px solid #e0e0e0;">
         <h2 style="color:#c9a84c;margin-bottom:4px;">TMS Verification</h2>
-        <p style="color:#555;margin-bottom:24px;">Hi <strong>${name}</strong>, please use the code below to verify your email.</p>
+        <p style="color:#555;margin-bottom:24px;">Hi <strong>${escapeHtml(name)}</strong>, please use the code below to verify your email.</p>
         <div style="background:#fff;border:2px dashed #c9a84c;border-radius:10px;padding:20px;text-align:center;margin-bottom:24px;">
           <span style="font-size:36px;font-weight:bold;letter-spacing:10px;color:#222;">${otp}</span>
         </div>
@@ -241,7 +238,7 @@ async function sendResetEmail(email, otp, name) {
     html: `
       <div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;background:#f9f9f9;border-radius:12px;padding:32px;border:1px solid #e0e0e0;">
         <h2 style="color:#c9a84c;margin-bottom:4px;">Reset Your Password</h2>
-        <p style="color:#555;margin-bottom:24px;">Hi <strong>${name}</strong>, use this code to reset your TMS password.</p>
+        <p style="color:#555;margin-bottom:24px;">Hi <strong>${escapeHtml(name)}</strong>, use this code to reset your TMS password.</p>
         <div style="background:#fff;border:2px dashed #c9a84c;border-radius:10px;padding:20px;text-align:center;margin-bottom:24px;">
           <span style="font-size:36px;font-weight:bold;letter-spacing:10px;color:#222;">${otp}</span>
         </div>
