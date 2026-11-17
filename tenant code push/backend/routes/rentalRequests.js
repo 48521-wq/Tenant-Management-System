@@ -4,6 +4,7 @@ const Property = require('../models/Property');
 const User = require('../models/User');
 const { protect } = require('../middleware/auth');
 const { evaluateFollowUp } = require('../utils/rentalRequestPolicy');
+const { parseRentAmount } = require('../utils/rentAmount');
 const router = express.Router();
 
 // ─── TENANT: Get all requests by this tenant ───
@@ -27,6 +28,9 @@ router.get('/my-requests', protect, async (req, res) => {
 router.post('/request', protect, async (req, res) => {
   try {
     const { propertyId, message, proposedRent } = req.body;
+    const rent = parseRentAmount(proposedRent);
+    if (!rent.valid)
+      return res.status(400).json({ success: false, message: 'Rent offer must be a positive number.' });
 
     // Validate property exists and is available
     const property = await Property.findById(propertyId);
@@ -39,7 +43,7 @@ router.post('/request', protect, async (req, res) => {
 
     // Earlier requests by this tenant for the same property (a finished/accepted tenancy is history and does not count)
     const priorRequests = await RentalRequest.find({ tenantId: req.user._id, propertyId, status: { $ne: 'accepted' } }).select('proposedRent status');
-    const rule = evaluateFollowUp(priorRequests, proposedRent);
+    const rule = evaluateFollowUp(priorRequests, rent.value);
     if (!rule.allowed) {
       return res.status(400).json({
         success: false,
@@ -67,7 +71,7 @@ router.post('/request', protect, async (req, res) => {
       landlordName: landlord?.name || 'Unknown',
       landlordEmail: landlord?.email || '',
       message: message || '',
-      proposedRent: proposedRent ? Number(proposedRent) : null,
+      proposedRent: rent.value,
       status: 'pending'
     });
 
@@ -365,14 +369,17 @@ router.put('/:id/negotiate', protect, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Cannot negotiate at this stage.' });
 
     const { proposedRent, text } = req.body;
+    const rent = parseRentAmount(proposedRent);
+    if (!rent.valid)
+      return res.status(400).json({ success: false, message: 'Rent offer must be a positive number.' });
     rentalRequest.status = 'negotiating';
-    rentalRequest.proposedRent = proposedRent || rentalRequest.proposedRent;
+    rentalRequest.proposedRent = rent.value || rentalRequest.proposedRent;
     rentalRequest.negotiationMessages.push({
       senderId:   req.user._id,
       senderName: req.user.name,
       senderRole: 'tenant',
       text: text || '',
-      proposedRent: proposedRent || null,
+      proposedRent: rent.value,
       sentAt: new Date()
     });
     await rentalRequest.save();
@@ -424,14 +431,17 @@ router.put('/:id/negotiate-reply', protect, async (req, res) => {
       });
     } else {
       // Counter offer
+      const rent = parseRentAmount(counterRent);
+      if (!rent.valid)
+        return res.status(400).json({ success: false, message: 'Counter offer must be a positive number.' });
       rentalRequest.status = 'negotiating';
-      if (counterRent) rentalRequest.proposedRent = counterRent;
+      if (rent.value !== null) rentalRequest.proposedRent = rent.value;
       rentalRequest.negotiationMessages.push({
         senderId:   req.user._id,
         senderName: req.user.name,
         senderRole: 'landlord',
         text: text || '',
-        proposedRent: counterRent || null,
+        proposedRent: rent.value,
         sentAt: new Date()
       });
     }
