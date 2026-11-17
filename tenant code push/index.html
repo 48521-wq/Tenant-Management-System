@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tenant Management System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Theme Toggle ── */
+    .theme-btn {
+      position: fixed; top: 20px; right: 24px; z-index: 999;
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      transition: transform 0.3s, box-shadow 0.3s;
+      backdrop-filter: blur(12px);
+    }
+    .theme-btn:hover { transform: rotate(20deg) scale(1.1); border-color: var(--gold); }
+
+    /* ── Divider ── */
+    .or-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 18px 0; color: var(--muted); font-size: 12px;
+    }
+    .or-divider::before, .or-divider::after {
+      content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08);
+    }
+    /* Fix select dropdown text visibility */
+    select, select option { color: #EDE9E0 !important; background: #12151C !important; }
+    [data-theme="light"] select, [data-theme="light"] select option { color: #1A1E26 !important; background: #fff !important; }
+
+    /* ── Google Button ── */
+    .btn-google {
+      width: 100%; padding: 12px 14px;
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 12px; background: rgba(255,255,255,0.04);
+      color: var(--text); font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 500;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      gap: 10px; transition: all 0.2s;
+    }
+    .btn-google:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.2);
+      transform: translateY(-1px);
+    }
+    .btn-google:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .google-icon { width: 20px; height: 20px; flex-shrink: 0; }
+    .google-spinner {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: var(--gold);
+      animation: spin 0.7s linear infinite; display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Light Theme ── */
+    [data-theme="light"] {
+      --dark:  #F0F2F5; --dark2: #E4E8EE; --card: #FFFFFF;
+      --border: rgba(201,169,110,0.25); --text: #1A1E26; --muted: #7A8390;
+    }
+    [data-theme="light"] body { background: #F0F2F5; }
+    [data-theme="light"] .bg-scene {
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 30%, rgba(201,169,110,0.09) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 70%, rgba(74,158,255,0.07) 0%, transparent 60%),
+        linear-gradient(160deg, #F0F2F5 0%, #E8ECF2 100%);
+    }
+    [data-theme="light"] .grid-overlay {
+      background-image:
+        linear-gradient(rgba(100,110,130,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(100,110,130,0.07) 1px, transparent 1px);
+    }
+    [data-theme="light"] .panel {
+      background: rgba(255,255,255,0.9);
+      border-color: rgba(201,169,110,0.22);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.9);
+    }
+    [data-theme="light"] .form-input {
+      background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); color: #1A1E26;
+    }
+    [data-theme="light"] .form-input:focus { background: rgba(201,169,110,0.05); border-color: var(--gold); }
+    [data-theme="light"] .form-input::placeholder { color: #AAB0BA; }
+    [data-theme="light"] .tabs { background: rgba(0,0,0,0.05); }
+    [data-theme="light"] .tab.active { background: rgba(255,255,255,0.85); color: #1A1E26; }
+    [data-theme="light"] .tab { color: #7A8390; }
+    [data-theme="light"] .role-card-inline { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); }
+    /* Role selected bright state */
+    .role-card-inline.tenant.selected  { border-color:#4A9EFF!important; background:rgba(74,158,255,0.15)!important; box-shadow:0 0 0 3px rgba(74,158,255,0.3)!important; transform:translateY(-3px); }
+    .role-card-inline.landlord.selected{ border-color:#C9A96E!important; background:rgba(201,169,110,0.15)!important; box-shadow:0 0 0 3px rgba(201,169,110,0.3)!important; transform:translateY(-3px); }
+    .role-card-inline.tenant.selected  .role-inline-name { color:#4A9EFF; }
+    .role-card-inline.landlord.selected .role-inline-name { color:#C9A96E; }
+    .role-card-inline.selected::after  { content:'✓'; position:absolute; top:6px; right:8px; font-size:11px; font-weight:700; }
+    .role-card-inline.tenant.selected::after   { color:#4A9EFF; }
+    .role-card-inline.landlord.selected::after { color:#C9A96E; }
+    [data-theme="light"] .btn-google { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); color: #1A1E26; }
+    [data-theme="light"] .btn-google:hover { background: rgba(0,0,0,0.07); }
+    [data-theme="light"] .or-divider::before, [data-theme="light"] .or-divider::after { background: rgba(0,0,0,0.1); }
+    [data-theme="light"] .panel-footer { color: #AAB0BA; }
+    [data-theme="light"] .strength-seg { background: rgba(0,0,0,0.08); }
+    /* Logo text visible on light theme */
+    [data-theme="light"] .logo h1 {
+      background: linear-gradient(135deg, #B8892A 0%, #C9A96E 100%) !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+    }
+    /* Card & panel text */
+    [data-theme="light"] .panel-footer { color: #9CA3AF !important; }
+    [data-theme="light"] .tab { color: #7A8390 !important; }
+    [data-theme="light"] .tab.active { color: #1A1E26 !important; background: rgba(255,255,255,0.85) !important; }
+    [data-theme="light"] .role-card-inline { background: rgba(0,0,0,0.02) !important; border-color: rgba(0,0,0,0.08) !important; }
+    [data-theme="light"] .role-inline-desc { color: #7A8390 !important; }
+    [data-theme="light"] .role-inline-name { color: #1A1E26 !important; }
+    [data-theme="light"] .form-label { color: #6B7280 !important; }
+    [data-theme="light"] .switch-text { color: #7A8390 !important; }
+    [data-theme="light"] .forgot-link { color: #7A8390 !important; }
+    [data-theme="light"] .logo p { color: #7A8390 !important; }
+    [data-theme="light"] .or-divider { color: #9CA3AF !important; }
+    [data-theme="light"] .btn-google { background: rgba(0,0,0,0.03) !important; border-color: rgba(0,0,0,0.1) !important; color: #1A1E26 !important; }
+    [data-theme="light"] .btn-google:hover { background: rgba(0,0,0,0.07) !important; }
+    [data-theme="light"] .strength-seg { background: rgba(0,0,0,0.08) !important; }
+
+
+    /* ── Google Account Modal ── */
+    .g-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(10px);
+      display: none; align-items: center; justify-content: center; padding: 20px;
+    }
+    .g-overlay.open { display: flex; animation: gfadein 0.2s ease; }
+    @keyframes gfadein { from{opacity:0} to{opacity:1} }
+
+    .g-modal {
+      background: #14181F; border: 1px solid rgba(201,169,110,0.2);
+      border-radius: 20px; padding: 32px 30px; width: 100%; max-width: 400px;
+      animation: gslide 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes gslide { from{transform:translateY(16px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+    .g-modal-head { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+    .g-modal-gicon { width: 36px; height: 36px; flex-shrink:0; }
+    .g-modal-title { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 700; }
+    .g-modal-sub { color: var(--muted); font-size: 13px; margin-bottom: 22px; line-height: 1.6; }
+
+    .g-input-wrap { position: relative; margin-bottom: 14px; }
+    .g-input {
+      width: 100%; background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 11px; padding: 12px 14px 12px 40px;
+      color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px;
+      outline: none; transition: border-color 0.2s;
+    }
+    .g-input:focus { border-color: var(--gold); background: rgba(201,169,110,0.04); }
+    .g-input::placeholder { color: #4B5563; }
+    .g-input-icon {
+      position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+      width: 17px; height: 17px; stroke: var(--muted); fill: none; pointer-events: none;
+    }
+    .g-error { font-size: 12px; color: #FF6B6B; margin: -8px 0 10px 2px; display: none; }
+    .g-error.show { display: block; }
+
+    .g-modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+    .g-btn-primary {
+      flex: 1; padding: 12px; border: none; border-radius: 11px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: #0A0C0F; font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .g-btn-primary:hover { box-shadow: 0 5px 16px rgba(201,169,110,0.35); transform: translateY(-1px); }
+    .g-btn-cancel {
+      padding: 12px 18px; border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 11px; background: rgba(255,255,255,0.04);
+      color: var(--muted); font-family: 'DM Sans', sans-serif;
+      font-size: 14px; cursor: pointer; transition: all 0.2s;
+    }
+    .g-btn-cancel:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+    /* Light mode for google modal */
+    [data-theme="light"] .g-modal { background: #fff; border-color: rgba(201,169,110,0.25); }
+    [data-theme="light"] .g-input { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); color: #1A1E26; }
+    [data-theme="light"] .g-input:focus { background: rgba(201,169,110,0.05); border-color: var(--gold); }
+    [data-theme="light"] .g-input::placeholder { color: #AAB0BA; }
+    [data-theme="light"] .g-btn-cancel { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
+  </style>
+
+<!-- ═══════ PROFESSIONAL DESIGN UPGRADE ═══════ -->
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+/* Login Page Premium Refinements */
+body { font-family: 'DM Sans', sans-serif; }
+
+.logo h1 {
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.2px !important;
+}
+
+.logo-tagline {
+  margin: 8px 0 0;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+}
+
+.logo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 7px 12px;
+  border: 1px solid rgba(201, 169, 110, 0.3);
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(201, 169, 110, 0.08);
+}
+
+.logo-badge::before {
+  content: '✓';
+  font-size: 10px;
+  color: var(--gold);
+}
+
+.panel {
+  border-radius: 26px !important;
+  padding: 50px 46px !important;
+  border: 1px solid rgba(201,169,110,0.13) !important;
+  box-shadow: 0 40px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.03) !important;
+}
+
+.form-label {
+  font-size: 10px !important;
+  letter-spacing: 1px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  color: rgba(156,163,175,0.8) !important;
+}
+
+.form-input {
+  border-radius: 11px !important;
+  padding: 13px 14px 13px 42px !important;
+  font-size: 13.5px !important;
+  border: 1.5px solid rgba(255,255,255,0.07) !important;
+  transition: all 0.22s cubic-bezier(0.4,0,0.2,1) !important;
+}
+.form-input:focus {
+  border-color: #C9A96E !important;
+  box-shadow: 0 0 0 3px rgba(201,169,110,0.1) !important;
+}
+
+.btn-primary {
+  border-radius: 11px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.1px !important;
+  transition: all 0.22s cubic-bezier(0.4,0,0.2,1) !important;
+}
+.btn-gold {
+  box-shadow: 0 6px 22px rgba(201,169,110,0.32) !important;
+}
+.btn-gold:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 9px 28px rgba(201,169,110,0.45) !important;
+}
+
+.tabs { border-radius: 13px !important; padding: 5px !important; }
+.tab { border-radius: 10px !important; font-size: 13.5px !important; font-weight: 500 !important; }
+.tab.active {
+  font-weight: 600 !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25) !important;
+}
+
+.logo-icon {
+  border-radius: 15px !important;
+  box-shadow: 0 8px 28px rgba(201,169,110,0.35), inset 0 1px 0 rgba(255,255,255,0.15) !important;
+}
+
+.fp-title, .success-title {
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif !important;
+  font-size: 24px !important;
+  font-weight: 700 !important;
+}
+
+.role-card-inline {
+  border-radius: 15px !important;
+  padding: 17px 13px !important;
+  transition: all 0.22s cubic-bezier(0.4,0,0.2,1) !important;
+}
+
+/* Subtle grain */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 999; opacity: 0.4;
+}
+[data-theme="light"] body::after { opacity: 0.12; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+
+</head>
+<body>
+
+  <div class="bg-scene"></div>
+  <div class="grid-overlay"></div>
+  <div class="orb1"></div>
+  <div class="orb2"></div>
+
+  <button class="theme-btn" id="theme-btn" type="button" aria-label="Switch to light theme" title="Switch to light theme" onclick="toggleTheme()">🌙</button>
+
+  <div class="container">
+    <div class="panel">
+
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <h1>Tenant Management System</h1>
+        <p>Property Management Portal</p>
+        <p class="logo-tagline">Smart renting, secure payments, and smoother operations</p>
+        <div class="logo-badge">Trusted by landlords & tenants</div>
+      </div>
+
+      <div class="tabs" id="main-tabs">
+        <button class="tab active" id="tab-signin" onclick="switchTab('signin')">Sign In</button>
+        <button class="tab" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
+      </div>
+
+      <div id="error-box" class="error-msg" style="display:none;"></div>
+
+      <!-- ===== SIGN IN ===== -->
+      <div id="form-signin">
+
+        <!-- Google Sign In -->
+        <button class="btn-google" id="google-signin-btn" onclick="handleGoogleSignin()">
+          <svg class="google-icon" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          Continue with Google
+        </button>
+
+        <div class="or-divider">or sign in with email</div>
+
+        <div class="form-group">
+          <label class="form-label" for="signin-email">Email Address</label>
+          <div class="input-wrap">
+            <input type="email" class="form-input" id="signin-email" placeholder="your@email.com" autocomplete="username" autocapitalize="none" spellcheck="false" onkeydown="if(event.key==='Enter') handleSignin()">
+            <svg class="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signin-password">Password</label>
+          <div class="input-wrap">
+            <input type="password" class="form-input" id="signin-password" placeholder="Enter your password" autocomplete="current-password" onkeydown="if(event.key==='Enter') handleSignin()">
+            <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <button class="eye-btn" type="button" aria-label="Show password" aria-pressed="false" onclick="togglePass('signin-password', this)">
+              <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <button class="forgot-link" onclick="showForgot()">Forgot Password?</button>
+        <button class="btn-primary btn-gold" id="signin-btn" onclick="handleSignin()">Sign In</button>
+        <div class="switch-text">
+          Don't have an account? <button class="switch-link" onclick="switchTab('signup')">Create one</button>
+        </div>
+      </div>
+
+      <!-- ===== SIGN UP ===== -->
+      <div id="form-signup" style="display:none;">
+
+        <!-- Google Sign Up -->
+        <button class="btn-google" id="google-signup-btn" onclick="handleGoogleSignup()">
+          <svg class="google-icon" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          Sign up with Google
+        </button>
+
+        <div class="or-divider">or create account with email</div>
+
+        <div class="form-group">
+          <label class="form-label" for="signup-name">Full Name</label>
+          <div class="input-wrap">
+            <input type="text" class="form-input" id="signup-name" placeholder="John Doe" autocomplete="name" oninput="this.value=this.value.replace(/[^A-Za-z ]+/g,'')">
+            <svg class="input-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-email">Email Address</label>
+          <div class="input-wrap">
+            <input type="email" class="form-input" id="signup-email" placeholder="your@email.com" autocomplete="email" autocapitalize="none" spellcheck="false">
+            <svg class="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-password">Password</label>
+          <div class="input-wrap">
+            <input type="password" class="form-input" id="signup-password" placeholder="Create a strong password" autocomplete="new-password" oninput="checkStrength(this.value)">
+            <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <button class="eye-btn" type="button" aria-label="Show password" aria-pressed="false" onclick="togglePass('signup-password', this)">
+              <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="strength-bar">
+            <div class="strength-seg" id="s1"></div><div class="strength-seg" id="s2"></div>
+            <div class="strength-seg" id="s3"></div><div class="strength-seg" id="s4"></div>
+          </div>
+          <div class="strength-label" id="strength-label"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-confirm">Confirm Password</label>
+          <div class="input-wrap">
+            <input type="password" class="form-input" id="signup-confirm" placeholder="Repeat your password" autocomplete="new-password">
+            <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <button class="eye-btn" type="button" aria-label="Show password" aria-pressed="false" onclick="togglePass('signup-confirm', this)">
+              <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Select Your Role</label>
+          <div class="role-cards-inline">
+            <div class="role-card-inline tenant" id="role-tenant" onclick="selectRole('tenant')">
+              <span class="role-inline-icon">🏠</span>
+              <span class="role-inline-name">Tenant</span>
+              <span class="role-inline-desc">I rent a property</span>
+            </div>
+            <div class="role-card-inline landlord" id="role-landlord" onclick="selectRole('landlord')">
+              <span class="role-inline-icon">🏢</span>
+              <span class="role-inline-name">Landlord</span>
+              <span class="role-inline-desc">I own properties</span>
+            </div>
+          </div>
+          <div id="role-error" class="role-error-msg">Please select a role to continue.</div>
+        </div>
+        <button class="btn-primary btn-gold" id="signup-btn" onclick="handleSignup()">Send Verification Code</button>
+        <div class="switch-text">
+          Already have an account? <button class="switch-link" onclick="switchTab('signin')">Sign in</button>
+        </div>
+      </div>
+
+      <!-- ===== OTP VERIFICATION STEP ===== -->
+      <div id="form-otp" style="display:none;">
+        <button class="back-btn" onclick="showOtpBack()" style="margin-bottom:16px;">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <div style="text-align:center;margin-bottom:20px;">
+          <div style="font-size:48px;margin-bottom:8px;">📧</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">Check Your Email</div>
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.5;">
+            We've sent a 6-digit verification code to<br>
+            <strong id="otp-email-display" style="color:var(--gold);"></strong>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="otp-input">Enter OTP Code</label>
+          <div class="input-wrap">
+            <input type="text" class="form-input" id="otp-input" placeholder="Enter 6-digit code" maxlength="6" inputmode="numeric" autocomplete="one-time-code"
+              style="letter-spacing:6px;font-size:22px;font-weight:700;text-align:center;"
+              oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+              onkeydown="if(event.key==='Enter')verifyOTP()">
+            <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);text-align:center;margin-bottom:16px;" id="otp-timer"></div>
+        <button class="btn-primary btn-gold" id="otp-verify-btn" onclick="verifyOTP()">Verify & Create Account</button>
+        <div style="text-align:center;margin-top:14px;">
+          <span style="font-size:13px;color:var(--text-secondary);">Didn't receive it? </span>
+          <button class="switch-link" id="resend-otp-btn" onclick="resendOTP()" style="font-size:13px;" disabled>Resend OTP</button>
+        </div>
+      </div>
+
+      <!-- ===== FORGOT PASSWORD ===== -->
+      <div id="screen-forgot" style="display:none;">
+        <button class="back-btn" onclick="showAuth()">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to Sign In
+        </button>
+        <div class="fp-icon">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div class="fp-title">Reset Password</div>
+        <div class="fp-sub">Enter your registered email. We'll send you a 6-digit reset code.</div>
+        <div id="fp-error" class="error-msg" style="display:none;"></div>
+        <div class="form-group">
+          <label class="form-label" for="fp-email">Email Address</label>
+          <div class="input-wrap">
+            <input type="email" class="form-input" id="fp-email" placeholder="your@email.com" autocomplete="email" autocapitalize="none" spellcheck="false">
+            <svg class="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+        </div>
+        <button class="btn-primary btn-gold" id="fp-btn" onclick="handleForgot()">Send Reset Code</button>
+      </div>
+
+
+      <!-- ===== RESET PASSWORD (code + new password) ===== -->
+      <div id="screen-reset" style="display:none;">
+        <button class="back-btn" onclick="showForgot()">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <div class="fp-title">Enter Code</div>
+        <div class="fp-sub">We sent a 6-digit code to <strong id="reset-email-display" style="color:var(--gold);"></strong></div>
+        <div id="rp-error" class="error-msg" style="display:none;"></div>
+        <div class="form-group">
+          <label class="form-label" for="rp-otp">Reset Code</label>
+          <div class="input-wrap">
+            <input type="text" class="form-input" id="rp-otp" placeholder="6-digit code" maxlength="6" inputmode="numeric" autocomplete="one-time-code"
+              style="letter-spacing:6px;font-size:20px;font-weight:700;text-align:center;"
+              oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="rp-pass">New Password</label>
+          <div class="input-wrap">
+            <input type="password" class="form-input" id="rp-pass" placeholder="At least 6 characters" autocomplete="new-password">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="rp-confirm">Confirm Password</label>
+          <div class="input-wrap">
+            <input type="password" class="form-input" id="rp-confirm" placeholder="Repeat password" autocomplete="new-password"
+              onkeydown="if(event.key==='Enter')handleReset()">
+          </div>
+        </div>
+        <button class="btn-primary btn-gold" id="rp-btn" onclick="handleReset()">Update Password</button>
+        <div style="text-align:center;margin-top:14px;">
+          <span style="font-size:13px;color:var(--text-secondary);">Didn't get it? </span>
+          <button class="switch-link" onclick="handleForgot(true)" style="font-size:13px;">Resend code</button>
+        </div>
+      </div>
+
+      <!-- ===== SUCCESS ===== -->
+      <div id="screen-success" style="display:none;">
+        <div class="success-state">
+          <div class="success-icon">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="success-title">Password Updated</div>
+          <div class="success-msg">
+            Your password has been updated for<br>
+            <span class="success-email" id="success-email-display"></span><br><br>
+            You can now sign in with your new password.
+          </div>
+          <div style="margin-top:28px;">
+            <button class="btn-primary btn-gold" onclick="showAuth()" style="max-width:200px;margin:0 auto;display:block;">Back to Login</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-footer">© 2026 Tenant Management System · All rights reserved</div>
+    </div>
+  </div>
+
+  
+  <!-- ── Google Account Modal ── -->
+  <div class="g-overlay" id="g-overlay" onclick="if(event.target===this) closeGoogleModal()">
+    <div class="g-modal" id="g-modal">
+      <div class="g-modal-head">
+        <svg class="g-modal-gicon" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        <div class="g-modal-title" id="g-modal-title">Sign in with Google</div>
+      </div>
+      <div class="g-modal-sub" id="g-modal-sub">Enter the Gmail address you want to use.</div>
+
+      <div class="g-input-wrap">
+        <svg class="g-input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <input class="g-input" id="g-email-input" type="email" placeholder="yourname@gmail.com" aria-label="Google account email address" autocomplete="email" autocapitalize="none" spellcheck="false" onkeydown="if(event.key==='Enter') confirmGoogle()">
+      </div>
+      <div class="g-error" id="g-error"></div>
+
+      <div class="g-modal-btns">
+        <button class="g-btn-primary" onclick="confirmGoogle()" id="g-confirm-btn">Continue</button>
+        <button class="g-btn-cancel" onclick="closeGoogleModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    /* Theme */
+    (function(){
+      const saved = localStorage.getItem('tms-theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+      document.getElementById('theme-btn').textContent = saved === 'dark' ? '🌙' : '☀️';
+      const action = saved === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+      document.getElementById('theme-btn').setAttribute('aria-label', action);
+      document.getElementById('theme-btn').title = action;
+    })();
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('theme-btn').textContent = next === 'dark' ? '🌙' : '☀️';
+      const action = next === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+      document.getElementById('theme-btn').setAttribute('aria-label', action);
+      document.getElementById('theme-btn').title = action;
+      localStorage.setItem('tms-theme', next);
+    }
+  </script>
+</body>
+</html>
