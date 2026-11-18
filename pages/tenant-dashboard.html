@@ -119,6 +119,12 @@
 .fg select option{background:var(--bg);color:var(--text)}
 .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(201,169,110,0.07)}
 .fg textarea{resize:vertical;min-height:90px}
+.payment-upload{position:relative;display:flex;align-items:center;gap:12px;min-height:54px;padding:7px 10px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;transition:all 0.2s}
+.payment-upload:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(201,169,110,0.07)}
+.fg .payment-upload-input{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);clip-path:inset(50%);white-space:nowrap;border:0}
+.payment-upload-btn{flex-shrink:0;padding:9px 14px!important;border:1px solid rgba(201,169,110,0.3);border-radius:8px;background:rgba(201,169,110,0.1);color:var(--text)!important;font-size:15px!important;font-weight:600!important;text-transform:none!important;letter-spacing:0!important;cursor:pointer}
+.payment-upload-input:focus-visible+.payment-upload-btn{outline:2px solid var(--blue);outline-offset:2px}
+.payment-upload-name{min-width:0;overflow:hidden;color:var(--muted);font-size:15px;text-overflow:ellipsis;white-space:nowrap}
 .submit-btn{padding:11px 28px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--blue),var(--blue-l));color:#fff;font-family:'DM Sans',sans-serif;font-size:18px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(201,169,110,0.28);transition:all 0.2s;margin-top:4px}
 .submit-btn:hover{transform:translateY(-1px);}
 .submit-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
@@ -141,7 +147,11 @@
 /* PROFILE */
 .profile-header{display:flex;align-items:center;gap:18px;margin-bottom:22px;padding:22px;background:var(--card);border:1px solid var(--border);border-radius:16px}
 .profile-av{width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-l));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff;flex-shrink:0}
-.profile-av-info h3{font-size:21px;font-weight:700;color:var(--text)}.profile-av-info p{font-size:16px;color:var(--muted);margin-top:2px}
+.profile-av-info{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.profile-av-info h3,.profile-av-info p{max-width:100%;margin:0;line-height:1.3;overflow-wrap:anywhere}
+.profile-av-info h3{font-size:21px;font-weight:700;color:var(--text)}
+.profile-av-info p{font-size:16px;color:var(--muted)}
+.profile-av-info .badge{display:inline-flex;align-items:center;margin:0!important;line-height:1.25}
 /* NOTIF ITEMS */
 .notif-item{display:flex;gap:12px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px}
 .notif-item.unread{border-color:rgba(201,169,110,0.25);background:rgba(201,169,110,0.04)}
@@ -1301,24 +1311,14 @@ async function loadProperties() {
   if (!grid) return;
   grid.innerHTML = '<div class="loading"><span class="spinner"></span>Loading properties…</div>';
   try {
-    const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
-    const userId = (user._id || user.id || '').toString();
-
-    // Load rented properties only and keep the payload small
-    let rentedProps = [];
-    try {
-      const allData = await tFetch('/properties?status=rented&fields=_id,status,tenantId,title,area,city,rent,beds,baths,type,frontImage,houseViewCount,model3d,tenantFurnitureLayout');
-      const allP = allData.properties || [];
-      rentedProps = allP.filter(p => {
-        const tid = (p.tenantId || p.tenant || '').toString();
-        return p.status === 'rented' && tid && tid === userId;
-      });
-    } catch(e2) { /* ignore if endpoint restricted */ }
+    const rentalData = await tFetch('/properties/my-rentals');
+    const rentedProps = rentalData.properties || [];
 
     allProps = rentedProps;
+    window._tenantRentalIds = new Set(rentedProps.map(p => String(p._id)));
 
     // Update shared prop map
-    window._tenantPropMap = {};
+    window._tenantPropMap = window._tenantPropMap || {};
     allProps.forEach(p => { window._tenantPropMap[p._id] = p; });
 
     renderProps(allProps, rentedProps.map(p => p._id));
@@ -1440,7 +1440,7 @@ function applyFilters() {
   if(beds) list = list.filter(p => Number(p.beds) >= Number(beds));
   if(rent) list = list.filter(p => Number(p.rent) <= Number(rent));
   // keep rented highlighting when filtering
-  const myIds = Object.values(window._tenantPropMap||{}).filter(p=>p.status==='rented').map(p=>p._id);
+  const myIds = [...(window._tenantRentalIds || [])];
   renderProps(list, myIds);
 }
 
@@ -1449,37 +1449,9 @@ function applyFilters() {
 // ═══════════════════════════════════════════════════════
 async function populatePropertyDropdowns() {
   try {
-    // Load available properties and tenant's rented properties
-    const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
-    const userId = user._id || user.id || '';
-    
-    // Get available properties with a smaller payload for dropdowns
-    const availData = await tFetch('/properties?status=available&fields=_id,title,area,city,rent,status,landlordName,address');
-    const availProps = availData.properties || [];
-    
-    // Get tenant's rented/assigned properties (use global map first)
-    const globalProps = window._tenantPropMap ? Object.values(window._tenantPropMap) : [];
-    let rentedProps = globalProps.filter(p => {
-      const tid = (p.tenantId || p.tenant || '').toString();
-      return p.status === 'rented' && tid && tid === userId;
-    });
-    // Fallback: fetch rented properties only
-    if (!rentedProps.length && userId) {
-      try {
-        const allPropsData = await tFetch('/properties?status=rented&fields=_id,status,tenantId,title,area,city,rent,beds,baths,type,frontImage,houseViewCount,model3d,tenantFurnitureLayout,address');
-        const allPropsArr = allPropsData.properties || [];
-        rentedProps = allPropsArr.filter(p => {
-          const tid = (p.tenantId || p.tenant || '').toString();
-          return p.status === 'rented' && tid && tid === userId;
-        });
-      } catch(e2) {}
-    }
-    
-    // Combine: rented properties first, then available
-    const combinedProps = [...rentedProps, ...availProps];
-    
-    // Remove duplicates based on ID
-    const uniqueProps = Array.from(new Map(combinedProps.map(p => [p._id, p])).values());
+    const rentalData = await tFetch('/properties/my-rentals');
+    const rentedProps = rentalData.properties || [];
+    window._tenantRentalIds = new Set(rentedProps.map(p => String(p._id)));
     
     const selects = ['pprop', 'mprop', 'cprop'];
     selects.forEach(selectId => {
@@ -1487,9 +1459,8 @@ async function populatePropertyDropdowns() {
       if (el) {
         const currentVal = el.value;
         el.innerHTML = '<option value="">-- Select Property --</option>' + 
-          uniqueProps.map(p => {
-            const isMine = rentedProps.some(rp => rp._id === p._id);
-            const label = `${p.title} (${p.address})${isMine ? ' ✓ YOUR RENTAL' : ''}`;
+          rentedProps.map(p => {
+            const label = `${p.title} (${p.address})`;
             return `<option value="${p._id}">${label}</option>`;
           }).join('');
         el.value = currentVal;
@@ -1501,9 +1472,9 @@ async function populatePropertyDropdowns() {
       }
     });
     
-    // Update tenant prop map with both types
-    window._tenantPropMap = {};
-    uniqueProps.forEach(p => { window._tenantPropMap[p._id] = p; });
+    // Keep service forms limited to properties assigned to this tenant.
+    window._tenantPropMap = window._tenantPropMap || {};
+    rentedProps.forEach(p => { window._tenantPropMap[p._id] = p; });
   } catch(e) {
     console.error('populatePropertyDropdowns error:', e);
   }
@@ -1524,7 +1495,7 @@ function updatePaymentPropertyInfo() {
 //  MAINTENANCE
 // ═══════════════════════════════════════════════════════
 async function loadMaintenance() {
-  populatePropertyDropdowns();
+  await populatePropertyDropdowns();
   const list = document.getElementById('maint-list');
   if (!list) return;
   list.innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>';
@@ -1621,7 +1592,7 @@ async function submitMaint() {
 //  COMPLAINTS
 // ═══════════════════════════════════════════════════════
 async function loadComplaints() {
-  populatePropertyDropdowns();
+  await populatePropertyDropdowns();
   const list = document.getElementById('comp-list');
   if (!list) return;
   list.innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>';
@@ -1920,7 +1891,8 @@ async function cancelRentalRequest(requestId) {
 //  PAYMENTS
 // ═══════════════════════════════════════════════════════
 async function loadPayments() {
-  populatePropertyDropdowns();
+  await populatePropertyDropdowns();
+  updatePaymentPropertyInfo();
   const tbody = document.getElementById('pay-tbody');
   const stats = document.getElementById('pay-stats');
   if (!tbody) return;
@@ -1929,7 +1901,7 @@ async function loadPayments() {
     const data = await tFetch('/payments');
     let items = data.payments || [];
 
-    const currentPropertyIds = Object.keys(window._tenantPropMap || {}).map(id => id.toString());
+    const currentPropertyIds = [...(window._tenantRentalIds || [])];
     if (currentPropertyIds.length) {
       items = items.filter(p => p.propertyId && currentPropertyIds.includes(p.propertyId.toString()));
     } else {
@@ -1971,6 +1943,11 @@ function monthInputToLabel(v) {
   return `${names[idx]} ${m[1]}`;
 }
 
+function updatePaymentScreenshotName(input) {
+  const nameEl = document.getElementById('pscreenshot-name');
+  if (nameEl) nameEl.textContent = input.files?.[0]?.name || 'No screenshot selected';
+}
+
 async function submitPayment() {
   const amount = document.getElementById('pamt')?.value;
   const monthRaw = document.getElementById('pmon')?.value?.trim();
@@ -1979,7 +1956,16 @@ async function submitPayment() {
   const note   = document.getElementById('pnot')?.value?.trim();
   const propId = document.getElementById('pprop')?.value?.trim();
   const screenshotInput = document.getElementById('pscreenshot');
-  if (!amount || !month) { alert('Amount and month are required.'); return; }
+  if (!month) {
+    alert('Please select a month.');
+    document.getElementById('pmon')?.focus();
+    return;
+  }
+  if (!amount) {
+    alert('Please enter the payment amount.');
+    document.getElementById('pamt')?.focus();
+    return;
+  }
   const btn = document.getElementById('psubmit-btn');
   if(btn){btn.disabled=true;btn.textContent='Saving…';}
   try {
@@ -2000,10 +1986,9 @@ async function submitPayment() {
     
     // Fallback to the tenant's rented property if no property was selected or found
     if (!landlordId || !landlordName) {
-      const user = JSON.parse(localStorage.getItem('tms_user') || '{}');
-      const userId = (user._id || user.id || '').toString();
-      const propertyData = await tFetch('/properties?status=rented&fields=_id,status,tenantId,title,landlordId,landlordName').catch(() => ({ properties: [] }));
-      const myProperty = (propertyData.properties || []).find(p => (p.tenantId || p.tenant || '').toString() === userId);
+      const propertyData = await tFetch('/properties/my-rentals');
+      const rentals = propertyData.properties || [];
+      const myProperty = rentals.find(p => String(p._id) === propertyId) || rentals[0];
       if (myProperty) {
         if (!landlordId) landlordId = myProperty.landlordId || '';
         if (!landlordName) landlordName = myProperty.landlordName || '';
@@ -2024,7 +2009,10 @@ async function submitPayment() {
     const r = await tFetch('/payments','POST',{amount:Number(amount), month, method, note, landlordId, landlordName, propertyId, propertyTitle, screenshot});
     if (r.success) {
       document.getElementById('pamt').value = ''; document.getElementById('pmon').value = ''; document.getElementById('pnot').value = ''; document.getElementById('pprop').value = '';
-      if (screenshotInput) screenshotInput.value = '';
+      if (screenshotInput) {
+        screenshotInput.value = '';
+        updatePaymentScreenshotName(screenshotInput);
+      }
       const toast = document.getElementById('pok'); if(toast){toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),3000);}
       await loadPayments();
     } else alert(r.message||'Failed.');
@@ -2046,10 +2034,8 @@ let _tRentedPropInfo = {}; // propertyId -> { landlordName, landlordEmail, prope
 async function _tLoadNotifProperties() {
   const sel = document.getElementById('notif-prop-sel');
   if (!sel) return;
-  const user = JSON.parse(localStorage.getItem('tms_user') || '{}');
-  const userId = (user._id || user.id || '').toString();
-  const r = await tFetch('/properties?status=rented&fields=_id,status,tenantId,title,landlordId,landlordName').catch(() => ({ properties: [] }));
-  const myProperties = (r.properties || []).filter(p => (p.tenantId || p.tenant || '').toString() === userId);
+  const r = await tFetch('/properties/my-rentals');
+  const myProperties = r.properties || [];
   _tRentedPropInfo = {};
   myProperties.forEach(p => {
     const pid = (p._id || '').toString();
@@ -2460,35 +2446,34 @@ async function loadAllProperties(silent) {
   if (!grid) return;
   if (!silent || !grid.children.length) grid.innerHTML = '<div class="loading"><span class="spinner"></span>Loading properties…</div>';
   try {
-    const [allData, myReqData] = await Promise.all([
-      (async () => {
-        try {
-          return await tFetch('/properties/tenant-portfolio');
-        } catch (portfolioError) {
-          console.warn('Tenant portfolio endpoint unavailable; using properties API fallback:', portfolioError);
-          const legacyData = await tFetch('/properties?fields=_id,title,type,area,address,city,rent,beds,baths,sqft,description,status,landlordId,landlordName,tenantId,tenantName,model3d,tenantFurnitureLayout,frontImage,houseViewCount');
-          const properties = legacyData.properties || [];
-          const user = JSON.parse(localStorage.getItem('tms_user') || '{}');
-          const userId = String(user._id || user.id || '');
-          const landlordIds = new Set(properties
-            .filter(property => {
-              const tenantId = property.tenantId && (property.tenantId._id || property.tenantId);
-              return ['rented', 'suspended'].includes(property.status) && String(tenantId || '') === userId;
-            })
-            .map(property => String(property.landlordId || ''))
-            .filter(Boolean));
-          const scopedProperties = landlordIds.size
-            ? properties.filter(property => landlordIds.has(String(property.landlordId || '')))
-            : properties;
-          return {
-            properties: scopedProperties,
-            scope: landlordIds.size ? 'landlords' : 'all',
-            landlordCount: landlordIds.size
-          };
-        }
-      })(),
+    const [rentalData, myReqData] = await Promise.all([
+      tFetch('/properties/my-rentals'),
       tFetch('/rental-requests/my-requests').catch(() => ({ requests: [] }))
     ]);
+    const myRentals = rentalData.properties || [];
+    const myRentalIds = new Set(myRentals.map(property => String(property._id)));
+    window._tenantRentalIds = myRentalIds;
+
+    let allData;
+    try {
+      allData = await tFetch('/properties/tenant-portfolio');
+    } catch (portfolioError) {
+      console.warn('Tenant portfolio endpoint unavailable; using properties API fallback:', portfolioError);
+      const legacyData = await tFetch('/properties?fields=_id,title,type,area,address,city,rent,beds,baths,sqft,description,status,landlordId,landlordName,tenantId,tenantName,model3d,tenantFurnitureLayout,frontImage,houseViewCount');
+      const properties = legacyData.properties || [];
+      const landlordIds = new Set(myRentals
+        .map(property => String(property.landlordId || ''))
+        .filter(Boolean));
+      const scopedProperties = landlordIds.size
+        ? properties.filter(property => landlordIds.has(String(property.landlordId || '')))
+        : properties;
+      allData = {
+        properties: scopedProperties,
+        scope: landlordIds.size ? 'landlords' : 'all',
+        landlordCount: landlordIds.size
+      };
+    }
+
     const allP = allData.properties || [];
     const myRequests = myReqData.requests || [];
     const subtitle = document.querySelector('#page-all-properties .pg-sub');
@@ -2526,8 +2511,7 @@ async function loadAllProperties(silent) {
       // Rent request button — smart status
       const reqStatus = reqMap[pid];
       const isRented = p.status === 'rented' || p.status === 'suspended';
-      const _me = JSON.parse(localStorage.getItem('tms_user') || '{}');
-      const isMyRental = !!p.tenantId && String((p.tenantId && p.tenantId._id) || p.tenantId) === String(_me._id || _me.id || '');
+      const isMyRental = myRentalIds.has(String(pid));
       const rentBtn = tRentButton(pid, btnBaseStyle, isMyRental, isRented);
 
       return `
@@ -2664,17 +2648,8 @@ async function loadMyRentals() {
   if (!list) return;
   list.innerHTML = '<div class="loading"><span class="spinner"></span>Loading your rented properties…</div>';
   try {
-    const user = JSON.parse(localStorage.getItem('tms_user') || '{}');
-    const userId = (user._id || user.id || '').toString();
-
-    const propertyData = await tFetch('/properties?status=rented&fields=_id,status,tenantId,title,address,area,city,rent,beds,baths,type,frontImage,houseViewCount,landlordName,tenantName').catch(() => ({ properties: [] }));
-
-    const propertyRentals = (propertyData && Array.isArray(propertyData.properties)) ? propertyData.properties.filter(p => {
-      const tid = (p.tenantId || p.tenant || '').toString();
-      return p.status === 'rented' && tid && tid === userId;
-    }) : [];
-
-    const rentals = propertyRentals.map(p => ({
+    const propertyData = await tFetch('/properties/my-rentals');
+    const rentals = (propertyData.properties || []).map(p => ({
       _id: p._id,
       propertyTitle: p.title,
       propertyAddress: p.address || p.area || '',
@@ -2744,8 +2719,7 @@ function filterAllProps() {
     const viewButton = tViewButtons(p, btnBaseStyle);
     const reqStatus = reqMap[pid];
     const isRented = p.status === 'rented' || p.status === 'suspended';
-      const _me = JSON.parse(localStorage.getItem('tms_user') || '{}');
-      const isMyRental = !!p.tenantId && String((p.tenantId && p.tenantId._id) || p.tenantId) === String(_me._id || _me.id || '');
+    const isMyRental = (window._tenantRentalIds || new Set()).has(String(pid));
     const rentBtn = tRentButton(pid, btnBaseStyle, isMyRental, isRented);
     return `
     <div class="pcard">
@@ -3005,7 +2979,14 @@ function filterAllProps() {
           <select id="pmth"><option>Cash</option><option>Bank Transfer</option><option>JazzCash</option><option>EasyPaisa</option><option>Cheque</option><option>Other</option></select>
         </div>
         <div class="fg"><label>Note (optional)</label><input id="pnot" placeholder="e.g. Paid via bank"></div>
-        <div class="fg full"><label>Payment Screenshot</label><input type="file" id="pscreenshot" accept="image/*"></div>
+        <div class="fg full">
+          <label>Payment Screenshot</label>
+          <div class="payment-upload">
+            <input type="file" id="pscreenshot" class="payment-upload-input" accept="image/*" onchange="updatePaymentScreenshotName(this)">
+            <label class="payment-upload-btn" for="pscreenshot">Select image</label>
+            <span class="payment-upload-name" id="pscreenshot-name" aria-live="polite">No screenshot selected</span>
+          </div>
+        </div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;margin-top:14px">
         <button class="submit-btn" id="psubmit-btn" onclick="submitPayment()">💳 Record Payment</button>
@@ -3287,15 +3268,13 @@ function populateFurnPropSelect() {
     const opt = document.createElement('option');
     opt.value = p._id;
     const isRented = p.status === 'rented' || p.status === 'suspended';
-      const _me = JSON.parse(localStorage.getItem('tms_user') || '{}');
-      const isMyRental = !!p.tenantId && String((p.tenantId && p.tenantId._id) || p.tenantId) === String(_me._id || _me.id || '');
     opt.textContent = (p.title || 'Property') + (isRented ? ' ✓ My Rental' : '');
     if (isRented) opt.style.color = '#C9A96E';
     sel.appendChild(opt);
   });
   // Auto-select rented property if none selected
   if (!sel.value) {
-    const rented = (allProps||[]).find(p => p.status === 'rented');
+    const rented = (allProps||[]).find(p => p.status === 'rented' || p.status === 'suspended');
     if (rented) { sel.value = rented._id; loadFurnForProp(rented._id); }
   }
   if (current) sel.value = current;

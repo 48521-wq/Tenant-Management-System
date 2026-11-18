@@ -63,7 +63,7 @@ router.get('/my', protect, async (req, res) => {
   try {
     const filter = req.user.role === 'landlord'
       ? { landlordId: req.user._id }
-      : { tenantId: req.user._id };
+      : { tenantId: req.user._id, status: { $in: ['sent', 'signed'] } };
     const leases = await LeaseAgreement.find(filter).sort({ createdAt: -1 });
     res.json({ success: true, leases });
   } catch (e) {

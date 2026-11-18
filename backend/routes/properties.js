@@ -1,6 +1,7 @@
 
 const express  = require('express');
 const Property = require('../models/Property');
+const RentalRequest = require('../models/RentalRequest');
 const { protect, adminOnly } = require('../middleware/auth');
 const { parsePropertyNumericFilters } = require('../utils/propertyFilters');
 const router = express.Router();
@@ -53,6 +54,93 @@ router.get('/my', protect, async (req, res) => {
       .populate('tenantId', 'name email phone cnic address');
     res.json({ success: true, count: props.length, properties: props });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
+});
+
+// GET the authenticated tenant's active rentals
+router.get('/my-rentals', protect, async (req, res) => {
+  try {
+    if (req.user?.role !== 'tenant')
+      return res.status(403).json({ success: false, message: 'Tenant access required.' });
+
+    const activeStatus = { $in: ['rented', 'suspended'] };
+    const fields = '_id title type area address city rent beds baths sqft status landlordId landlordName tenantId tenantName model3d tenantFurnitureLayout frontImage houseViewCount createdAt';
+    const tenantId = String(req.user._id);
+    const assignedProperties = await Property.find({
+      tenantId: req.user._id,
+      status: activeStatus
+    })
+      .select(fields)
+      .sort({ createdAt: -1 });
+
+    const approvedRequests = await RentalRequest.find({
+      tenantId: req.user._id,
+      status: 'accepted'
+    }).select('propertyId').lean();
+    const candidatePropertyIds = [...new Set(approvedRequests
+      .map(request => String(request.propertyId || ''))
+      .filter(id => id && !assignedProperties.some(property => String(property._id) === id)))];
+
+    const propertiesById = new Map(assignedProperties.map(property => [String(property._id), property]));
+    if (candidatePropertyIds.length) {
+      const latestApprovals = await RentalRequest.find({
+        propertyId: { $in: candidatePropertyIds },
+        status: 'accepted'
+      })
+        .select('propertyId tenantId tenantName updatedAt')
+        .sort({ updatedAt: -1, createdAt: -1, _id: -1 })
+        .lean();
+      const latestApprovalByProperty = new Map();
+      latestApprovals.forEach(request => {
+        const propertyId = String(request.propertyId || '');
+        if (propertyId && !latestApprovalByProperty.has(propertyId))
+          latestApprovalByProperty.set(propertyId, request);
+      });
+
+      const confirmedPropertyIds = [...latestApprovalByProperty]
+        .filter(([, request]) => String(request.tenantId) === tenantId)
+        .map(([propertyId]) => propertyId);
+      if (confirmedPropertyIds.length) {
+        const confirmedProperties = await Property.find({
+          _id: { $in: confirmedPropertyIds },
+          status: activeStatus
+        }).select(fields);
+
+        for (const property of confirmedProperties) {
+          const propertyId = String(property._id);
+          const approval = latestApprovalByProperty.get(propertyId);
+          if (!approval || String(approval.tenantId) !== tenantId) continue;
+
+          let currentProperty = property;
+          if (String(property.tenantId || '') !== tenantId) {
+            const existingTenantName = String(property.tenantName || '').trim().toLowerCase();
+            const approvedTenantNames = [approval.tenantName, req.user.name]
+              .map(name => String(name || '').trim().toLowerCase())
+              .filter(Boolean);
+            if (existingTenantName && approvedTenantNames.length &&
+                !approvedTenantNames.includes(existingTenantName)) continue;
+
+            currentProperty = await Property.findOneAndUpdate(
+              { _id: property._id, tenantId: property.tenantId || null, status: activeStatus },
+              {
+                tenantId: req.user._id,
+                tenantName: approval.tenantName || req.user.name || ''
+              },
+              { new: true }
+            ).select(fields);
+            if (!currentProperty) continue;
+          }
+          propertiesById.set(propertyId, currentProperty);
+        }
+      }
+    }
+
+    const properties = [...propertiesById.values()]
+      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    res.json({ success: true, count: properties.length, properties });
+  } catch (e) {
+    console.error('GET /properties/my-rentals error', e);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
 });
 
 // GET properties from the landlord(s) renting to this tenant.

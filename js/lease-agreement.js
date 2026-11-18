@@ -68,6 +68,7 @@ function lwJumpTab(n) {
 //  "All agreements" — overview tab (landlord + tenant)
 // ═══════════════════════════════════════════════════════
 async function lwShowAllAgreements() {
+  if (LW.role === 'tenant') return lwTenantLoad();
   LW.step = 0;
   renderTabs();
   const body = document.getElementById('lw-body');
@@ -97,36 +98,6 @@ async function lwShowAllAgreements() {
             <button class="btn btn-ghost btn-sm" onclick="lwOpenAgreementHistory('${p._id}')">Change history</button>
             <button class="btn btn-gold btn-sm" onclick="lwSelectProperty('${p._id}')">View</button>
           </div>`).join('') : '<div class="loading">No lease agreements yet.</div>'}
-      `;
-    } else {
-      const user = JSON.parse(localStorage.getItem('tms_user') || '{}');
-      const userId = (user._id || user.id || '').toString();
-      const propData = await LW.fetch('/properties?status=rented');
-      const myProp = (propData.properties || []).find(p => (p.tenantId || '').toString() === userId);
-      if (!myProp) {
-        if (body) body.innerHTML = `<div class="lw-section-lbl">ALL LEASE AGREEMENTS</div><div class="loading">You don't have any lease agreements yet.</div>`;
-        return;
-      }
-      const leaseData = await LW.fetch(`/lease-agreements/property/${myProp._id}`);
-      const lease = leaseData.lease;
-      if (!lease) {
-        if (body) body.innerHTML = `<div class="lw-section-lbl">ALL LEASE AGREEMENTS</div><div class="loading">Your landlord hasn't started the tenancy agreement yet.</div>`;
-        return;
-      }
-      LW.lease = lease;
-      const goStep = lease.status === 'signed' ? 4 : 3;
-      body.innerHTML = `
-        <div class="lw-section-lbl">ALL LEASE AGREEMENTS</div>
-        <div class="lw-prop-row">
-          <div>
-            <div style="font-weight:600">${esc(myProp.title || myProp.address || 'Property')}</div>
-            <div style="font-size:12px;color:var(--muted)">${esc(myProp.address || '')}</div>
-          </div>
-          ${lwStatusBadge(lease)}
-          ${lwRevisionBadge(lease)}
-          <button class="btn btn-ghost btn-sm" onclick="lwTenantShowHistory()">Change history</button>
-          <button class="btn btn-gold btn-sm" onclick="LW.step=${goStep};renderTabs();${goStep === 4 ? 'renderStep4()' : 'renderStep3()'}">View</button>
-        </div>
       `;
     }
   } catch (e) {
@@ -610,33 +581,61 @@ async function lwUnlockAgreement() {
 // ═══════════════════════════════════════════════════════
 async function lwTenantLoad() {
   const body = document.getElementById('lw-body');
-  if (body) body.innerHTML = '<div class="loading"><span class="spinner"></span>Loading your agreement…</div>';
+  LW.step = 0;
+  LW.lease = null;
+  renderTabs();
+  if (body) body.innerHTML = '<div class="loading"><span class="spinner"></span>Loading your agreements…</div>';
   try {
-    const user = JSON.parse(localStorage.getItem('tms_user') || '{}');
-    const userId = (user._id || user.id || '').toString();
-    const propData = await LW.fetch('/properties?status=rented');
-    const myProp = (propData.properties || []).find(p => (p.tenantId || '').toString() === userId);
+    const [propertyData, leaseData] = await Promise.all([
+      LW.fetch('/properties/my-rentals'),
+      LW.fetch('/lease-agreements/my')
+    ]);
+    const rentals = propertyData.properties || [];
+    LW.properties = rentals;
+    LW.leasesByProp = {};
+    (leaseData.leases || []).forEach(lease => {
+      const propertyId = String((lease.propertyId && lease.propertyId._id) || lease.propertyId || '');
+      if (propertyId) LW.leasesByProp[propertyId] = lease;
+    });
 
-    if (!myProp) {
-      LW.step = 2; renderTabs();
-      if (body) body.innerHTML = `<div class="lw-section-lbl">TENANT DASHBOARD → LEASE AGREEMENT</div><div class="loading">You don't have a rented property yet. Once a landlord accepts your rental request, your tenancy agreement will appear here.</div>`;
+    if (!body) return;
+    if (!rentals.length) {
+      body.innerHTML = `<div class="lw-section-lbl">TENANT DASHBOARD → LEASE AGREEMENT</div><div class="loading">You don't have a rented property yet. Once a landlord accepts your rental request, your tenancy agreement will appear here.</div>`;
       return;
     }
 
-    const leaseData = await LW.fetch(`/lease-agreements/property/${myProp._id}`);
-    LW.lease = leaseData.lease;
-
-    if (!LW.lease) {
-      LW.step = 2; renderTabs();
-      if (body) body.innerHTML = `<div class="lw-section-lbl">TENANT DASHBOARD → LEASE AGREEMENT</div><div class="loading">Your landlord hasn't started the tenancy agreement yet. Check back soon.</div>`;
-      return;
-    }
-    if (LW.lease.status === 'sent') { LW.step = 3; renderTabs(); renderStep3(); }
-    else if (LW.lease.status === 'signed') { LW.step = 4; renderTabs(); renderStep4(); }
-    else { LW.step = 2; renderTabs(); if (body) body.innerHTML = `<div class="loading">Your landlord is preparing the agreement. Check back soon.</div>`; }
+    body.innerHTML = `
+      <div class="lw-section-lbl">ALL LEASE AGREEMENTS</div>
+      ${rentals.map(property => {
+        const lease = LW.leasesByProp[String(property._id)];
+        const canView = !!lease;
+        return `
+          <div class="lw-prop-row">
+            <div>
+              <div style="font-weight:600">${esc(property.title || property.address || 'Property')}</div>
+              <div style="font-size:12px;color:var(--muted)">${esc(property.address || '')}</div>
+            </div>
+            ${lease ? lwStatusBadge(lease) : '<span class="badge b-muted">Not sent yet</span>'}
+            ${lease ? lwRevisionBadge(lease) : ''}
+            ${canView
+              ? `<button class="btn btn-gold btn-sm" onclick="lwTenantOpenLease('${esc(property._id)}')">View</button>`
+              : '<button class="btn btn-ghost btn-sm" disabled>Waiting for landlord</button>'}
+          </div>`;
+      }).join('')}
+    `;
   } catch (e) {
     if (body) body.innerHTML = `<div class="loading">⚠️ ${esc(e.message || 'Unable to load your agreement.')}</div>`;
   }
+}
+
+function lwTenantOpenLease(propertyId) {
+  const lease = LW.leasesByProp[String(propertyId)];
+  if (!lease) return;
+  lwSetLease(lease);
+  LW.step = lease.status === 'signed' ? 4 : 3;
+  renderTabs();
+  if (LW.step === 4) renderStep4();
+  else renderStep3();
 }
 
 // ═══════════════════════════════════════════════════════

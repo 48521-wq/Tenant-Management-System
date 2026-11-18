@@ -158,6 +158,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 /* PROFILE */
 .prof-header{display:flex;align-items:center;gap:18px;margin-bottom:22px;padding:22px;background:var(--card);border:1px solid var(--border);border-radius:16px}
 .prof-av{width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-l));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#FFFFFF;flex-shrink:0}
+.prof-info{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.prof-info h3,.prof-info p{max-width:100%;margin:0!important;line-height:1.3;overflow-wrap:anywhere}
+.prof-info .badge{display:inline-flex;align-items:center;margin:0!important;line-height:1.25}
 /* TABLE */
 .tbl-wrap{overflow-x:auto;margin-top:12px}
 table{width:100%;border-collapse:collapse;font-size:18px}
@@ -1330,6 +1333,52 @@ body::after {
 .lw-lock-icon{font-size:42px;margin-bottom:8px}
 .lw-lock-title{font-family:'Playfair Display',serif;font-size:23px;font-weight:700;color:var(--text);margin-bottom:4px}
 @media (max-width:640px){.lw-grid2,.lw-sig-cols{grid-template-columns:1fr}}
+
+/* Tenant document review */
+.ll-vd-overlay{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(2,6,14,.78);backdrop-filter:blur(12px)}
+.ll-vd-dialog{position:relative;width:min(760px,100%);max-height:90vh;overflow-y:auto;padding:28px;border:1px solid rgba(79,123,254,.24);border-radius:24px;background:linear-gradient(150deg,rgba(18,24,36,.99),rgba(9,13,22,.99));box-shadow:0 28px 90px rgba(0,0,0,.58),0 0 0 1px rgba(255,255,255,.025) inset}
+.ll-vd-dialog::before{position:absolute;top:0;left:28px;right:28px;height:2px;border-radius:0 0 4px 4px;background:linear-gradient(90deg,transparent,var(--blue-l),var(--gold),transparent);content:""}
+.ll-vd-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px}
+.ll-vd-heading{display:flex;align-items:flex-start;gap:14px;min-width:0}
+.ll-vd-mark{display:grid;width:46px;height:46px;flex:0 0 46px;place-items:center;border:1px solid rgba(79,123,254,.28);border-radius:15px;background:linear-gradient(145deg,rgba(37,99,235,.22),rgba(201,169,110,.12));font-size:22px}
+.ll-vd-kicker{display:block;margin:1px 0 4px;color:var(--blue-l);font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase}
+.ll-vd-title{color:var(--text);font-family:'Playfair Display',serif;font-size:25px;line-height:1.2}
+.ll-vd-tenant{margin-top:6px;color:var(--muted);font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.ll-vd-close{display:grid;width:36px;height:36px;flex:0 0 36px;place-items:center;border:1px solid var(--border);border-radius:12px;background:var(--input-bg);color:var(--muted);font-size:23px;cursor:pointer;transition:all .18s}
+.ll-vd-close:hover{border-color:rgba(255,107,107,.45);background:rgba(255,107,107,.1);color:var(--error)}
+.ll-vd-section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px}
+.ll-vd-section-title{color:var(--text);font-size:15px;font-weight:700}
+.ll-vd-section-hint{color:var(--muted);font-size:12px}
+.ll-vd-doc-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.ll-vd-doc-card{min-width:0;padding:12px;border:1px solid var(--border);border-radius:17px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));transition:border-color .18s,transform .18s}
+.ll-vd-doc-card:hover{transform:translateY(-2px);border-color:rgba(79,123,254,.36)}
+.ll-vd-doc-head{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.ll-vd-doc-icon{display:grid;width:34px;height:34px;flex:0 0 34px;place-items:center;border-radius:11px;background:rgba(37,99,235,.13);font-size:17px}
+.ll-vd-doc-name{color:var(--text);font-size:13px;font-weight:700}
+.ll-vd-doc-type{display:block;margin-top:2px;color:var(--muted);font-size:11px}
+.ll-vd-preview{position:relative;display:grid;width:100%;height:145px;place-items:center;overflow:hidden;padding:0;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(2,6,14,.48)}
+.ll-vd-doc-img{width:100%;height:100%;object-fit:contain;padding:7px;cursor:zoom-in}
+.ll-vd-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:12px;color:var(--muted);font-size:12px;text-align:center}
+.ll-vd-empty-icon{display:grid;width:34px;height:34px;place-items:center;border:1px solid var(--border);border-radius:11px;background:var(--input-bg);font-size:16px}
+.ll-vd-submission{display:flex;align-items:center;gap:10px;margin-top:14px;padding:11px 13px;border:1px solid rgba(79,123,254,.17);border-radius:13px;background:rgba(37,99,235,.07)}
+.ll-vd-submission-icon{font-size:17px}
+.ll-vd-submission-label{display:block;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+.ll-vd-submission-value{display:block;margin-top:2px;color:var(--text);font-size:13px}
+.ll-vd-reject-wrap{margin-top:16px}
+.ll-vd-reject-label{display:block;margin-bottom:7px;color:var(--text);font-size:13px;font-weight:700}
+.ll-vd-reject-reason{width:100%;min-height:84px;resize:vertical;padding:11px 13px;border:1px solid var(--border);border-radius:12px;outline:none;background:var(--input-bg);color:var(--text);font:inherit;font-size:14px}
+.ll-vd-reject-reason:focus{border-color:var(--blue-l);box-shadow:0 0 0 3px rgba(79,123,254,.12)}
+.ll-vd-cancel-reject{margin-top:8px;padding:0;border:0;background:none;color:var(--muted);font:inherit;font-size:12px;cursor:pointer}
+.ll-vd-cancel-reject:hover{color:var(--text)}
+.ll-vd-footer{display:flex;gap:11px;margin-top:18px}
+.ll-vd-btn{display:inline-flex;min-height:46px;flex:1;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:13px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:transform .18s,box-shadow .18s,background .18s}
+.ll-vd-btn:hover{transform:translateY(-1px)}
+.ll-vd-btn-reject{border:1px solid rgba(255,107,107,.28);background:rgba(255,107,107,.075);color:#ff8585}
+.ll-vd-btn-reject:hover{background:rgba(255,107,107,.14);box-shadow:0 8px 22px rgba(255,107,107,.1)}
+.ll-vd-btn-approve{border:1px solid rgba(78,205,196,.35);background:linear-gradient(135deg,#20b8a9,#0d8c83);color:#fff;box-shadow:0 7px 20px rgba(20,184,166,.18)}
+.ll-vd-btn-approve:hover{box-shadow:0 10px 26px rgba(20,184,166,.28)}
+.ll-vd-footnote{margin-top:12px;color:var(--muted);font-size:11px;line-height:1.5;text-align:center}
+@media(max-width:600px){.ll-vd-overlay{padding:12px}.ll-vd-dialog{padding:22px 16px;border-radius:19px}.ll-vd-dialog::before{left:16px;right:16px}.ll-vd-title{font-size:22px}.ll-vd-section-head{align-items:flex-start;flex-direction:column;gap:3px}.ll-vd-doc-grid{grid-template-columns:1fr}.ll-vd-doc-card{display:grid;grid-template-columns:minmax(105px,.8fr) minmax(0,1fr);align-items:center;gap:10px}.ll-vd-doc-head{margin:0}.ll-vd-preview{height:92px}.ll-vd-footer{flex-direction:column-reverse}.ll-vd-btn{flex:auto}}
 
 /* Signature modal */
 .lw-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(3px)}
@@ -2813,7 +2862,7 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
     <div>
       <div class="prof-header">
         <div class="prof-av" id="prof-av">L</div>
-        <div>
+        <div class="prof-info">
           <h3 style="font-size:21px;font-weight:700;color:var(--text)" id="prof-name">Landlord</h3>
           <p style="font-size:16px;color:var(--muted);margin-top:2px" id="prof-email">landlord@email.com</p>
           <span class="badge b-gold" style="margin-top:6px">🔑 Landlord</span>
@@ -4171,50 +4220,63 @@ setTimeout(()=>{
 
 
 <!-- ══ LANDLORD: VERIFY DOCS MODAL ══ -->
-<div id="ll-vd-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);align-items:center;justify-content:center">
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:26px 28px;width:96%;max-width:500px;max-height:90vh;overflow-y:auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-      <div>
-        <div style="font-size:20px;font-weight:700;color:var(--text)">🔍 Verify Documents</div>
-        <div id="ll-vd-tname" style="font-size:15px;color:var(--muted);margin-top:2px"></div>
-      </div>
-      <button onclick="closeLlVdModal()" style="width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:21px;cursor:pointer">×</button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
-      <div>
-        <div style="font-size:14px;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase">🪪 ID Card</div>
-        <div style="position:relative;height:110px;">
-          <img id="ll-vd-idcard" style="width:100%;height:100%;cursor:pointer;object-fit:cover;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);display:none" onclick="openDocPreview(this.src,'ID Card')" onerror="this.style.opacity=0.3">
-          <div id="ll-vd-idcard-empty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.06);color:var(--muted);font-size:15px;text-align:center;padding:8px">No ID card uploaded yet.</div>
+<div id="ll-vd-modal" class="ll-vd-overlay" onclick="if(event.target===this) closeLlVdModal()">
+  <section class="ll-vd-dialog" role="dialog" aria-modal="true" aria-labelledby="ll-vd-title">
+    <header class="ll-vd-header">
+      <div class="ll-vd-heading">
+        <div class="ll-vd-mark" aria-hidden="true">🔍</div>
+        <div style="min-width:0">
+          <span class="ll-vd-kicker">Tenant verification</span>
+          <h2 id="ll-vd-title" class="ll-vd-title">Verify documents</h2>
+          <div id="ll-vd-tname" class="ll-vd-tenant"></div>
         </div>
       </div>
-      <div>
-        <div style="font-size:14px;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase">🚔 Police Cert</div>
-        <div style="position:relative;height:110px;">
-          <img id="ll-vd-police" style="width:100%;height:100%;cursor:pointer;object-fit:cover;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);display:none" onclick="openDocPreview(this.src,'Police Certificate')" onerror="this.style.opacity=0.3">
-          <div id="ll-vd-police-empty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.06);color:var(--muted);font-size:15px;text-align:center;padding:8px">No police certificate uploaded yet.</div>
+      <button class="ll-vd-close" type="button" onclick="closeLlVdModal()" aria-label="Close document review">×</button>
+    </header>
+
+    <div class="ll-vd-section-head">
+      <div class="ll-vd-section-title">Review uploaded documents</div>
+      <div class="ll-vd-section-hint">Select a document to view it full size</div>
+    </div>
+    <div class="ll-vd-doc-grid">
+      <article class="ll-vd-doc-card">
+        <div class="ll-vd-doc-head"><span class="ll-vd-doc-icon" aria-hidden="true">🪪</span><div><div class="ll-vd-doc-name">ID Card</div><span class="ll-vd-doc-type">Required document</span></div></div>
+        <div class="ll-vd-preview">
+          <img id="ll-vd-idcard" class="ll-vd-doc-img" alt="Tenant ID card" style="display:none" onclick="openDocPreview(this.src,'ID Card')" onerror="this.style.opacity=0.3">
+          <div id="ll-vd-idcard-empty" class="ll-vd-empty"><span class="ll-vd-empty-icon">📄</span><span>No ID card uploaded yet</span></div>
         </div>
-      </div>
-      <div>
-        <div style="font-size:14px;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase">🎂 Birth Cert</div>
-        <div style="position:relative;height:110px;">
-          <img id="ll-vd-birth" style="width:100%;height:100%;cursor:pointer;object-fit:cover;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);display:none" onclick="openDocPreview(this.src,'Birth Certificate')" onerror="this.style.opacity=0.3">
-          <div id="ll-vd-birth-empty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.06);color:var(--muted);font-size:15px;text-align:center;padding:8px">Not provided (optional).</div>
+      </article>
+      <article class="ll-vd-doc-card">
+        <div class="ll-vd-doc-head"><span class="ll-vd-doc-icon" aria-hidden="true">🚔</span><div><div class="ll-vd-doc-name">Police Certificate</div><span class="ll-vd-doc-type">Required document</span></div></div>
+        <div class="ll-vd-preview">
+          <img id="ll-vd-police" class="ll-vd-doc-img" alt="Tenant police certificate" style="display:none" onclick="openDocPreview(this.src,'Police Certificate')" onerror="this.style.opacity=0.3">
+          <div id="ll-vd-police-empty" class="ll-vd-empty"><span class="ll-vd-empty-icon">📄</span><span>No police certificate uploaded yet</span></div>
         </div>
-      </div>
-      </div>
+      </article>
+      <article class="ll-vd-doc-card">
+        <div class="ll-vd-doc-head"><span class="ll-vd-doc-icon" aria-hidden="true">🎂</span><div><div class="ll-vd-doc-name">Birth Certificate</div><span class="ll-vd-doc-type">Optional</span></div></div>
+        <div class="ll-vd-preview">
+          <img id="ll-vd-birth" class="ll-vd-doc-img" alt="Tenant birth certificate" style="display:none" onclick="openDocPreview(this.src,'Birth Certificate')" onerror="this.style.opacity=0.3">
+          <div id="ll-vd-birth-empty" class="ll-vd-empty"><span class="ll-vd-empty-icon">📄</span><span>Not provided</span></div>
+        </div>
+      </article>
     </div>
-    <div id="ll-vd-subat" style="font-size:15px;color:var(--muted);margin-bottom:14px;text-align:center"></div>
-    <!-- Reject reason input -->
-    <div id="ll-vd-reject-wrap" style="display:none;margin-bottom:14px">
-      <label style="font-size:16px;font-weight:700;color:var(--text);display:block;margin-bottom:6px">Reject Reason *</label>
-      <textarea id="ll-vd-reject-reason" placeholder="Explain the issue with these documents..." style="width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;min-height:70px;resize:none;outline:none"></textarea>
+
+    <div class="ll-vd-submission">
+      <span class="ll-vd-submission-icon" aria-hidden="true">🕒</span>
+      <div><span class="ll-vd-submission-label">Submission time</span><span id="ll-vd-subat" class="ll-vd-submission-value"></span></div>
     </div>
-    <div style="display:flex;gap:10px">
-      <button onclick="llVdToggleReject()" id="ll-vd-reject-btn" style="flex:1;padding:10px;border-radius:9px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);color:var(--error);font-size:16px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">❌ Reject</button>
-      <button onclick="llVdAction('approve')" style="flex:1;padding:10px;border-radius:9px;border:none;background:linear-gradient(135deg,#4ecdc4,#2bb5ac);color:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">✅ Approve</button>
+    <div id="ll-vd-reject-wrap" class="ll-vd-reject-wrap" style="display:none">
+      <label class="ll-vd-reject-label" for="ll-vd-reject-reason">Reason for rejection <span aria-hidden="true">*</span></label>
+      <textarea id="ll-vd-reject-reason" class="ll-vd-reject-reason" placeholder="Explain what needs to be corrected in these documents…"></textarea>
+      <button onclick="llVdToggleReject()" class="ll-vd-cancel-reject" type="button">Cancel rejection</button>
     </div>
-  </div>
+    <footer class="ll-vd-footer">
+      <button onclick="llVdToggleReject()" id="ll-vd-reject-btn" class="ll-vd-btn ll-vd-btn-reject" type="button">✕ Reject documents</button>
+      <button onclick="llVdAction('approve')" class="ll-vd-btn ll-vd-btn-approve" type="button">✓ Approve &amp; assign</button>
+    </footer>
+    <div class="ll-vd-footnote">Approval assigns this property to the verified tenant.</div>
+  </section>
 </div>
 
 <div id="doc-preview-overlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.86);align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)">
@@ -4249,7 +4311,9 @@ async function llOpenVerifyDocs(reqId) {
   _llVdReqId = reqId; _llVdRejectMode = false;
   document.getElementById('ll-vd-reject-wrap').style.display='none';
   document.getElementById('ll-vd-reject-reason').value='';
-  document.getElementById('ll-vd-reject-btn').textContent='❌ Reject';
+  const rejectButton = document.getElementById('ll-vd-reject-btn');
+  rejectButton.textContent='✕ Reject documents';
+  rejectButton.setAttribute('onclick','llVdToggleReject()');
   try {
     const data = await lFetch('/rental-requests/'+reqId);
     const r = data.request;
@@ -4287,9 +4351,8 @@ function updateLlVdDoc(fieldId, src) {
 function llVdToggleReject(){
   _llVdRejectMode = !_llVdRejectMode;
   document.getElementById('ll-vd-reject-wrap').style.display=_llVdRejectMode?'block':'none';
-  document.getElementById('ll-vd-reject-btn').textContent=_llVdRejectMode?'↩ Cancel Reject':'❌ Reject';
-  if(_llVdRejectMode) document.getElementById('ll-vd-reject-btn').setAttribute('onclick','llVdAction("reject")');
-  else document.getElementById('ll-vd-reject-btn').setAttribute('onclick','llVdToggleReject()');
+  document.getElementById('ll-vd-reject-btn').textContent=_llVdRejectMode?'✕ Submit rejection':'✕ Reject documents';
+  document.getElementById('ll-vd-reject-btn').setAttribute('onclick',_llVdRejectMode?'llVdAction("reject")':'llVdToggleReject()');
 }
 async function llVdAction(action){
   let rejectReason='';

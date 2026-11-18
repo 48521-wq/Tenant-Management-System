@@ -196,10 +196,11 @@ function tmsHouseViewEditor(container, initial, spec) {
 function tmsOpenHouseViewEditor(opts) {
   tmsCloseModals('house-view-edit');
   const m = document.createElement('div'); m.setAttribute('data-tms-modal', 'house-view-edit'); m.className = 'hv-overlay';
-  m.innerHTML = '<div class="hv-dialog"><div class="hv-dt">📷 House View</div><div class="hv-ds"></div><div class="hv-body"><div class="loading" style="min-height:160px">Loading photos…</div></div>'
+  m.innerHTML = '<div class="hv-dialog"><div class="hv-dialog-head"><div class="hv-dialog-title"><div class="hv-dt">📷 House View</div><div class="hv-ds"></div></div><button type="button" class="hv-dialog-x" title="Close editor" aria-label="Close House View editor">×</button></div><div class="hv-body"><div class="loading" style="min-height:160px">Loading photos…</div></div>'
     + '<div class="hv-actions"><button type="button" class="btn btn-ghost hv-cancel">Cancel</button><button type="button" class="btn btn-teal hv-save" disabled>💾 Save photos</button></div></div>';
   m.querySelector('.hv-ds').textContent = opts.title || '';
   m.addEventListener('mousedown', e => { if (e.target === m) m.remove(); });
+  m.querySelector('.hv-dialog-x').onclick = () => m.remove();
   m.querySelector('.hv-cancel').onclick = () => m.remove();
   document.body.appendChild(m);
   let ed = null; const save = m.querySelector('.hv-save');
