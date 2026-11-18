@@ -14,4 +14,6 @@ test('escapeHtml encodes characters that can change HTML markup', () => {
   assert.equal(escapeHtml(`<script a="b">O'Neil & Co</script>`),
     '&lt;script a=&quot;b&quot;&gt;O&#39;Neil &amp; Co&lt;/script&gt;');
   assert.equal(escapeHtml(null), '');
+  assert.equal(escapeHtml(0), '0');
+  assert.equal(escapeHtml('plain tenant name'), 'plain tenant name');
 });

@@ -27,6 +27,7 @@ test('property numeric filters reject invalid or fractional bedroom counts', () 
   assert.deepEqual(parsePropertyNumericFilters({ beds: '-1' }), { valid: false, field: 'beds' });
   assert.deepEqual(parsePropertyNumericFilters({ beds: '1.5' }), { valid: false, field: 'beds' });
   assert.deepEqual(parsePropertyNumericFilters({ beds: 'many' }), { valid: false, field: 'beds' });
+  assert.deepEqual(parsePropertyNumericFilters({ beds: '2e0' }), { valid: false, field: 'beds' });
 });
 
 test('property numeric filters reject invalid or negative rent limits', () => {
