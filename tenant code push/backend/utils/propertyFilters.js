@@ -4,6 +4,9 @@ function parseOptionalNumber(value) {
   if (typeof value !== 'number' && typeof value !== 'string')
     return { valid: false, value: null };
 
+  if (typeof value === 'string' && !/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(value.trim()))
+    return { valid: false, value: null };
+
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed >= 0
     ? { valid: true, value: parsed }
