@@ -13,7 +13,7 @@ test('parseRentAmount treats an omitted or blank optional offer as absent', () =
 });
 
 test('parseRentAmount rejects zero, negative, non-finite, and non-numeric values', () => {
-  for (const value of [0, -1, 'nope', 'Infinity', NaN, Infinity, true, {}]) {
+  for (const value of [0, -1, 'nope', 'Infinity', '0x10', '1e3', NaN, Infinity, true, {}]) {
     assert.deepEqual(parseRentAmount(value), { valid: false, value: null });
   }
 });
