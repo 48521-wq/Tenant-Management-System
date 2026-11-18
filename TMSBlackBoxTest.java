@@ -421,12 +421,12 @@ public class TMSBlackBoxTest {
     }
 
     @Test @Order(23)
-    @DisplayName("TC-PAY-BB-004: Submit empty payment form shows JS alert")
+    @DisplayName("TC-PAY-BB-004: Empty payment form asks for a month first")
     void payBB004() {
         loginAsTenant();
         clickNavItem("Payment");
         waitVisible(By.id("page-payments"));
-        assertValidationAlert(By.id("psubmit-btn"), "Amount and month are required.");
+        assertValidationAlert(By.id("psubmit-btn"), "Please select a month.");
     }
 
     @Test @Order(24)
