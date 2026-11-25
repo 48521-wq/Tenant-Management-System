@@ -1539,6 +1539,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     llUpdateNotifBadge();
     setInterval(() => { if (typeof tmsUpdateStats === 'function') tmsUpdateStats(); llUpdateNotifBadge(); }, 5000);
   }, 1000);
+
+  // Keep landlord screens synchronized with tenant changes.
+  setInterval(() => {
+    if (document.visibilityState !== 'visible') return;
+    const activePage = document.querySelector('.page.active');
+    if (!activePage) return;
+
+    const pageId = activePage.id;
+    if (pageId === 'page-maintenance') loadLandlordMaintenance();
+    else if (pageId === 'page-complaints') loadLandlordComplaints();
+    else if (pageId === 'page-rental-requests') loadLandlordRentalRequests();
+    else if (pageId === 'page-documents') loadLandlordDocuments();
+    else if (pageId === 'page-payments') loadLandlordPayments();
+    else if (pageId === 'page-notifications') loadNotifications();
+    else if (pageId === 'page-lease-agreements' && typeof initLeaseAgreements === 'function') initLeaseAgreements('landlord', lFetch);
+  }, 5000);
   const user = JSON.parse(localStorage.getItem('tms_user')||'{}');
   const name  = user.name  || 'Landlord';
   const email = user.email || '';

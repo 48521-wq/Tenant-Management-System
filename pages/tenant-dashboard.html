@@ -1300,6 +1300,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof tmsUpdateStats === 'function') tmsUpdateStats();
     tmsUpdateNotifBadge();
   }, 5000);
+
+  // Keep tenant screens synchronized with landlord/admin changes.
+  setInterval(() => {
+    if (document.visibilityState !== 'visible') return;
+    const activePage = document.querySelector('.page.active');
+    if (!activePage) return;
+
+    const pageId = activePage.id;
+    if (pageId === 'page-maintenance') loadMaintenance();
+    else if (pageId === 'page-complaints') loadComplaints();
+    else if (pageId === 'page-requests') loadRentalRequests(true);
+    else if (pageId === 'page-my-rentals') loadMyRentals();
+    else if (pageId === 'page-payments') loadPayments();
+    else if (pageId === 'page-notifications') loadNotifications();
+    else if (pageId === 'page-lease-agreements' && typeof initLeaseAgreements === 'function') initLeaseAgreements('tenant', tFetch);
+  }, 5000);
 });
 
 // ═══════════════════════════════════════════════════════
