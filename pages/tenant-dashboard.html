@@ -1301,21 +1301,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     tmsUpdateNotifBadge();
   }, 5000);
 
-  // Keep tenant screens synchronized with landlord/admin changes.
-  setInterval(() => {
+  // Refresh only when shared tenant/landlord data actually changes.
+  const tenantSyncSignatures = {};
+  async function syncTenantActivePage() {
     if (document.visibilityState !== 'visible') return;
     const activePage = document.querySelector('.page.active');
     if (!activePage) return;
 
-    const pageId = activePage.id;
-    if (pageId === 'page-maintenance') loadMaintenance();
-    else if (pageId === 'page-complaints') loadComplaints();
-    else if (pageId === 'page-requests') loadRentalRequests(true);
-    else if (pageId === 'page-my-rentals') loadMyRentals();
-    else if (pageId === 'page-payments') loadPayments();
-    else if (pageId === 'page-notifications') loadNotifications();
-    else if (pageId === 'page-lease-agreements' && typeof initLeaseAgreements === 'function') initLeaseAgreements('tenant', tFetch);
-  }, 5000);
+    const checks = {
+      'page-maintenance': ['/maintenance', loadMaintenance],
+      'page-complaints': ['/complaints', loadComplaints],
+      'page-requests': ['/rental-requests/my-requests', () => loadRentalRequests(true)],
+      'page-my-rentals': ['/properties/my-rentals', loadMyRentals],
+      'page-payments': ['/payments', loadPayments],
+      'page-notifications': ['/notifications', loadNotifications],
+      'page-lease-agreements': ['/lease-agreements', () => initLeaseAgreements?.('tenant', tFetch)]
+    };
+    const check = checks[activePage.id];
+    if (!check) return;
+
+    try {
+      const data = await tFetch(check[0]);
+      const signature = JSON.stringify(data);
+      if (tenantSyncSignatures[activePage.id] === undefined) {
+        tenantSyncSignatures[activePage.id] = signature;
+        return;
+      }
+      if (tenantSyncSignatures[activePage.id] !== signature) {
+        tenantSyncSignatures[activePage.id] = signature;
+        await check[1]();
+      }
+    } catch {}
+  }
+  setInterval(syncTenantActivePage, 5000);
 });
 
 // ═══════════════════════════════════════════════════════
