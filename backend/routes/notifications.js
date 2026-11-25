@@ -8,15 +8,39 @@ const router = express.Router();
 // Resolve a stable identifier + role for whoever is making the request
 // (req.user is either { isAdmin:true, email } or a full Mongoose User doc)
 function identity(req) {
-  if (req.user?.isAdmin) return { role: 'admin', email: req.user.email || 'admin', name: 'Admin' };
-  return { role: req.user.role, email: req.user.email, name: req.user.name || req.user.email };
+  if (req.user?.isAdmin) return { role: 'admin', email: req.user.email || 'admin', name: 'Admin', createdAt: null };
+  return {
+    role: req.user.role,
+    email: req.user.email,
+    name: req.user.name || req.user.email,
+    createdAt: req.user.createdAt || null,
+  };
 }
 
-function isForUser(notif, id) {
+function isForUser(notif, id, tenantLandlordEmails = new Set()) {
   const to = (notif.to && notif.to.length) ? notif.to : ['all'];
   if (id.email && notif.fromEmail === id.email) return true;
-  if (to.includes('all')) return true;
-  if (id.role && to.includes(id.role)) return true;
+  if (to.includes('all')) {
+    // A landlord "all" notification belongs only to its own tenants.
+    // Landlords must not receive other landlords' inbox items.
+    if (notif.fromRole === 'landlord') {
+      // Legacy landlord-wide records are intentionally no longer visible.
+      // New landlord sends are stored as exact tenant emails.
+      if (id.role === 'tenant') return false;
+      if (id.role === 'admin') return true;
+      return false;
+    }
+    if (id.role === 'tenant' && id.createdAt && notif.createdAt &&
+        new Date(notif.createdAt) < new Date(id.createdAt)) {
+      return false;
+    }
+    return true;
+  }
+  if (id.role && to.includes(id.role)) {
+    if (id.createdAt && notif.createdAt &&
+        new Date(notif.createdAt) < new Date(id.createdAt)) return false;
+    return true;
+  }
   if (id.email && to.includes(id.email)) return true;
   return false;
 }
@@ -25,6 +49,16 @@ function isForUser(notif, id) {
 router.get('/', protect, async (req, res) => {
   try {
     const id = identity(req);
+    let tenantLandlordEmails = new Set();
+    if (id.role === 'tenant') {
+      const properties = await Property.find({ tenantId: req.user._id })
+        .populate('landlordId', 'email')
+        .select('landlordId');
+      tenantLandlordEmails = new Set(properties
+        .map(p => p.landlordId?.email)
+        .filter(Boolean)
+        .map(email => email.toLowerCase()));
+    }
     // Pull broadly (all / role / their own email / sent by this user) then filter+shape in JS,
     // since `to` mixes emails and role keywords in the same array.
     const all = await Notification.find({
@@ -33,10 +67,10 @@ router.get('/', protect, async (req, res) => {
         { to: id.role },
         ...(id.email ? [{ to: id.email }, { fromEmail: id.email }] : []),
       ],
-    }).sort({ createdAt: -1 }).limit(200);
+    }).select('to readBy fromEmail fromRole createdAt title message color fromName toLabel').sort({ createdAt: -1 }).limit(200);
 
     const notifications = all
-      .filter(n => isForUser(n, id))
+      .filter(n => isForUser(n, id, tenantLandlordEmails))
       .map(n => ({
         id: n._id,
         title: n.title,
@@ -60,14 +94,24 @@ router.get('/', protect, async (req, res) => {
 router.get('/unread-count', protect, async (req, res) => {
   try {
     const id = identity(req);
+    let tenantLandlordEmails = new Set();
+    if (id.role === 'tenant') {
+      const properties = await Property.find({ tenantId: req.user._id })
+        .populate('landlordId', 'email')
+        .select('landlordId');
+      tenantLandlordEmails = new Set(properties
+        .map(p => p.landlordId?.email)
+        .filter(Boolean)
+        .map(email => email.toLowerCase()));
+    }
     const all = await Notification.find({
       $or: [
         { to: 'all' },
         { to: id.role },
         ...(id.email ? [{ to: id.email }, { fromEmail: id.email }] : []),
       ],
-    }).select('to readBy fromEmail');
-    const unread = all.filter(n => isForUser(n, id) && !n.readBy.includes(id.email)).length;
+    }).select('to readBy fromEmail fromRole createdAt');
+    const unread = all.filter(n => isForUser(n, id, tenantLandlordEmails) && !n.readBy.includes(id.email)).length;
     res.json({ success: true, unread });
   } catch (e) {
     res.status(500).json({ success: false, message: 'Server error.' });
@@ -108,11 +152,26 @@ router.post('/', protect, async (req, res) => {
         toList = ['admin'];
         toLabel = 'Admin';
       } else {
-        if (!Array.isArray(recipients) || !recipients.length) {
-          return res.status(400).json({ success: false, message: 'Choose at least one recipient.' });
+        if (Array.isArray(recipients) && recipients.includes('all')) {
+          const leasedProperties = await Property.find({
+            landlordId: req.user._id,
+            tenantId: { $ne: null },
+          }).populate('tenantId', 'email');
+          toList = [...new Set(leasedProperties
+            .map(p => p.tenantId?.email)
+            .filter(Boolean)
+            .map(email => email.toLowerCase()))];
+          toLabel = 'All my tenants';
+        } else {
+          if (!Array.isArray(recipients) || !recipients.length) {
+            return res.status(400).json({ success: false, message: 'Choose at least one recipient.' });
+          }
+          toList = recipients;
+          toLabel = recipientLabel || `${recipients.length} tenant(s)`;
         }
-        toList = recipients;
-        toLabel = recipientLabel || (toList.includes('all') ? 'Everyone' : `${toList.length} tenant(s)`);
+        if (!toList.length) {
+          return res.status(400).json({ success: false, message: 'No tenants are currently renting your properties.' });
+        }
       }
     } else if (id.role === 'tenant') {
       const { propertyId } = req.body;
@@ -155,10 +214,32 @@ router.put('/mark-all-read', protect, async (req, res) => {
   try {
     const id = identity(req);
     if (!id.email) return res.json({ success: true });
-    await Notification.updateMany(
-      { $or: [{ to: 'all' }, { to: id.role }, { to: id.email }, { fromEmail: id.email }], readBy: { $ne: id.email } },
-      { $addToSet: { readBy: id.email } }
-    );
+    let tenantLandlordEmails = new Set();
+    if (id.role === 'tenant') {
+      const properties = await Property.find({ tenantId: req.user._id })
+        .populate('landlordId', 'email')
+        .select('landlordId');
+      tenantLandlordEmails = new Set(properties
+        .map(p => p.landlordId?.email)
+        .filter(Boolean)
+        .map(email => email.toLowerCase()));
+    }
+    const all = await Notification.find({
+      $or: [
+        { to: 'all' },
+        { to: id.role },
+        { to: id.email },
+        { fromEmail: id.email },
+      ],
+      readBy: { $ne: id.email },
+    }).select('_id to fromRole fromEmail readBy createdAt');
+    const visibleIds = all.filter(n => isForUser(n, id, tenantLandlordEmails)).map(n => n._id);
+    if (visibleIds.length) {
+      await Notification.updateMany(
+        { _id: { $in: visibleIds } },
+        { $addToSet: { readBy: id.email } }
+      );
+    }
     res.json({ success: true });
   } catch (e) {
     res.status(500).json({ success: false, message: 'Server error.' });
