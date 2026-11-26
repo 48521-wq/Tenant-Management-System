@@ -368,7 +368,7 @@ async function resendOTP() {
   const btn   = document.getElementById('resend-otp-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
   try {
-    const { ok, data } = await api('/auth/send-otp', 'POST', { name, email, password: pass, role });
+    const { ok, data } = await api('/auth/resend-otp', 'POST', { name, email, password: pass, role });
     if (ok && data.success) {
       document.getElementById('otp-input').value = '';
       startOtpTimer(600);

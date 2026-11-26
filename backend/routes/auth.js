@@ -94,13 +94,36 @@ router.post('/send-otp', async (req, res) => {
 
     const otp = generateOTP();
     const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
-    otpStore.set(email.toLowerCase(), { otp, expiresAt, userData: { name: name.trim(), email: email.toLowerCase(), password, role } });
-
     await sendOTPEmail(email, otp, name.trim());
+    otpStore.set(email.toLowerCase(), { otp, expiresAt, userData: { name: name.trim(), email: email.toLowerCase(), password, role } });
     res.json({ success: true, message: 'OTP sent to your email. Please check your inbox.' });
   } catch (e) {
     console.error('Send OTP:', e);
     res.status(500).json({ success: false, message: 'Failed to send OTP. Check server email config.' });
+  }
+});
+
+// POST /api/auth/resend-otp  — generate and email a fresh OTP for the pending signup
+router.post('/resend-otp', async (req, res) => {
+  try {
+    const email = (req.body.email || '').toLowerCase().trim();
+    if (!email) return res.status(400).json({ success: false, message: 'Email required.' });
+
+    let record = otpStore.get(email);
+    if (!record || Date.now() > record.expiresAt) {
+      const { name, password, role } = req.body;
+      if (!name || !password || !role || !['tenant', 'landlord'].includes(role))
+        return res.status(400).json({ success: false, message: 'Signup session expired. Please go back and submit the signup form again.' });
+      record = { userData: { name: name.trim(), email, password, role } };
+    }
+    const otp = generateOTP();
+    const expiresAt = Date.now() + 10 * 60 * 1000;
+    await sendOTPEmail(email, otp, record.userData.name);
+    otpStore.set(email, { otp, expiresAt, userData: record.userData });
+    res.json({ success: true, message: 'New OTP sent to your email.' });
+  } catch (e) {
+    console.error('Resend OTP:', e);
+    res.status(500).json({ success: false, message: 'Failed to resend OTP. Check server email config.' });
   }
 });
 
