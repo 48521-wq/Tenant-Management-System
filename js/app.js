@@ -49,9 +49,19 @@ async function api(endpoint, method = 'GET', body = null) {
   const t = getToken();
   if (t) opts.headers['Authorization'] = 'Bearer ' + t;
   if (body) opts.body = JSON.stringify(body);
-  const res  = await fetch(API_BASE + endpoint, opts);
-  const data = await res.json();
-  return { ok: res.ok, data };
+  try {
+    const res = await fetch(API_BASE + endpoint, opts);
+    const data = await res.json().catch(() => ({
+      success: false,
+      message: 'Server returned an invalid response.',
+    }));
+    return { ok: res.ok, data };
+  } catch {
+    return {
+      ok: false,
+      data: { success: false, message: 'Cannot connect to server. Make sure backend is running.' },
+    };
+  }
 }
 
 // ── Redirect by role ──────────────────────────────────
@@ -347,7 +357,8 @@ async function verifyOTP() {
   if (!otp || otp.length !== 6) { showErr('Enter the 6-digit OTP sent to your email.'); return; }
   setBtnLoad('otp-verify-btn', true, 'Verifying...');
   try {
-    const { ok, data } = await api('/auth/verify-otp', 'POST', { email, otp });
+    const password = document.getElementById('signup-password')?.value;
+    const { ok, data } = await api('/auth/verify-otp', 'POST', { email, otp, password });
     if (ok && data.success) {
       clearOtpTimer();
       setToken(data.token); setUser(data.user);

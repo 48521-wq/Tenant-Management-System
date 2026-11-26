@@ -4,6 +4,7 @@ const crypto     = require('crypto');
 const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
 const User    = require('../models/User');
+const PendingSignup = require('../models/PendingSignup');
 const { protect } = require('../middleware/auth');
 const { generateOTP, escapeHtml } = require('../utils/authHelpers');
 
@@ -11,10 +12,6 @@ const router  = express.Router();
 const gClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const genToken = (payload) => jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
-
-// ─── OTP In-Memory Store ────────────────────────────────────────────────────
-// key = email, value = { otp, expiresAt, userData }
-const otpStore = new Map();
 
 // Nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -95,7 +92,15 @@ router.post('/send-otp', async (req, res) => {
     const otp = generateOTP();
     const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
     await sendOTPEmail(email, otp, name.trim());
-    otpStore.set(email.toLowerCase(), { otp, expiresAt, userData: { name: name.trim(), email: email.toLowerCase(), password, role } });
+    await PendingSignup.findOneAndUpdate(
+      { email: email.toLowerCase() },
+      {
+        otp,
+        expiresAt: new Date(expiresAt),
+        userData: { name: name.trim(), email: email.toLowerCase(), role },
+      },
+      { upsert: true, new: true, runValidators: true }
+    );
     res.json({ success: true, message: 'OTP sent to your email. Please check your inbox.' });
   } catch (e) {
     console.error('Send OTP:', e);
@@ -109,17 +114,27 @@ router.post('/resend-otp', async (req, res) => {
     const email = (req.body.email || '').toLowerCase().trim();
     if (!email) return res.status(400).json({ success: false, message: 'Email required.' });
 
-    let record = otpStore.get(email);
-    if (!record || Date.now() > record.expiresAt) {
+    let record = await PendingSignup.findOne({ email });
+    if (!record || Date.now() > record.expiresAt.getTime()) {
       const { name, password, role } = req.body;
       if (!name || !password || !role || !['tenant', 'landlord'].includes(role))
         return res.status(400).json({ success: false, message: 'Signup session expired. Please go back and submit the signup form again.' });
-      record = { userData: { name: name.trim(), email, password, role } };
+      if (password.length < 6)
+        return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
+      record = { userData: { name: name.trim(), email, role } };
     }
     const otp = generateOTP();
     const expiresAt = Date.now() + 10 * 60 * 1000;
     await sendOTPEmail(email, otp, record.userData.name);
-    otpStore.set(email, { otp, expiresAt, userData: record.userData });
+    await PendingSignup.findOneAndUpdate(
+      { email },
+      {
+        otp,
+        expiresAt: new Date(expiresAt),
+        userData: record.userData,
+      },
+      { upsert: true, new: true, runValidators: true }
+    );
     res.json({ success: true, message: 'New OTP sent to your email.' });
   } catch (e) {
     console.error('Resend OTP:', e);
@@ -130,20 +145,25 @@ router.post('/resend-otp', async (req, res) => {
 // POST /api/auth/verify-otp  — Step 2: verify OTP & create account
 router.post('/verify-otp', async (req, res) => {
   try {
-    const { email, otp } = req.body;
-    if (!email || !otp) return res.status(400).json({ success: false, message: 'Email and OTP required.' });
+    const { email, otp, password } = req.body;
+    if (!email || !otp || !password)
+      return res.status(400).json({ success: false, message: 'Email, OTP, and password required.' });
+    if (password.length < 6)
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
 
-    const record = otpStore.get(email.toLowerCase());
+    const normalizedEmail = email.toLowerCase();
+    const record = await PendingSignup.findOne({ email: normalizedEmail });
     if (!record) return res.status(400).json({ success: false, message: 'OTP expired or not requested. Please try again.' });
-    if (Date.now() > record.expiresAt) {
-      otpStore.delete(email.toLowerCase());
+    if (Date.now() > record.expiresAt.getTime()) {
+      await PendingSignup.deleteOne({ _id: record._id });
       return res.status(400).json({ success: false, message: 'OTP has expired. Please request a new one.' });
     }
     if (record.otp !== otp.trim()) return res.status(400).json({ success: false, message: 'Incorrect OTP. Please try again.' });
 
-    otpStore.delete(email.toLowerCase()); // one-time use
+    const claimed = await PendingSignup.findOneAndDelete({ _id: record._id, otp: otp.trim() });
+    if (!claimed) return res.status(400).json({ success: false, message: 'OTP expired or already used. Please try again.' });
 
-    const { name, password, role } = record.userData;
+    const { name, role } = record.userData;
     const user = await User.create({ name, email: email.toLowerCase(), password, role, authProvider: 'email' });
     const token = genToken({ id: user._id, role: user.role });
 
