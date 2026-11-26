@@ -1420,13 +1420,15 @@ async function lFetch(url, method='GET', body=null) {
   try {
     const r = await fetch(API + url, opts);
     const data = await r.json().catch(() => null);
-    if (r.status === 401 || r.status === 403) {
+    if (r.status === 401 || (r.status === 403 && data?.code !== 'PROFILE_INCOMPLETE')) {
       const isPolling = url.includes('notifications') || url.includes('unread');
       if (!isPolling) { localStorage.clear(); window.location.replace('../index.html'); }
       throw new Error('Unauthorized');
     }
     if (!r.ok) {
-      throw new Error(data?.message || r.statusText || 'Request failed.');
+      const error = new Error(data?.message || r.statusText || 'Request failed.');
+      error.code = data?.code;
+      throw error;
     }
     return data;
   } catch(e) {
@@ -1755,6 +1757,12 @@ async function submitAddProp() {
     } else showMsg('ap-msg','⚠️ '+(data.message||'Error'),'err');
   } catch (err) {
     const m = tmsCleanErr(err);
+    if (err.code === 'PROFILE_INCOMPLETE') {
+      alert(err.message);
+      const profileNav = [...document.querySelectorAll('.nav-item')].find(n => (n.getAttribute('onclick') || '').includes("'profile'"));
+      sp('profile', profileNav);
+      return;
+    }
     showMsg('ap-msg','⚠️ ' + (/failed to fetch|networkerror/i.test(m) ? 'Unable to connect to the server.' : m),'err');
     alert('❌ Property was not added: ' + m);
   }
@@ -2892,7 +2900,7 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
 
   <!-- PROFILE -->
   <div class="page" id="page-profile">
-    <div class="pg-head"><div><div class="pg-title">My Profile</div><div class="pg-sub">Update your personal information and account credentials</div></div></div>
+    <div class="pg-head"><div><div class="pg-title">My Profile</div><div class="pg-sub">Add your phone number and CNIC to list properties</div></div></div>
     <div>
       <div class="prof-header">
         <div class="prof-av" id="prof-av">L</div>
@@ -2907,8 +2915,8 @@ function c3d(){ document.getElementById('ov3d')?.classList.remove('open'); docum
           <div class="fg"><label>First Name</label><input id="p-fn" inputmode="text" autocomplete="given-name" oninput="enforceLettersInput(this)"></div>
           <div class="fg"><label>Last Name</label><input id="p-ln" inputmode="text" autocomplete="family-name" oninput="enforceLettersInput(this)"></div>
           <div class="fg full"><label>Email</label><input id="p-em" disabled style="opacity:0.6"></div>
-          <div class="fg"><label>Phone</label><input id="p-ph" placeholder="e.g. 03123456789" inputmode="numeric" oninput="enforceDigitsInput(this)"></div>
-          <div class="fg"><label>CNIC</label><input id="p-cnic" placeholder="e.g. 35202-1234567-1" inputmode="numeric" oninput="formatCnicInput(this)"></div>
+          <div class="fg"><label>Phone *</label><input id="p-ph" placeholder="e.g. 03123456789" inputmode="numeric" oninput="enforceDigitsInput(this)"></div>
+          <div class="fg"><label>CNIC *</label><input id="p-cnic" placeholder="e.g. 35202-1234567-1" inputmode="numeric" oninput="formatCnicInput(this)"></div>
           <div class="fg"><label>City</label><input id="p-ct" placeholder="Lahore"></div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;margin-top:16px">

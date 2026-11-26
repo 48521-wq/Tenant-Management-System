@@ -1193,7 +1193,7 @@ async function tFetch(url, method='GET', body=null) {
   const r = await fetch(fullUrl, opts);
   const data = await r.json().catch(() => null);
   if (!r.ok) {
-    if (r.status === 401 || r.status === 403) {
+    if (r.status === 401 || (r.status === 403 && data?.code !== 'PROFILE_INCOMPLETE')) {
       localStorage.clear(); sessionStorage.clear(); window.location.replace('../index.html');
       return;
     }
@@ -1799,6 +1799,14 @@ async function submitRentalRequest(propertyId, btn) {
       resetBtn();
     }
   } catch (e) {
+    if (e.code === 'PROFILE_INCOMPLETE') {
+      tmsCloseModals('request');
+      alert(e.message);
+      const profileNav = [...document.querySelectorAll('.nav-item')].find(n => (n.getAttribute('onclick') || '').includes("'profile'"));
+      sp('profile', profileNav);
+      resetBtn();
+      return;
+    }
     const msg = tmsCleanErr(e);
     alert('❌ ' + msg);
     if (/not available/i.test(msg)) {                  // someone else got it first - close and refresh the list
@@ -2916,7 +2924,7 @@ function filterAllProps() {
 
   <!-- PROFILE -->
   <div class="page" id="page-profile">
-    <div class="pg-head"><div><div class="pg-title">My Profile</div><div class="pg-sub">Manage your personal information</div></div></div>
+    <div class="pg-head"><div><div class="pg-title">My Profile</div><div class="pg-sub">Add your phone number and CNIC before renting a property</div></div></div>
     <div>
       <div class="profile-header">
         <div class="profile-av" id="pav">T</div>
@@ -2931,9 +2939,9 @@ function filterAllProps() {
           <div class="fg"><label>First Name</label><input id="pfn" inputmode="text" autocomplete="given-name" oninput="enforceLettersInput(this)"></div>
           <div class="fg"><label>Last Name</label><input id="pln" inputmode="text" autocomplete="family-name" oninput="enforceLettersInput(this)"></div>
           <div class="fg full"><label>Email</label><input id="pem" disabled style="opacity:0.6"></div>
-          <div class="fg"><label>Phone</label><input id="pph" placeholder="e.g. 03123456789" inputmode="numeric" oninput="enforceDigitsInput(this)"></div>
+          <div class="fg"><label>Phone *</label><input id="pph" placeholder="e.g. 03123456789" inputmode="numeric" oninput="enforceDigitsInput(this)"></div>
           <div class="fg"><label>City</label><input id="pct" placeholder="Lahore"></div>
-          <div class="fg full"><label>CNIC</label><input id="pcn" placeholder="e.g. 4210123456789" inputmode="numeric" oninput="enforceDigitsInput(this)"></div>
+          <div class="fg full"><label>CNIC *</label><input id="pcn" placeholder="e.g. 4210123456789" inputmode="numeric" oninput="enforceDigitsInput(this)"></div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;margin-top:16px">
           <button class="submit-btn" id="save-profile-btn" onclick="saveProfile()">💾 Save Changes</button>

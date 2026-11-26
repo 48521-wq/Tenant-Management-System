@@ -38,6 +38,29 @@ test('my-rentals only allows tenant accounts', async t => {
   assert.equal(propertyLookup.mock.callCount(), 0);
 });
 
+test('landlords with incomplete profiles cannot list properties', async t => {
+  const createProperty = t.mock.method(Property, 'create', () => {
+    throw new Error('Property should not be created for an incomplete profile');
+  });
+  const res = response();
+
+  await getHandler('/', 'post')({
+    user: {
+      role: 'landlord',
+      name: 'Landlord Name',
+      email: 'landlord@example.com',
+      phone: '',
+      cnic: ''
+    },
+    body: {}
+  }, res);
+
+  assert.equal(res.statusCode, 403);
+  assert.equal(res.body.code, 'PROFILE_INCOMPLETE');
+  assert.deepEqual(res.body.missingFields, ['phone', 'cnic']);
+  assert.equal(createProperty.mock.callCount(), 0);
+});
+
 test('my-rentals returns all active properties assigned to the authenticated tenant', async t => {
   const tenantId = 'tenant-id';
   const properties = [{ _id: 'property-one' }, { _id: 'property-two' }];

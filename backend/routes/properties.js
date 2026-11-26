@@ -2,6 +2,7 @@
 const express  = require('express');
 const Property = require('../models/Property');
 const RentalRequest = require('../models/RentalRequest');
+const { isProfileComplete, profileIncompleteResponse } = require('../utils/profileCompletion');
 const { protect, adminOnly } = require('../middleware/auth');
 const { parsePropertyNumericFilters } = require('../utils/propertyFilters');
 const router = express.Router();
@@ -232,6 +233,7 @@ router.post('/', protect, async (req, res) => {
   try {
     if (req.user?.isAdmin) return res.status(403).json({ success: false, message: 'Admin cannot add properties.' });
     if (req.user.role !== 'landlord') return res.status(403).json({ success: false, message: 'Only landlords can add properties.' });
+    if (!isProfileComplete(req.user)) return profileIncompleteResponse(res, req.user);
 
     const body = { ...req.body };
     if (body.houseViewRooms !== undefined) applyHouseRooms(body, body.houseViewRooms);

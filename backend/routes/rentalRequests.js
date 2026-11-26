@@ -5,6 +5,7 @@ const User = require('../models/User');
 const { protect } = require('../middleware/auth');
 const { evaluateFollowUp } = require('../utils/rentalRequestPolicy');
 const { parseRentAmount } = require('../utils/rentAmount');
+const { isProfileComplete, profileIncompleteResponse } = require('../utils/profileCompletion');
 const router = express.Router();
 
 // ─── TENANT: Get all requests by this tenant ───
@@ -31,6 +32,8 @@ router.post('/request', protect, async (req, res) => {
       return res.status(403).json({ success: false, message: 'Tenant access required.' });
 
     const { propertyId, message, proposedRent } = req.body || {};
+    if (!isProfileComplete(req.user)) return profileIncompleteResponse(res, req.user);
+
     const rent = parseRentAmount(proposedRent);
     if (!rent.valid)
       return res.status(400).json({ success: false, message: 'Rent offer must be a positive number.' });
@@ -44,6 +47,10 @@ router.post('/request', protect, async (req, res) => {
       return res.status(400).json({ success: false, message: 'This property is not available.' });
     }
 
+    const landlord = await User.findById(property.landlordId);
+    if (!landlord || !isProfileComplete(landlord))
+      return profileIncompleteResponse(res, landlord);
+
     // Earlier requests by this tenant for the same property (a finished/accepted tenancy is history and does not count)
     const priorRequests = await RentalRequest.find({ tenantId: req.user._id, propertyId, status: { $ne: 'accepted' } }).select('proposedRent status');
     const rule = evaluateFollowUp(priorRequests, rent.value);
@@ -56,9 +63,6 @@ router.post('/request', protect, async (req, res) => {
         minimumOffer: rule.minimumOffer
       });
     }
-
-    // Get landlord info
-    const landlord = await User.findById(property.landlordId);
 
     // Create rental request
     const rentalRequest = await RentalRequest.create({
@@ -317,6 +321,11 @@ router.put('/:id/verify-docs', protect, async (req, res) => {
       await r.save();
       return res.json({ success:true, message:'Documents rejected.', request: r });
     }
+
+    const landlord = await User.findById(property.landlordId);
+    if (!isProfileComplete(landlord)) return profileIncompleteResponse(res, landlord);
+    const tenant = await User.findById(r.tenantId);
+    if (!isProfileComplete(tenant)) return profileIncompleteResponse(res, tenant);
 
     // APPROVE — finalize rental
     r.status = 'accepted';

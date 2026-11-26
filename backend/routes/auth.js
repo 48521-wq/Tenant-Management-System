@@ -162,7 +162,7 @@ router.post('/login', async (req, res) => {
       return res.status(403).json({ success: false, message: 'Account suspended. Contact admin.' });
 
     const token = genToken({ id: user._id, role: user.role });
-    res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, role: user.role, status: user.status, verified: user.verified, phone: user.phone, city: user.city } });
+    res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, role: user.role, status: user.status, verified: user.verified, phone: user.phone, cnic: user.cnic, city: user.city } });
   } catch (e) { console.error('Login:', e); res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
@@ -198,7 +198,7 @@ router.post('/google', async (req, res) => {
     }
 
     const token = genToken({ id: user._id, role: user.role });
-    res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, role: user.role, status: user.status, verified: user.verified, phone: user.phone, city: user.city } });
+    res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, role: user.role, status: user.status, verified: user.verified, phone: user.phone, cnic: user.cnic, city: user.city } });
   } catch (e) { console.error('Google:', e); res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
@@ -221,7 +221,7 @@ router.post('/google-fallback', async (req, res) => {
       user = await User.create({ name: lEmail.split('@')[0], email: lEmail, role, authProvider: 'google' });
     }
     const token = genToken({ id: user._id, role: user.role });
-    res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, role: user.role, status: user.status, verified: user.verified } });
+    res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, role: user.role, status: user.status, verified: user.verified, phone: user.phone, cnic: user.cnic, city: user.city } });
   } catch (e) { res.status(500).json({ success: false, message: 'Server error.' }); }
 });
 
