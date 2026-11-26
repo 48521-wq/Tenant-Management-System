@@ -135,8 +135,37 @@ function lwStatusBadge(lease) {
 }
 
 function lwRevisionBadge(lease) {
-  const count = (lease?.agreementVersions || []).length;
+  const count = lwRevisionCount(lease);
   return count ? `<span class="badge b-warn">Revised ${count} time${count === 1 ? '' : 's'}</span>` : '';
+}
+
+function lwRevisionCount(lease) {
+  const versions = lease?.agreementVersions || [];
+  const edits = lease?.editHistory || [];
+
+  const isPlaceholder = value => {
+    const text = String(value || '').trim().toLowerCase();
+    return !text
+      || text === 'agreement reviewed by landlord'
+      || text === 'agreement revised by landlord.'
+      || text === 'agreement unlocked and revised by landlord.';
+  };
+
+  let count = 0;
+  versions.forEach((version, i) => {
+    const changes = Array.isArray(version?.changes)
+      ? version.changes.filter(change => !isPlaceholder(change))
+      : [];
+    const editNote = edits[i]?.note || '';
+    if (changes.length || !isPlaceholder(editNote)) count++;
+  });
+
+  if (versions.length < edits.length) {
+    edits.slice(versions.length).forEach(edit => {
+      if (!isPlaceholder(edit?.note)) count++;
+    });
+  }
+  return count;
 }
 
 async function lwOpenAgreementHistory(propertyId) {
@@ -483,21 +512,64 @@ function lwOpenSignTenant() {
 // ═══════════════════════════════════════════════════════
 function lwEditHistoryBanner(l) {
   if (!l.editHistory || !l.editHistory.length) return '';
-  const last = l.editHistory[l.editHistory.length - 1];
-  return `<div class="lw-warn" style="background:rgba(79,123,254,0.1);border-color:rgba(79,123,254,0.4);color:#8FB4FF">✏️ This agreement was revised by the landlord on ${fmtDate(last.at)}${l.editHistory.length > 1 ? ` (revised ${l.editHistory.length} times in total)` : ''}. ${last.note ? esc(last.note) : ''} Please review the updated terms carefully.</div>`;
+  if (!lwRevisionCount(l)) return '';
+  const revisionCount = lwRevisionCount(l);
+  const versions = l.agreementVersions || [];
+  const placeholderNotes = [
+    '',
+    'agreement reviewed by landlord',
+    'agreement revised by landlord.',
+    'agreement unlocked and revised by landlord.'
+  ];
+  let last = null;
+  for (let i = l.editHistory.length - 1; i >= 0; i--) {
+    const edit = l.editHistory[i];
+    const version = versions[i];
+    const changes = (version?.changes || []).filter(change => {
+      const text = String(change || '').trim().toLowerCase();
+      return text && !placeholderNotes.includes(text);
+    });
+    const note = String(edit?.note || '').trim().toLowerCase();
+    if (changes.length || (note && !placeholderNotes.includes(note))) {
+      last = edit;
+      break;
+    }
+  }
+  if (!last) return '';
+  return `<div class="lw-warn" style="background:rgba(79,123,254,0.1);border-color:rgba(79,123,254,0.4);color:#8FB4FF">✏️ This agreement was revised by the landlord on ${fmtDate(last.at)}${revisionCount > 1 ? ` (revised ${revisionCount} times in total)` : ''}. ${last.note ? esc(last.note) : ''} Please review the updated terms carefully.</div>`;
 }
 
 function lwChangeTimelineHtml(l) {
   const versions = l.agreementVersions || [];
   const edits = l.editHistory || [];
-  if (!versions.length && !edits.length) {
+  const placeholderNotes = [
+    '',
+    'agreement reviewed by landlord',
+    'agreement revised by landlord.',
+    'agreement unlocked and revised by landlord.'
+  ];
+  if (!lwRevisionCount(l)) {
     return `<div style="text-align:left;margin:22px auto 0;max-width:760px">
       <div class="lw-blk-lbl">Change history</div>
       <div class="lw-hint" style="margin-top:4px">No landlord revisions have been recorded yet. This section will show the date and details after the agreement is changed.</div>
     </div>`;
   }
-  const entries = versions.map((version, i) => ({ version, edit: edits[i] }));
-  edits.slice(versions.length).forEach(edit => entries.push({ version: null, edit }));
+  const entries = [];
+  versions.forEach((version, i) => {
+    const edit = edits[i];
+    const changes = (version?.changes || []).filter(change => {
+      const text = String(change || '').trim().toLowerCase();
+      return text && !placeholderNotes.includes(text);
+    });
+    const note = String(edit?.note || '').trim().toLowerCase();
+    if (changes.length || (note && !placeholderNotes.includes(note))) {
+      entries.push({ version, edit });
+    }
+  });
+  edits.slice(versions.length).forEach(edit => {
+    const note = String(edit?.note || '').trim().toLowerCase();
+    if (note && !placeholderNotes.includes(note)) entries.push({ version: null, edit });
+  });
   const changeHtml = change => {
     const parts = String(change).split(' | ');
     return `<li style="margin-bottom:6px"><div style="font-weight:700">${esc(parts[0])}</div>${parts.slice(1).map(part => `<div style="white-space:pre-wrap;margin-top:2px;padding-left:8px;color:var(--muted)">${esc(part)}</div>`).join('')}</li>`;
