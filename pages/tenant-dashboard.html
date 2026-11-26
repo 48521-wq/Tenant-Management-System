@@ -2503,16 +2503,10 @@ async function loadAllProperties(silent) {
       console.warn('Tenant portfolio endpoint unavailable; using properties API fallback:', portfolioError);
       const legacyData = await tFetch('/properties?fields=_id,title,type,area,address,city,rent,beds,baths,sqft,description,status,landlordId,landlordName,tenantId,tenantName,model3d,tenantFurnitureLayout,frontImage,houseViewCount');
       const properties = legacyData.properties || [];
-      const landlordIds = new Set(myRentals
-        .map(property => String(property.landlordId || ''))
-        .filter(Boolean));
-      const scopedProperties = landlordIds.size
-        ? properties.filter(property => landlordIds.has(String(property.landlordId || '')))
-        : properties;
       allData = {
-        properties: scopedProperties,
-        scope: landlordIds.size ? 'landlords' : 'all',
-        landlordCount: landlordIds.size
+        properties,
+        scope: 'all',
+        landlordCount: new Set(properties.map(property => String(property.landlordId || '')).filter(Boolean)).size
       };
     }
 
@@ -2520,9 +2514,7 @@ async function loadAllProperties(silent) {
     const myRequests = myReqData.requests || [];
     const subtitle = document.querySelector('#page-all-properties .pg-sub');
     if (subtitle) {
-      subtitle.textContent = allData.scope === 'landlords'
-        ? `Browse properties from your landlord${allData.landlordCount === 1 ? '' : 's'}`
-        : 'Browse properties from all landlords in the system';
+      subtitle.textContent = 'Browse properties from all landlords in the system';
     }
 
     // Build a map: propertyId -> request status

@@ -25,6 +25,38 @@ function response() {
   };
 }
 
+test('tenant portfolio shows properties from every landlord', async t => {
+  const properties = [
+    { _id: 'existing-property', landlordId: 'landlord-one', landlordName: 'Existing Landlord' },
+    { _id: 'new-property', landlordId: 'landlord-two', landlordName: 'New Landlord' }
+  ];
+  t.mock.method(Property, 'find', filter => {
+    assert.deepEqual(filter, {});
+    return {
+      select(fields) {
+        assert.match(fields, /landlordName/);
+        return {
+          sort(sort) {
+            assert.deepEqual(sort, { createdAt: -1 });
+            return Promise.resolve(properties);
+          }
+        };
+      }
+    };
+  });
+  const res = response();
+
+  await getHandler('/tenant-portfolio', 'get')({
+    user: { _id: 'tenant-id', role: 'tenant' }
+  }, res);
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.scope, 'all');
+  assert.equal(res.body.count, 2);
+  assert.equal(res.body.landlordCount, 2);
+  assert.deepEqual(res.body.properties, properties);
+});
+
 test('my-rentals only allows tenant accounts', async t => {
   const propertyLookup = t.mock.method(Property, 'find', () => {
     throw new Error('Property lookup should not run for non-tenants');

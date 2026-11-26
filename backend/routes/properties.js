@@ -144,27 +144,27 @@ router.get('/my-rentals', protect, async (req, res) => {
   }
 });
 
-// GET properties from the landlord(s) renting to this tenant.
+// GET the property marketplace for tenants.
 router.get('/tenant-portfolio', protect, async (req, res) => {
   try {
     if (req.user.role !== 'tenant')
       return res.status(403).json({ success: false, message: 'Tenant access required.' });
 
-    const rentals = await Property.find({
-      tenantId: req.user._id,
-      status: { $in: ['rented', 'suspended'] }
-    }).select('landlordId').lean();
-    const landlordIds = [...new Set(rentals.map(property => String(property.landlordId)))];
-    const filter = landlordIds.length ? { landlordId: { $in: landlordIds } } : {};
-    const properties = await Property.find(filter)
-      .select('_id title type area address city rent beds baths sqft description status landlordName tenantId tenantName model3d tenantFurnitureLayout frontImage houseViewCount')
+    // Tenants browse listings from every landlord, including landlords they have
+    // never rented from. Scoping this response to existing rentals hides new
+    // properties and makes newly registered landlords invisible.
+    const properties = await Property.find({})
+      .select('_id title type area address city rent beds baths sqft description status landlordId landlordName tenantId tenantName model3d tenantFurnitureLayout frontImage houseViewCount')
       .sort({ createdAt: -1 });
+    const landlordCount = new Set(properties
+      .map(property => String(property.landlordId || ''))
+      .filter(Boolean)).size;
 
     res.json({
       success: true,
       count: properties.length,
-      scope: landlordIds.length ? 'landlords' : 'all',
-      landlordCount: landlordIds.length,
+      scope: 'all',
+      landlordCount,
       properties
     });
   } catch (e) {
